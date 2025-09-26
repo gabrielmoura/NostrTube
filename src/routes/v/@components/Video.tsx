@@ -8,6 +8,7 @@ import {RecordView} from "@/hooks/useRecordView.tsx";
 import useVideoStore from "@/store/videoStore.ts";
 import {VideoProvider} from "@/context/VideoContext.tsx";
 import {useLoaderData} from "@tanstack/react-router";
+import {Spinner} from "@radix-ui/themes";
 
 
 export function VideoPage() {
@@ -26,6 +27,9 @@ function EventLoaded() {
     const {ndk} = useNDK()
     const session = useVideoStore(s => s.session!)
 
+    if (!session){
+        return <Spinner/>
+    }
 
     async function onCanPlay() {
         console.log("onCanPlay");

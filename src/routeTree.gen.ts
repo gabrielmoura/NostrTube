@@ -13,11 +13,11 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SearchIndexRouteImport } from './routes/search/index'
-import { Route as VEventIdRouteImport } from './routes/v/$eventId'
 import { Route as UUserIdRouteImport } from './routes/u/$userId'
 import { Route as PListIdRouteImport } from './routes/p/$listId'
 
 const NewIndexLazyRouteImport = createFileRoute('/new/')()
+const VEventIdLazyRouteImport = createFileRoute('/v/$eventId')()
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,11 +34,11 @@ const SearchIndexRoute = SearchIndexRouteImport.update({
   path: '/search/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VEventIdRoute = VEventIdRouteImport.update({
+const VEventIdLazyRoute = VEventIdLazyRouteImport.update({
   id: '/v/$eventId',
   path: '/v/$eventId',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/v/$eventId.lazy').then((d) => d.Route))
 const UUserIdRoute = UUserIdRouteImport.update({
   id: '/u/$userId',
   path: '/u/$userId',
@@ -54,7 +54,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/p/$listId': typeof PListIdRoute
   '/u/$userId': typeof UUserIdRoute
-  '/v/$eventId': typeof VEventIdRoute
+  '/v/$eventId': typeof VEventIdLazyRoute
   '/search': typeof SearchIndexRoute
   '/new': typeof NewIndexLazyRoute
 }
@@ -62,7 +62,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/p/$listId': typeof PListIdRoute
   '/u/$userId': typeof UUserIdRoute
-  '/v/$eventId': typeof VEventIdRoute
+  '/v/$eventId': typeof VEventIdLazyRoute
   '/search': typeof SearchIndexRoute
   '/new': typeof NewIndexLazyRoute
 }
@@ -71,7 +71,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/p/$listId': typeof PListIdRoute
   '/u/$userId': typeof UUserIdRoute
-  '/v/$eventId': typeof VEventIdRoute
+  '/v/$eventId': typeof VEventIdLazyRoute
   '/search/': typeof SearchIndexRoute
   '/new/': typeof NewIndexLazyRoute
 }
@@ -100,7 +100,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PListIdRoute: typeof PListIdRoute
   UUserIdRoute: typeof UUserIdRoute
-  VEventIdRoute: typeof VEventIdRoute
+  VEventIdLazyRoute: typeof VEventIdLazyRoute
   SearchIndexRoute: typeof SearchIndexRoute
   NewIndexLazyRoute: typeof NewIndexLazyRoute
 }
@@ -132,7 +132,7 @@ declare module '@tanstack/react-router' {
       id: '/v/$eventId'
       path: '/v/$eventId'
       fullPath: '/v/$eventId'
-      preLoaderRoute: typeof VEventIdRouteImport
+      preLoaderRoute: typeof VEventIdLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/u/$userId': {
@@ -156,7 +156,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PListIdRoute: PListIdRoute,
   UUserIdRoute: UUserIdRoute,
-  VEventIdRoute: VEventIdRoute,
+  VEventIdLazyRoute: VEventIdLazyRoute,
   SearchIndexRoute: SearchIndexRoute,
   NewIndexLazyRoute: NewIndexLazyRoute,
 }

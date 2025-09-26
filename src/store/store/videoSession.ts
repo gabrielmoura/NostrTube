@@ -7,23 +7,27 @@ interface VideoSessionAction {
     clanSession: () => void,
     setVideo: (vet: NDKEvent) => void
 }
-export interface VideoSession {
-    session?: {
-        event: NDKEvent
-        likes?: NDKEvent[],
-        comments?: NDKEvent[],
-        views?: NDKEvent[],
-        title: string,
-        summary: string,
-        content: string,
-        url: string,
-        fallbacks?: string[],
-        nsfw: boolean,
-        age?: AgeEnum,
-        identification:string
-        image?:string
-    }
+
+export interface VideoMetaTypes {
+    event: NDKEvent
+    likes?: NDKEvent[],
+    comments?: NDKEvent[],
+    views?: NDKEvent[],
+    title: string,
+    summary: string,
+    content: string,
+    url: string,
+    fallbacks?: string[],
+    nsfw: boolean,
+    age?: AgeEnum,
+    identification: string
+    image?: string
 }
+
+export interface VideoSession {
+    session?: Partial<VideoMetaTypes>
+}
+
 export type VideoStore = VideoSession & VideoSessionAction;
 
 export const createVideoSlice: StateCreator<
