@@ -49,7 +49,7 @@ export async function geVideoByEventIdData({ndk, eventId}: GeVideoByEventIdDataP
                 filters = [
                     {
                         ids: [data.id],
-                        authors: [data.author],
+                        authors: [data.author as string],
                         limit: 1,
                     },
                 ];
@@ -102,7 +102,7 @@ export async function getVideosFromSearchData({ndk, search, nsfw, tag}: eventSea
             // limit: 25,
             ...(search ? {search} : {}),
             ...(tags ? tags : {}),
-            ...(nsfw ? {"#content-warning": ""} : {}),
+            ...(nsfw ? {"#content-warning": [""]} : {}),
         },
     ]
     const events = await ndk.fetchEvents(filters, {

@@ -1,4 +1,3 @@
-
 import {AgeEnum} from "@/store/store/sessionTypes.ts";
 import type {StateCreator} from "zustand/index";
 import type {NDKUserProfile} from "@nostr-dev-kit/ndk-hooks";
@@ -23,10 +22,17 @@ export const createUserSlice: StateCreator<
     UserStore,
     [["zustand/devtools", never]],
     []
-> = (set) => {
+> = (set, get) => {
     return ({
         session: undefined,
         clanSession: () => set(() => ({session: undefined}), false, "clanSession"),
-        SetProfile: (p) => set(({session}) => ({session: {...session, profile: p}}), false, "SetProfile")
+        SetProfile: (p) => set(() => ({
+            session: {
+                ...get().session,
+                profile: p,
+                darkTheme: false,
+                nsfw: false
+            }
+        }), false, "SetProfile")
     });
 };

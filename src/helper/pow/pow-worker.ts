@@ -1,9 +1,9 @@
 import {createSHA256} from "hash-wasm"
 import {bytesToHex} from "@welshman/util/dist/lib/src";
-import type {OwnedEvent} from "@welshman/util";
+import type {HashedEvent} from "@welshman/util";
 
 interface ProofOfWork {
-    event: OwnedEvent
+    event: Partial<HashedEvent>
     difficulty: number
     start: number
     step: number
@@ -33,7 +33,7 @@ self.addEventListener('message', async function (ev: MessageEvent<ProofOfWork>) 
 
     const tag = ["nonce", count.toString(), "" + difficulty + ""]
 
-    event.tags.push(tag)
+    event.tags?.push(tag)
 
     const hasher = await createSHA256()
 
@@ -57,3 +57,4 @@ self.addEventListener('message', async function (ev: MessageEvent<ProofOfWork>) 
 
     self.postMessage(event)
 })
+export {}

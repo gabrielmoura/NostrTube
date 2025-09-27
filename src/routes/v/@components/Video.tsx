@@ -8,7 +8,7 @@ import {RecordView} from "@/hooks/useRecordView.tsx";
 import useVideoStore from "@/store/videoStore.ts";
 import {VideoProvider} from "@/context/VideoContext.tsx";
 import {useLoaderData} from "@tanstack/react-router";
-import {Spinner} from "@radix-ui/themes";
+import {PageSpinner} from "@/components/PageSpinner.tsx";
 
 
 export function VideoPage() {
@@ -27,8 +27,8 @@ function EventLoaded() {
     const {ndk} = useNDK()
     const session = useVideoStore(s => s.session!)
 
-    if (!session){
-        return <Spinner/>
+    if (!session) {
+        return <PageSpinner/>
     }
 
     async function onCanPlay() {
@@ -55,7 +55,7 @@ function EventLoaded() {
                 <div
                     className="sticky top-[calc(var(--header-height))] z-30 aspect-video w-full overflow-hidden sm:static sm:max-h-[calc(61vw-32px)] sm:rounded-xl sm:px-4">
                     <ErrorBoundaryVideo>
-                        <VideoPlayer src={session.url} image={session.image!} title={session.title}
+                        <VideoPlayer src={session.url!} image={session.image!} title={session.title}
                                      onCanPlay={onCanPlay}
                                      className="overflow-hidden sm:rounded-xl"
                         />
@@ -64,14 +64,14 @@ function EventLoaded() {
                 <div className="px-4">
                     <div className="pt-1">
                         <ErrorBoundaryVideo>
-                            <VideoActions event={session.event}/>
+                            <VideoActions event={session.event!}/>
                         </ErrorBoundaryVideo>
                     </div>
                     <ErrorBoundaryVideo>
                         <CommentSection
                             eventReference={session.identification!}
-                            eventId={session.event.id}
-                            pubkey={session.event.pubkey}
+                            eventId={session.event!.id}
+                            pubkey={session.event?.pubkey as string}
                         />
                     </ErrorBoundaryVideo>
                 </div>

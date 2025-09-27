@@ -1,9 +1,9 @@
-import {createContext, ReactNode, useContext, useEffect, useState} from 'react';
+import {createContext, type ReactNode, useContext, useEffect, useState} from 'react';
 import type {NDKEvent} from "@nostr-dev-kit/ndk-hooks";
 import {useNDK} from "@nostr-dev-kit/ndk-hooks";
 import {extractTag} from "@/helper/extractTag.ts";
 import {useParams} from "@tanstack/react-router";
-import {geVideoByEventIdData, GeVideoByEventIdDataParams} from "@/helper/nostr.ts";
+import {geVideoByEventIdData, type GeVideoByEventIdDataParams} from "@/helper/nostr.ts";
 import useVideoStore from "@/store/videoStore.ts";
 import {NotFoundVideo} from "@/routes/v/@components/NotFoundVideo.tsx";
 

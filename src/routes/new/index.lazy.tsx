@@ -135,7 +135,7 @@ function Page() {
                     content: videoData.summary ?? "",
                     created_at: nostrNow()
                 },
-                difficulty: 10,
+                difficulty: 16,
             })
 
 

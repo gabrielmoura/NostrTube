@@ -6,10 +6,10 @@ import {sortEventsByImages} from "@/helper/format.ts";
 import {eventSearchSchema} from "@/helper/nostr.ts";
 import type {NDKFilter} from "@nostr-dev-kit/ndk";
 import {NDKKind} from "@nostr-dev-kit/ndk";
-import Spinner from "@/components/Spinner.tsx";
 import {uniqBy} from "ramda";
 import {getTagValues} from "@welshman/util";
-import {Section, SectionContent, SectionHeader, SectionTitle} from "@/containers/pageSection";
+import {Section, SectionContent, SectionHeader, SectionTitle} from "@/components/containers/pageSection";
+import {PageSpinner} from "@/components/PageSpinner.tsx";
 
 
 export const Route = createFileRoute('/search/')({
@@ -17,7 +17,7 @@ export const Route = createFileRoute('/search/')({
     validateSearch: zodValidator(eventSearchSchema),
     loaderDeps: ({search: {search, nsfw, tag}}) => ({search, nsfw, tag}),
     // loader: ({deps, context: {ndk}}) => getVideosFromSearchData({...deps, ndk}),
-    pendingComponent: Spinner,
+    pendingComponent: PageSpinner,
     // notFoundComponent: () => <div>nehum resultado encontrado</div>,
 
 })

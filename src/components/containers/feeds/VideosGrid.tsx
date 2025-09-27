@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import HorizontalVideoCard, {
   HorizontalVideoCardLoading,
-} from "@/components/cards/videoCard/horizontalCard";
+} from "@/components/cards/videoCard/horizontalCard.tsx";
 import VideoCard, { VideoCardLoading } from "@/components/cards/videoCard";
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";

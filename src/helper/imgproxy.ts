@@ -94,9 +94,9 @@ export interface ImgProxyProcessingOptions {
 
 /* --- Serializer (basic, covers main options) --- */
 
-function boolToArg(v: boolean | undefined) {
-    return v ? '1' : '0';
-}
+// function boolToArg(v: boolean | undefined) {
+//     return v ? '1' : '0';
+// }
 
 function numToArg(n?: number) {
     if (n === undefined || n === null) return undefined;

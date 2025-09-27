@@ -1,17 +1,24 @@
-import {useRouter, createLazyFileRoute} from '@tanstack/react-router'
-
-import Spinner from "@/components/Spinner.tsx";
+import {createLazyFileRoute, useRouter} from '@tanstack/react-router'
 import {geVideoByEventIdData, type GeVideoByEventIdDataParams} from "@/helper/nostr.ts";
 import {VideoPage} from "@/routes/v/@components/Video.tsx";
 import {NotFoundVideo} from "@/routes/v/@components/NotFoundVideo.tsx";
+import {PageSpinner} from "@/components/PageSpinner.tsx";
+import type NDK__default from "@nostr-dev-kit/ndk";
 
 /*
  * @route /v/$eventId
  */
 export const Route = createLazyFileRoute('/v/$eventId')({
     component: VideoPage,
-    loader: ({params: {eventId}, context: {ndk}}) => geVideoByEventIdData({eventId, ndk} as GeVideoByEventIdDataParams),
-    pendingComponent: Spinner,
+    loader: ({params: {eventId}, context: {ndk}}: {
+        context: {
+            ndk: NDK__default,
+        },
+        params: {
+            eventId: string,
+        }
+    }) => geVideoByEventIdData({eventId, ndk} as GeVideoByEventIdDataParams),
+    pendingComponent: PageSpinner,
     notFoundComponent: () => <NotFoundVideo/>,
     errorComponent: ({error}) => {
         // eslint-disable-next-line react-hooks/rules-of-hooks

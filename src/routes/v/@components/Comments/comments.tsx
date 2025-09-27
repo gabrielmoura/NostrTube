@@ -8,7 +8,7 @@ import {t} from "i18next";
 type CommentSectionProps = {
     eventReference: string;
     eventId: string;
-    pubkey: string;
+    pubkey?: string;
 };
 
 export default function CommentSection({
@@ -41,7 +41,7 @@ export default function CommentSection({
                     initialTags={[
                         ["a", eventReference],
                         ["e", eventId, "", "reply"],
-                        ["p", pubkey],
+                        ["p", pubkey!],
                     ]}
                 />
             </ErrorBoundaryVideo>

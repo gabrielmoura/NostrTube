@@ -5,7 +5,8 @@ import useElementOnScreen from "@/hooks/useElements.ts";
 import {cn, formatCount, getNameToShow, getTwoLetters} from "@/helper/format.ts";
 import {relativeTime} from "@/helper/date.ts";
 import {extractTag} from "@/helper/extractTag.ts";
-import {AspectRatio, Badge} from "@radix-ui/themes";
+import {AspectRatio, Avatar, Badge} from "@radix-ui/themes";
+import {HiCheckBadge} from "react-icons/hi2";
 
 
 type VideoCardProps = {
@@ -76,26 +77,24 @@ export default function HorizontalVideoCard({
                 </div>
                 <div className="flex">
                     <div
-                        onClick={() => navigate("/u/$userId",{
-                            params: {
-                                {
-                                    userId:npub
-                                }
-                            },
-                        }
+                        onClick={() => navigate({
+                                to: "/u/$userId",
+                                params: {
+                                    userId: npub
+                                },
+                            }
                         )}
                         className="center group gap-x-2 rounded-sm rounded-r-full pr-1 text-muted-foreground hover:shadow"
                     >
-                        <Avatar className="center h-[20px] w-[20px] overflow-hidden rounded-[.35rem] bg-muted">
-                            <AvatarImage
-                                className="object-cover"
+                        <Avatar className={cn("center h-[20px] w-[20px] overflow-hidden rounded-[.35rem] bg-muted",
+                            "object-cover"
+                        )}
                                 src={profile?.image}
                                 alt={profile?.displayName}
-                            />
-                            <AvatarFallback className="text-[9px]">
-                                {getTwoLetters({npub, profile})}
-                            </AvatarFallback>
-                        </Avatar>
+                                fallback={getTwoLetters({npub, profile})}
+                        />
+
+
                         <div className="flex items-center gap-1">
               <span className="truncate text-[12px] font-semibold">
                 {getNameToShow({npub, profile})}

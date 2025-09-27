@@ -10,7 +10,7 @@ export class BlossomUpload {
 
     public async upload(file: File): Promise<NDKTag> {
         this.blossom.onUploadFailed = (error) => console.error(error);
-        this.blossom.onUploadProgress = (progress, file, serverUrl) => {
+        this.blossom.onUploadProgress = (progress) => {
             const percentage = Math.round((progress.loaded / progress.total) * 100);
             console.log(`Upload progress: ${percentage}%`);
             return 'continue';

@@ -5,8 +5,6 @@ import {VitePWA} from 'vite-plugin-pwa'
 import legacy from '@vitejs/plugin-legacy'
 import VitePaths from "vite-tsconfig-paths"
 import {tanstackRouter} from '@tanstack/router-plugin/vite'
-import {forEach} from "ramda";
-// import { createHtmlPlugin } from 'vite-plugin-html'
 
 
 export default defineConfig(({mode}) => {
@@ -14,12 +12,12 @@ export default defineConfig(({mode}) => {
     const env = loadEnv(mode, process.cwd(), ''); // The third argument is the prefix for client-side variables (e.g., 'VITE_')
     const chunkVideo = ['node_modules/@vidstack/react', 'hls.js', 'dashjs'];
     const chunkIcons = ['react-icons', '@heroicons/react', 'media-icons', 'lucide-react'];
-    const chunkI18next = ['i18next', 'i18next-browser-languagedetector', 'i18next-http-backend']
-    const chunckCore=['src','@nostr-dev-kit','@radix-ui','@tanstack','react','zustand']
+    // const chunkI18next = ['i18next', 'i18next-browser-languagedetector', 'i18next-http-backend']
+    // const chunckCore = ['src', '@nostr-dev-kit', '@radix-ui', '@tanstack', 'react', 'zustand']
 
     function checkDependency(id: string, options: string[]): boolean {
-        let value: boolean
-        forEach((item) => {
+        let value: boolean = false
+        options.forEach((item) => {
             if (id.includes(item)) {
                 value = id.includes(item)
             }
@@ -76,25 +74,6 @@ export default defineConfig(({mode}) => {
                 autoCodeSplitting: true,
                 routeFileIgnorePrefix: "@"
             }),
-            // createHtmlPlugin({
-            //     minify: true,
-            //     entry: 'src/main.tsx',
-            //     inject: {
-            //         data: {
-            //             title: 'index',
-            //             // injectScript: `<script type="module" src="/src/main.tsx"></script>`,
-            //         },
-            //         tags: [
-            //             {
-            //                 injectTo: 'body-prepend',
-            //                 tag: 'div',
-            //                 attrs: {
-            //                     id: 'root',
-            //                 },
-            //             },
-            //         ],
-            //     }
-            // })
         ],
         build: {
             sourcemap: false,
@@ -118,10 +97,5 @@ export default defineConfig(({mode}) => {
                 cache: true
             },
         },
-        // css: {
-        //     postcss: {
-        //         plugins: [tailwindcss()],
-        //     },
-        // }
     };
 });

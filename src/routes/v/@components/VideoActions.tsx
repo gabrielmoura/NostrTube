@@ -135,7 +135,7 @@ function VideoTags({event}: VideoActionsProps) {
     return (
         <>
             {tags.map((value, index) => (
-                <Link to="/search/" search={{tag: value as string}} key={index}>
+                <Link to="/search" search={{tag: value as string}} key={index}>
                     <Badge>{value}</Badge>
                 </Link>
             ))}
