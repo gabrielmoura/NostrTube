@@ -1,15 +1,18 @@
 import {NDKEvent, useCurrentUserProfile, useNDK} from "@nostr-dev-kit/ndk-hooks";
 import {VideoPlayer} from "@/components/videoPlayer";
-import {ErrorBoundaryVideo} from "./error.tsx";
-import {useState} from "react";
-import VideoActions from "./VideoActions.tsx";
-import CommentSection from "@/routes/v/@components/Comments/comments.tsx";
+import {ErrorBoundaryVideo} from "@/routes/v/@components/error.tsx";
+import {lazy, useState} from "react";
+
+// import VideoActions from "./VideoActions.tsx";
+// import CommentSection from "@/routes/v/@components/Comments/comments.tsx";
 import {RecordView} from "@/hooks/useRecordView.tsx";
 import useVideoStore from "@/store/videoStore.ts";
 import {VideoProvider} from "@/context/VideoContext.tsx";
 import {useLoaderData} from "@tanstack/react-router";
 import {PageSpinner} from "@/components/PageSpinner.tsx";
 
+const VideoActions = lazy(() => import('@/routes/v/@components/VideoActions.tsx'));
+const CommentSection = lazy(() => import('@/routes/v/@components/Comments/comments.tsx'));
 
 export function VideoPage() {
     const event = useLoaderData({from: "/v/$eventId"}) as NDKEvent
@@ -26,6 +29,7 @@ function EventLoaded() {
     const currentUser = useCurrentUserProfile()
     const {ndk} = useNDK()
     const session = useVideoStore(s => s.session!)
+
 
     if (!session) {
         return <PageSpinner/>
