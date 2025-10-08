@@ -7,16 +7,21 @@ import {RenderText} from "@/components/RenderText.tsx";
 import {getNameToShow, getTwoLetters} from "@/helper/format.ts";
 import {relativeTime} from "@/helper/date.ts";
 import {Avatar} from "@radix-ui/themes";
-import ReactionButtons from "@/routes/v/@components/Comments/ReactionButtons.tsx";
-import {useProfileValue} from "@nostr-dev-kit/ndk-hooks";
+// import ReactionButtons from "@/routes/v/@components/Comments/ReactionButtons.tsx";
+import {NDKSubscriptionCacheUsage, NDKUserProfile} from "@nostr-dev-kit/ndk-hooks";
+import {lazy, useEffect, useState} from "react";
+const ReactionButtons = lazy(()=>import("@/routes/v/@components/Comments/ReactionButtons.tsx"))
 
 type CommentBodyProps = {
     event: NDKEvent;
 };
 export default function CommentBody({event}: CommentBodyProps) {
     const npub = event.author.npub;
+    const [profile, setProfile] = useState<NDKUserProfile | undefined>()
 
-    const profile = useProfileValue(event.author.npub)
+    useEffect(() => {
+        event.author.fetchProfile({cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST}, true).then((p) => (p) ? setProfile(p) : "");
+    }, [event.author]);
     return (
         <div className="flex w-full gap-x-4 overflow-hidden">
             <Avatar className="center h-[40px] w-[40px] overflow-hidden rounded-[.55rem] bg-muted   object-cover"
@@ -31,9 +36,9 @@ export default function CommentBody({event}: CommentBodyProps) {
             <div className="space-y-1 overflow-hidden">
                 <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1">
-            <span className="line-clamp-1 text-[14px] font-semibold">
-              {getNameToShow({npub, profile})}
-            </span>
+                     <span className="line-clamp-1 text-[14px] font-semibold">
+                        {getNameToShow({npub, profile})}
+                     </span>
                         {!!profile?.nip05 && (
                             <HiCheckBadge className="h-[14px] w-[14px] shrink-0 text-primary"/>
                         )}

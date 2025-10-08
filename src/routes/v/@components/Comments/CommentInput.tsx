@@ -1,9 +1,9 @@
-import {useRef, useState} from "react";
+import {lazy, useRef, useState} from "react";
 
 
 import {HiOutlinePaperClip} from "react-icons/hi";
 import {cn, getTwoLetters} from "@/helper/format.ts";
-import {Textarea} from "@/components/textarea.tsx";
+// import {Textarea} from "@/components/textarea.tsx";
 import {Avatar} from "@radix-ui/themes";
 import useUpload from "@/hooks/useUpload.tsx";
 import {NDKEvent, NDKKind, useCurrentUserProfile, useNDK} from "@nostr-dev-kit/ndk-hooks";
@@ -12,6 +12,7 @@ import {useMutation} from "@tanstack/react-query";
 import {nostrNow} from "@/helper/date.ts";
 import {t} from "i18next";
 import {Button} from "@/components/button.tsx";
+const Textarea =lazy(()=>import("@/components/textarea.tsx"))
 
 export default function CommentInput({
 

@@ -5,7 +5,7 @@ import HorizontalVideoCard, {
   HorizontalVideoCardLoading,
 } from "@/components/cards/videoCard/horizontalCard.tsx";
 import VideoCard, { VideoCardLoading } from "@/components/cards/videoCard";
-import { ReactNode } from "react";
+import {JSX, ReactNode} from "react";
 import { cn } from "@/lib/utils";
 import type { NDKEvent, NDKFilter } from "@nostr-dev-kit/ndk";
 import useEvents from "@/lib/hooks/useEvents";
@@ -15,7 +15,7 @@ type VerticalVideosFeedProps = {
   action?: ReactNode;
   className?: string;
   filter?: NDKFilter;
-  secondaryFilter?: (event: NDKEvent) => Boolean;
+  secondaryFilter?: (event: NDKEvent) => boolean;
   loader?: () => JSX.Element;
   empty?: () => JSX.Element;
 };
@@ -78,7 +78,7 @@ function RawFeed({
   ),
 }: {
   filter?: NDKFilter;
-  secondaryFilter?: (event: NDKEvent) => Boolean;
+  secondaryFilter?: (event: NDKEvent) => boolean;
   loader?: () => JSX.Element;
   empty?: () => JSX.Element;
 }) {

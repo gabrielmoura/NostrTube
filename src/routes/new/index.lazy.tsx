@@ -1,23 +1,28 @@
-import {createLazyFileRoute, useRouter} from '@tanstack/react-router'
-import {useState} from "react";
+import {createLazyFileRoute, useNavigate} from '@tanstack/react-router'
+import {lazy, useEffect, useState} from "react";
 
 import {nip19} from "nostr-tools";
-
-import Thumbnail from "@/routes/new/@components/thumbnail.tsx";
-import TextTracks from "@/routes/new/@components/textTracks.tsx";
 import {RiAlertLine} from "react-icons/ri";
 import {NDKKind} from "@nostr-dev-kit/ndk";
-import Player, {VideoUpload} from "@/routes/new/@components/VideoUpload.tsx";
+import Player, {VideoMetadata, VideoUpload} from "@/routes/new/@components/VideoUpload.tsx";
 import {cn} from "@/helper/format.ts";
-import {Textarea} from "@/components/textarea.tsx";
 
 import {Label} from "@/components/label.tsx";
 import {NDKEvent, useCurrentUserProfile, useNDK} from "@nostr-dev-kit/ndk-hooks";
 import {useMutation} from "@tanstack/react-query";
 import {makeEvent, type makeEventParams} from "@/helper/pow/pow.ts";
 import {nostrNow} from "@/helper/date.ts";
-import {nanoid} from "nanoid";
 import {Button} from "@/components/button.tsx";
+import {t} from "i18next";
+import {useGenTagsVideo} from "@/hooks/gentTags.ts";
+import {toast} from "react-toastify";
+import {Image} from "@/components/Image.tsx";
+// import {BoxAddToModal} from "@/routes/new/@components/BoxAddToModal.tsx";
+// import {ButtonUpload} from "@/components/ButtonUpload.tsx";
+
+const ButtonUpload = lazy(() => import("@/components/ButtonUpload.tsx"))
+const BoxAddToModal = lazy(() => import("@/routes/new/@components/BoxAddToModal.tsx"))
+const Textarea = lazy(() => import("@/components/textarea.tsx"))
 
 
 export const Route = createLazyFileRoute('/new/')({
@@ -26,21 +31,24 @@ export const Route = createLazyFileRoute('/new/')({
 
 
 function Page() {
-    const {navigate} = useRouter();
+    const navigate = useNavigate()
     const {ndk} = useNDK();
     const currentUser = useCurrentUserProfile();
-    const [videoData, setVideoData] = useState<{
-        url?: string;
-        title?: string;
-        summary?: string;
-        thumbnail?: string;
-        fileType?: string;
-        fileHash?: string;
-        fileSize?: number;
-        duration?: number;
-        hashtags?: string;
-        contentWarning?: string;
-    }>({});
+
+    const [videoData, setVideoData] = useState<Partial<VideoMetadata>>({});
+    const [indexers, setIndexers] = useState<string[]>([])
+    const [hashtags, setHashtags] = useState<string[]>([])
+    const [thumb, setThumb] = useState<string>()
+
+    useEffect(() => {
+        if (!currentUser) {
+            navigate({to: "/"}).then(() => toast("You must be logged in to upload videos", {
+                type: "warning",
+                autoClose: 5000
+            }))
+        }
+    }, [currentUser, navigate])
+
     const makeEventMut = useMutation({
         mutationKey: ['event:generate:new:video'],
         mutationFn: ({ndk, event, difficulty}: makeEventParams): Promise<NDKEvent> => makeEvent({
@@ -59,73 +67,24 @@ function Page() {
             // const encodedEvent = event.encode();
             await navigate({to: "/v/$eventId", params: {eventId: nip19Encode}})
             // router.push(`/v/${encodedEvent}`);
-        }
+        },
+        onError: () => toast("Um erro encontrado")
     })
+    const {genTags} = useGenTagsVideo()
 
 
     function handleSubmit() {
+
         if (!ndk || !currentUser) return;
         if (!videoData?.url || !videoData?.title) return;
-        const relays: string = import.meta.env.PROD ? import.meta.env.VITE_NOSTR_RELAYS : import.meta.env.VITE_NOSTR_DEV_RELAYS
 
-        console.log("handleSubmit")
         try {
-            const d = nanoid(7);
-
-            const imeta = ["imeta", "url" + " " + videoData.url];
-
-            const tags: string[][] = [
-                ["d", d],
-                // ["url", videoData.url],
-                ["title", videoData.title],
-                ["summary", videoData.summary ?? ""],
-                ["published_at", nostrNow().toString()],
-                [
-                    "alt",
-                    `This is a video event and can be viewed at ${
-                        import.meta.env.VITE_PUBLIC_ROOT_DOMAIN ?? "https://nostr-tube.com"
-                    }/v/${nip19.naddrEncode({
-                        identifier: d,
-                        kind: NDKKind.Video,
-                        pubkey: currentUser.pubkey as string,
-                        relays: relays.split(",")
-                    })}`,
-                ],
-            ];
-
-            if (videoData.fileType) {
-                imeta.push("m" + " " + videoData.fileType)
-
-            }
-            if (videoData.fileHash) {
-                imeta.push("x" + " " + videoData.fileHash)
-            }
-            if (videoData.fileSize) {
-                imeta.push("size" + " " + videoData.fileSize.toString())
-
-            }
-            if (videoData.duration) {
-                imeta.push("duration" + " " + videoData.duration.toString())
-
-            }
-
-            if (videoData.thumbnail) {
-                imeta.push("thumb" + " " + videoData.thumbnail)
-                imeta.push("image" + " " + videoData.thumbnail)
-            }
-
-            if (videoData.contentWarning) {
-                tags.push(["content-warning", videoData.contentWarning]);
-            }
-            if (videoData.hashtags) {
-                const hashtags = videoData.hashtags.split(",").map((t) => t.trim());
-                for (const hashtag of hashtags) {
-                    tags.push(["t", hashtag]);
-                }
-            }
-            tags.push(imeta)
-
-            // const event = await createEvent(ndk, preEvent);
+            const tags = genTags({
+                currentPubkey: currentUser.pubkey as string,
+                hashtags,
+                indexers,
+                videoData
+            })
             makeEventMut.mutate({
                 ndk: ndk,
                 event: {
@@ -138,32 +97,15 @@ function Page() {
                 difficulty: 16,
             })
 
-
-            // if (event) {
-            //     console.log("Event", event);
-            //     // toast.success("Video published!");
-            //     const encodedEvent = event.encode();
-            //
-            //     //     router.navigate("/v/$eventId", {
-            //     //     {
-            //     //         params:{
-            //     //             eventId:encodedEvent
-            //     //         }
-            //     //     }
-            //     // })
-            //     navigate({to: `/w/${encodedEvent}`})
-            // } else {
-            //     // toast.error("An error occured");
-            // }
         } catch (err) {
-            console.log("error submitting event", err);
+            console.error("error submitting event", err);
         } finally {
             // setLoading(false);
         }
     }
 
     return (
-        <div className="flex flex-col gap-8 lg:flex-row">
+        <div className="flex flex-col gap-8 lg:flex-row py-2.5 px-5">
             {/* Coluna principal (Player + Metadados do vídeo) */}
             <div className="flex-1 min-w-[320px] md:min-w-[500px] space-y-6">
                 {/* Player ou Upload */}
@@ -187,7 +129,7 @@ function Page() {
                         onChange={(e) =>
                             setVideoData((prev) => ({...prev, title: e.target.value}))
                         }
-                        placeholder="Add a video title..."
+                        placeholder={t('add_a_video_title') + "..."}
                         autoFocus
                         className={cn(
                             "invisible-textarea text-3xl font-semibold tracking-tight text-foreground placeholder:text-muted-foreground/70"
@@ -200,7 +142,7 @@ function Page() {
                         onChange={(e) =>
                             setVideoData((prev) => ({...prev, summary: e.target.value}))
                         }
-                        placeholder="Write a short summary or description..."
+                        placeholder={t('write_a_short_summary_or_description') + "..."}
                         className={cn(
                             "invisible-textarea min-h-[70px] text-base text-foreground placeholder:text-muted-foreground/70"
                         )}
@@ -210,7 +152,7 @@ function Page() {
                     <div className="flex items-center gap-3 pt-2">
 
                         <Button variant="outline" size="sm" disabled>
-                            Save as Draft
+                            {t('save_as_draft')}
                         </Button>
 
                         <Button
@@ -219,7 +161,7 @@ function Page() {
                             loading={makeEventMut.isPending}
                             disabled={!videoData?.url || !videoData?.title}
                         >
-                            Publish
+                            {t('Publish')}
                         </Button>
                     </div>
                 </div>
@@ -235,32 +177,33 @@ function Page() {
                     )}
                 >
                     <Label className="text-sm font-medium">Thumbnail</Label>
-                    <Thumbnail
-                        url={videoData?.thumbnail}
-                        onChange={(newThumbnailUrl) =>
-                            setVideoData((prev) => ({...prev, thumbnail: newThumbnailUrl}))
-                        }
-                    />
+                    {videoData?.thumbnail ? (
+                        <Image
+                            src={videoData.thumbnail}
+                            alt="Video thumbnail"
+                            className="mb-2 w-full rounded-md border object-cover"
+                            width={"288"}
+                        />) : (<ButtonUpload setUrl={setThumb} url={thumb}>
+                            <Button>Upload</Button>
+                        </ButtonUpload>
+                    )}
+
                 </div>
 
                 {/* Legendas */}
-                <div className="rounded-xl border bg-card p-4 shadow-sm">
-                    <Label className="text-sm font-medium">Text tracks</Label>
-                    <TextTracks/>
-                </div>
+                {/*<div className="rounded-xl border bg-card p-4 shadow-sm">*/}
+                {/*    <Label className="text-sm font-medium">Text tracks</Label>*/}
+                {/*    <TextTracks/>*/}
+                {/*</div>*/}
 
                 {/* Hashtags */}
-                <div className="rounded-xl border bg-card p-4 shadow-sm space-y-2">
-                    <Label className="text-sm font-medium">Hashtags</Label>
-                    <Textarea
-                        value={videoData?.hashtags}
-                        onChange={(e) =>
-                            setVideoData((prev) => ({...prev, hashtags: e.target.value}))
-                        }
-                        placeholder="e.g. Bitcoin, Nostr, Entertainment"
-                        className="text-sm"
-                    />
-                </div>
+                <BoxAddToModal addTo={setHashtags} label="Hashtags" to={hashtags}
+                               placeholder="Ex: Bitcoin, Nostr, Entertainment"/>
+
+                {/*Indexers*/}
+                <BoxAddToModal addTo={setIndexers} label="Indexers" to={indexers}
+                               placeholder="Ex: imdb:tt12345678, myanimelist:12345"/>
+
 
                 {/* Aviso de conteúdo */}
                 <div className="rounded-xl border bg-card p-4 shadow-sm space-y-2">
@@ -278,16 +221,16 @@ function Page() {
                     />
                 </div>
 
+
                 {/* Disclaimer */}
                 <div
                     className="rounded-xl border bg-muted/70 p-4 text-muted-foreground transition-colors hover:border-yellow-500 hover:text-yellow-600 space-y-2">
                     <div className="flex items-center gap-2">
                         <RiAlertLine className="h-5 w-5"/>
-                        <Label className="text-sm font-semibold">Disclaimer</Label>
+                        <Label className="text-sm font-semibold">{t('Disclaimer')}</Label>
                     </div>
                     <p className="text-xs leading-relaxed">
-                        By using this service, you confirm that this video belongs to you or
-                        that you have the right to publish it.
+                        {t('disclaimer_text')}
                     </p>
                 </div>
             </div>
@@ -295,4 +238,3 @@ function Page() {
 
     );
 }
-

@@ -5,6 +5,8 @@ import {VitePWA} from 'vite-plugin-pwa'
 import legacy from '@vitejs/plugin-legacy'
 import VitePaths from "vite-tsconfig-paths"
 import {tanstackRouter} from '@tanstack/router-plugin/vite'
+import  wasm  from  "vite-plugin-wasm" ;
+
 
 
 export default defineConfig(({mode}) => {
@@ -74,6 +76,7 @@ export default defineConfig(({mode}) => {
                 autoCodeSplitting: true,
                 routeFileIgnorePrefix: "@"
             }),
+            wasm(),
         ],
         build: {
             sourcemap: false,

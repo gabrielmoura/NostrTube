@@ -1,32 +1,40 @@
-import type {NDKEvent} from "@nostr-dev-kit/ndk-hooks";
-import {NDKSubscriptionCacheUsage, useCurrentUserProfile, useFollows, useProfileValue} from "@nostr-dev-kit/ndk-hooks";
+import type {NDKEvent, NDKUserProfile} from "@nostr-dev-kit/ndk-hooks";
+import {NDKSubscriptionCacheUsage, useCurrentUserProfile, useFollows} from "@nostr-dev-kit/ndk-hooks";
 import {Avatar, Badge, Button, Skeleton} from "@radix-ui/themes";
 import {HiCheckBadge} from "react-icons/hi2";
 import {cn, formatCount, getLettersPlain, getNameToShow, getVideoDetails} from "@/helper/format.ts";
 import {RenderText} from "@/components/RenderText.tsx";
 import {ErrorBoundaryVideo} from "./error.tsx";
 import {getTagValues} from "@welshman/util";
-import LikeButton from "./LikeButton.tsx";
+// import LikeButton from "@/routes/v/@components/LikeButton.tsx";
 import {Link} from "@tanstack/react-router";
 import LikeToggleButton from "@/components/LikeToggleButton.tsx";
-import {VideoMeta} from "@/routes/v/@components/VideoMeta.tsx";
+// import {VideoMeta} from "@/routes/v/@components/VideoMeta.tsx";
+import {lazy, useEffect, useState} from "react";
+
+const VideoMeta = lazy(() => import("@/routes/v/@components/VideoMeta.tsx"))
+const LikeButton=lazy(()=>import("@/routes/v/@components/LikeButton.tsx"))
 
 export type VideoActionsProps = {
     event: NDKEvent;
     eventIdentifier?: string;
 };
-export default function VideoActions({event, eventIdentifier}: VideoActionsProps) {
-    // const [profile, setProfile] = useState<NDKUserProfile | undefined>()
+export default function VideoActions({event}: VideoActionsProps) {
+    const [profile, setProfile] = useState<NDKUserProfile | undefined>()
 
     const npub = event.author.npub;
 
 
-    const profile = useProfileValue(event.author.npub, {
-        subOpts: {
-            closeOnEose: true,
-            cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
-        }
-    })
+    // const profile = useProfileValue(event.author.npub, {
+    //     subOpts: {
+    //         closeOnEose: true,
+    //         cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
+    //     }
+    // })
+    useEffect(() => {
+        event.author.fetchProfile({cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST}, true).then((p) => (p) ? setProfile(p) : "");
+    }, [event.author]);
+
     const followers = useFollows()
 
 
@@ -63,9 +71,9 @@ export default function VideoActions({event, eventIdentifier}: VideoActionsProps
 
                             <div className="">
                                 <div className="flex items-center gap-1">
-                  <span className="truncate text-[14px] font-semibold sm:text-[16px]">
-                    {getNameToShow({npub, profile})}
-                  </span>
+                                    <span className="truncate text-[14px] font-semibold sm:text-[16px]">
+                                        {getNameToShow({npub, profile})}
+                                    </span>
                                     {!!profile?.nip05 && (
                                         <HiCheckBadge
                                             className="h-[12px] w-[12px] text-primary sm:h-[14px] sm:w-[14px]"/>
@@ -109,7 +117,7 @@ export default function VideoActions({event, eventIdentifier}: VideoActionsProps
                 )}
             >
                 <ErrorBoundaryVideo>
-                    <VideoMeta event={event} eventIdentifier={eventIdentifier}/>
+                    <VideoMeta event={event}/>
                 </ErrorBoundaryVideo>
                 <ErrorBoundaryVideo>
                     <div className="overflow-hidden whitespace-break-spaces break-words text-sm text-muted-foreground">
@@ -135,7 +143,7 @@ function VideoTags({event}: VideoActionsProps) {
     return (
         <>
             {tags.map((value, index) => (
-                <Link to="/search" search={{tag: value as string}} key={index}>
+                <Link to="/search/" search={{tag: value as string}} key={index}>
                     <Badge>{value}</Badge>
                 </Link>
             ))}

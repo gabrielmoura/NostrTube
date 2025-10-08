@@ -4,6 +4,7 @@ import {formatCount} from "@/helper/format.ts";
 import {NDKKind, NDKSubscriptionCacheUsage, useSubscribe} from "@nostr-dev-kit/ndk-hooks";
 import {ErrorBoundaryVideo} from "@/routes/v/@components/error.tsx";
 import {t} from "i18next";
+import Spinner from "@/components/Spinner.tsx";
 
 type CommentSectionProps = {
     eventReference: string;
@@ -16,14 +17,18 @@ export default function CommentSection({
                                            eventId,
                                            pubkey,
                                        }: CommentSectionProps) {
-    const {events} = useSubscribe([{
+    const {events, eose} = useSubscribe([{
         kinds: [NDKKind.Text],
-        "#a": [eventReference],
+        // "#a": [eventReference],
+        "#e": [eventId],
     }], {
-        closeOnEose: true,
+        closeOnEose: false,
         cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
-    })
+    }, [eventId, eventReference])
 
+    if (!eose) {
+        return <Spinner/>
+    }
     return (
         <section className="space-y-2.5 py-2">
             {/* Comments Section */}

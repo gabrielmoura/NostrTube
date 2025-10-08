@@ -1,5 +1,5 @@
 import {getTagValues} from "@welshman/util";
-import {type ClassValue, clsx} from "clsx";
+import clsx, {type ClassValue} from "clsx";
 import {twMerge} from "tailwind-merge";
 import type {NDKEvent} from "@nostr-dev-kit/ndk-hooks";
 import {unixTimeNowInSeconds} from "./date.ts";

@@ -4,75 +4,76 @@ import type {NDKEvent, NDKKind} from "@nostr-dev-kit/ndk";
 import {HiHandThumbDown, HiHandThumbUp, HiOutlineHandThumbDown, HiOutlineHandThumbUp,} from "react-icons/hi2";
 // import {modal} from "@/app/_providers/modal";
 // import AuthModal from "@/components/modals/auth";
-import {useCurrentUserProfile, useNDK, useSubscribe} from "@nostr-dev-kit/ndk-hooks";
+import {NDKSubscriptionCacheUsage, useNDK, useNDKCurrentPubkey, useSubscribe} from "@nostr-dev-kit/ndk-hooks";
 import {Button} from "@/components/button.tsx";
-import {makeEvent} from "@/helper/pow/pow.ts";
+import {makeEvent, makeEventParams} from "@/helper/pow/pow.ts";
 import {formatCount} from "@/helper/format.ts";
 import {nostrNow} from "@/helper/date.ts";
+import Spinner from "@/components/Spinner.tsx";
+import type {likeOptions} from "@/components/LikeToggleButton.tsx";
+import {useMutation} from "@tanstack/react-query";
 
-type ReactionButtosProps = {
+type likeOptions = "+" | "-"
+type ReactionButtonsProps = {
     event: NDKEvent;
 };
-export default function ReactionButtons({event}: ReactionButtosProps) {
-    const currentUser = useCurrentUserProfile()
-    const {ndk} = useNDK();
-    const {events} = useSubscribe([{
+export default function ReactionButtons({event}: ReactionButtonsProps) {
+    const {ndk} = useNDK()
+    const currentPubkey = useNDKCurrentPubkey()
+    const {events, eose} = useSubscribe([{
         kinds: [7 as NDKKind],
         "#e": [event.id],
-    }])
-    const downVotes = [...events]?.filter((e) => e.content === "-").length;
-    const upVotes = events?.size||events?.length - downVotes;
+    }], {
+        closeOnEose: true,
+        cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
+    }, [event])
 
-    async function handleLike(action: string) {
-        if (!currentUser || !ndk) return;
-        try {
-            const newEvent = await makeEvent({
-                ndk,
-                event: {
-                    content: action,
-                    pubkey: currentUser.pubkey,
-                    tags: [["e", event.id]],
-                    kind: 7,
-                    created_at: nostrNow(),
-                },
-                difficulty: 10,
-            });
-            if (newEvent) {
-                console.log("Event", newEvent);
-            } else {
-                console.log("Error adding reaction");
+    const makeEventMut = useMutation({
+        mutationKey: ['event:generate:new:video'],
+        mutationFn: ({ndk, event, difficulty}: makeEventParams): Promise<NDKEvent> => makeEvent({
+            ndk,
+            event,
+            difficulty
+        }),
+        onSuccess: async (event: NDKEvent) => {
+            await event.publish()
+        }
+    })
+
+    if (!eose) {
+        return <Spinner/>
+    }
+
+
+    async function handleLike(action: likeOptions) {
+        await makeEventMut.mutateAsync({
+            difficulty: 10,
+            ndk: ndk!,
+            event: {
+                created_at: nostrNow(),
+                pubkey: currentPubkey!,
+                content: action,
+                kind: 7,
+                tags: [["e", event.id]],
             }
-        } catch (err) {
-            console.log("error submitting event", err);
-        }
+        })
     }
 
-    const activeReaction = [...events]?.filter(
-        (e) => e.pubkey === currentUser?.pubkey,
-    )?.[0]?.content as "-" | "+" | "" | undefined;
+    const activeReaction = Array.from(events).filter(e => e.pubkey == currentPubkey)[0]?.content as likeOptions
+    const downVotes = Array.from(events)?.filter((e) => e.content === "-").length;
+    const upVotes = (events?.size || events?.length) - downVotes;
 
-    function handleReact(action: "+" | "-") {
-        if (currentUser) {
-            handleLike(action);
-        } else {
-            // modal.show(<AuthModal/>, {
-            //     id: "login",
-            // });
-            console.log("modal")
-            throw new Error("Authentication required");
-        }
-    }
 
     return (
         <div className="flex items-center gap-1">
             <Button
-                onClick={() => handleReact("+")}
-                disabled={!currentUser}
+                onClick={async () => await handleLike("+")}
+                disabled={!currentPubkey}
                 size="sm"
                 variant="ghost"
                 className="gap-x-1.5 px-2"
             >
-                {activeReaction === "+" ? (
+                {activeReaction == "+" ? (
                     <HiHandThumbUp className="h-4 w-4"/>
                 ) : (
                     <HiOutlineHandThumbUp className="h-4 w-4"/>
@@ -82,13 +83,13 @@ export default function ReactionButtons({event}: ReactionButtosProps) {
                 )}
             </Button>
             <Button
-                onClick={() => handleReact("-")}
-                disabled={!currentUser}
+                onClick={async () => await handleLike("-")}
+                disabled={!currentPubkey}
                 size="sm"
                 variant="ghost"
                 className="gap-x-1.5 px-2"
             >
-                {activeReaction === "-" ? (
+                {activeReaction == "-" ? (
                     <HiHandThumbDown className="h-4 w-4"/>
                 ) : (
                     <HiOutlineHandThumbDown className="h-4 w-4"/>

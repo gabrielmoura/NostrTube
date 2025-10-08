@@ -3,9 +3,7 @@ import {VideoPlayer} from "@/components/videoPlayer";
 import {ErrorBoundaryVideo} from "@/routes/v/@components/error.tsx";
 import {lazy, useState} from "react";
 
-// import VideoActions from "./VideoActions.tsx";
-// import CommentSection from "@/routes/v/@components/Comments/comments.tsx";
-import {RecordView} from "@/hooks/useRecordView.tsx";
+import {useRecordView} from "@/hooks/useRecordView.ts";
 import useVideoStore from "@/store/videoStore.ts";
 import {VideoProvider} from "@/context/VideoContext.tsx";
 import {useLoaderData} from "@tanstack/react-router";
@@ -29,6 +27,7 @@ function EventLoaded() {
     const currentUser = useCurrentUserProfile()
     const {ndk} = useNDK()
     const session = useVideoStore(s => s.session!)
+    const {markView} = useRecordView()
 
 
     if (!session) {
@@ -36,16 +35,14 @@ function EventLoaded() {
     }
 
     async function onCanPlay() {
-        console.log("onCanPlay");
         if (toViewer && currentUser) {
-            RecordView({
-                currentUser,
-                eventIdentifier: session?.identification,
-                ndk
+            markView({
+                eventIdentifier: session?.identification!,
+                ndk: ndk!,
+                pubKey: currentUser.pubkey!
             }).then(
                 async (evt) => {
-                    console.log("Event", evt)
-                    await evt.publish()
+                    await evt!.publish()
                     setViewed(false)
                 }
             )

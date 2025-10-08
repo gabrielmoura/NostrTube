@@ -6,10 +6,11 @@ import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {routeTree} from './routeTree.gen'
 
 import NDKCacheAdapterDexie from "@nostr-dev-kit/ndk-cache-dexie";
-import NDK from "@nostr-dev-kit/ndk";
+import NDK, {NDKPool} from "@nostr-dev-kit/ndk";
 import {NDKSessionLocalStorage, useNDK, useNDKInit, useNDKSessionMonitor} from "@nostr-dev-kit/ndk-hooks";
 import './helper/i18n';
 import "./main.css"
+import {ToastContainer} from "react-toastify";
 
 // register nostr: protocol handler
 if (import.meta.env.PROD) {
@@ -56,15 +57,16 @@ if (typeof window !== "undefined") {
     cacheAdapter = new NDKCacheAdapterDexie({dbName: import.meta.env.VITE_APP_NAME});
 }
 const relays = import.meta.env.PROD ? import.meta.env.VITE_NOSTR_RELAYS : import.meta.env.VITE_NOSTR_DEV_RELAYS
-// const relays = import.meta.env.VITE_NOSTR_RELAYS
-
 const ndkInstance = new NDK({
-    explicitRelayUrls: relays.split(","),
+    // explicitRelayUrls: relays.split(","),
     clientName: import.meta.env.VITE_APP_NAME,
     cacheAdapter: cacheAdapter,
     signatureVerificationWorker: sigWorker,
     autoConnectUserRelays: import.meta.env.PROD,
+    clientNip89: import.meta.env.VITE_APP_NAME,
 });
+const pool = new NDKPool(relays.split(","), [], ndkInstance)
+ndkInstance.pool = pool
 // Set up a Router instance
 const router = createRouter({
     routeTree,
@@ -106,6 +108,7 @@ createRoot(root).render(
             <QueryClientProvider client={queryClient}>
                 <Theme>
                     <RouterProvider router={router}/>
+                    <ToastContainer/>
                 </Theme>
             </QueryClientProvider>
         </PreRoot>

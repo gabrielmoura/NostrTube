@@ -2,6 +2,7 @@ import type {StateCreator} from "zustand/index";
 import type {NDKEvent} from "@nostr-dev-kit/ndk-hooks";
 import {extractTag} from "@/helper/extractTag.ts";
 import {AgeEnum} from "@/store/store/sessionTypes.ts";
+import {getTagValue} from "@welshman/util";
 
 interface VideoSessionAction {
     clanSession: () => void,
@@ -40,6 +41,7 @@ export const createVideoSlice: StateCreator<
         clanSession: () => set(() => ({session: undefined}), false, "clanSession"),
         setVideo: (e) => {
             const tEvent = extractTag(e.tags)
+            const  url = tEvent.url ??getTagValue("src",e.tags)
 
             return set(({session}) => ({
                 session: {
@@ -47,7 +49,7 @@ export const createVideoSlice: StateCreator<
                     event: e,
                     title: tEvent.title,
                     summary: tEvent.summary,
-                    url: tEvent.url,
+                    url: url,
                     identification: e.dTag,
                     image: tEvent.image
                 }

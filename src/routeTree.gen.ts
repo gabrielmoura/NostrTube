@@ -12,8 +12,10 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TermsIndexRouteImport } from './routes/terms/index'
 import { Route as SearchIndexRouteImport } from './routes/search/index'
 import { Route as UUserIdRouteImport } from './routes/u/$userId'
+import { Route as PNewRouteImport } from './routes/p/new'
 import { Route as PListIdRouteImport } from './routes/p/$listId'
 
 const NewIndexLazyRouteImport = createFileRoute('/new/')()
@@ -29,6 +31,11 @@ const NewIndexLazyRoute = NewIndexLazyRouteImport.update({
   path: '/new/',
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./routes/new/index.lazy').then((d) => d.Route))
+const TermsIndexRoute = TermsIndexRouteImport.update({
+  id: '/terms/',
+  path: '/terms/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SearchIndexRoute = SearchIndexRouteImport.update({
   id: '/search/',
   path: '/search/',
@@ -44,6 +51,11 @@ const UUserIdRoute = UUserIdRouteImport.update({
   path: '/u/$userId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PNewRoute = PNewRouteImport.update({
+  id: '/p/new',
+  path: '/p/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PListIdRoute = PListIdRouteImport.update({
   id: '/p/$listId',
   path: '/p/$listId',
@@ -53,26 +65,32 @@ const PListIdRoute = PListIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/p/$listId': typeof PListIdRoute
+  '/p/new': typeof PNewRoute
   '/u/$userId': typeof UUserIdRoute
   '/v/$eventId': typeof VEventIdLazyRoute
   '/search': typeof SearchIndexRoute
+  '/terms': typeof TermsIndexRoute
   '/new': typeof NewIndexLazyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/p/$listId': typeof PListIdRoute
+  '/p/new': typeof PNewRoute
   '/u/$userId': typeof UUserIdRoute
   '/v/$eventId': typeof VEventIdLazyRoute
   '/search': typeof SearchIndexRoute
+  '/terms': typeof TermsIndexRoute
   '/new': typeof NewIndexLazyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/p/$listId': typeof PListIdRoute
+  '/p/new': typeof PNewRoute
   '/u/$userId': typeof UUserIdRoute
   '/v/$eventId': typeof VEventIdLazyRoute
   '/search/': typeof SearchIndexRoute
+  '/terms/': typeof TermsIndexRoute
   '/new/': typeof NewIndexLazyRoute
 }
 export interface FileRouteTypes {
@@ -80,28 +98,42 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/p/$listId'
+    | '/p/new'
     | '/u/$userId'
     | '/v/$eventId'
     | '/search'
+    | '/terms'
     | '/new'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/p/$listId' | '/u/$userId' | '/v/$eventId' | '/search' | '/new'
+  to:
+    | '/'
+    | '/p/$listId'
+    | '/p/new'
+    | '/u/$userId'
+    | '/v/$eventId'
+    | '/search'
+    | '/terms'
+    | '/new'
   id:
     | '__root__'
     | '/'
     | '/p/$listId'
+    | '/p/new'
     | '/u/$userId'
     | '/v/$eventId'
     | '/search/'
+    | '/terms/'
     | '/new/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PListIdRoute: typeof PListIdRoute
+  PNewRoute: typeof PNewRoute
   UUserIdRoute: typeof UUserIdRoute
   VEventIdLazyRoute: typeof VEventIdLazyRoute
   SearchIndexRoute: typeof SearchIndexRoute
+  TermsIndexRoute: typeof TermsIndexRoute
   NewIndexLazyRoute: typeof NewIndexLazyRoute
 }
 
@@ -119,6 +151,13 @@ declare module '@tanstack/react-router' {
       path: '/new'
       fullPath: '/new'
       preLoaderRoute: typeof NewIndexLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms/': {
+      id: '/terms/'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search/': {
@@ -142,6 +181,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UUserIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/p/new': {
+      id: '/p/new'
+      path: '/p/new'
+      fullPath: '/p/new'
+      preLoaderRoute: typeof PNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/p/$listId': {
       id: '/p/$listId'
       path: '/p/$listId'
@@ -155,9 +201,11 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PListIdRoute: PListIdRoute,
+  PNewRoute: PNewRoute,
   UUserIdRoute: UUserIdRoute,
   VEventIdLazyRoute: VEventIdLazyRoute,
   SearchIndexRoute: SearchIndexRoute,
+  TermsIndexRoute: TermsIndexRoute,
   NewIndexLazyRoute: NewIndexLazyRoute,
 }
 export const routeTree = rootRouteImport

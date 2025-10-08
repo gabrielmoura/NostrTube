@@ -4,5 +4,11 @@
   "comments": "Comments",
   "leave_a_comment": "Leave a comment",
   "no_comments_yet": "No comments yet",
-  "video_not_found": "No video yet"
+  "video_not_found": "No video yet",
+  "disclaimer_text": "By using this service, you confirm that this video belongs to you or that you have the right to publish it.",
+  "Disclaimer": "Disclaimer",
+  "add_a_video_title": "Add a video title",
+  "write_a_short_summary_or_description": "Write a short summary or description",
+  "save_as_draft": "Save as Draft",
+  "Publish": "Publish"
 }

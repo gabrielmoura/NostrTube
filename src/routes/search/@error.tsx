@@ -9,6 +9,7 @@ type Props = {
     fallback?: ReactNode;
     /** Uma função opcional a ser executada quando o botão "Voltar ao Início" for clicado. O botão só será exibido se esta prop for fornecida. */
     onGoHome?: () => void;
+    error?: Error
 };
 
 type State = {
@@ -20,7 +21,7 @@ type State = {
  * ErrorBoundaryVideo é um componente que captura erros de JavaScript em seus
  * componentes filhos, registra esses erros e exibe uma UI de fallback.
  */
-export class ErrorBoundaryVideo extends Component<Props, State> {
+export class ErrorBoundarySearch extends Component<Props, State> {
     // Inicializa o estado
     public state: State = {
         hasError: false,
@@ -48,6 +49,13 @@ export class ErrorBoundaryVideo extends Component<Props, State> {
         // Ex: Sentry, LogRocket, DataDog, etc.
         console.error("Uncaught error in <ErrorBoundaryVideo />:", error, errorInfo);
         navigator.sendBeacon(import.meta.env.VITE_BEACON_URL, JSON.stringify(error))
+    }
+
+    public componentDidMount() {
+        if (this.props.error) {
+            this.state.hasError = true
+            this.state.error = this.props.error
+        }
     }
 
     public render() {

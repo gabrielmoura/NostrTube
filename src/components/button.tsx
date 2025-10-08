@@ -1,9 +1,9 @@
 import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
-import { cva, type VariantProps } from "class-variance-authority";
+import {ButtonHTMLAttributes, forwardRef} from "react";
+import {Slot} from "@radix-ui/react-slot";
+import {cva, type VariantProps} from "class-variance-authority";
 import Spinner from "@/components/Spinner.tsx";
-import { cn } from "@/helper/format.ts";
-import { ButtonHTMLAttributes, forwardRef } from "react";
+import {cn} from "@/helper/format.ts";
 
 const buttonVariants = cva(
     [
@@ -61,20 +61,20 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ) => {
         const Comp = asChild ? Slot : "button";
 
-        const mergedClassName = cn(buttonVariants({ variant, size }), className);
+        const mergedClassName = cn(buttonVariants({variant, size}), className);
 
         if (loading) {
             return (
                 <Comp
                     // só adiciona type se não for Slot
-                    {...(!asChild && { type })}
+                    {...(!asChild && {type})}
                     className={mergedClassName}
                     ref={ref}
                     {...props}
                 >
                     <div className="text-transparent">{props.children}</div>
                     <div className="center absolute inset-0">
-                        <Spinner />
+                        <Spinner/>
                     </div>
                 </Comp>
             );
@@ -82,7 +82,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
         return (
             <Comp
-                {...(!asChild && { type })}
+                {...(!asChild && {type})}
                 className={mergedClassName}
                 ref={ref}
                 {...props}

@@ -4,10 +4,13 @@ import {cn, formatCount, getNameToShow, getTwoLetters, ifHasString} from "@/help
 import {AspectRatio, Avatar, Skeleton} from "@radix-ui/themes";
 import {HiCheckBadge} from "react-icons/hi2";
 import {relativeTime} from "@/helper/date.ts";
-import {useRouter} from "@tanstack/react-router";
+import {Link} from "@tanstack/react-router";
 import {extractTag} from "@/helper/extractTag.ts";
 import {useEffect, useState} from "react";
 import {Image} from "@/components/Image.tsx";
+import {getTagValue, getTagValues} from "@welshman/util";
+import thumbNotFound from "@/assets/thumb_not_found.jpeg"
+import NostrNotFound from "@/components/logo/NostrNotFound.tsx";
 
 type VideoCardProps = {
     className?: string;
@@ -16,18 +19,28 @@ type VideoCardProps = {
 
 
 export default function VideoCard({className, event,}: VideoCardProps) {
-    const router = useRouter();
     const npub = event.author.npub;
+    const [isLoading, setLoading] = useState<boolean>(true)
 
 
     const {image, thumb, title, published_at: publishedAt} = extractTag(event.tags);
     const thumbnail = ifHasString(thumb, image);
     const [profile, setProfile] = useState<NDKUserProfile | undefined>()
+    const nsfw = getTagValue("content-warning", event.tags);
+
     // if (!thumbnail ||thumbnail=="") return null;
     useEffect(() => {
-        event.author.fetchProfile({cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST}, true).then((p) => (p)?setProfile(p):"");
+        event.author.fetchProfile({cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST}, true).then((p) => {
+            if (p) {
+                setProfile(p)
+            }
+            setLoading(false)
+        });
     }, [event.author]);
 
+    if (isLoading) {
+        return <VideoCardLoading/>
+    }
     return (
         <div
             className={cn(
@@ -41,13 +54,21 @@ export default function VideoCard({className, event,}: VideoCardProps) {
                     {thumbnail ? <Image
                         src={thumbnail}
                         alt={title ? `Thumbnail do vídeo: ${title}` : "Thumbnail do vídeo"}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                     width={"200"}/> : <div style={{
+                        className={cn("h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 grayscale-2", {" bg-red-400/25": nsfw?.length > 0})}
+                        width={"200"}/> : <div style={{
                         backgroundColor: "hsl(12 6.5% 15.1%)",
                         position: "absolute",
                         inset: "0px"
                     }
-                    }></div>}
+                    }>
+                        {/*<Image*/}
+                        {/*    src={thumbNotFound as string}*/}
+                        {/*    alt={title ? `Thumbnail do vídeo: ${title}` : "Thumbnail do vídeo"}*/}
+                        {/*    width="200"*/}
+                        {/*    className={cn("h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 blur-xs grayscale")}*/}
+                        {/*/>*/}
+                        <NostrNotFound className="absolute top-1/2 left-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 opacity-80"/>
+                    </div>}
 
                 </AspectRatio>
             </div>
@@ -59,11 +80,11 @@ export default function VideoCard({className, event,}: VideoCardProps) {
 
             {/* Channel Info + Views */}
             <div className="flex items-center justify-between pr-2 text-sm text-muted-foreground">
-                <div
-                    role="button"
+                <Link
+                    to="/u/$userId"
+                    params={{userId: npub}}
                     tabIndex={0}
-                    aria-label={`Abrir canal de ${getNameToShow({npub,profile})}`}
-                    onClick={() => router.navigate(`/channel/${npub}`)}
+                    aria-label={`Abrir canal de ${getNameToShow({npub, profile})}`}
                     className="flex items-center gap-2 rounded-md px-1 py-0.5 transition hover:bg-muted focus:ring-2 focus:ring-primary"
                 >
                     <Avatar
@@ -73,10 +94,10 @@ export default function VideoCard({className, event,}: VideoCardProps) {
                         className="h-7 w-7 rounded-md transition-transform duration-200 group-hover:scale-105"
                     />
                     <span className="flex items-center gap-1 text-sm font-semibold">
-            {getNameToShow({npub,profile})}
+                        {getNameToShow({npub, profile})}
                         {profile?.nip05 && <HiCheckBadge className="h-4 w-4 text-primary"/>}
           </span>
-                </div>
+                </Link>
 
                 <div className="flex items-center gap-1 text-xs">
                     <span>{`${formatCount(123)} views`}</span>

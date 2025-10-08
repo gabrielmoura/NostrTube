@@ -23,8 +23,8 @@ export function VideoProvider({children, event}: { children: ReactNode, event?: 
     const setVideo = useVideoStore(s => s.setVideo!)
     const [isNotFound, setNotFound] = useState(false)
 
-
     useEffect(() => {
+
         if (event) {
             const {title} = extractTag(event.tags)
             document.title = title!
@@ -44,6 +44,7 @@ export function VideoProvider({children, event}: { children: ReactNode, event?: 
                         setNotFound(e.isNotFound)
                     }
                 })
+
         }
     }, [event, eventId, ndk, setVideo]);
     if (isNotFound) {

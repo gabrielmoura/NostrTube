@@ -4,5 +4,11 @@
   "comments": "Comentários",
   "leave_a_comment": "Deixe um comentário",
   "no_comments_yet": "Nenhum comentário ainda",
-  "video_not_found": "Nenhum vídeo encontrado"
+  "video_not_found": "Nenhum vídeo encontrado",
+  "disclaimer_text": "Ao usar este serviço, você confirma que este vídeo pertence a você ou que você tem o direito de publicá-lo.",
+  "Disclaimer": "Aviso Legal",
+  "add_a_video_title": "Add a video title",
+  "write_a_short_summary_or_description": "Write a short summary or description",
+  "save_as_draft": "Save as Draft",
+  "Publish": "Publish"
 }
