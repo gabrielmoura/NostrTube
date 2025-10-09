@@ -8,9 +8,9 @@ import {Link} from "@tanstack/react-router";
 import {extractTag} from "@/helper/extractTag.ts";
 import {useEffect, useState} from "react";
 import {Image} from "@/components/Image.tsx";
-import {getTagValue, getTagValues} from "@welshman/util";
-import thumbNotFound from "@/assets/thumb_not_found.jpeg"
+import {getTagValue} from "@welshman/util";
 import NostrNotFound from "@/components/logo/NostrNotFound.tsx";
+import {IconNSFW} from "@/components/logo/IconNSFW.tsx";
 
 type VideoCardProps = {
     className?: string;
@@ -51,24 +51,28 @@ export default function VideoCard({className, event,}: VideoCardProps) {
             {/* Thumbnail */}
             <div className="relative overflow-hidden rounded-lg">
                 <AspectRatio ratio={16 / 9} className="bg-muted">
-                    {thumbnail ? <Image
-                        src={thumbnail}
-                        alt={title ? `Thumbnail do vídeo: ${title}` : "Thumbnail do vídeo"}
-                        className={cn("h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 grayscale-2", {" bg-red-400/25": nsfw?.length > 0})}
-                        width={"200"}/> : <div style={{
-                        backgroundColor: "hsl(12 6.5% 15.1%)",
-                        position: "absolute",
-                        inset: "0px"
-                    }
-                    }>
-                        {/*<Image*/}
-                        {/*    src={thumbNotFound as string}*/}
-                        {/*    alt={title ? `Thumbnail do vídeo: ${title}` : "Thumbnail do vídeo"}*/}
-                        {/*    width="200"*/}
-                        {/*    className={cn("h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 blur-xs grayscale")}*/}
-                        {/*/>*/}
-                        <NostrNotFound className="absolute top-1/2 left-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 opacity-80"/>
-                    </div>}
+                    {nsfw?.length > 0 ? <IconNSFW
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 grayscale-2"/> : (thumbnail) ?
+                        <Image
+                            src={thumbnail}
+                            alt={title ? `Thumbnail do vídeo: ${title}` : "Thumbnail do vídeo"}
+                            className={cn("h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 grayscale-2", {" bg-red-400/25": nsfw?.length > 0})}
+                            width={"200"}/> : <div style={{
+                            backgroundColor: "hsl(12 6.5% 15.1%)",
+                            position: "absolute",
+                            inset: "0px"
+                        }
+                        }>
+                            {/*<Image*/}
+                            {/*    src={thumbNotFound as string}*/}
+                            {/*    alt={title ? `Thumbnail do vídeo: ${title}` : "Thumbnail do vídeo"}*/}
+                            {/*    width="200"*/}
+                            {/*    className={cn("h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 blur-xs grayscale")}*/}
+                            {/*/>*/}
+                            <NostrNotFound
+                                className="absolute top-1/2 left-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 opacity-80"/>
+                        </div>}
+
 
                 </AspectRatio>
             </div>

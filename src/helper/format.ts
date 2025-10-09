@@ -1,4 +1,4 @@
-import {getTagValues} from "@welshman/util";
+import {getTagValue, getTagValues} from "@welshman/util";
 import clsx, {type ClassValue} from "clsx";
 import {twMerge} from "tailwind-merge";
 import type {NDKEvent} from "@nostr-dev-kit/ndk-hooks";
@@ -119,7 +119,7 @@ export function getVideoDetails(event: NDKEvent) {
                         : url.split("?v=").pop()
                 }/hqdefault.jpg`
                 : ""),
-        title: getTagValues("title", event.tags) ?? "Untitled",
+        title: getTagValue("title", event.tags) ?? "Untitled",
         summary:
             getTagValues("summary", event.tags) ??
             getTagValues("about", event.tags) ??

@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 import generated from "@vidstack/react/tailwind.cjs";
-import prose from  '@tailwindcss/typography'
+import prose from '@tailwindcss/typography'
 
 module.exports = {
     darkMode: ["class"],
@@ -11,7 +11,7 @@ module.exports = {
         "./app/**/*.{ts,tsx}",
         "./src/**/*.{ts,tsx}",
     ],
-    theme:{
+    theme: {
         container: {
             center: true,
             padding: "2rem",
@@ -19,7 +19,7 @@ module.exports = {
                 "2xl": "1400px",
             },
         },
-        extend:{
+        extend: {
             colors: {
                 border: "hsl(var(--border))",
                 input: "hsl(var(--input))",
@@ -76,6 +76,13 @@ module.exports = {
                 spotlight: "spotlight 2s ease .75s 1 forwards",
                 "accordion-down": "accordion-down 0.2s ease-out",
                 "accordion-up": "accordion-up 0.2s ease-out",
+                slideDownAndFade:
+                    "slideDownAndFade 400ms cubic-bezier(0.16, 1, 0.3, 1)",
+                slideLeftAndFade:
+                    "slideLeftAndFade 400ms cubic-bezier(0.16, 1, 0.3, 1)",
+                slideUpAndFade: "slideUpAndFade 400ms cubic-bezier(0.16, 1, 0.3, 1)",
+                slideRightAndFade:
+                    "slideRightAndFade 400ms cubic-bezier(0.16, 1, 0.3, 1)",
             },
             keyframes: {
                 spotlight: {
@@ -89,12 +96,28 @@ module.exports = {
                     },
                 },
                 "accordion-down": {
-                    from: { height: 0 },
-                    to: { height: "var(--radix-accordion-content-height)" },
+                    from: {height: 0},
+                    to: {height: "var(--radix-accordion-content-height)"},
                 },
                 "accordion-up": {
-                    from: { height: "var(--radix-accordion-content-height)" },
-                    to: { height: 0 },
+                    from: {height: "var(--radix-accordion-content-height)"},
+                    to: {height: 0},
+                },
+                slideDownAndFade: {
+                    from: {opacity: "0", transform: "translateY(-2px)"},
+                    to: {opacity: "1", transform: "translateY(0)"},
+                },
+                slideLeftAndFade: {
+                    from: {opacity: "0", transform: "translateX(2px)"},
+                    to: {opacity: "1", transform: "translateX(0)"},
+                },
+                slideUpAndFade: {
+                    from: {opacity: "0", transform: "translateY(2px)"},
+                    to: {opacity: "1", transform: "translateY(0)"},
+                },
+                slideRightAndFade: {
+                    from: {opacity: "0", transform: "translateX(-2px)"},
+                    to: {opacity: "1", transform: "translateX(0)"},
                 },
             },
 
@@ -134,12 +157,13 @@ module.exports = {
         generated({
             selector: ".media-player",
             prefix: "media",
-            webComponents:true,
+            webComponents: true,
         }),
         customVariants,
         prose,
     ]
 }
+
 function customVariants({
                             addVariant,
                             matchVariant,

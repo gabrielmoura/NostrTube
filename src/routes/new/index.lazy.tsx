@@ -42,7 +42,7 @@ function Page() {
 
     useEffect(() => {
         if (!currentUser) {
-            navigate({to: "/"}).then(() => toast("You must be logged in to upload videos", {
+            navigate({to: "/"}).then(() => toast(t("you_must_be_logged_in_to_upload_videos", "You must be logged in to upload videos"), {
                 type: "warning",
                 autoClose: 5000
             }))

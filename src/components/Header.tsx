@@ -1,7 +1,7 @@
 // src/components/Header.jsx
 import {Fragment, useState} from 'react'
 import {Disclosure, Menu, Transition} from '@headlessui/react'
-import {MenuIcon, SearchIcon, XIcon} from "lucide-react";
+import {MenuIcon, MoonIcon, SearchIcon, SunIcon, XIcon} from "lucide-react";
 import {BellIcon} from "@heroicons/react/24/outline";
 import {Avatar, Box, Button, Card, Dialog, Flex, Text, TextField} from "@radix-ui/themes";
 import {NDKNip07Signer, NDKPrivateKeySigner} from "@nostr-dev-kit/ndk";
@@ -14,7 +14,7 @@ import {
 import {Link, linkOptions} from "@tanstack/react-router";
 import {cn} from "@/helper/format.ts";
 import useUserStore from "@/store/userStore.ts";
-import LogoIcon from "@/components/logo/LogoIcon.tsx";
+import {LogoIcon} from "@/components/logo/Logo.tsx";
 
 
 // Seu Header, agora com o componente UserActions
@@ -54,8 +54,8 @@ export default function Header() {
                         <div className="flex px-2 lg:px-0">
                             <div className="flex-shrink-0 flex items-center">
                                 <LogoIcon
-                                    aria-label={ import.meta.env.VITE_APP_NAME}
-                                    title={ import.meta.env.VITE_APP_NAME}
+                                    aria-label={import.meta.env.VITE_APP_NAME}
+                                    title={import.meta.env.VITE_APP_NAME}
                                     className="hidden lg:block h-8 w-auto"
                                 />
                                 <img
@@ -120,12 +120,24 @@ export default function Header() {
                             </Disclosure.Button>
                         </div>
                         <div className="hidden lg:ml-4 lg:flex lg:items-center">
+
                             <button
+                                onClick={() => {
+                                    if (document.documentElement.classList.contains('dark')) {
+                                        document.documentElement.classList.remove('dark')
+                                        localStorage.setItem('theme', 'light')
+                                    } else {
+                                        document.documentElement.classList.add('dark')
+                                        localStorage.setItem('theme', 'dark')
+                                    }
+                                }}
                                 type="button"
                                 className="flex-shrink-0 bg-white p-1 text-gray-400 rounded-full hover:text-gray-500 focus:outline-none "
                             >
-                                <span className="sr-only">View notifications</span>
-                                <BellIcon className="h-6 w-6" aria-hidden="true"/>
+                                {localStorage.getItem('theme') === 'dark' ?
+                                    <MoonIcon className="h-6 w-6" aria-hidden="true"/> :
+                                    <SunIcon className="h-6 w-6" aria-hidden="true"/>}
+                                <span className="sr-only">Toggle dark mode</span>
                             </button>
 
                             {/* Profile dropdown */}

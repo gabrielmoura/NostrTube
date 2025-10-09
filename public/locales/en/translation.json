@@ -10,5 +10,6 @@
   "add_a_video_title": "Add a video title",
   "write_a_short_summary_or_description": "Write a short summary or description",
   "save_as_draft": "Save as Draft",
-  "Publish": "Publish"
+  "Publish": "Publish",
+  "you_must_be_logged_in_to_upload_videos": "You must be logged in to upload videos"
 }

@@ -11,9 +11,10 @@ import {Link} from "@tanstack/react-router";
 import LikeToggleButton from "@/components/LikeToggleButton.tsx";
 // import {VideoMeta} from "@/routes/v/@components/VideoMeta.tsx";
 import {lazy, useEffect, useState} from "react";
+import {DropdownMenuVideo} from "@/routes/v/@components/DropDown.tsx";
 
 const VideoMeta = lazy(() => import("@/routes/v/@components/VideoMeta.tsx"))
-const LikeButton=lazy(()=>import("@/routes/v/@components/LikeButton.tsx"))
+const LikeButton = lazy(() => import("@/routes/v/@components/LikeButton.tsx"))
 
 export type VideoActionsProps = {
     event: NDKEvent;
@@ -169,6 +170,9 @@ function VideoActionsInternal({event}: VideoActionsProps) {
         <div className="ml-auto flex items-center gap-3 text-muted-foreground">
             <ErrorBoundaryVideo>
                 <LikeButton contentEvent={event}/>
+            </ErrorBoundaryVideo>
+            <ErrorBoundaryVideo>
+                <DropdownMenuVideo event={event}/>
             </ErrorBoundaryVideo>
             {/*<DropDownOptions*/}
             {/*    options={[*/}
