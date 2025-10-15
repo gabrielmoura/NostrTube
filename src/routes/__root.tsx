@@ -1,6 +1,6 @@
 import {createRootRouteWithContext, HeadContent, Outlet} from '@tanstack/react-router'
 import NDK__default from "@nostr-dev-kit/ndk";
-import Header from "../components/Header.tsx";
+import Header from "../components/header/Header.tsx";
 import {Devtools} from "@/Devtools.tsx";
 
 interface NdkContext {

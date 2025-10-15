@@ -20,7 +20,7 @@ function RouteComponent() {
                 <section>
                     <h2>1. Descrição da Plataforma</h2>
                     <p>
-                        A <strong>[Nome da Plataforma]</strong> é uma plataforma de compartilhamento de vídeos
+                        A <strong>{import.meta.env.VITE_APP_NAME}</strong> é uma plataforma de compartilhamento de vídeos
                         construída sobre o protocolo <strong>Nostr</strong>,
                         que utiliza uma rede descentralizada de servidores (relays) para armazenar e distribuir
                         conteúdo.
@@ -99,28 +99,28 @@ function RouteComponent() {
                     </p>
                 </section>
 
-                <section>
-                    <h2>7. Direitos Autorais</h2>
-                    <p>
-                        Se você acredita que um conteúdo publicado viola seus direitos autorais, envie uma notificação
-                        formal contendo:
-                    </p>
-                    <ul>
-                        <li>Identificação do conteúdo supostamente infrator;</li>
-                        <li>Prova de titularidade dos direitos autorais;</li>
-                        <li>Informações de contato válidas.</li>
-                    </ul>
-                    <p>
-                        Embora a plataforma não possa remover diretamente conteúdo dos relays externos, podemos:
-                    </p>
-                    <ul>
-                        <li>Remover o conteúdo do índice da plataforma;</li>
-                        <li>Notificar operadores dos relays identificados, quando aplicável.</li>
-                    </ul>
-                </section>
+                {/*<section>*/}
+                {/*    <h2>7. Direitos Autorais</h2>*/}
+                {/*    <p>*/}
+                {/*        Se você acredita que um conteúdo publicado viola seus direitos autorais, envie uma notificação*/}
+                {/*        formal para os relays contendo:*/}
+                {/*    </p>*/}
+                {/*    <ul>*/}
+                {/*        <li>Identificação do conteúdo supostamente infrator;</li>*/}
+                {/*        <li>Prova de titularidade dos direitos autorais;</li>*/}
+                {/*        <li>Informações de contato válidas.</li>*/}
+                {/*    </ul>*/}
+                {/*    <p>*/}
+                {/*        Embora a plataforma não possa remover diretamente conteúdo dos relays externos, podemos:*/}
+                {/*    </p>*/}
+                {/*    <ul>*/}
+                {/*        <li>Remover o conteúdo do índice da plataforma;</li>*/}
+                {/*        <li>Notificar operadores dos relays identificados, quando aplicável.</li>*/}
+                {/*    </ul>*/}
+                {/*</section>*/}
 
                 <section>
-                    <h2>8. Alterações destes Termos</h2>
+                    <h2>7. Alterações destes Termos</h2>
                     <p>
                         Podemos atualizar estes Termos periodicamente. A data da última atualização constará no topo do
                         documento.
@@ -129,7 +129,7 @@ function RouteComponent() {
                 </section>
 
                 <section>
-                    <h2>9. Encerramento e Exclusão</h2>
+                    <h2>8. Encerramento e Exclusão</h2>
                     <p>
                         Você pode deixar de usar a plataforma a qualquer momento. A remoção do seu perfil local na
                         plataforma não implica na exclusão dos dados já publicados nos relays,
@@ -138,7 +138,7 @@ function RouteComponent() {
                 </section>
 
                 <section>
-                    <h2>10. Legislação Aplicável</h2>
+                    <h2>9. Legislação Aplicável</h2>
                     <p>
                         Estes Termos são regidos pelas leis da <strong>República Federativa do Brasil</strong>,
                         independentemente de onde o conteúdo esteja hospedado ou acessado.
@@ -146,13 +146,12 @@ function RouteComponent() {
                 </section>
 
                 <section id="contact">
-                    <h2>11. Contato</h2>
+                    <h2>10. Contato</h2>
                     <p>
                         Dúvidas sobre estes Termos podem ser enviadas para:
                     </p>
                     <ul>
-                        <li>Email / suporte: <a href="mailto:suporte@exemplo.com">suporte@exemplo.com</a></li>
-                        <li>Ou via Nostr: <code>npub... (chave pública de suporte)</code></li>
+                        <li>Npub: <a href="nostr://npub">Nostr User</a></li>
                     </ul>
                 </section>
             </p>

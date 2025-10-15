@@ -1,109 +1,130 @@
-import * as React from "react";
-import {HamburgerMenuIcon} from "@radix-ui/react-icons";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {useNavigate} from "@tanstack/react-router";
 import {toast} from "react-toastify";
 import {copyText, downloadVideo, getVideoDetails} from "@/helper/format.ts";
 import {useNDKCurrentPubkey} from "@nostr-dev-kit/ndk-hooks";
+import {getTagValue} from "@welshman/util";
+import {Download, ExternalLink, FileJson, Flag, ListPlus, MoreVertical, Pencil, Send, Share2,} from "lucide-react";
+import {modal} from "@/components/modal/state.tsx";
+// import AddToPlaylistModal from "@/routes/v/@components/AddToPlaylistModal.tsx";
+// const AddToPlaylistModal=lazy(()=>import(/* webpackChunkName: "AddToPlaylistModal" */"@/routes/v/@components/AddToPlaylistModal.tsx"));
 
 
-const modal = {
-    show: (component: React.ReactNode) => console.log("Modal Show:", component),
-};
-const AddToPlaylistModal = ({eventIdentifier}: { eventIdentifier: string }) => (
-    <div>Add to Playlist Modal for: {eventIdentifier}</div>
-);
+function AddToPlaylistModal({eventIdentifier}) {
+    return <div className="p-4">Add to Playlist Modal for event {eventIdentifier} (Demo only)</div>;
+}
+
 
 export const DropdownMenuVideo = ({event}) => {
-
     const navigate = useNavigate();
-    const npub = useNDKCurrentPubkey()
+    const npub = useNDKCurrentPubkey();
     const rawEvent = event.rawEvent();
-    const {url, title} = getVideoDetails(event)
+    const {url, title} = getVideoDetails(event);
+    const naddr = event.encode()
 
     function handleDownload() {
-        downloadVideo(url, title).then(() => toast("Video has been downloaded", {type: "success"}));
+        downloadVideo(url, title).then(() =>
+            toast("Video has been downloaded", {type: "success"}),
+        );
     }
 
     const options = [
         {
             label: "Share video",
+            icon: <Share2 className="size-4"/>,
             action: () => {
                 copyText(
                     `${
-                        import.meta.env.VITE_BASE_URL ??
-                        "https://nostrtube.com"
-                    }/w/${event.encode()}`,
-                ).then(() => toast("Link copied!", {type: "success"}))
-
+                        import.meta.env.VITE_BASE_URL ?? "https://nostrtube.com"
+                    }/w/${naddr}`,
+                ).then(() => toast("Link copied!", {type: "success"}));
             },
         },
         {
             label: "Add to Playlist",
+            icon: <ListPlus className="size-4"/>,
             action: () => {
-                modal.show(
-                    <AddToPlaylistModal eventIdentifier={event.tagId()}/>,
-                );
+                // modal.show(<AddToPlaylistModal eventIdentifier={event.tagId()}/>)
+                toast("Demo only: Add to Playlist Modal would open", {type: "info"})
             },
         },
         {
             label: "Download video",
-            action: () => {
-                handleDownload();
-            },
+            icon: <Download className="size-4"/>,
+            action: handleDownload,
         },
         {
             label: "Copy raw event",
-            action: () => {
-                copyText(JSON.stringify(rawEvent)).then(() => toast("Copied event", {type: "success"}));
-            },
+            icon: <FileJson className="size-4"/>,
+            action: () =>
+                copyText(JSON.stringify(rawEvent)).then(() =>
+                    toast("Copied event", {type: "success"}),
+                ),
         },
         ...(npub === event.author.pubkey
             ? [
                 {
                     label: "Edit Event",
+                    icon: <Pencil className="size-4"/>,
                     action: async () => {
                         await navigate({
                             to: "/v/$eventId",
-                            params: {eventId: getTagValues("d", event.tags) ?? ""},
-                        })
+                            params: {eventId: getTagValue("d", event.tags) ?? ""},
+                        });
                     },
                 },
             ]
             : []),
+        {
+            label: "Report Event",
+            icon: <Flag className="size-4 text-red-500"/>,
+            action: () => toast("Reported! (demo only)", {type: "info"}),
+        },
+        {
+            label: "View on NJump",
+            icon: <ExternalLink className="size-4"/>,
+            action: () => window.open(`https://njump.me/${event.id}`, "_blank"),
+        },
+        {
+            label: "Open Native",
+            icon: <Send className="size-4"/>,
+            action: () => window.open(`nostr://${naddr}`),
+        },
     ];
 
     return (
         <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
                 <button
-                    className="inline-flex size-[35px] items-center justify-center rounded-full bg-white text-violet11 shadow-[0_2px_10px] shadow-blackA4 outline-none hover:bg-violet3 focus:shadow-[0_0_0_2px] focus:shadow-black"
-                    aria-label="Customise options"
+                    className="inline-flex size-9 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow-md transition-all hover:bg-gray-100 hover:text-black focus-visible:ring-2 focus-visible:ring-violet-500 focus:outline-none"
+                    aria-label="Video options"
                 >
-                    <HamburgerMenuIcon/>
+                    <MoreVertical className="size-5"/>
                 </button>
             </DropdownMenu.Trigger>
 
             <DropdownMenu.Portal>
                 <DropdownMenu.Content
-                    className="min-w-[220px] rounded-md bg-white p-[5px] shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),_0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)] will-change-[opacity,transform] data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade data-[side=right]:animate-slideLeftAndFade data-[side=top]:animate-slideDownAndFade"
-                    sideOffset={5}
+                    className="min-w-[220px] rounded-lg bg-white p-1.5 shadow-lg ring-1 ring-gray-200 animate-in fade-in slide-in-from-top-1 z-50"
+                    sideOffset={8}
                 >
                     {options.map((option, index) => (
                         <DropdownMenu.Item
                             key={index}
-                            className="group relative flex h-[25px] select-none items-center rounded-[3px] pl-[25px] pr-[5px] text-[13px] leading-none text-violet11 outline-none data-[disabled]:pointer-events-none data-[highlighted]:bg-violet9 data-[disabled]:text-mauve8 data-[highlighted]:text-violet1"
                             onClick={option.action}
+                            className="group flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-700 outline-none transition-colors hover:bg-violet-100 hover:text-violet-900 focus:bg-violet-100"
                         >
-                            {option.label}
+                            {option.icon}
+                            <span>{option.label}</span>
                         </DropdownMenu.Item>
                     ))}
 
-                    <DropdownMenu.Separator className="m-[5px] h-px bg-violet6"/>
+                    <DropdownMenu.Separator className="my-1 h-px bg-gray-200"/>
                     <DropdownMenu.Arrow className="fill-white"/>
                 </DropdownMenu.Content>
             </DropdownMenu.Portal>
         </DropdownMenu.Root>
     );
 };
+
 export default DropdownMenuVideo;

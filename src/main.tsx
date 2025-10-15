@@ -11,6 +11,7 @@ import {NDKSessionLocalStorage, useNDK, useNDKInit, useNDKSessionMonitor} from "
 import './helper/i18n';
 import "./main.css"
 import {ToastContainer} from "react-toastify";
+import {Modstr} from "@/components/modal/Modal.tsx";
 
 // register nostr: protocol handler
 if (import.meta.env.PROD) {
@@ -109,6 +110,7 @@ createRoot(root).render(
                 <Theme>
                     <RouterProvider router={router}/>
                     <ToastContainer/>
+                    <Modstr />
                 </Theme>
             </QueryClientProvider>
         </PreRoot>

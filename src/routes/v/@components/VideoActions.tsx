@@ -12,6 +12,7 @@ import LikeToggleButton from "@/components/LikeToggleButton.tsx";
 // import {VideoMeta} from "@/routes/v/@components/VideoMeta.tsx";
 import {lazy, useEffect, useState} from "react";
 import {DropdownMenuVideo} from "@/routes/v/@components/DropDown.tsx";
+import FollowButton from "@/components/FollowButton.tsx";
 
 const VideoMeta = lazy(() => import("@/routes/v/@components/VideoMeta.tsx"))
 const LikeButton = lazy(() => import("@/routes/v/@components/LikeButton.tsx"))
@@ -89,11 +90,7 @@ export default function VideoActions({event}: VideoActionsProps) {
                     </div>
                     {/* Channel Action Section */}
                     <div className="flex items-center gap-2">
-                        {/*<FollowButton*/}
-                        {/*    size={"sm"}*/}
-                        {/*    className="px-4 font-bold"*/}
-                        {/*    pubkey={event.author.pubkey}*/}
-                        {/*/>*/}
+                        <FollowButton pubkey={event.author.pubkey} className="px-4 font-bold" size="sm"/>
                         {/*<ZapButton*/}
                         {/*    zapType="event"*/}
                         {/*    event={event.rawEvent()}*/}
@@ -142,29 +139,18 @@ function VideoTags({event}: VideoActionsProps) {
     const tags = getTagValues("t", event.tags);
 
     return (
-        <>
+        <div className="mt-2 flex flex-wrap gap-2">
             {tags.map((value, index) => (
                 <Link to="/search/" search={{tag: value as string}} key={index}>
                     <Badge>{value}</Badge>
                 </Link>
             ))}
-        </>
+        </div>
     );
 }
 
 
 function VideoActionsInternal({event}: VideoActionsProps) {
-
-    // function handleDownload() {
-    //     // const promise = downloadVideo(url, title);
-    //     // toast.promise(promise, {
-    //     //     loading: "Loading...",
-    //     //     success: (data) => {
-    //     //         return `Video has been downloaded`;
-    //     //     },
-    //     //     error: "Error",
-    //     // });
-    // }
 
     return <>
         <div className="ml-auto flex items-center gap-3 text-muted-foreground">
@@ -174,55 +160,6 @@ function VideoActionsInternal({event}: VideoActionsProps) {
             <ErrorBoundaryVideo>
                 <DropdownMenuVideo event={event}/>
             </ErrorBoundaryVideo>
-            {/*<DropDownOptions*/}
-            {/*    options={[*/}
-            {/*        {*/}
-            {/*            label: "Share video",*/}
-            {/*            action: () => {*/}
-            {/*                copyText(*/}
-            {/*                    `${*/}
-            {/*                        process.env.NEXT_PUBLIC_ROOT_DOMAIN ??*/}
-            {/*                        "https://www.flare.pub"*/}
-            {/*                    }/w/${event.encode()}`,*/}
-            {/*                );*/}
-            {/*                toast.success("Link copied!");*/}
-            {/*            },*/}
-            {/*        },*/}
-            {/*        {*/}
-            {/*            label: "Add to Playlist",*/}
-            {/*            action: () => {*/}
-            {/*                modal.show(*/}
-            {/*                    <AddToPlaylistModal eventIdentifier={event.tagId()}/>,*/}
-            {/*                );*/}
-            {/*            },*/}
-            {/*        },*/}
-            {/*        {*/}
-            {/*            label: "Download video",*/}
-            {/*            action: () => {*/}
-            {/*                handleDownload();*/}
-            {/*            },*/}
-            {/*        },*/}
-            {/*        {*/}
-            {/*            label: "Copy raw event",*/}
-            {/*            action: () => {*/}
-            {/*                copyText(JSON.stringify(rawEvent));*/}
-            {/*                toast.success("Copied event");*/}
-            {/*            },*/}
-            {/*        },*/}
-            {/*        ...(currentUser?.pubkey === event.author.pubkey*/}
-            {/*            ? [*/}
-            {/*                {*/}
-            {/*                    label: "Edit Event",*/}
-            {/*                    action: () => {*/}
-            {/*                        router.push(*/}
-            {/*                            `/video/${getTagValues("d", event.tags) ?? ""}/edit`,*/}
-            {/*                        );*/}
-            {/*                    },*/}
-            {/*                },*/}
-            {/*            ]*/}
-            {/*            : []),*/}
-            {/*    ]}*/}
-            {/*/>*/}
         </div>
     </>
 }

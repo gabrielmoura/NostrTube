@@ -5,8 +5,9 @@ import {VitePWA} from 'vite-plugin-pwa'
 import legacy from '@vitejs/plugin-legacy'
 import VitePaths from "vite-tsconfig-paths"
 import {tanstackRouter} from '@tanstack/router-plugin/vite'
-import  wasm  from  "vite-plugin-wasm" ;
-
+import wasm from "vite-plugin-wasm";
+import sri from 'vite-plugin-sri'
+import path from "path"
 
 
 export default defineConfig(({mode}) => {
@@ -28,27 +29,52 @@ export default defineConfig(({mode}) => {
     }
 
     return {
+        resolve: {
+            alias: {
+                "@": path.resolve(__dirname, "./src"),
+            },
+        },
         plugins: [
             tailwindcss(),
             react(),
             VitePWA({
                     registerType: 'autoUpdate',
+                    // strategies: "injectManifest",
+                    // srcDir: "src/sw/worker",
+                    // filename: "sw.ts",
+                    strategies: "generateSW",
                     includeManifestIcons: true,
+                    injectManifest: {
+                        minify: false,
+                        sourcemap: true,
+                        // This increase the cache limit to 8mB
+                        maximumFileSizeToCacheInBytes: 1024 * 1024 * 8,
+                        // Ensure index.html is included in the manifest
+                        // globPatterns: ["**/*.{js,css,html,ico,png,svg,json,woff,woff2}"],
+                    },
                     workbox: {
+                        maximumFileSizeToCacheInBytes: 1024 * 1024 * 8,
+                        // gerados no diretório de build (dist).
+                        globPatterns: ["**/*.{js,css,html,ico,png,svg,json,woff,woff2,wasm}"],
+
+                        // Garante que o novo service worker assuma o controle imediatamente
                         clientsClaim: true,
                         skipWaiting: true,
-                        maximumFileSizeToCacheInBytes: 1024 * 1024 * 4
                     },
                     devOptions: {
-                        enabled: true
+                        enabled: true,
+                        type: "module",
+                        navigateFallback: "index.html",
                     },
                     manifest: {
                         name: env.VITE_APP_DESCRIPTION,
-                        start_url: ".",
+                        start_url: "/",
+                        scope: "/",
                         short_name: env.VITE_APP_NAME,
                         icons: [
                             {
-                                src: "/logo.svg",
+                                src: "/favicon.svg",
+                                type: "image/svg+xml",
                             }
                         ],
                         categories: ["social"],
@@ -77,6 +103,7 @@ export default defineConfig(({mode}) => {
                 routeFileIgnorePrefix: "@"
             }),
             wasm(),
+            sri(),
         ],
         build: {
             sourcemap: false,

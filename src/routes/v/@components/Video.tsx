@@ -8,6 +8,7 @@ import useVideoStore from "@/store/videoStore.ts";
 import {VideoProvider} from "@/context/VideoContext.tsx";
 import {useLoaderData} from "@tanstack/react-router";
 import {PageSpinner} from "@/components/PageSpinner.tsx";
+import {ScrollArea} from "@/components/ui/scroll-area"
 
 const VideoActions = lazy(() => import('@/routes/v/@components/VideoActions.tsx'));
 const CommentSection = lazy(() => import('@/routes/v/@components/Comments/comments.tsx'));
@@ -69,11 +70,13 @@ function EventLoaded() {
                         </ErrorBoundaryVideo>
                     </div>
                     <ErrorBoundaryVideo>
-                        <CommentSection
-                            eventReference={session.identification!}
-                            eventId={session.event!.id}
-                            pubkey={session.event?.pubkey as string}
-                        />
+                        <ScrollArea>
+                            <CommentSection
+                                eventReference={session.identification!}
+                                eventId={session.event!.id}
+                                pubkey={session.event?.pubkey as string}
+                            />
+                        </ScrollArea>
                     </ErrorBoundaryVideo>
                 </div>
             </div>

@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 import generated from "@vidstack/react/tailwind.cjs";
 import prose from '@tailwindcss/typography'
+import twA from 'tailwindcss-animate';
 
 module.exports = {
     darkMode: ["class"],
@@ -161,6 +162,7 @@ module.exports = {
         }),
         customVariants,
         prose,
+        twA,
     ]
 }
 
