@@ -5,6 +5,8 @@ import {
     MuteButton,
     PIPButton,
     PlayButton,
+    Tooltip,
+    type TooltipPlacement,
     useMediaState,
 } from "@vidstack/react";
 
@@ -16,179 +18,176 @@ import {
     RiPictureInPicture2Fill as PictureInPictureIcon,
     RiPictureInPictureExitFill as PictureInPictureExitIcon,
     RiPlayFill as PlayIcon,
-    RiSettings3Fill as SettingsIcon,
     RiVolumeDownFill as VolumeLowIcon,
     RiVolumeMuteFill as MuteIcon,
     RiVolumeUpFill as VolumeHighIcon,
 } from "react-icons/ri";
 
-import {Popover} from "@radix-ui/themes";
-
 export interface MediaButtonProps {
     tooltipOffset?: number;
+    tooltipPlacement?: TooltipPlacement;
 }
 
+// 🎨 Base de estilo para botões do player
 export const buttonClass =
-    "group ring-media-focus relative inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-md outline-none ring-inset hover:bg-white/10 focus-visible:ring-4 aria-disabled:hidden";
+    "group relative inline-flex h-10 w-10 items-center justify-center rounded-md text-white/90 hover:text-sky-400 hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-sky-400 outline-none transition-all duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed";
 
+// 🎨 Base de estilo para tooltips
 export const tooltipClass =
-    "animate-out fade-out slide-out-to-bottom-2 data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in data-[state=delayed-open]:slide-in-from-bottom-4 z-10 rounded-sm bg-black/90 px-2 py-0.5 text-sm font-medium text-white parent-data-[open]:hidden";
+    "animate-out fade-out slide-out-to-bottom-2 data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in data-[state=delayed-open]:slide-in-from-bottom-4 z-10 rounded-md bg-black/90 px-2 py-1 text-sm font-medium text-white/90 shadow backdrop-blur-sm";
 
-export function Play({
-                         tooltipOffset = 0,
+// ----------------------------- //
+//           BOTÕES              //
+// ----------------------------- //
 
-                     }: MediaButtonProps) {
+export function Play({tooltipOffset = 0, tooltipPlacement}: MediaButtonProps) {
     const isPaused = useMediaState("paused");
+
     return (
-        <Popover.Root>
-            <Popover.Trigger>
+        <Tooltip.Root>
+            <Tooltip.Trigger asChild>
                 <PlayButton className={buttonClass}>
                     {isPaused ? (
-                        <PlayIcon className="h-7 w-7 translate-x-px"/>
+                        <PlayIcon className="h-7 w-7 translate-x-px transition-transform duration-200"/>
                     ) : (
-                        <PauseIcon className="h-7 w-7"/>
+                        <PauseIcon className="h-7 w-7 transition-transform duration-200"/>
                     )}
                 </PlayButton>
-            </Popover.Trigger>
-            <Popover.Content
+            </Tooltip.Trigger>
+            <Tooltip.Content
                 className={tooltipClass}
-
                 sideOffset={tooltipOffset}
+                placement={tooltipPlacement}
             >
                 {isPaused ? "Play" : "Pause"}
-            </Popover.Content>
-        </Popover.Root>
+            </Tooltip.Content>
+        </Tooltip.Root>
     );
 }
 
-export function Mute({
-                         tooltipOffset = 0,
+export function Mute({tooltipOffset = 0, tooltipPlacement}: MediaButtonProps) {
+    const volume = useMediaState("volume");
+    const isMuted = useMediaState("muted");
 
-                     }: MediaButtonProps) {
-    const volume = useMediaState("volume"),
-        isMuted = useMediaState("muted");
+    const Icon =
+        isMuted || volume === 0
+            ? MuteIcon
+            : volume < 0.5
+                ? VolumeLowIcon
+                : VolumeHighIcon;
+
     return (
-        <Popover.Root>
-            <Popover.Trigger>
+        <Tooltip.Root>
+            <Tooltip.Trigger asChild>
                 <MuteButton className={buttonClass}>
-                    {isMuted || volume == 0 ? (
-                        <MuteIcon className="h-6 w-6"/>
-                    ) : volume < 0.5 ? (
-                        <VolumeLowIcon className="h-6 w-6"/>
-                    ) : (
-                        <VolumeHighIcon className="h-6 w-6"/>
-                    )}
+                    <Icon className="h-6 w-6 transition-transform duration-200"/>
                 </MuteButton>
-            </Popover.Trigger>
-            <Popover.Content
+            </Tooltip.Trigger>
+            <Tooltip.Content
                 className={tooltipClass}
-
                 sideOffset={tooltipOffset}
+                placement={tooltipPlacement}
             >
                 {isMuted ? "Unmute" : "Mute"}
-            </Popover.Content>
-        </Popover.Root>
+            </Tooltip.Content>
+        </Tooltip.Root>
     );
 }
 
 export function Caption({
                             tooltipOffset = 0,
-
+                            tooltipPlacement,
                         }: MediaButtonProps) {
-    const track = useMediaState("textTrack"),
-        isOn = track && isTrackCaptionKind(track);
+    const track = useMediaState("textTrack");
+    const isOn = track && isTrackCaptionKind(track);
+
     return (
-        <Popover.Root>
-            <Popover.Trigger>
+        <Tooltip.Root>
+            <Tooltip.Trigger asChild>
                 <CaptionButton className={buttonClass}>
                     <SubtitlesIcon
-                        className={`h-7 w-7 ${!isOn ? "text-white/60" : ""}`}
+                        className={`h-6 w-6 transition-colors duration-200 ${
+                            isOn ? "text-sky-400" : "text-white/60 group-hover:text-white"
+                        }`}
                     />
                 </CaptionButton>
-            </Popover.Trigger>
-            <Popover.Content
+            </Tooltip.Trigger>
+            <Tooltip.Content
                 className={tooltipClass}
-
+                placement={tooltipPlacement}
                 sideOffset={tooltipOffset}
             >
-                {isOn ? "Closed-Captions Off" : "Closed-Captions On"}
-            </Popover.Content>
-        </Popover.Root>
+                {isOn ? "Subtitles Off" : "Subtitles On"}
+            </Tooltip.Content>
+        </Tooltip.Root>
     );
 }
 
-export function PIP({
-                        tooltipOffset = 0,
-
-                    }: MediaButtonProps) {
+export function PIP({tooltipOffset = 0, tooltipPlacement}: MediaButtonProps) {
     const isActive = useMediaState("pictureInPicture");
-    return (
-        <Popover.Root>
-            <Popover.Trigger>
-                <PIPButton className={buttonClass}>
-                    {isActive ? (
-                        <PictureInPictureExitIcon className="h-6 w-6"/>
-                    ) : (
-                        <PictureInPictureIcon className="h-6 w-6"/>
-                    )}
-                </PIPButton>
-            </Popover.Trigger>
-            <Popover.Content
-                className={tooltipClass}
+    const Icon = isActive ? PictureInPictureExitIcon : PictureInPictureIcon;
 
+    return (
+        <Tooltip.Root>
+            <Tooltip.Trigger asChild>
+                <PIPButton className={buttonClass}>
+                    <Icon className="h-6 w-6 transition-transform duration-200"/>
+                </PIPButton>
+            </Tooltip.Trigger>
+            <Tooltip.Content
+                className={tooltipClass}
+                placement={tooltipPlacement}
                 sideOffset={tooltipOffset}
             >
                 {isActive ? "Exit PIP" : "Enter PIP"}
-            </Popover.Content>
-        </Popover.Root>
+            </Tooltip.Content>
+        </Tooltip.Root>
     );
 }
 
 export function Fullscreen({
                                tooltipOffset = 0,
-
+                               tooltipPlacement,
                            }: MediaButtonProps) {
     const isActive = useMediaState("fullscreen");
-    return (
-        <Popover.Root>
-            <Popover.Trigger>
-                <FullscreenButton className={buttonClass}>
-                    {isActive ? (
-                        <FullscreenExitIcon className="h-6 w-6"/>
-                    ) : (
-                        <FullscreenIcon className="h-6 w-6"/>
-                    )}
-                </FullscreenButton>
-            </Popover.Trigger>
-            <Popover.Content
-                className={tooltipClass}
+    const Icon = isActive ? FullscreenExitIcon : FullscreenIcon;
 
+    return (
+        <Tooltip.Root>
+            <Tooltip.Trigger asChild>
+                <FullscreenButton className={buttonClass}>
+                    <Icon className="h-6 w-6 transition-transform duration-200"/>
+                </FullscreenButton>
+            </Tooltip.Trigger>
+            <Tooltip.Content
+                className={tooltipClass}
+                placement={tooltipPlacement}
                 sideOffset={tooltipOffset}
             >
                 {isActive ? "Exit Fullscreen" : "Enter Fullscreen"}
-            </Popover.Content>
-        </Popover.Root>
+            </Tooltip.Content>
+        </Tooltip.Root>
     );
 }
 
-export function Settings({
-                             tooltipOffset = 0,
-
-                         }: MediaButtonProps) {
-    return (
-        <Popover.Root>
-            <Popover.Trigger>
-                <FullscreenButton className={buttonClass}>
-                    <SettingsIcon className="h-7 w-7"/>
-                </FullscreenButton>
-            </Popover.Trigger>
-            <Popover.Content
-                className={tooltipClass}
-
-                sideOffset={tooltipOffset}
-            >
-                Settings
-            </Popover.Content>
-        </Popover.Root>
-    );
-}
+// export function Settings({
+//                              tooltipOffset = 0,
+//                              tooltipPlacement,
+//                          }: MediaButtonProps) {
+//     return (
+//         <Tooltip.Root>
+//             <Tooltip.Trigger asChild>
+//                 <SettingsButton className={buttonClass}>
+//                     <SettingsIcon className="h-7 w-7 transition-transform duration-200"/>
+//                 </SettingsButton>
+//             </Tooltip.Trigger>
+//             <Tooltip.Content
+//                 className={tooltipClass}
+//                 placement={tooltipPlacement}
+//                 sideOffset={tooltipOffset}
+//             >
+//                 Settings
+//             </Tooltip.Content>
+//         </Tooltip.Root>
+//     );
+// }

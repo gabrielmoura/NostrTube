@@ -15,13 +15,21 @@ interface VideoPlayerParams extends DataVideo {
 }
 
 export function VideoPlayer({image, src, title, onCanPlay, className}: VideoPlayerParams) {
-    let player = useRef<MediaPlayerInstance>();
+    let player = useRef<MediaPlayerInstance>(null);
+
+    // useEffect(() => {
+    //     // Subscribe to state updates.
+    //     return player.current!.subscribe(({ paused, viewType }) => {
+    //         // console.log('is paused?', '->', state.paused);
+    //         // console.log('is audio view?', '->', state.viewType === 'audio');
+    //     });
+    // }, []);
 
     // player.onplay((this: GlobalEventHandlers, ev: Event)=>function (this: GlobalEventHandlers, ev: Event) {
     //     this.addEventListener("")
     // })
 
-
+    //
     // function onProviderChange(
     //     provider: MediaProviderAdapter ,
     //     // nativeEvent: MediaProviderChangeEvent,

@@ -3,13 +3,16 @@ import captionStyles from "./captions.module.css";
 import {Captions, Controls, Gesture} from "@vidstack/react";
 
 import {TimeGroup} from "./components/time-group";
-import {Title} from "./components/title";
+import {TitleChapter} from "./components/title";
 
 import {Fullscreen, Mute, PIP, Play} from "./components/buttons.tsx";
 import * as Sliders from "./components/sliders.tsx";
 
 import {BufferingIndicator} from "./components/Buffering.tsx";
 import {cn} from "@/helper/format.ts";
+import {MenuCaptions} from "@/components/videoPlayer/components/MenuCaptions.tsx";
+import {Menus} from "@/components/videoPlayer/components/Menu.tsx";
+
 
 // Offset tooltips/menus/slider previews in the lower controls group so they're clearly visible.
 const popupOffset = 30;
@@ -43,7 +46,7 @@ export function VideoLayout({
 
                 <div className="flex-1"/>
                 <Controls.Group className="absolute right-0 top-0 flex items-center px-2">
-                    {/*<Menus.Settings />*/}
+                    <Menus/>
                 </Controls.Group>
                 <Controls.Group className="-mb-2 flex w-full items-center px-2">
                     <Sliders.Time thumbnails={thumbnails}/>
@@ -57,14 +60,14 @@ export function VideoLayout({
                             <Sliders.Volume/>
                         </div>
                         <TimeGroup/>
-                        <Title/>
+                        <TitleChapter/>
                     </div>
                     <div className="flex-1"/>
                     <div className="flex gap-x-1">
-                        {/*<Menus.Captions*/}
-                        {/*    offset={popupOffset}*/}
-                        {/*    tooltipOffset={popupOffset}*/}
-                        {/*/>*/}
+                        <MenuCaptions
+                            offset={popupOffset}
+                            tooltipOffset={popupOffset}
+                        />
                         <PIP tooltipOffset={popupOffset}/>
                         <Fullscreen
                             tooltipOffset={popupOffset}

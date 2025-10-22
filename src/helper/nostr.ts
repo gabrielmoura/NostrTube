@@ -166,3 +166,22 @@ export async function getVideosFromUserData({ndk, userId}: GetVideosFromUserData
     if (events.size === 0) throw notFound();
     return events
 }
+
+// --> Adiciona Evento a uma lista
+export type AddToPlayListDataParams = {
+    ndk: NDK__default;
+    playListId: string;
+    eventId: string
+};
+
+export async function addToPlayList({ndk, playListId, eventId}: AddToPlayListDataParams) {
+    // Busca Lista, caso não exista cria uma e adicione o evento ao final da lista.
+    if (!playListId) {
+        throw new Error("No PlayList ID provided");
+    }
+    if (!eventId) {
+        throw new Error("No Event ID provided");
+    }
+    //TODO: Implement function
+    throw new Error("Not implemented");
+}

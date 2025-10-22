@@ -4,8 +4,8 @@ import {Button} from '@/components/ui/button.tsx';
 import {Input} from '@/components/ui/input.tsx';
 import {Label} from '@/components/ui/label.tsx';
 import {Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger} from '@/components/ui/dialog.tsx'; // Assuming you have these Shadcn Dialog components
-import {NDKNip07Signer, NDKPrivateKeySigner} from "@nostr-dev-kit/ndk";
-import {useNDKSessionLogin} from "@nostr-dev-kit/ndk-hooks";
+import {NDKNip07Signer, NDKNip46Signer, NDKPrivateKeySigner, NDKSigner} from "@nostr-dev-kit/ndk";
+import {useNDK, useNDKSessionLogin} from "@nostr-dev-kit/ndk-hooks";
 import {Link} from "@tanstack/react-router";
 import {cn} from "@/helper/format.ts";
 
@@ -17,6 +17,7 @@ export function LoginModal({
     const [nsec, setNsec] = useState<string>(''); // Initialize with empty string
     const [isLoading, setIsLoading] = useState<boolean>(false); // Add loading state
     const [error, setError] = useState<string | null>(null); // Add error state
+    const {ndk} = useNDK()
 
     const loginWithExtension = async () => {
         setIsLoading(true);
@@ -39,9 +40,16 @@ export function LoginModal({
         }
         setIsLoading(true);
         setError(null);
+        let signer: NDKSigner;
+
+
         try {
             // Create a signer from the private key
-            const signer = new NDKPrivateKeySigner(nsec);
+            if (nsec.startsWith("bunker://")) {
+                signer = new NDKNip46Signer(ndk!, nsec);
+            } else {
+                signer = new NDKPrivateKeySigner(nsec);
+            }
 
             // Login and create a session
             await login(signer);
@@ -99,11 +107,7 @@ export function LoginModal({
                     </Button>
                 </div>
 
-                <div
-                    className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-                    <span className="relative z-10 bg-background px-2 text-muted-foreground">Or</span>
-                </div>
-
+                <Or/>
 
                 <div className=" gap-4 sm:grid-cols-2 flex  justify-center">
                     {/*// O botão precisa estart centralizado no meio*/}
@@ -113,7 +117,6 @@ export function LoginModal({
                         {isLoading ? 'Connecting...' : 'Login with Extension'}
                     </Button>
                 </div>
-
                 <div
                     className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary  ">
                     By clicking continue, you agree to our <Link to="/terms/">Terms of Service</Link>{' '}
@@ -122,4 +125,11 @@ export function LoginModal({
             </DialogContent>
         </Dialog>
     );
+}
+
+function Or() {
+    return <div
+        className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
+        <span className="relative z-10 bg-background px-2 text-muted-foreground">Or</span>
+    </div>
 }

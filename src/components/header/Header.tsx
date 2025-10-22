@@ -1,7 +1,7 @@
 import * as React from "react"
 import {Link} from "@tanstack/react-router"
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu"
-import {Sheet, SheetContent, SheetTrigger,} from "@/components/ui/sheet"
+import {Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,} from "@/components/ui/sheet"
 import {Input} from "@/components/ui/input"
 import {Button} from "@/components/ui/button"
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar"
@@ -15,34 +15,30 @@ import {LoginModal} from "@/components/header/LoginModal"
 export default function Header() {
     const currentProfile = useCurrentUserProfile()
     const SetProfile = useUserStore((s) => s.SetProfile)
-    const [theme, setTheme] = React.useState(
-        localStorage.getItem("theme") || "light"
-    )
+    const [theme, setTheme] = React.useState(localStorage.getItem("theme") || "light")
 
     React.useEffect(() => {
         if (currentProfile) SetProfile(currentProfile)
     }, [currentProfile, SetProfile])
 
-    // Aplica o tema e adiciona classe de transição
     React.useEffect(() => {
         const root = document.documentElement
         root.classList.add("theme-transition")
         root.classList.toggle("dark", theme === "dark")
         localStorage.setItem("theme", theme)
-
-        const timeout = setTimeout(() => {
-            root.classList.remove("theme-transition")
-        }, 400)
-
+        const timeout = setTimeout(() => root.classList.remove("theme-transition"), 400)
         return () => clearTimeout(timeout)
     }, [theme])
 
     const options = [
-        {to: "/", label: "Home", exact: true},
-        {to: "/new", label: "Novo"},
+        {to: "/", label: "Home"},
+        // {to: "/new", label: "Novo"},
         {to: "/search", label: "Buscar"},
         {to: "/terms", label: "Termos de Uso"},
     ]
+    if (currentProfile) {
+        options.push({to: `/new`, label: "Novo"})
+    }
 
     const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") {
@@ -62,30 +58,13 @@ export default function Header() {
                 {/* Left Section */}
                 <div className="flex items-center gap-4">
                     {/* Mobile Menu */}
-                    <Sheet>
-                        <SheetTrigger asChild className="lg:hidden">
-                            <Button variant="ghost" size="icon">
-                                <Menu className="h-5 w-5"/>
-                                <span className="sr-only">Abrir menu</span>
-                            </Button>
-                        </SheetTrigger>
-                        <SheetContent side="left" className="w-64">
-                            <nav className="flex flex-col space-y-3 mt-4">
-                                {options.map((opt) => (
-                                    <Link
-                                        key={opt.to}
-                                        to={opt.to}
-                                        className="text-lg font-medium hover:text-primary transition"
-                                        activeProps={{
-                                            className: "text-primary font-semibold",
-                                        }}
-                                    >
-                                        {opt.label}
-                                    </Link>
-                                ))}
-                            </nav>
-                        </SheetContent>
-                    </Sheet>
+                    <MobileMenu
+                        options={options}
+                        theme={theme}
+                        setTheme={setTheme}
+                        currentProfile={currentProfile}
+                        handleSearch={handleSearch}
+                    />
 
                     {/* Logo */}
                     <Link to="/" className="flex items-center space-x-2">
@@ -132,9 +111,9 @@ export default function Header() {
                         onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                     >
                         {theme === "dark" ? (
-                            <Moon className="h-5 w-5"/>
-                        ) : (
                             <Sun className="h-5 w-5"/>
+                        ) : (
+                            <Moon className="h-5 w-5"/>
                         )}
                         <span className="sr-only">Alternar tema</span>
                     </Button>
@@ -146,18 +125,129 @@ export default function Header() {
                     </Button>
 
                     {/* Profile */}
-                    {currentProfile ? (
-                        <UserMenu currentProfile={currentProfile}/>
-                    ) : (
-                        <LoginModal/>
-                    )}
+                    {currentProfile ? <UserMenu currentProfile={currentProfile}/> : <LoginModal/>}
                 </div>
             </div>
         </header>
     )
 }
 
-// ---- Profile Menu ----
+/* ---------- MOBILE MENU ---------- */
+function MobileMenu({options, theme, setTheme, currentProfile, handleSearch}: any) {
+    const logout = useNDKSessionLogout()
+    const clanSession = useUserStore((s) => s.clanSession)
+    const currentPubkey = useNDKCurrentPubkey()
+
+    const handleLogout = () => {
+        logout()
+        clanSession()
+    }
+
+    return (
+        <Sheet>
+            <SheetTrigger asChild className="lg:hidden">
+                <Button variant="ghost" size="icon">
+                    <Menu className="h-5 w-5"/>
+                    <span className="sr-only">Abrir menu</span>
+                </Button>
+            </SheetTrigger>
+
+            <SheetContent side="left" className="w-72 p-0">
+                <SheetHeader className="border-b border-border p-4 flex items-center justify-between">
+                    <SheetTitle className="text-lg font-semibold flex items-center gap-2">
+                        <LogoNovoMono className="h-6 w-auto"/>
+                        {import.meta.env.VITE_APP_NAME}
+                    </SheetTitle>
+                </SheetHeader>
+
+                <div className="p-4 space-y-6">
+                    {/* Search input */}
+                    <div className="relative block sm:hidden">
+                        <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground"/>
+                        <Input
+                            type="search"
+                            placeholder="Buscar..."
+                            className="pl-9"
+                            onKeyDown={handleSearch}
+                        />
+                    </div>
+
+                    {/* Links */}
+                    <nav className="flex flex-col space-y-3">
+                        {options.map((opt) => (
+                            <Link
+                                key={opt.to}
+                                to={opt.to}
+                                className="text-base font-medium hover:text-primary transition"
+                                activeProps={{
+                                    className: "text-primary font-semibold",
+                                }}
+                            >
+                                {opt.label}
+                            </Link>
+                        ))}
+                    </nav>
+
+                    <div className="border-t border-border pt-4 space-y-3">
+                        {/* Profile area */}
+                        {/*{currentProfile ? (*/}
+                        {/*    <div className="flex items-center gap-3">*/}
+                        {/*        <Avatar className="h-8 w-8">*/}
+                        {/*            <AvatarImage src={currentProfile?.picture} />*/}
+                        {/*            <AvatarFallback>*/}
+                        {/*                {currentProfile?.name?.[0] ?? "U"}*/}
+                        {/*            </AvatarFallback>*/}
+                        {/*        </Avatar>*/}
+                        {/*        <div className="flex-1">*/}
+                        {/*            <p className="text-sm font-semibold">*/}
+                        {/*                {currentProfile?.name || "Usuário"}*/}
+                        {/*            </p>*/}
+                        {/*            <Button*/}
+                        {/*                variant="ghost"*/}
+                        {/*                size="sm"*/}
+                        {/*                onClick={handleLogout}*/}
+                        {/*                className="text-muted-foreground p-0 text-xs hover:text-primary"*/}
+                        {/*            >*/}
+                        {/*                <LogOut className="h-3 w-3 mr-1" /> Sair*/}
+                        {/*            </Button>*/}
+                        {/*        </div>*/}
+                        {/*    </div>*/}
+                        {/*) : (*/}
+                        {/*    <LoginModal />*/}
+                        {/*)}*/}
+
+                        {/* Theme toggle */}
+                        <Button
+                            variant="outline"
+                            className="w-full flex items-center justify-start gap-2"
+                            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                        >
+                            {theme === "dark" ? (
+                                <Sun className="h-4 w-4"/>
+                            ) : (
+                                <Moon className="h-4 w-4"/>
+                            )}
+                            Alternar tema
+                        </Button>
+
+                        {/*/!* Configurações e perfil *!/*/}
+                        {/*{currentProfile && (*/}
+                        {/*    <Link*/}
+                        {/*        to="/u/$userId"*/}
+                        {/*        params={{userId: currentPubkey}}*/}
+                        {/*        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary"*/}
+                        {/*    >*/}
+                        {/*        <User className="h-4 w-4" /> Perfil*/}
+                        {/*    </Link>*/}
+                        {/*)}*/}
+                    </div>
+                </div>
+            </SheetContent>
+        </Sheet>
+    )
+}
+
+/* ---------- USER MENU DESKTOP ---------- */
 function UserMenu({currentProfile}: { currentProfile: any }) {
     const logout = useNDKSessionLogout()
     const clanSession = useUserStore((s) => s.clanSession)
