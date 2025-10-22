@@ -35,8 +35,8 @@ export const DropdownMenuVideo = ({event}) => {
             action: () => {
                 copyText(
                     `${
-                        import.meta.env.VITE_BASE_URL ?? "https://nostrtube.com"
-                    }/w/${naddr}`,
+                        import.meta.env.VITE_PUBLIC_ROOT_DOMAIN ?? "https://nostrtube.com"
+                    }/v/${naddr}`,
                 ).then(() => toast("Link copied!", {type: "success"}));
             },
         },

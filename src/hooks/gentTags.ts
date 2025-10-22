@@ -63,7 +63,7 @@ export function useGenTagsVideo(): useGenTagsVideo {
             tags.push(['thumb', videoData.thumbnail, 'image', videoData.thumbnail])
         }
 
-        if (videoData.url) {
+        if (videoData.url&&!videoData.imetaVideo) {
             tags.push(["imeta", `url ${videoData.url}`])
         }
 
