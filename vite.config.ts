@@ -106,7 +106,7 @@ export default defineConfig(({mode}) => {
             sri(),
         ],
         build: {
-            sourcemap: false,
+            sourcemap: false, //True to generate sourcemaps for debugging
             cssMinify: true,
             minify: true,
             cssCodeSplit: true,
@@ -116,10 +116,8 @@ export default defineConfig(({mode}) => {
                         if (checkDependency(id, chunkVideo)) {
                             return 'video'
                         }
-                        if (checkDependency(id, chunkIcons)) {
-                            return 'icons'
-                        }
-                        if (id.includes('node_modules') && !checkDependency(id, [...chunkVideo, ...chunkIcons])) {
+
+                        if (id.includes('node_modules') && !checkDependency(id, [...chunkVideo])) {
                             return 'vendor'
                         }
                     }
