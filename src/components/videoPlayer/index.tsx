@@ -40,7 +40,7 @@ export function VideoPlayer({image, src, title, onCanPlay, className}: VideoPlay
     //     }
     // }
 
-
+    console.log("Rendering video player for:", title, src);
     return <MediaPlayer
         className={cn(
             "bg-muted-background group relative aspect-video h-auto w-full overflow-hidden font-sans text-foreground ring-media-focus @container data-[focus]:ring-4 data-[hocus]:ring-4",
@@ -54,7 +54,7 @@ export function VideoPlayer({image, src, title, onCanPlay, className}: VideoPlay
         onPlay={onCanPlay}
         ref={player}
         autoplay={false}
-        logLevel='warn'
+        logLevel={import.meta.env.PROD ? 'warn' : 'debug'}
         viewType='video'
         streamType='on-demand'
     >

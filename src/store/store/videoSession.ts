@@ -2,7 +2,8 @@ import type {StateCreator} from "zustand/index";
 import type {NDKEvent} from "@nostr-dev-kit/ndk-hooks";
 import {extractTag} from "@/helper/extractTag.ts";
 import {AgeEnum} from "@/store/store/sessionTypes.ts";
-import {getTagValue} from "@welshman/util";
+import {getTags, getTagValue} from "@welshman/util";
+import {mapImetaTag} from "@nostr-dev-kit/ndk";
 
 interface VideoSessionAction {
     clanSession: () => void,
@@ -41,7 +42,18 @@ export const createVideoSlice: StateCreator<
         clanSession: () => set(() => ({session: undefined}), false, "clanSession"),
         setVideo: (e) => {
             const tEvent = extractTag(e.tags)
-            const  url = tEvent.url ??getTagValue("src",e.tags)
+            let url: string
+            if (getTags("imeta", e.tags).length > 0) {
+                getTags("imeta", e.tags).forEach((imetaTag) => {
+                    const imeta = mapImetaTag(imetaTag)
+                    if (imeta.url) {
+                        url = imeta.url
+                    }
+                })
+            } else {
+                url = tEvent.url ?? getTagValue("src", e.tags)!;
+            }
+
 
             return set(({session}) => ({
                 session: {
