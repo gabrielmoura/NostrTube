@@ -1,10 +1,17 @@
 //@vidstack/react
 // Base styles for media player and provider (~400B).
 import '@vidstack/react/player/styles/base.css';
-import {MediaPlayer, MediaPlayerInstance, MediaProvider, Poster} from '@vidstack/react';
+import {
+    isHLSProvider,
+    MediaPlayer,
+    MediaPlayerInstance,
+    MediaProvider,
+    MediaProviderAdapter,
+    Poster
+} from '@vidstack/react';
 // See "Icons" component page for setup before importing the following:
 import type {DataVideo} from "./types.ts";
-import {useRef} from "react";
+import {useEffect, useRef} from "react";
 import {VideoLayout} from "./layout.tsx";
 import {imageNewSrc} from "@/helper/http.ts";
 import {cn} from "@/helper/format.ts";
@@ -17,30 +24,36 @@ interface VideoPlayerParams extends DataVideo {
 export function VideoPlayer({image, src, title, onCanPlay, className}: VideoPlayerParams) {
     let player = useRef<MediaPlayerInstance>(null);
 
-    // useEffect(() => {
-    //     // Subscribe to state updates.
-    //     return player.current!.subscribe(({ paused, viewType }) => {
-    //         // console.log('is paused?', '->', state.paused);
-    //         // console.log('is audio view?', '->', state.viewType === 'audio');
-    //     });
-    // }, []);
+    useEffect(() => {
+        // Subscribe to state updates.
+        return player.current!.subscribe(({paused, viewType, error}) => {
+            // console.log('is paused?', '->', state.paused);
+            // console.log('is audio view?', '->', state.viewType === 'audio');
+            if (error) {
+                console.error('Media Player Error:', error);
+            }
+            console.log("type:", viewType, "paused:", paused);
+        });
+    }, []);
 
     // player.onplay((this: GlobalEventHandlers, ev: Event)=>function (this: GlobalEventHandlers, ev: Event) {
     //     this.addEventListener("")
     // })
 
     //
-    // function onProviderChange(
-    //     provider: MediaProviderAdapter ,
-    //     // nativeEvent: MediaProviderChangeEvent,
-    // ) {
-    //     // We can configure provider's here.
-    //     if (isHLSProvider(provider)) {
-    //         provider.config = {};
-    //     }
-    // }
+    function onProviderChange(
+        provider: MediaProviderAdapter,
+        // nativeEvent: MediaProviderChangeEvent,
+    ) {
+        // We can configure provider's here.
+        if (isHLSProvider(provider)) {
+            provider.config = {};
+        }
+        // if (!provider.currentSrc?.type && provider.currentSrc?.src) {
+        //     player.current?.loadSource({src: provider.currentSrc.src, type: 'video/mp4'});
+        // }
+    }
 
-    console.log("Rendering video player for:", title, src);
     return <MediaPlayer
         className={cn(
             "bg-muted-background group relative aspect-video h-auto w-full overflow-hidden font-sans text-foreground ring-media-focus @container data-[focus]:ring-4 data-[hocus]:ring-4",
@@ -49,7 +62,7 @@ export function VideoPlayer({image, src, title, onCanPlay, className}: VideoPlay
         title={title} src={src}
         crossOrigin
         playsinline
-        // onProviderChange={onProviderChange}
+        onProviderChange={onProviderChange}
         // onCanPlay={onCanPlay}
         onPlay={onCanPlay}
         ref={player}
@@ -57,6 +70,7 @@ export function VideoPlayer({image, src, title, onCanPlay, className}: VideoPlay
         logLevel={import.meta.env.PROD ? 'warn' : 'debug'}
         viewType='video'
         streamType='on-demand'
+        preload={'auto'}
     >
 
 

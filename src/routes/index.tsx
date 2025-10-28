@@ -14,7 +14,7 @@ function IndexPage() {
         <>
             <Flex direction="column" gap="2" className="items-center justify-center">
                 <Text>Em desenvolvimento!</Text>
-
+                {/*<LanguagesCombo/>*/}
             </Flex>
         </>
     )

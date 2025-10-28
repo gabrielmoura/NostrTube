@@ -20,7 +20,8 @@ function RouteComponent() {
                 <section>
                     <h2>1. Descrição da Plataforma</h2>
                     <p>
-                        A <strong>{import.meta.env.VITE_APP_NAME}</strong> é uma plataforma de compartilhamento de vídeos
+                        A <strong>{import.meta.env.VITE_APP_NAME}</strong> é uma plataforma de compartilhamento de
+                        vídeos
                         construída sobre o protocolo <strong>Nostr</strong>,
                         que utiliza uma rede descentralizada de servidores (relays) para armazenar e distribuir
                         conteúdo.
@@ -76,7 +77,8 @@ function RouteComponent() {
                 <section>
                     <h2>5. Limitação de Responsabilidade</h2>
                     <p>
-                        A <strong>[Nome da Plataforma]</strong> não se responsabiliza por danos diretos, indiretos,
+                        A <strong>{import.meta.env.VITE_APP_NAME}</strong> não se responsabiliza por danos diretos,
+                        indiretos,
                         incidentais, consequentes ou punitivos decorrentes do uso da plataforma,
                         por conteúdo publicado por terceiros, falhas de relays externos, perda de dados ou
                         indisponibilidade de serviços de terceiros.
@@ -137,21 +139,22 @@ function RouteComponent() {
                     </p>
                 </section>
 
-                <section>
-                    <h2>9. Legislação Aplicável</h2>
-                    <p>
-                        Estes Termos são regidos pelas leis da <strong>República Federativa do Brasil</strong>,
-                        independentemente de onde o conteúdo esteja hospedado ou acessado.
-                    </p>
-                </section>
+                {/*<section>*/}
+                {/*    <h2>9. Legislação Aplicável</h2>*/}
+                {/*    <p>*/}
+                {/*        Estes Termos são regidos pelas leis da <strong>República Federativa do Brasil</strong>,*/}
+                {/*        independentemente de onde o conteúdo esteja hospedado ou acessado.*/}
+                {/*    </p>*/}
+                {/*</section>*/}
 
                 <section id="contact">
-                    <h2>10. Contato</h2>
+                    <h2>9. Contato</h2>
                     <p>
                         Dúvidas sobre estes Termos podem ser enviadas para:
                     </p>
                     <ul>
-                        <li>Npub: <a href="nostr://npub">Nostr User</a></li>
+                        <li>Npub: <a href="nostr://npub1733g4vyyqjkan972u90zfysguc09vvcvkwhmesacpd73ljf4jqlsrz0sq8">Nostr
+                            User</a></li>
                     </ul>
                 </section>
             </p>

@@ -35,6 +35,7 @@ export default function Header() {
         // {to: "/new", label: "Novo"},
         {to: "/search", label: "Buscar"},
         {to: "/terms", label: "Termos de Uso"},
+        {to: '/faq/', label: "FAQ"}
     ]
     if (currentProfile) {
         options.push({to: `/new`, label: "Novo"})
