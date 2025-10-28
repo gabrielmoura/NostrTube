@@ -15,10 +15,29 @@
   ],
   "routes": [
     {
-      "handle": "filesystem"
+      "src": "/redirect",
+      "status": 308,
+      "headers": { "Location": "https://nostrtube.app/" }
     },
     {
-      "src": "/.*",
+      "src": "/manifest.webmanifest",
+      "headers": { "Content-Type": "application/manifest+json" },
+      "dest": "/manifest.webmanifest"
+    },
+    {
+      "src": "/sw.js",
+      "headers": { "Cache-Control": "no-cache" },
+      "dest": "/sw.js"
+    },
+    {
+      "src": "/(.*)",
+      "headers": {
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "X-Frame-Options": "SAMEORIGIN",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Permissions-Policy": "camera=(), microphone=(), geolocation=()"
+      },
       "dest": "/index.html"
     }
   ]
