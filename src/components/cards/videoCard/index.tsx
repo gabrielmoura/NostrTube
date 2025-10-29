@@ -104,7 +104,7 @@ export default function VideoCard({className, event,}: VideoCardProps) {
                 </Link>
 
                 <div className="flex items-center gap-1 text-xs">
-                    <span>{`${formatCount(123)} views`}</span>
+                    <span></span>
                     {publishedAt && (
                         <>
                             <span>•</span>
