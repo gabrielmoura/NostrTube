@@ -11,5 +11,29 @@
   "write_a_short_summary_or_description": "Write a short summary or description",
   "save_as_draft": "Save as Draft",
   "Publish": "Publish",
-  "you_must_be_logged_in_to_upload_videos": "Você deve estar logado para enviar vídeos"
+  "you_must_be_logged_in_to_upload_videos": "Você deve estar logado para enviar vídeos",
+  "video_published_successfully": "Vídeo publicado com sucesso",
+  "error_publishing_video": "Erro ao publicar vídeo",
+  "Language": "Língua",
+  "Select_language": "Selecione um idioma...",
+  "Add": "Adicionar",
+  "Cancel": "Cancelar",
+  "New": "Novo",
+  "Content_warning": "Aviso de conteúdo",
+  "Thumbnail": "Miniatura",
+  "Indexers": "Indexadores",
+  "components": {
+    "comboLanguage": {
+      "noLanguageFound": "Nenhum idioma encontrado.",
+      "clearSelection": "Limpar seleção",
+      "selectYourLanguage": "Selecione o idioma de seu conteúdo."
+    },
+    "addTagInput": {
+      "error": {
+        "empty": "O campo não pode estar vazio.",
+        "invalidFormat": "Formato inválido.",
+        "duplicate": "Esta tag já existe."
+      }
+    }
+  }
 }

@@ -11,5 +11,29 @@
   "write_a_short_summary_or_description": "Write a short summary or description",
   "save_as_draft": "Save as Draft",
   "Publish": "Publish",
-  "you_must_be_logged_in_to_upload_videos": "You must be logged in to upload videos"
+  "you_must_be_logged_in_to_upload_videos": "You must be logged in to upload videos",
+  "video_published_successfully": "Video published successfully",
+  "error_publishing_video": "Error publishing video",
+  "Language": "Language",
+  "Select_language": "Select a language...",
+  "Add": "Add",
+  "Cancel": "Cancel",
+  "New": "New",
+  "Content_warning": "Content warning",
+  "Thumbnail": "Thumbnail",
+  "Indexers": "Indexers",
+  "components": {
+    "comboLanguage": {
+      "noLanguageFound": "No language found",
+      "clearSelection": "Clear selection",
+      "selectYourLanguage": "Select your content language."
+    },
+    "addTagInput": {
+      "error": {
+        "empty": "The field cannot be empty.",
+        "invalidFormat": "Invalid format.",
+        "duplicate": "This tag already exists."
+      }
+    }
+  }
 }

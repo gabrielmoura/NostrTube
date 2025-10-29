@@ -7,6 +7,7 @@ import {cn} from "@/helper/format.ts";
 import {RiUploadCloud2Line} from "react-icons/ri";
 import {Button} from "@/components/button.tsx";
 import type {VideoMetadata} from "@/routes/new/@components/VideoUpload.tsx";
+import type {NDKImetaTag} from "@nostr-dev-kit/ndk";
 
 interface VideoUploadFileProps {
     setShowEventInput: Dispatch<SetStateAction<boolean>>;
@@ -66,7 +67,18 @@ export default function VideoUploadFile({setShowEventInput, setVideo}: VideoUplo
             });
             console.log('File uploaded:', imeta);
 
-            const {url, sha256, size, blurhash, dim, m} = imeta;
+            const {url, sha256, size, blurhash, dim, m,uploaded,type,owner,} = imeta;
+            const newImeta :NDKImetaTag= {
+                url,
+                sha256,
+                size,
+                blurhash,
+                dim,
+                m,
+                uploaded,
+                type,
+                owner,
+            }
 
             setVideo({
                 url,
@@ -77,7 +89,7 @@ export default function VideoUploadFile({setShowEventInput, setVideo}: VideoUplo
                 blurhash: blurhash || undefined,
                 dim: dim || undefined,
                 mime_type: m || undefined,
-                imetaVideo: imeta
+                imetaVideo: newImeta,
             });
             setShowEventInput(false);
         } catch (error) {

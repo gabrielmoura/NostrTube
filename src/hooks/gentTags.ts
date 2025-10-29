@@ -8,7 +8,8 @@ interface genTagsProps {
     videoData: Partial<VideoMetadata>
     currentPubkey: string
     hashtags: string[]
-    indexers: string[]
+    indexers: string[],
+    language?: string
 }
 
 interface useGenTagsVideo {
@@ -16,7 +17,7 @@ interface useGenTagsVideo {
 }
 
 export function useGenTagsVideo(): useGenTagsVideo {
-    const genTags = ({videoData, currentPubkey, hashtags, indexers}: genTagsProps): string[][] => {
+    const genTags = ({videoData, currentPubkey, hashtags, indexers, language}: genTagsProps): string[][] => {
         if (!currentPubkey) return;
         if (!videoData?.url || !videoData?.title) return;
         const relays: string = import.meta.env.PROD ? import.meta.env.VITE_NOSTR_RELAYS : import.meta.env.VITE_NOSTR_DEV_RELAYS
@@ -24,7 +25,7 @@ export function useGenTagsVideo(): useGenTagsVideo {
         const d = ulid();
 
         const tags: string[][] = [
-            ["d", d],
+            ["d", `${import.meta.env.VITE_APP_NAME}-${d}`],
             // ["url", videoData.url],
             ["title", videoData.title],
             ["summary", videoData.summary ?? ""],
@@ -63,7 +64,7 @@ export function useGenTagsVideo(): useGenTagsVideo {
             tags.push(['thumb', videoData.thumbnail, 'image', videoData.thumbnail])
         }
 
-        if (videoData.url&&!videoData.imetaVideo) {
+        if (videoData.url && !videoData.imetaVideo) {
             tags.push(["imeta", `url ${videoData.url}`])
         }
 
@@ -85,6 +86,11 @@ export function useGenTagsVideo(): useGenTagsVideo {
             imetaT.push("service nip96")
             tags.push(imetaT)
         }
+
+        if (language) {
+            tags.push(["l", language, "ISO-639-1"])
+        }
+
         return tags
     }
     return {genTags}

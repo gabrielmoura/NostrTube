@@ -1,0 +1,36 @@
+{
+  "title": "Título",
+  "comment": "Comentario",
+  "comments": "Comentarios",
+  "leave_a_comment": "Deja un comentario",
+  "no_comments_yet": "Aún no hay comentarios",
+  "video_not_found": "Vídeo no encontrado",
+  "disclaimer_text": "Al usar este servicio, usted confirma que este video le pertenece o que tiene derecho a publicarlo.",
+  "Disclaimer": "Aviso Legal",
+  "add_a_video_title": "Agregar un título de vídeo",
+  "write_a_short_summary_or_description": "Escribir un breve resumen o descripción",
+  "save_as_draft": "Guardar como borrador",
+  "Publish": "Publicar",
+  "you_must_be_logged_in_to_upload_videos": "Debes iniciar sesión para subir vídeos",
+  "video_published_successfully": "Vídeo publicado con éxito",
+  "error_publishing_video": "Error al publicar el vídeo",
+  "Language": "Idioma",
+  "Select_language": "Seleccionar un idioma...",
+  "Add": "Añadir",
+  "Cancel": "Cancelar",
+  "New": "Nuevo",
+  "components": {
+    "comboLanguage": {
+      "noLanguageFound": "Ningún idioma encontrado.",
+      "clearSelection": "Borrar selección",
+      "selectYourLanguage": "Selecciona el idioma de tu contenido."
+    },
+    "addTagInput": {
+      "error": {
+        "empty": "El campo no puede estar vacío.",
+        "invalidFormat": "Formato inválido.",
+        "duplicate": "Esta etiqueta ya existe."
+      }
+    }
+  }
+}

@@ -35,6 +35,12 @@ importers:
       '@nostr-dev-kit/ndk-hooks':
         specifier: ^1.2.3
         version: 1.2.3(@cashu/cashu-ts@2.7.1)(@cashu/crypto@0.3.4)(@types/react@19.1.12)(immer@10.1.3)(nostr-tools@2.16.2(typescript@5.8.3))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(use-sync-external-store@1.5.0(react@19.1.1))
+      '@nostrify/nostrify':
+        specifier: jsr:^0.46.5
+        version: '@jsr/nostrify__nostrify@0.46.5(typescript@5.8.3)'
+      '@nostrify/react':
+        specifier: jsr:^0.2.9
+        version: '@jsr/nostrify__react@0.2.9(typescript@5.8.3)'
       '@radix-ui/react-accordion':
         specifier: ^1.2.12
         version: 1.2.12(@types/react-dom@19.1.9(@types/react@19.1.12))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -1172,6 +1178,21 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.30':
     resolution: {integrity: sha512-GQ7Nw5G2lTu/BtHTKfXhKHok2WGetd4XYcVKGx00SjAk8GMwgJM3zr6zORiPGuOE+/vkc90KtTosSSvaCjKb2Q==}
+
+  '@jsr/nostrify__nostrify@0.46.5':
+    resolution: {integrity: sha512-l81N0o1A4WKAnOhq600ASDLxZbwzFZzUjhAkARPNFbWkXmEssVvXEQXyyoy1s7lboK45iZCijW0Bia7NHXmSug==, tarball: https://npm.jsr.io/~/11/@jsr/nostrify__nostrify/0.46.5.tgz}
+
+  '@jsr/nostrify__react@0.2.9':
+    resolution: {integrity: sha512-S19YP9adasszJbxgdIeC/4KXtZsAs9nf8I/2ptjr7pipyZWx8HykjjFE5pahj2TNMFc0/pEErcYpxGBg5t2n6Q==, tarball: https://npm.jsr.io/~/11/@jsr/nostrify__react/0.2.9.tgz}
+
+  '@jsr/nostrify__types@0.36.0':
+    resolution: {integrity: sha512-kDjFf1nJMhZafULtH2GW+TWjs85J0aDxYYLpwBDQugDVsFqG2kLbxnoE2NtMJCIMNk1vUaipUHeil//4fY/d2w==, tarball: https://npm.jsr.io/~/11/@jsr/nostrify__types/0.36.0.tgz}
+
+  '@jsr/scure__base@1.2.6':
+    resolution: {integrity: sha512-oZvJweJ4VMgVHJdsp8wwcG7t1U8aZLe0h8f4oNSFfavGqOKhpmi0b9mZ8vXLtGzBGiqVjK8Mon1NVMzTJincLQ==, tarball: https://npm.jsr.io/~/11/@jsr/scure__base/1.2.6.tgz}
+
+  '@jsr/std__encoding@0.224.3':
+    resolution: {integrity: sha512-zAuX2QV1zwJ5RSmrnDGVerAtN3pBXpYYNlGzhERW9AiQ1UJd2/xruyB3i5NdTWy2OK2pjETswOj+0+prYTPlxQ==, tarball: https://npm.jsr.io/~/11/@jsr/std__encoding/0.224.3.tgz}
 
   '@noble/ciphers@0.5.3':
     resolution: {integrity: sha512-B0+6IIHiqEs3BPMT0hcRmHvEj2QHOLu+uwt+tqDDeVd0oyVzh7BPrDcPjRnV1PV/5LaknXJJQvOuRGR0zQJz+w==}
@@ -3917,6 +3938,9 @@ packages:
   lower-case@2.0.2:
     resolution: {integrity: sha512-7fm3l3NAF9WfN6W3JOmf5drwpVqX78JtoGJ3A6W0a6ZnldM41w2fV5D490psKFTpMds8TJse/eHLFFsNHHjHgg==}
 
+  lru-cache@10.4.3:
+    resolution: {integrity: sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==}
+
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
 
@@ -4322,6 +4346,10 @@ packages:
     peerDependencies:
       react: ^18 || ^19
       react-dom: ^18 || ^19
+
+  react@18.3.1:
+    resolution: {integrity: sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==}
+    engines: {node: '>=0.10.0'}
 
   react@19.1.1:
     resolution: {integrity: sha512-w8nqGImo45dmMIfljjMwOGtbmC/mk4CMYhWIicdSflH91J9TyCyczcPFXJzrZ/ZXcgGRFeP6BU0BEJTw6tZdfQ==}
@@ -4906,6 +4934,9 @@ packages:
 
   webpack-virtual-modules@0.6.2:
     resolution: {integrity: sha512-66/V2i5hQanC51vBQKPH4aI8NMAcBW59FVBs+rC7eGHupMyfn34q7rZIE+ETlJ+XTevqfUhVVBgSUNSW2flEUQ==}
+
+  websocket-ts@2.2.1:
+    resolution: {integrity: sha512-YKPDfxlK5qOheLZ2bTIiktZO1bpfGdNCPJmTEaPW7G9UXI1GKjDdeacOrsULUS000OPNxDVOyAuKLuIWPqWM0Q==}
 
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
@@ -6055,6 +6086,32 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@jsr/nostrify__nostrify@0.46.5(typescript@5.8.3)':
+    dependencies:
+      '@jsr/nostrify__types': 0.36.0
+      '@jsr/scure__base': 1.2.6
+      '@jsr/std__encoding': 0.224.3
+      lru-cache: 10.4.3
+      nostr-tools: 2.16.2(typescript@5.8.3)
+      websocket-ts: 2.2.1
+      zod: 3.25.76
+    transitivePeerDependencies:
+      - typescript
+
+  '@jsr/nostrify__react@0.2.9(typescript@5.8.3)':
+    dependencies:
+      '@jsr/nostrify__nostrify': 0.46.5(typescript@5.8.3)
+      nostr-tools: 2.16.2(typescript@5.8.3)
+      react: 18.3.1
+    transitivePeerDependencies:
+      - typescript
+
+  '@jsr/nostrify__types@0.36.0': {}
+
+  '@jsr/scure__base@1.2.6': {}
+
+  '@jsr/std__encoding@0.224.3': {}
 
   '@noble/ciphers@0.5.3': {}
 
@@ -9014,6 +9071,8 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
+  lru-cache@10.4.3: {}
+
   lru-cache@5.1.1:
     dependencies:
       yallist: 3.1.1
@@ -9422,6 +9481,10 @@ snapshots:
       clsx: 2.1.1
       react: 19.1.1
       react-dom: 19.1.1(react@19.1.1)
+
+  react@18.3.1:
+    dependencies:
+      loose-envify: 1.4.0
 
   react@19.1.1: {}
 
@@ -10041,6 +10104,8 @@ snapshots:
       '@types/chrome': 0.0.74
 
   webpack-virtual-modules@0.6.2: {}
+
+  websocket-ts@2.2.1: {}
 
   whatwg-encoding@3.1.1:
     dependencies:

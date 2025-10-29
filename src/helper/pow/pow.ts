@@ -16,7 +16,7 @@ export async function makeEvent({ndk, event, difficulty}: makeEventParams): Prom
     event.tags.push([
         "client",
         import.meta.env.VITE_APP_NAME,
-        // "31990:266815e0c9210dfa324c6cba3573b14bee49da4209a9456f9484e5106cd408a5:1686066542546"
+        "31990:acbf4bb4141163d7fa034b8d4fdcd5bd002916122739150fa1456511c1b4ff76"
     ])
     if (difficulty) {
         // preEvent = await _calcProof({event, difficulty})

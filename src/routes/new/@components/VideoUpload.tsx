@@ -31,7 +31,7 @@ export default function Player({
         </div>
     );
 }
-
+// TODO: incluir linguagem na geração de metadados
 export interface VideoMetadata {
     url?: string;
     title?: string;
@@ -50,6 +50,7 @@ export interface VideoMetadata {
     imetaThumb?: NDKImetaTag
     imetaImage?: NDKImetaTag
     age?: AgeEnum
+    language?: string
 }
 
 export function VideoUpload({setVideo,}: { setVideo: Dispatch<SetStateAction<VideoMetadata>> }) {

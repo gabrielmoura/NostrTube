@@ -108,6 +108,10 @@ const faqDataPt: FaqEntry[] = [
         "id": "q9",
         "question": "Qual é o objetivo desta aplicação?",
         "answer": "Trata-se de uma aplicação independente, desenvolvida sem apoio financeiro, com o objetivo de facilitar o consumo e o envio de vídeos para a comunidade Nostr. Criada por um desenvolvedor brasileiro, pode demorar um pouco para ser traduzida para outros idiomas. É um PWA ainda em estágio inicial, mas que busca ajudar novos usuários a compreender o potencial do Nostr de forma visual. O app adota a filosofia KISS (Keep It Simple, Stupid), priorizando simplicidade e utilidade. O código-fonte ainda é privado por não haver maturidade suficiente para colaboração externa."
+    }, {
+        "id": "q10",
+        "question": "O que é um servidor Blossom?",
+        "answer": "Servidores Blossom são serviços de hospedagem descentralizados que permitem aos usuários armazenar e distribuir vídeos de forma eficiente, aproveitando a infraestrutura da rede Nostr para garantir disponibilidade e desempenho. Veja: https://nips.nostr.com/B7"
     }
 ];
 export const faqData = {

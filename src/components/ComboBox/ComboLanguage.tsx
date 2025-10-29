@@ -8,7 +8,7 @@ import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover.t
 import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem} from "@/components/ui/command.tsx";
 import {detectLanguageMain} from "@/helper/userLang.ts";
 import {COMBOBOX_LANGUAGES} from "@/default.ts";
-
+import {t} from "i18next";
 
 export type Language = { id: string; name: string; native?: string; };
 
@@ -21,11 +21,11 @@ export type LanguagesComboProps = {
 };
 
 export default function LanguagesCombo({
-                                              value: controlledValue = null,
-                                              onChange,
-                                              placeholder = "Selecione um idioma...",
-                                              label = "Idioma",
-                                          }: LanguagesComboProps) {
+                                           value: controlledValue = null,
+                                           onChange,
+                                           placeholder = "Selecione um idioma...",
+                                           label = "Idioma",
+                                       }: LanguagesComboProps) {
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState("");
     const [value, setValue] = useState<Language | null>(controlledValue || null);
@@ -63,7 +63,8 @@ export default function LanguagesCombo({
             </CardHeader>
             <CardContent>
                 <div className="flex flex-col gap-2">
-                    <Label className="text-xs">Escolha um dos 10 principais idiomas</Label>
+                    <Label
+                        className="text-xs">{t('components.comboLanguage.selectYourLanguage', 'Select your content language.')}</Label>
 
                     <Popover open={open} onOpenChange={setOpen}>
                         <div className="flex items-center gap-2">
@@ -85,7 +86,8 @@ export default function LanguagesCombo({
                             </PopoverTrigger>
 
                             {value && (
-                                <Button variant="ghost" size="icon" onClick={clear} aria-label="Limpar seleção">
+                                <Button variant="ghost" size="icon" onClick={clear}
+                                        aria-label={t('components.comboLanguage.clearSelection', 'Clear selection')}>
                                     <X/>
                                 </Button>
                             )}
@@ -100,7 +102,7 @@ export default function LanguagesCombo({
                                     className="h-10"
                                 />
                                 <CommandEmpty>
-                                    Nenhum idioma encontrado.
+                                    {t('components.comboLanguage.noLanguageFound', 'No language found')}
                                 </CommandEmpty>
 
                                 <CommandGroup>
