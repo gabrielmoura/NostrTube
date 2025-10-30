@@ -14,10 +14,10 @@ import {nostrNow} from "@/helper/date.ts";
 import {Button} from "@/components/ui/button"
 import {t} from "i18next";
 import {useGenTagsVideo} from "@/hooks/gentTags.ts";
-import {toast} from "react-toastify";
 import {Image} from "@/components/Image.tsx";
 import LanguagesCombo from "@/components/ComboBox/ComboLanguage.tsx";
-import {AddTagButton, AddTagInput} from "@/routes/new/@components/BoxAddToModal.tsx";
+import {AddTagInput} from "@/routes/new/@components/BoxAddToModal.tsx";
+import {toast} from "sonner";
 
 
 const ButtonUpload = lazy(() => import("@/components/ButtonUpload.tsx"))
@@ -195,16 +195,13 @@ function Page() {
                             alt="Video thumbnail"
                             className="mb-2 w-full rounded-md border object-cover"
                             width={"288"}
-                        />) : (<div className="flex gap-2 "><ButtonUpload setUrl={setThumb} url={thumb}>
+                        />) : (
+                        <ButtonUpload
+                            setUrl={setThumb}
+                            url={thumb}
+                            accept={{'image/*': []}}>
                             <Button variant="outline">Upload</Button>
                         </ButtonUpload>
-                            <AddTagButton
-                                onAdd={setThumb}
-                                label="Thumbnail"
-                                placeholder="https://example.com/thumbnail.jpg"
-                                regex={/^https?:\/\/.+/i}
-                            />
-                        </div>
                     )}
 
                 </div>

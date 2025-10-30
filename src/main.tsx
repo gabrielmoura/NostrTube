@@ -10,8 +10,9 @@ import NDK, {NDKPool} from "@nostr-dev-kit/ndk";
 import {NDKSessionLocalStorage, useNDK, useNDKInit, useNDKSessionMonitor} from "@nostr-dev-kit/ndk-hooks";
 import './helper/i18n';
 import "./main.css"
-import {ToastContainer} from "react-toastify";
 import {Modstr} from "@/components/modal/Modal.tsx";
+import {Toaster} from "@/components/ui/sonner"
+
 
 // register nostr: protocol handler
 if (import.meta.env.PROD) {
@@ -109,8 +110,8 @@ createRoot(root).render(
             <QueryClientProvider client={queryClient}>
                 <Theme>
                     <RouterProvider router={router}/>
-                    <ToastContainer/>
-                    <Modstr />
+                    <Toaster/>
+                    <Modstr/>
                 </Theme>
             </QueryClientProvider>
         </PreRoot>

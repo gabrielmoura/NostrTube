@@ -22,6 +22,7 @@
   "Content_warning": "Aviso de conteúdo",
   "Thumbnail": "Miniatura",
   "Indexers": "Indexadores",
+  "Sending_files": "Enviando arquivos",
   "components": {
     "comboLanguage": {
       "noLanguageFound": "Nenhum idioma encontrado.",
