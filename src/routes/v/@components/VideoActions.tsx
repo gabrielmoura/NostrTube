@@ -13,6 +13,7 @@ import LikeToggleButton from "@/components/LikeToggleButton.tsx";
 import {lazy, useEffect, useState} from "react";
 import {DropdownMenuVideo} from "@/routes/v/@components/DropDown.tsx";
 import FollowButton from "@/components/FollowButton.tsx";
+import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 
 const VideoMeta = lazy(() => import("@/routes/v/@components/VideoMeta.tsx"))
 const LikeButton = lazy(() => import("@/routes/v/@components/LikeButton.tsx"))
@@ -107,6 +108,7 @@ export default function VideoActions({event}: VideoActionsProps) {
             </div>
 
             {/* Metadata Section */}
+            <ScrollArea>
             <div
 
                 className={cn(
@@ -130,6 +132,7 @@ export default function VideoActions({event}: VideoActionsProps) {
                 {/*    </div>*/}
                 {/*</ExpandButton>*/}
             </div>
+            </ScrollArea>
         </div>
     );
 }

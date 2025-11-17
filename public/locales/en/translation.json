@@ -23,6 +23,7 @@
   "Thumbnail": "Thumbnail",
   "Indexers": "Indexers",
   "Sending_files": "Sending files",
+  "In_Development": "In Development!",
   "components": {
     "comboLanguage": {
       "noLanguageFound": "No language found",
