@@ -4,9 +4,9 @@ import {NDKEvent} from "@nostr-dev-kit/ndk-hooks";
 import NDK__default from "@nostr-dev-kit/ndk";
 
 // https://github.com/coracle-social/coracle/blob/master/src/util/pow.ts#L5
-import {logger} from "@/debug.ts";
+import {LoggerAgent} from "@/debug.ts";
 
-const log = logger.extend("POW");
+const log = LoggerAgent.create("POW");
 export interface makeEventParams {
     event: OwnedEvent,
     difficulty?: number,
@@ -34,7 +34,7 @@ export async function makeEvent({ndk, event, difficulty}: makeEventParams): Prom
     } else {
         preEvent = event
     }
-    log(preEvent, event)
+    log.debug("POW generated",preEvent, event)
     const evt = new NDKEvent(ndk, {...preEvent})
     await evt.sign()
     return evt
@@ -61,44 +61,3 @@ export const getPow = (event: HashedEvent): number => {
 
     return count >= difficulty ? difficulty : 0
 }
-// export async function _makeEvent({ndk, event, difficulty}: makeEventParams): Promise<NDKEvent> {
-//     let preEvent: OwnedEvent
-//     event.tags.push([
-//         "client",
-//         import.meta.env.VITE_APP_NAME,
-//         // "31990:266815e0c9210dfa324c6cba3573b14bee49da4209a9456f9484e5106cd408a5:1686066542546"
-//     ])
-//     if (difficulty) {
-//         preEvent = await _calcProof({event, difficulty})
-//     } else {
-//         preEvent = event
-//     }
-//     console.log(preEvent, event)
-//     const evt = new NDKEvent(ndk, {...preEvent})
-//     await evt.sign()
-//     return evt
-// }
-
-// interface _ProofOfWorkW {
-//     event: Partial<HashedEvent>
-//     difficulty: number
-//     start?: number
-//     step?: number
-// }
-//
-//
-// function _getPowW(id: Uint8Array<ArrayBufferLike>): number {
-//     let count = 0
-//
-//     for (let i = 0; i < 32; i++) {
-//         const nibble = id[i]
-//         if (nibble === 0) {
-//             count += 8
-//         } else {
-//             count += Math.clz32(nibble) - 24
-//             break
-//         }
-//     }
-//
-//     return count
-// }
