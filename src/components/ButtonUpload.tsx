@@ -8,7 +8,8 @@ import {CircleDotDashed, UploadCloud} from "lucide-react"; // Adicionado UploadC
 import {t} from "i18next";
 import {Progress} from "@/components/ui/progress.tsx";
 import {Button} from "@/components/ui/button.tsx";
-import {AddTagButton} from "@/routes/new/@components/BoxAddToModal.tsx"; // Importe o componente Button se não tiver
+import {AddTagButton} from "@/routes/new/@components/BoxAddToModal.tsx";
+import {toast} from "sonner"; // Importe o componente Button se não tiver
 
 interface ButtonUploadProps {
     children: ReactNode
@@ -82,8 +83,10 @@ export default function ButtonUpload({children, url, setUrl, accept}: ButtonUplo
             setUrl(url)
             setFileToUpload(null); // Limpa o arquivo após o upload bem-sucedido
             setFiles([]); // Limpa a pré-visualização também
+            toast.success("File uploaded")
         } catch (error) {
             console.error("Error during file upload:", error);
+            toast.error("Error during file upload")
         } finally {
             setIsLoading(false);
             setUploadProgress(undefined);

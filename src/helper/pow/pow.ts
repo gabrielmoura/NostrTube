@@ -4,7 +4,9 @@ import {NDKEvent} from "@nostr-dev-kit/ndk-hooks";
 import NDK__default from "@nostr-dev-kit/ndk";
 
 // https://github.com/coracle-social/coracle/blob/master/src/util/pow.ts#L5
+import {logger} from "@/debug.ts";
 
+const log = logger.extend("POW");
 export interface makeEventParams {
     event: OwnedEvent,
     difficulty?: number,
@@ -32,7 +34,7 @@ export async function makeEvent({ndk, event, difficulty}: makeEventParams): Prom
     } else {
         preEvent = event
     }
-    console.log(preEvent, event)
+    log(preEvent, event)
     const evt = new NDKEvent(ndk, {...preEvent})
     await evt.sign()
     return evt

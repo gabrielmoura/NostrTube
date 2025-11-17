@@ -111,6 +111,7 @@ function Page() {
 
         } catch (err) {
             console.error("error submitting event", err);
+            toast.error("error submitting event")
         } finally {
             // setLoading(false);
         }

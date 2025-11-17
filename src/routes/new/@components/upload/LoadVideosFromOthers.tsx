@@ -6,6 +6,7 @@ import {Label} from "@/components/label.tsx";
 import {Input} from "@/components/input.tsx";
 import {Button} from "@/components/button.tsx";
 import {RiSearchLine} from "react-icons/ri";
+import {toast} from "sonner";
 
 export default function LoadVideoFromOthers({
                                                 setShowEventInput,
@@ -22,7 +23,9 @@ export default function LoadVideoFromOthers({
         if (!eventTagId) return;
         const {data, type} = nip19.decode(eventTagId);
         if (["naddr", "nevent"].indexOf(type) === -1) {
-            return alert("Invalid naddr or nevent");
+            toast.error("Invalid naddr or nevent")
+            console.log("Invalid naddr or nevent")
+            return;
         }
         setIsSearching(true);
         try {
@@ -79,6 +82,7 @@ export default function LoadVideoFromOthers({
             }
         } catch (err) {
             console.log("Error searching", err);
+            toast.error("Error searching")
         } finally {
             setIsSearching(false);
         }

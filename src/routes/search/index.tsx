@@ -18,7 +18,7 @@ const VideoCard = lazy(() => import('@/components/cards/videoCard'));
 export const Route = createFileRoute('/search/')({
     component: RouteComponent,
     validateSearch: zodValidator(eventSearchSchema),
-    loaderDeps: ({search: {search, nsfw, tag}}) => ({search, nsfw, tag}),
+    loaderDeps: ({search: {search, nsfw, tag,lang}}) => ({search, nsfw, tag,lang}),
     // loader: ({deps, context: {ndk}}) => getVideosFromSearchData({...deps, ndk}),
     pendingComponent: PageSpinner,
     // notFoundComponent: () => <div>nehum resultado encontrado</div>,
@@ -106,12 +106,17 @@ function RouteComponent() {
 }
 
 function Search() {
-    const {search, nsfw, tag} = useSearch({
+    const {search, nsfw, tag,lang} = useSearch({
         from: "/search/"
     })
     const tags = tag
         ? Array.isArray(tag) ? tag.map((t) => ({"#t": [t]})) : {"#t": [tag]}
         : undefined
+    if (lang) {
+        if(Array.isArray(tags)){
+            tags.push(["l", lang])
+        }
+    }
 
     const filters: NDKFilter[] = [
         {

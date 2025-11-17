@@ -38,11 +38,11 @@ export default defineConfig(({mode}) => {
             tailwindcss(),
             react(),
             VitePWA({
+                    strategies: "injectManifest",
+                    srcDir: "src/sw/worker",
+                    filename: "sw.ts",
                     registerType: 'autoUpdate',
-                    // strategies: "injectManifest",
-                    // srcDir: "src/sw/worker",
-                    // filename: "sw.ts",
-                    strategies: "generateSW",
+                    // strategies: "generateSW",
                     includeManifestIcons: true,
                     injectManifest: {
                         minify: false,

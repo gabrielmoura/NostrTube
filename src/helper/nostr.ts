@@ -44,7 +44,6 @@ export async function geVideoByEventIdData({ndk, eventId}: GeVideoByEventIdDataP
                     },
                 ];
                 break
-            //{"id":"3f834227bf13befa879719591b4c519d11b4cf46b6122891fe8af7285ced0cb1","relays":["ws://localhost:4869/","ws://localhost:4869/"],"author":"91bea5cd9361504c409aaf459516988f68a2fcd482762fd969a7cdc71df4451c"}
             case "nevent":
                 filters = [
                     {
@@ -88,13 +87,19 @@ export const eventSearchSchema = z.object({
     tag: z.union([z.string(), z.array(z.string())]).optional(),
     search: z.string().optional(),
     nsfw: z.boolean().optional(),
+    lang: z.string().min(2).optional(),
 })
 export type eventSearchType = z.infer<typeof eventSearchSchema>
 
-export async function getVideosFromSearchData({ndk, search, nsfw, tag}: eventSearchType & { ndk: NDK__default }) {
+export async function getVideosFromSearchData({ndk, search, nsfw, tag, lang}: eventSearchType & { ndk: NDK__default }) {
     const tags = tag
         ? Array.isArray(tag) ? tag.map((t) => ({"#t": [t]})) : {"#t": [tag]}
         : undefined
+    if (lang) {
+        if(Array.isArray(tags)){
+            tags.push(["l", lang])
+        }
+    }
 
     const filters: NDKFilter[] = [
         {

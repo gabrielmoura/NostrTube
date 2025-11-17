@@ -66,7 +66,7 @@ export function VideoPlayer({image, src, title, onCanPlay, className}: VideoPlay
         // onCanPlay={onCanPlay}
         onPlay={onCanPlay}
         ref={player}
-        autoplay={false}
+        autoplay={true}
         logLevel={import.meta.env.PROD ? 'warn' : 'debug'}
         viewType='video'
         streamType='on-demand'
