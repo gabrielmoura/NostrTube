@@ -24,6 +24,9 @@
   "Indexers": "Indexadores",
   "Sending_files": "Enviando arquivos",
   "In_Development": "Em desenvolvimento!",
+  "Search": "Pesquisar",
+  "Generating": "Gerando",
+  "Generate": "Gerar",
   "components": {
     "comboLanguage": {
       "noLanguageFound": "Nenhum idioma encontrado.",

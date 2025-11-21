@@ -24,6 +24,9 @@
   "Indexers": "Indexers",
   "Sending_files": "Sending files",
   "In_Development": "In Development!",
+  "Search": "Search",
+  "Generating": "Generating",
+  "Generate": "Generate",
   "components": {
     "comboLanguage": {
       "noLanguageFound": "No language found",

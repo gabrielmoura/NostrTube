@@ -11,6 +11,7 @@ import {getTagValues} from "@welshman/util";
 import {Section, SectionContent, SectionHeader, SectionTitle} from "@/components/containers/pageSection";
 import {PageSpinner} from "@/components/PageSpinner.tsx";
 import React, {lazy, useEffect} from "react"
+import {t} from "i18next"
 
 const VideoCard = lazy(() => import('@/components/cards/videoCard'));
 
@@ -176,7 +177,7 @@ function Search() {
         <Section className="px-5">
             <SectionHeader>
                 <SectionTitle className="font-main text-2xl font-semibold sm:text-3xl">
-                    Recent Uploads
+                    {t('Search','Search')}
                 </SectionTitle>
             </SectionHeader>
             <SectionContent className="md-feed-cols relative mx-auto gap-4">
