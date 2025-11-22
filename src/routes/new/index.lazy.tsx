@@ -7,7 +7,7 @@ import Player, {VideoMetadata, VideoUpload} from "@/routes/new/@components/Video
 import {cn} from "@/helper/format.ts";
 
 import {Label} from "@/components/label.tsx";
-import {NDKEvent, useCurrentUserProfile, useNDK} from "@nostr-dev-kit/ndk-hooks";
+import { NDKEvent, useCurrentUserProfile, useNDK, useNDKCurrentUser } from "@nostr-dev-kit/ndk-hooks";
 import {useMutation} from "@tanstack/react-query";
 import {makeEvent, type makeEventParams} from "@/helper/pow/pow.ts";
 import {nostrNow} from "@/helper/date.ts";
@@ -18,6 +18,7 @@ import {Image} from "@/components/Image.tsx";
 import LanguagesCombo from "@/components/ComboBox/ComboLanguage.tsx";
 import {AddTagInput} from "@/routes/new/@components/BoxAddToModal.tsx";
 import {toast} from "sonner";
+import { LoggerAgent } from "@/debug.ts";
 
 
 const ButtonUpload = lazy(() => import("@/components/ButtonUpload.tsx"))
@@ -28,11 +29,11 @@ export const Route = createLazyFileRoute('/new/')({
     component: Page,
 })
 
-
+const log = LoggerAgent.create("NewVideoPage");
 function Page() {
     const navigate = useNavigate()
     const {ndk} = useNDK();
-    const currentUser = useCurrentUserProfile();
+    const currentUser = useNDKCurrentUser();
 
     const [videoData, setVideoData] = useState<Partial<VideoMetadata>>({});
     const [indexers, setIndexers] = useState<string[]>([])
@@ -72,7 +73,7 @@ function Page() {
                     autoClose: 5000
                 });
             }).catch((err) => {
-                console.error("error publishing event", err);
+                log.error("error publishing event", err);
                 toast(t("error_publishing_video", "Error publishing video"), {
                     type: "error",
                     autoClose: 5000
@@ -110,7 +111,7 @@ function Page() {
             })
 
         } catch (err) {
-            console.error("error submitting event", err);
+            log.error("error submitting event", err);
             toast.error("error submitting event")
         } finally {
             // setLoading(false);

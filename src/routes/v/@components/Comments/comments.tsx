@@ -5,6 +5,7 @@ import {NDKKind, NDKSubscriptionCacheUsage, useSubscribe} from "@nostr-dev-kit/n
 import {ErrorBoundaryVideo} from "@/routes/v/@components/error.tsx";
 import {t} from "i18next";
 import Spinner from "@/components/Spinner.tsx";
+import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 
 type CommentSectionProps = {
     eventReference: string;
@@ -30,7 +31,7 @@ export default function CommentSection({
         return <Spinner/>
     }
     return (
-        <section className="space-y-2.5 py-2">
+        <ScrollArea className="space-y-2.5 py-2">
             {/* Comments Section */}
             <div className="">
                 <div className="flex items-center">
@@ -53,6 +54,6 @@ export default function CommentSection({
             <ErrorBoundaryVideo>
                 <CommentFeed comments={events}/>
             </ErrorBoundaryVideo>
-        </section>
+        </ScrollArea>
     );
 }

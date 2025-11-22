@@ -8,6 +8,7 @@ export interface UserSession {
         darkTheme: boolean,
         nsfw: boolean,
         age?: AgeEnum,
+        mirrors?: string[]
     }
 }
 

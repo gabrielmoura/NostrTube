@@ -1,11 +1,11 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import {useNavigate} from "@tanstack/react-router";
-import {toast} from "react-toastify";
 import {copyText, downloadVideo, getVideoDetails} from "@/helper/format.ts";
 import {useNDKCurrentPubkey} from "@nostr-dev-kit/ndk-hooks";
 import {getTagValue} from "@welshman/util";
 import {Download, ExternalLink, FileJson, Flag, ListPlus, MoreVertical, Pencil, Send, Share2,} from "lucide-react";
 import {modal} from "@/components/modal/state.tsx";
+import { toast } from "sonner";
 // import AddToPlaylistModal from "@/routes/v/@components/AddToPlaylistModal.tsx";
 // const AddToPlaylistModal=lazy(()=>import(/* webpackChunkName: "AddToPlaylistModal" */"@/routes/v/@components/AddToPlaylistModal.tsx"));
 

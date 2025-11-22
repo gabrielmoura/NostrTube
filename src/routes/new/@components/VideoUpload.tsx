@@ -65,7 +65,7 @@ export function VideoUpload({setVideo,}: { setVideo: Dispatch<SetStateAction<Vid
             setVideo={setVideo}
         />
     }
-    return <VideoUploadFile setShowEventInput={setShowEventInput} setVideo={setVideo}/>
+    return <VideoUploadFile  setShowEventInput={setShowEventInput} setVideo={setVideo}/>
 }
 
 

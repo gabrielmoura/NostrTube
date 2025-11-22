@@ -120,9 +120,11 @@ export default function VideoActions({event}: VideoActionsProps) {
                     <VideoMeta event={event}/>
                 </ErrorBoundaryVideo>
                 <ErrorBoundaryVideo>
-                    <div className="overflow-hidden whitespace-break-spaces break-words text-sm text-muted-foreground">
+                    <ScrollArea className="whitespace-break-spaces break-words text-sm text-muted-foreground">
+                    {/*<div className="overflow-hidden whitespace-break-spaces break-words text-sm text-muted-foreground">*/}
                         <RenderText text={summary}/>
-                    </div>
+                    {/*</div>*/}
+                    </ScrollArea>
                 </ErrorBoundaryVideo>
                 <VideoTags event={event}/>
                 {/*<ExpandButton className="absolute inset-x-0 bottom-0 z-20 mt-[-55px]">*/}

@@ -63,7 +63,6 @@ function EventLoaded() {
           </ErrorBoundaryVideo>
         </div>
         <div className="px-4">
-          <ScrollArea>
             <div className="pt-1">
               <ErrorBoundaryVideo>
                 <VideoActions event={video.event!} />
@@ -78,7 +77,6 @@ function EventLoaded() {
               />
 
             </ErrorBoundaryVideo>
-          </ScrollArea>
         </div>
       </div>
     </div>

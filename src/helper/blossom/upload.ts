@@ -55,6 +55,6 @@ export function useBlossomUpload({ndk}: { ndk: NDK__default }) {
 
     return {
         upload,
-        onProgress:
+        onProgress: progress,
     };
 }
