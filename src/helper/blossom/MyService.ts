@@ -1,7 +1,7 @@
-import { NostrEvent } from "@jsr/nostrify__types/NostrEvent.ts";
-import { encodeHex } from "@jsr/std__encoding/hex";
+import { encodeHex } from "./hex/hex.ts";
 import { decodeBase64, encodeBase64 } from "hash-wasm/lib/util.ts";
 import { z } from "zod";
+import type { NostrEvent } from "./types.ts";
 
 type UploadCallback<T = any> = (data: T) => void;
 

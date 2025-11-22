@@ -1,7 +1,5 @@
 import { Outlet } from "react-router";
 import Header from "@/components/header/Header.tsx";
-import OfflineDetector from "@/components/OfflineDetector.tsx";
-
 
 export function Nostr() {
 
@@ -13,6 +11,5 @@ export function Nostr() {
     </div>
 
     <Outlet />
-    <OfflineDetector />
   </main>;
 }

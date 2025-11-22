@@ -12,6 +12,8 @@ import './helper/i18n';
 import "./main.css"
 import {Modstr} from "@/components/modal/Modal.tsx";
 import {Toaster} from "@/components/ui/sonner"
+import OfflineDetector from "@/components/OfflineDetector.tsx";
+import { Analytics } from "@vercel/analytics/react";
 
 
 // register nostr: protocol handler
@@ -112,6 +114,8 @@ createRoot(root).render(
                     <RouterProvider router={router}/>
                     <Toaster/>
                     <Modstr/>
+                    <OfflineDetector />
+                    <Analytics />
                 </Theme>
             </QueryClientProvider>
         </PreRoot>
