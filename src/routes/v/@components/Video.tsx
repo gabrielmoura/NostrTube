@@ -7,7 +7,7 @@ import { useRecordView } from "@/hooks/useRecordView.ts";
 import { useVideoContext, VideoProvider } from "@/context/VideoContext.tsx";
 import { useLoaderData } from "@tanstack/react-router";
 import { PageSpinner } from "@/components/PageSpinner.tsx";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Helmet } from "react-helmet-async";
 
 const VideoActions = lazy(() => import("@/routes/v/@components/VideoActions.tsx"));
 const CommentSection = lazy(() => import("@/routes/v/@components/Comments/comments.tsx"));
@@ -50,6 +50,17 @@ function EventLoaded() {
   }
 
   return <div className="mx-auto max-w-7xl pb-4 sm:py-4">
+    <Helmet>
+      <title>{video.title} - NostrTube</title>
+      <meta name="description" content={video.summary || ""} />
+      {/*  Og */}
+      <meta property="og:image" content={video.image || ""} />
+      <meta property="og:title" content={video.title || ""} />
+      <meta property="og:description" content={video.summary || ""} />
+      <meta property="og:type" content="video.other" />
+      <meta property="og:video" content={video.url || ""} />
+      <meta property="og:video:secure_url" content={video.url || ""} />
+    </Helmet>
     <div className="flex flex-col gap-6 lg:flex-row">
       <div className="shrink-1 flex-1 md:min-w-[500px]">
         {/* Video Player */}
@@ -63,20 +74,20 @@ function EventLoaded() {
           </ErrorBoundaryVideo>
         </div>
         <div className="px-4">
-            <div className="pt-1">
-              <ErrorBoundaryVideo>
-                <VideoActions event={video.event!} />
-              </ErrorBoundaryVideo>
-            </div>
+          <div className="pt-1">
             <ErrorBoundaryVideo>
-
-              <CommentSection
-                eventReference={video.identification!}
-                eventId={video.event!.id}
-                pubkey={video.event?.pubkey as string}
-              />
-
+              <VideoActions event={video.event!} />
             </ErrorBoundaryVideo>
+          </div>
+          <ErrorBoundaryVideo>
+
+            <CommentSection
+              eventReference={video.identification!}
+              eventId={video.event!.id}
+              pubkey={video.event?.pubkey as string}
+            />
+
+          </ErrorBoundaryVideo>
         </div>
       </div>
     </div>

@@ -35,7 +35,7 @@ export default function VideoUploadFile({
   const [countErrors, setErrosCount] = useState<number>(0);
   const [uploadProgress, setUploadProgress] = useState<number>();
   const logger = LoggerAgent.create("VideoUploadFile");
-  const { session } = useUserStore((state) => state.session);
+  const session  = useUserStore((state) => state?.session);
 
   // 🔒 Garante referência estável do NDK e upload handler
   const ndkRef = useRef(ndk);
@@ -116,7 +116,7 @@ export default function VideoUploadFile({
         imeta;
       const mirrorSet = new Set<NDKImetaTag>();
 
-      myBlossom.mirrorBlob(url, session.mirrors).then((mirrors => {
+      myBlossom.mirrorBlob(url, session?.mirrors||[]).then((mirrors => {
         mirrors.forEach((mirror) => {
           mirrorSet.add(mirror.url as NDKImetaTag);
         });

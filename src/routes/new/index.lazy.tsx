@@ -12,13 +12,14 @@ import {useMutation} from "@tanstack/react-query";
 import {makeEvent, type makeEventParams} from "@/helper/pow/pow.ts";
 import {nostrNow} from "@/helper/date.ts";
 import {Button} from "@/components/ui/button"
-import {t} from "i18next";
+import { t } from "i18next";
 import {useGenTagsVideo} from "@/hooks/gentTags.ts";
 import {Image} from "@/components/Image.tsx";
 import LanguagesCombo from "@/components/ComboBox/ComboLanguage.tsx";
 import {AddTagInput} from "@/routes/new/@components/BoxAddToModal.tsx";
 import {toast} from "sonner";
 import { LoggerAgent } from "@/debug.ts";
+import { Helmet } from "react-helmet-async";
 
 
 const ButtonUpload = lazy(() => import("@/components/ButtonUpload.tsx"))
@@ -120,6 +121,10 @@ function Page() {
 
     return (
         <div className="flex flex-col gap-8 lg:flex-row py-2.5 px-5">
+            <Helmet>
+                <title>{t('upload_new_video', 'Upload New Video')} - NostrTube</title>
+                <meta name="description" content={t('upload_new_video_description', 'Upload a new video to NostrTube and share it with the world.')} />
+            </Helmet>
             {/* Coluna principal (Player + Metadados do vídeo) */}
             <div className="flex-1 min-w-[320px] md:min-w-[500px] space-y-6">
                 {/* Player ou Upload */}

@@ -69,16 +69,11 @@ export function VideoProvider({ children, event }: {
   const [video, setVideoState] = useState<Partial<VideoMetaTypes>>(null);
 
   useEffect(() => {
-
     if (event) {
-      const { title } = extractTag(event.tags);
-      document.title = title!;
       wrapSetVideo(setVideoState)(event);
     } else {
       geVideoByEventIdData({ eventId, ndk } as GeVideoByEventIdDataParams)
         .then((event) => {
-          const { title } = extractTag(event.tags);
-          document.title = title!;
           wrapSetVideo(setVideoState)(event);
         })
         .catch(e => {

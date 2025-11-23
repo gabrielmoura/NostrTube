@@ -11,3 +11,5 @@ VITE_APP_IMGPROXY=http://localhost:9095
 ```
 
 https://github.com/nostr-protocol/nips/blob/master/89.md#client-tag
+
+Uma lista de servidores Blossom podem ser encontrados aqui: https://blossomservers.com/
