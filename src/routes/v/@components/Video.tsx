@@ -1,4 +1,4 @@
-import { NDKEvent, useCurrentUserProfile, useNDK } from "@nostr-dev-kit/ndk-hooks";
+import { NDKEvent, useCurrentUserProfile, useNDK, useNDKCurrentUser } from "@nostr-dev-kit/ndk-hooks";
 import { VideoPlayer } from "@/components/videoPlayer";
 import { ErrorBoundaryVideo } from "@/routes/v/@components/error.tsx";
 import { lazy, useState } from "react";
@@ -24,7 +24,7 @@ export function VideoPage() {
 
 function EventLoaded() {
   const [toViewer, setViewed] = useState<boolean>(true);
-  const currentUser = useCurrentUserProfile();
+  const currentUser = useNDKCurrentUser();
   const { ndk } = useNDK();
   const { video } = useVideoContext();
   const { markView } = useRecordView();

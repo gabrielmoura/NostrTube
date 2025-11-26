@@ -38,7 +38,7 @@ export default function CommentSection({
                     <h2 className="text-base font-semibold text-foreground">
                         {events.length === 1
                             ? "1 Comment"
-                            : `${formatCount(events?.length)} ${t('comments')}`}
+                            : `${formatCount(events?.length||0)} ${t('comments')}`}
                     </h2>
                 </div>
             </div>
