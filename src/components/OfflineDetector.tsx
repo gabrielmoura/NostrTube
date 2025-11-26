@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Status, StatusIndicator, StatusLabel } from "@/components/ui/shadcn-io/status";
-
+import { t } from "i18next";
 
 export default function OfflineDetector() {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const msg = t("You_are_offline", "Você está offline");
 
   useEffect(() => {
     const handleOffline = () => {
       setIsOffline(true);
-      toast.error("Você está offline");
+      toast.error(msg);
     };
 
     const handleOnline = () => {
@@ -28,17 +29,28 @@ export default function OfflineDetector() {
   if (!isOffline) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 w-full bg-red-600 text-white text-center py-2 text-sm z-50 shadow-lg">
+    <div className="fixed bottom-0 left-0 w-full flex justify-center py-3 z-50">
       <Status
-        className="gap-4 rounded-full px-6 py-2 text-sm"
         status="offline"
         variant="outline"
+        className="
+          border-2
+          border-dashed
+          border-gray-400
+          bg-gray-200/60
+          text-gray-800
+          rounded-xl
+          px-6
+          py-2
+          shadow
+          flex
+          items-center
+          gap-2
+        "
       >
-        <StatusIndicator />
-        <StatusLabel className="font-mono">Você está offline</StatusLabel>
+        <StatusIndicator className="w-3 h-3" />
+        <StatusLabel className="font-mono text-sm">{msg}</StatusLabel>
       </Status>
-
     </div>
-
   );
 }
