@@ -74,3 +74,14 @@ export interface NostrSigner {
         decrypt(pubkey: string, ciphertext: string): Promise<string>;
     };
 }
+export interface NDKImetaTag {
+    url?: string;
+    blurhash?: string;
+    dim?: string;
+    alt?: string;
+    m?: string;
+    x?: string;
+    size?: string;
+    fallback?: string[];
+    [key: string]: string | string[] | undefined;
+}

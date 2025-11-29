@@ -1,4 +1,4 @@
-import { NDKEvent, useCurrentUserProfile, useNDK, useNDKCurrentUser } from "@nostr-dev-kit/ndk-hooks";
+import { NDKEvent, useNDK, useNDKCurrentUser } from "@nostr-dev-kit/ndk-hooks";
 import { VideoPlayer } from "@/components/videoPlayer";
 import { ErrorBoundaryVideo } from "@/routes/v/@components/error.tsx";
 import { lazy, useState } from "react";
@@ -51,12 +51,12 @@ function EventLoaded() {
 
   return <div className="mx-auto max-w-7xl pb-4 sm:py-4">
     <Helmet>
-      <title>{video.title} - NostrTube</title>
-      <meta name="description" content={video.summary || ""} />
+      <title>{video?.title || "Untitled"} - NostrTube</title>
+      <meta name="description" content={video?.summary || ""} />
       {/*  Og */}
-      <meta property="og:image" content={video.image || ""} />
-      <meta property="og:title" content={video.title || ""} />
-      <meta property="og:description" content={video.summary || ""} />
+      <meta property="og:image" content={video?.image || ""} />
+      <meta property="og:title" content={video?.title || ""} />
+      <meta property="og:description" content={video?.summary || ""} />
       <meta property="og:type" content="video.other" />
       <meta property="og:video" content={video.url || ""} />
       <meta property="og:video:secure_url" content={video.url || ""} />
@@ -67,7 +67,7 @@ function EventLoaded() {
         <div
           className="sticky top-[calc(var(--header-height))] z-30 aspect-video w-full overflow-hidden sm:static sm:max-h-[calc(61vw-32px)] sm:rounded-xl sm:px-4">
           <ErrorBoundaryVideo>
-            <VideoPlayer src={video.url!} image={video.image!} title={video.title}
+            <VideoPlayer src={video.url!} image={video.image!} title={video?.title || "Untitled"}
                          onCanPlay={onCanPlay}
                          className="overflow-hidden sm:rounded-xl"
             />

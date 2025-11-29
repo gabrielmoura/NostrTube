@@ -1,48 +1,128 @@
-import { type NDKImetaTag } from "@nostr-dev-kit/ndk";
-import { encodeHex } from "./hex/hex";
-import { N64 } from "@nostrify/nostrify/utils/N64";
-
+import { encodeHex } from "./hex/hex.ts";
+import { decodeBase64, encodeBase64 } from "hash-wasm/lib/util.ts";
 import { z } from "zod";
-import type { NostrSigner, NUploader } from "./types.ts";
+import type { NDKImetaTag, NostrEvent } from "./types.ts";
 
-/** BlossomUploader options. */
-export interface BlossomUploaderOpts {
-  /** Blossom servers to use. */
-  servers: Request["url"][];
-  /** Signer for Blossom authorizations. */
-  signer: NostrSigner;
-  /** Custom fetch implementation. */
-  fetch?: typeof fetch;
-  /** Number of milliseconds until each request should expire. (Default: `60_000`) */
-  expiresIn?: number;
-  /** Callback for upload progress. */
-  onProgress?: (progress: number) => void;
-  /** Number of retries for failed uploads. (Default: `3`) */
-  maxRetries?: number;
+type UploadCallback<T = any> = (data: T) => void;
+
+interface UploadOptions {
+  endpoint: string;
+  authHeader: string;
 }
 
-/** Upload files to Blossom servers. */
-export class BlossomUploader implements NUploader {
-  private servers: Request["url"][];
-  private signer: NostrSigner;
-  private fetch: typeof fetch;
-  private expiresIn: number;
-  private onProgress?: (progress: number) => void;
-  private maxRetries: number;
+export interface NostrSigner {
+  /** Returns a public key as hex. */
+  getPublicKey(): Promise<string>;
 
-  constructor(opts: BlossomUploaderOpts) {
-    if (!opts.servers || opts.servers.length === 0) {
-      throw new Error("At least one Blossom server URL must be provided.");
-    }
-    this.servers = opts.servers;
-    this.signer = opts.signer;
-    this.fetch = opts.fetch ?? globalThis.fetch.bind(globalThis);
-    this.expiresIn = opts.expiresIn ?? 60_000;
-    this.onProgress = opts.onProgress;
-    this.maxRetries = opts.maxRetries ?? 3;
+  /** Takes an event template, adds `id`, `pubkey` and `sig` and returns it. */
+  signEvent(event: Omit<NostrEvent, "id" | "pubkey" | "sig">): Promise<NostrEvent>;
+
+  /** Returns a record of relay URLs to relay policies. */
+  getRelays?(): Promise<Record<string, { read: boolean; write: boolean }>>;
+
+  /** @deprecated NIP-04 crypto methods. Use `nip44` instead. */
+  nip04?: {
+    /** @deprecated Returns ciphertext and iv as specified in NIP-04. */
+    encrypt(pubkey: string, plaintext: string): Promise<string>;
+    /** @deprecated Takes ciphertext and iv as specified in NIP-04. */
+    decrypt(pubkey: string, ciphertext: string): Promise<string>;
+  };
+  /** NIP-44 crypto methods. */
+  nip44?: {
+    /** Returns ciphertext as specified in NIP-44. */
+    encrypt(pubkey: string, plaintext: string): Promise<string>;
+    /** Takes ciphertext as specified in NIP-44. */
+    decrypt(pubkey: string, ciphertext: string): Promise<string>;
+  };
+}
+
+const Schema = z.object({
+  url: z.string(),
+  sha256: z.string(),
+  size: z.number(),
+  type: z.string().optional(),
+  dim: z.string().optional()
+});
+type schemaType = typeof Schema
+
+export class FileUploader {
+  private onSuccessCallback?: UploadCallback<Response>;
+  private onProgressCallback?: UploadCallback<number>;
+  private onFailedCallback?: UploadCallback<Error>;
+  public signer: NostrSigner;
+
+  /**
+   * Define o callback de sucesso
+   */
+  onSuccess(cb: UploadCallback<Response>) {
+    this.onSuccessCallback = cb;
+    return this;
   }
 
-  async upload(file: File, opts?: { signal?: AbortSignal }): Promise<NDKImetaTag> {
+  /**
+   * Define o callback de progresso (0-100)
+   */
+  onProgress(cb: UploadCallback<number>) {
+    this.onProgressCallback = cb;
+    return this;
+  }
+
+  /**
+   * Define o callback de falha
+   */
+  onFailed(cb: UploadCallback<Error>) {
+    this.onFailedCallback = cb;
+    return this;
+  }
+
+  /**
+   * Faz o upload de um arquivo para um endpoint
+   */
+  private async _upload(file: File, { endpoint, authHeader }: UploadOptions): Promise<schemaType> {
+    try {
+
+      const totalSize = file.size;
+      let uploaded = 0;
+
+      // Usa um stream customizado para monitorar o progresso
+      const stream = file.stream().pipeThrough(
+        new TransformStream({
+          transform: (chunk, controller) => {
+            uploaded += chunk.byteLength;
+            const progress = Math.round((uploaded / totalSize) * 100);
+            this.onProgressCallback?.(progress);
+            controller.enqueue(chunk);
+          }
+        })
+      );
+
+      const response = await fetch(`${endpoint}/upload`, {
+        method: "PUT",
+        headers: {
+          ...(authHeader ? { Authorization: authHeader } : {})
+        },
+        body: stream
+      });
+
+      const json = await response.json();
+      const data = Schema.parse(json);
+
+
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.statusText}`);
+      }
+
+      this.onSuccessCallback?.(response);
+      return data;
+    } catch (error: any) {
+      this.onFailedCallback?.(error);
+    }
+  }
+
+  /**
+   * Envia o mesmo arquivo para múltiplos endpoints em paralelo
+   */
+  async upload(file: File, endpoints: string[]): Promise<schemaType[]> {
     const x = encodeHex(await crypto.subtle.digest("SHA-256", await file.arrayBuffer()));
 
     const now = Date.now();
@@ -59,112 +139,90 @@ export class BlossomUploader implements NUploader {
         ["expiration", Math.floor(expiration / 1000).toString()]
       ]
     });
+    const authHeader = `Nostr ${N64.encodeEvent(event)}`;
 
-    const authorization = `Nostr ${N64.encodeEvent(event)}`;
-
-    const successfulUploads: NDKImetaTag[] = [];
-    const failedAttempts: Error[] = [];
-
-    // Distribute mirrors for parallel attempts, but prioritize the first server as primary
-    const primaryServer = this.servers[0];
-    const mirrorServers = this.servers.slice(1);
-
-    const uploadAttempt = async (server: string, attempt: number = 0): Promise<NDKImetaTag | undefined> => {
-      try {
-        const url = new URL("/upload", server);
-
-        const response = await this.fetch(url, {
-          method: "PUT",
-          body: file,
-          headers: {
-            authorization,
-            "content-type": file.type
-          },
-          signal: opts?.signal
-          // Implement progress tracking if a custom fetch can expose it
-          // For standard fetch, progress is not directly exposed for request body.
-          // A custom fetch or XMLHttpRequest would be needed for precise progress.
-          // For simplicity, we'll simulate a completion progress here if onProgress is set.
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Upload failed on ${server} with status ${response.status}: ${errorText}`);
-        }
-
-        const json = await response.json();
-        const data = BlossomUploader.schema().parse(json);
-
-        if (this.onProgress) {
-          this.onProgress(100); // Mark as complete
-        }
-
-        return {
-          url: data.url,
-          x: data.sha256,
-          size: data.size.toString(),
-          m: data.type
-        };
-      } catch (error) {
-        if (attempt < this.maxRetries) {
-          console.warn(`Upload attempt ${attempt + 1} failed on ${server}. Retrying...`, error);
-          return await uploadAttempt(server, attempt + 1);
-        }
-        throw error; // Propagate error after max retries
-      }
-    };
-
-    // Try to upload to the primary server first
-    let primaryResult: NDKImetaTag | undefined;
-    try {
-      primaryResult = await uploadAttempt(primaryServer);
-      if (primaryResult) {
-        successfulUploads.push(primaryResult);
-      }
-    } catch (error) {
-      failedAttempts.push(error as Error);
-    }
-
-    // Concurrently try to upload to mirrors
-    const mirrorUploadPromises = mirrorServers.map(async (mirror) => {
-      try {
-        const mirrorResult = await uploadAttempt(mirror);
-        if (mirrorResult) {
-          successfulUploads.push(mirrorResult);
-        }
-      } catch (error) {
-        failedAttempts.push(error as Error);
-      }
-    });
-
-    await Promise.all(mirrorUploadPromises);
-
-    if (successfulUploads.length === 0) {
-      const allErrors = failedAttempts.map(err => err.message).join("; ");
-      throw new Error(`Failed to upload file to any Blossom server after multiple attempts. Errors: ${allErrors}`);
-    }
-
-    // Prioritize the primary server's URL if available, otherwise pick the first successful mirror
-    const primaryMeta = successfulUploads.find(meta => meta.url?.startsWith(primaryServer)) || successfulUploads[0];
-
-    const fallbackUrls: string[] = successfulUploads
-      .filter(meta => meta.url !== primaryMeta.url)
-      .map(meta => meta.url!)
-      .filter(Boolean);
-
-    return {
-      ...primaryMeta,
-      fallback: fallbackUrls.length > 0 ? fallbackUrls : undefined
-    };
+    return await Promise.all(
+      endpoints.map((endpoint) =>
+        this._upload(file, { endpoint, authHeader })
+      )
+    );
   }
 
-  /** Blossom "BlobDescriptor" schema. */
-  private static schema() {
-    return z.object({
-      url: z.string(),
-      sha256: z.string(),
-      size: z.number(),
-      type: z.string().optional()
+  private async _mirror(endpoint, authHeader, url: string) {
+    try {
+
+      const response = await fetch(`${endpoint}/mirror`, {
+        method: "PUT",
+        headers: {
+          ...(authHeader ? { Authorization: authHeader } : {})
+        },
+        body: JSON.stringify({ "url": url })
+      });
+      const json = await response.json();
+      const data = Schema.parse(json);
+
+
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.statusText}`);
+      }
+
+      this.onSuccessCallback?.(response);
+      return data;
+    } catch (error: any) {
+      this.onFailedCallback?.(error);
+    }
+
+  }
+
+  async mirrorBlob(url: string, endpoints: string[]): Promise<schemaType[]> {
+    // /mirror
+    const now = Date.now();
+    const expiration = now + this.expiresIn;
+    const event = await this.signer.signEvent({
+      kind: 24242,
+      content: `Mirror ${url}`,
+      created_at: Math.floor(now / 1000),
+      tags: [
+        ["t", "mirror"],
+        ["expiration", Math.floor(expiration / 1000).toString()]
+      ]
     });
+    const authHeader = `Nostr ${N64.encodeEvent(event)}`;
+
+    return await Promise.all(
+      endpoints.map((endpoint) =>
+        this._mirror(endpoint, authHeader, url)
+      )
+    );
+  }
+
+  // Format as NDKImetaTag
+  toImeta(data: schemaType[]): NDKImetaTag {
+    const primary = data[0];
+    const tag: NDKImetaTag = {
+      url: primary.url,
+      x: primary.sha256,
+      size: primary.size?.toString(),
+      m: primary.type || "application/octet-stream"
+    };
+    if (data.length > 1) {
+      tag.fallback = data.slice(1).map(d => d.url);
+    }
+    return tag;
+  }
+}
+
+export class N64 {
+  /** Encode an event as a base64 string. */
+  static encodeEvent(event: NostrEvent): string {
+    return encodeBase64(JSON.stringify(event));
+  }
+
+  /** Decode an event from a base64 string. Validates the event's structure but does not verify its signature. */
+  static decodeEvent(base64: string): NostrEvent {
+    const bytes = decodeBase64(base64);
+    const text = new TextDecoder().decode(bytes);
+
+    return JSON.parse(text);
   }
 }
