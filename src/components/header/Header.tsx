@@ -289,7 +289,8 @@ function UserMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem>
-          <Settings className="mr-2 h-4 w-4" /> Configurações
+          <Settings className="mr-2 h-4 w-4" />
+          <Link to="/configurarion/">Configurações</Link>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" /> Sair
