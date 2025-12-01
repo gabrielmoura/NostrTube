@@ -34,8 +34,7 @@ export type VideoStore = VideoSession & VideoSessionAction;
 
 export const createVideoSlice: StateCreator<
     VideoStore,
-    [["zustand/devtools", never]],
-    []
+  [["zustand/devtools", never], ["zustand/persist", unknown]]
 > = (set) => {
     return ({
         session: undefined,

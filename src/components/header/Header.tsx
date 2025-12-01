@@ -19,7 +19,7 @@ import {
   useNDKCurrentUser,
   useNDKSessionLogout
 } from "@nostr-dev-kit/ndk-hooks";
-import useUserStore from "@/store/userStore";
+import useUserStore from "@/store/useUserStore.ts";
 import { LoginModal } from "@/components/header/LoginModal";
 
 export default function Header() {
@@ -250,8 +250,8 @@ function MobileMenu({ options, theme, setTheme, handleSearch }: any) {
 function UserMenu() {
 
   const logout = useNDKSessionLogout();
-  const clanSession = useUserStore((s) => s.clanSession);
-  const SetProfile = useUserStore((s) => s.SetProfile);
+  const clearSession = useUserStore((s) => s.clearSession);
+  const SetProfile = useUserStore((s) => s.setProfile);
   const currentPubkey = useNDKCurrentPubkey();
   const currentProfile = useCurrentUserProfile();
 
@@ -263,7 +263,7 @@ function UserMenu() {
 
   const handleLogout = () => {
     logout();
-    clanSession();
+    clearSession();
   };
 
   return (

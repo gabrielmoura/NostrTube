@@ -17,7 +17,7 @@ import { FileUploader } from "@/helper/blossom/BlossomUpload.ts";
 import type { EventTemplate } from "blossom-client-sdk";
 import type { UnsignedEvent } from "nostr-tools/core";
 import { getEventHash } from "nostr-tools/pure";
-import useUserStore from "@/store/userStore.ts";
+import useUserStore from "@/store/useUserStore.ts";
 
 interface VideoUploadFileProps {
   setShowEventInput: Dispatch<SetStateAction<boolean>>;

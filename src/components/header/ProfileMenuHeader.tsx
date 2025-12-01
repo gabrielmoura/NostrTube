@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router"; // Assumindo que você está usando TanStack Router
 import { useNDKCurrentPubkey, useNDKSessionLogout } from "@nostr-dev-kit/ndk-hooks";
-import useUserStore from "@/store/userStore.ts";
+import useUserStore from "@/store/useUserStore.ts";
 
 import {
   DropdownMenu,
