@@ -51,18 +51,23 @@ export async function getVideosFromUserData({ ndk, userId }: GetVideosFromUserDa
     {
       authors: [pubkey],
       kinds: [NDKKind.Video, NDKKind.HorizontalVideo],
-      limit: 30
+      limit: 50
     },
     {
       authors: [pubkey],
       kinds: [NDKKind.Metadata],
       limit: 1
+    },
+    {
+      authors: [pubkey],
+      kinds: [NDKKind.VideoCurationSet],
+      limit: 10
     }
   ];
 
   // 3. Busca os eventos
   const events = await ndk.fetchEvents(filters, {
-    closeOnEose: true,
+     closeOnEose: true,
     cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST
   });
 
@@ -70,6 +75,11 @@ export async function getVideosFromUserData({ ndk, userId }: GetVideosFromUserDa
   if (!events || events.size === 0) {
     throw notFound();
   }
+
+  // const hasMetadata = [...events].some(e => e.kind === NDKKind.Metadata);
+  // if (!hasMetadata) {
+  //   throw notFound();
+  // }
 
   return events;
 }

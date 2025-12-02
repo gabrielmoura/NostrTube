@@ -4,7 +4,7 @@ import {imageNewSrc} from "@/helper/http.ts";
 interface ImageProps extends DetailedHTMLProps<ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement> {
     src: string
     alt: string
-    width: string;
+    width: string|number;
 }
 
 export function Image({alt, src, width, ...props}: ImageProps) {

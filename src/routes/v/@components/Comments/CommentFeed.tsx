@@ -1,4 +1,4 @@
-import {NDKEvent, NDKSubscriptionCacheUsage, NDKUserProfile} from "@nostr-dev-kit/ndk";
+import {NDKEvent, NDKSubscriptionCacheUsage, type NDKUserProfile} from "@nostr-dev-kit/ndk";
 import {t} from "i18next";
 import {HiCheckBadge} from "react-icons/hi2";
 import {lazy, useEffect, useState} from "react";

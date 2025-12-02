@@ -169,25 +169,3 @@ export function Fullscreen({
         </Tooltip.Root>
     );
 }
-
-// export function Settings({
-//                              tooltipOffset = 0,
-//                              tooltipPlacement,
-//                          }: MediaButtonProps) {
-//     return (
-//         <Tooltip.Root>
-//             <Tooltip.Trigger asChild>
-//                 <SettingsButton className={buttonClass}>
-//                     <SettingsIcon className="h-7 w-7 transition-transform duration-200"/>
-//                 </SettingsButton>
-//             </Tooltip.Trigger>
-//             <Tooltip.Content
-//                 className={tooltipClass}
-//                 placement={tooltipPlacement}
-//                 sideOffset={tooltipOffset}
-//             >
-//                 Settings
-//             </Tooltip.Content>
-//         </Tooltip.Root>
-//     );
-// }

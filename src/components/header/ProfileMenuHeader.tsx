@@ -14,7 +14,7 @@ import { ChevronDownIcon } from "@radix-ui/react-icons"; // Exemplo de ícone, a
 
 function ProfileMenuHeader() {
   const logout = useNDKSessionLogout();
-  const clanSession = useUserStore((s) => s.clanSession);
+  const clanSession = useUserStore((s) => s.clearSession);
   const currentPubkey = useNDKCurrentPubkey();
 
   function handleLogout() {
@@ -43,7 +43,7 @@ function ProfileMenuHeader() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem>
-          <Link to="/configurarion/">
+          <Link to="/configurarion">
             Settings
           </Link>
         </DropdownMenuItem>

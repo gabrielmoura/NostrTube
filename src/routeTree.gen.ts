@@ -20,6 +20,7 @@ import { Route as VEventIdRouteImport } from './routes/v/$eventId'
 import { Route as UUserIdRouteImport } from './routes/u/$userId'
 import { Route as PNewRouteImport } from './routes/p/new'
 import { Route as PListIdRouteImport } from './routes/p/$listId'
+import { Route as UUserIdEditRouteImport } from './routes/u_/$userId/edit'
 
 const NewIndexLazyRouteImport = createFileRoute('/new/')()
 
@@ -73,6 +74,11 @@ const PListIdRoute = PListIdRouteImport.update({
   path: '/p/$listId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UUserIdEditRoute = UUserIdEditRouteImport.update({
+  id: '/u_/$userId/edit',
+  path: '/u/$userId/edit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchIndexRoute
   '/terms': typeof TermsIndexRoute
   '/new': typeof NewIndexLazyRoute
+  '/u/$userId/edit': typeof UUserIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchIndexRoute
   '/terms': typeof TermsIndexRoute
   '/new': typeof NewIndexLazyRoute
+  '/u/$userId/edit': typeof UUserIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/search/': typeof SearchIndexRoute
   '/terms/': typeof TermsIndexRoute
   '/new/': typeof NewIndexLazyRoute
+  '/u_/$userId/edit': typeof UUserIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/terms'
     | '/new'
+    | '/u/$userId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/terms'
     | '/new'
+    | '/u/$userId/edit'
   id:
     | '__root__'
     | '/'
@@ -148,6 +159,7 @@ export interface FileRouteTypes {
     | '/search/'
     | '/terms/'
     | '/new/'
+    | '/u_/$userId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -161,6 +173,7 @@ export interface RootRouteChildren {
   SearchIndexRoute: typeof SearchIndexRoute
   TermsIndexRoute: typeof TermsIndexRoute
   NewIndexLazyRoute: typeof NewIndexLazyRoute
+  UUserIdEditRoute: typeof UUserIdEditRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -235,6 +248,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PListIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/u_/$userId/edit': {
+      id: '/u_/$userId/edit'
+      path: '/u/$userId/edit'
+      fullPath: '/u/$userId/edit'
+      preLoaderRoute: typeof UUserIdEditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -249,6 +269,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchIndexRoute: SearchIndexRoute,
   TermsIndexRoute: TermsIndexRoute,
   NewIndexLazyRoute: NewIndexLazyRoute,
+  UUserIdEditRoute: UUserIdEditRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

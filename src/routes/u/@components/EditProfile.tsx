@@ -1,13 +1,17 @@
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input.tsx";
+import { Textarea } from "@/components/ui/textarea.tsx";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.tsx";
+import { Label } from "@/components/ui/label.tsx";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
 import { motion } from "framer-motion";
-import { useCurrentUserProfile } from "@nostr-dev-kit/ndk-hooks";
+import { useCurrentUserProfile, useNDK, useNDKCurrentPubkey } from "@nostr-dev-kit/ndk-hooks";
 import { useMutation } from "@tanstack/react-query";
+import { ButtonWithLoader } from "@/components/ButtonWithLoader.tsx";
+import { makeEvent } from "@/helper/pow/pow.ts";
+import { nostrNow } from "@/helper/date.ts";
+import { NDKKind } from "@nostr-dev-kit/ndk";
+
 interface ProfileForm {
   displayName?: string;
   username?: string;
@@ -20,33 +24,55 @@ interface ProfileForm {
 }
 
 export default function CreateProfile() {
-  const user = useCurrentUserProfile();
+  const userProfile = useCurrentUserProfile();
+  const currentPubkey = useNDKCurrentPubkey();
+  const { ndk } = useNDK();
 
   const [form, setForm] = useState<ProfileForm>({
-    displayName: user?.name ?? "",
-    username: user?.username ?? "",
-    about: user?.about ?? "",
-    website: user?.website ?? "",
-    nip05: user?.nip05 ?? "",
-    lnAddress: user?.lud16 ?? "",
-    avatar: user?.picture ?? "",
-    banner: user?.banner ?? ""
+    displayName: userProfile?.displayName ?? "",
+    username: userProfile?.name ?? "",
+    about: userProfile?.about ?? "",
+    website: userProfile?.website ?? "",
+    nip05: userProfile?.nip05 ?? "",
+    lnAddress: userProfile?.lud16 ?? "",
+    avatar: userProfile?.picture ?? "",
+    banner: userProfile?.banner ?? ""
   });
 
-  const handleChange = (field) => (e) => {
+  const handleChange = (field: string) => (e: { target: { value: unknown; }; }) => {
     setForm({ ...form, [field]: e.target.value });
   };
 
   const mut = useMutation({
     mutationKey: ["updateProfile"],
-    mutationFn: async (newProfile:ProfileForm) => {
+    mutationFn: async (newProfile: ProfileForm) => {
       // Here you would implement the logic to update the profile on the backend or Nostr network
-      console.log("Updating profile with data:", newProfile);
-      return Promise.resolve();
+      const event = await makeEvent({
+        ndk: ndk!,
+        event: {
+          created_at: nostrNow(),
+          pubkey: currentPubkey!,
+          kind: NDKKind.Metadata,
+          content: JSON.stringify({
+            name: newProfile.username,
+            display_name: newProfile.displayName,
+            about: newProfile.about,
+            website: newProfile.website,
+            nip05: newProfile.nip05,
+            lud16: newProfile.lnAddress,
+            picture: newProfile.avatar,
+            banner: newProfile.banner
+          }),
+          tags: []
+        }, difficulty: 16
+      });
+
+      await event.publish();
+      return event;
     }
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     mut.mutate(form);
   };
@@ -120,9 +146,9 @@ export default function CreateProfile() {
                      onChange={handleChange("lnAddress")} />
             </div>
 
-            <Button type="submit" className="w-full"
-                    disabled={mut.isPending}
-            >Salvar</Button>
+            <ButtonWithLoader type="submit" className="w-full"
+                              isLoading={mut.isPending}
+            >Salvar</ButtonWithLoader>
           </form>
         </CardContent>
       </Card>

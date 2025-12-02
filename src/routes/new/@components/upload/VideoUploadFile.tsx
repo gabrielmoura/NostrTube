@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
+import { type Dispatch, type SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 import { useNDK } from "@nostr-dev-kit/ndk-hooks";
 import { useDropzone } from "react-dropzone";
 import { NDKBlossom } from "@nostr-dev-kit/ndk-blossom";

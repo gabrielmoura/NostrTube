@@ -17,7 +17,7 @@ function RouteComponent() {
     <Card>
       <div className="text-sm font-semibold">Aviso Legal</div>
       <p className="text-xs leading-relaxed prose">
-        <div class="notice">
+        <div className="notice">
           ⚠️ <strong>Atenção:</strong> Este documento é um modelo informativo e não substitui a revisão por um
           advogado. Plataformas descentralizadas levantam questões legais e de responsabilidade específicas.
         </div>
@@ -108,25 +108,6 @@ function RouteComponent() {
           </p>
         </section>
 
-        {/*<section>*/}
-        {/*    <h2>7. Direitos Autorais</h2>*/}
-        {/*    <p>*/}
-        {/*        Se você acredita que um conteúdo publicado viola seus direitos autorais, envie uma notificação*/}
-        {/*        formal para os relays contendo:*/}
-        {/*    </p>*/}
-        {/*    <ul>*/}
-        {/*        <li>Identificação do conteúdo supostamente infrator;</li>*/}
-        {/*        <li>Prova de titularidade dos direitos autorais;</li>*/}
-        {/*        <li>Informações de contato válidas.</li>*/}
-        {/*    </ul>*/}
-        {/*    <p>*/}
-        {/*        Embora a plataforma não possa remover diretamente conteúdo dos relays externos, podemos:*/}
-        {/*    </p>*/}
-        {/*    <ul>*/}
-        {/*        <li>Remover o conteúdo do índice da plataforma;</li>*/}
-        {/*        <li>Notificar operadores dos relays identificados, quando aplicável.</li>*/}
-        {/*    </ul>*/}
-        {/*</section>*/}
 
         <section>
           <h2>7. Alterações destes Termos</h2>
@@ -146,13 +127,6 @@ function RouteComponent() {
           </p>
         </section>
 
-        {/*<section>*/}
-        {/*    <h2>9. Legislação Aplicável</h2>*/}
-        {/*    <p>*/}
-        {/*        Estes Termos são regidos pelas leis da <strong>República Federativa do Brasil</strong>,*/}
-        {/*        independentemente de onde o conteúdo esteja hospedado ou acessado.*/}
-        {/*    </p>*/}
-        {/*</section>*/}
 
         <section id="contact">
           <h2>9. Contato</h2>

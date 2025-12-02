@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { checkLatency } from "@/helper/checkLatency.ts";
 import { Activity, AlertCircle, RefreshCw, Wifi } from "lucide-react";

@@ -1,10 +1,10 @@
-type ChaptersTrack = {
+export type ChaptersTrack = {
   src: string;
   kind: "chapters";
   language: string;
   default?: boolean;
 };
-type SubtitlesTrack = {
+export type SubtitlesTrack = {
   src: string;
   kind: "subtitles";
   language: string;

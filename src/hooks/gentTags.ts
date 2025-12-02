@@ -1,7 +1,7 @@
 import {nostrNow} from "@/helper/date.ts";
 import {nip19} from "nostr-tools";
 import {imetaTagToTag, NDKKind} from "@nostr-dev-kit/ndk";
-import {VideoMetadata} from "@/routes/new/@components/VideoUpload.tsx";
+import { type VideoMetadata} from "@/routes/new/@components/VideoUpload.tsx";
 import {ulid} from "ulid";
 
 interface genTagsProps {

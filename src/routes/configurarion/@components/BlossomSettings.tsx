@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { BlossomServer, MOCK_BLOSSOM_SERVERS } from "@/default.ts";
+import { useEffect, useState } from "react";
+import { type BlossomServer, MOCK_BLOSSOM_SERVERS } from "@/default.ts";
 import { Check, Info, Server } from "lucide-react";
 import { Badge, Button, Card, CardContent, CardHeader } from "./CommonComponents.tsx";
 import useUserStore from "@/store/useUserStore.ts";

@@ -3,7 +3,7 @@ import {NDKSubscriptionCacheUsage, useNDK, useNDKCurrentPubkey, useSubscribe} fr
 import LikeToggleButton, {type likeOptions} from "@/components/LikeToggleButton.tsx";
 import Spinner from "@/components/Spinner.tsx";
 import type {NDKKind} from "@nostr-dev-kit/ndk";
-import {makeEvent, makeEventParams} from "@/helper/pow/pow.ts";
+import {makeEvent, type makeEventParams} from "@/helper/pow/pow.ts";
 import {nostrNow} from "@/helper/date.ts";
 import {useMutation} from "@tanstack/react-query";
 

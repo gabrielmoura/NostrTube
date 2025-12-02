@@ -21,7 +21,7 @@ export async function addToPlayList({ ndk, playListId, eventId }: AddToPlayListD
   }
   const eventX = await ndk.fetchEvent([{
     "#d": [playListId],
-    kind: NDKKind.VideoCurationSet,
+    kinds: [NDKKind.VideoCurationSet],
     limit: 1,
     ids: [playListId]
   }], {
@@ -38,13 +38,14 @@ export async function addToPlayList({ ndk, playListId, eventId }: AddToPlayListD
   }
 }
 
-interface CreatePlayListParams {
+export interface CreatePlayListParams {
   title: string;
   description?: string;
+  imageUrl?: string;
   events?: NDKEvent[];
 }
 
-export function createPlayList({ title, description, events }: CreatePlayListParams): StampedEvent {
+export function createPlayList({ title, description, events, imageUrl }: CreatePlayListParams): StampedEvent {
   return {
     created_at: nostrNow(),
     kind: NDKKind.VideoCurationSet,
@@ -53,7 +54,8 @@ export function createPlayList({ title, description, events }: CreatePlayListPar
       ["title", title],
       ["d", `${import.meta.env.VITE_APP_NAME}-playlist-${ulid()}`],
       ["description", description || ""],
-      ...(events ? events.map(e => ["e", `${e.kind}:${e.id}`]) : [])
+      ...(events ? events.map(e => ["e", `${e.kind}:${e.id}`]) : []),
+      ...(imageUrl ? [["image", imageUrl]] : [])
     ]
   };
 }

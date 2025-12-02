@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertCircle, Bell, Loader2, MapPin, Shield } from "lucide-react";
 import ngeohash from "ngeohash";
 import { Card, CardHeader, Switch } from "./CommonComponents";

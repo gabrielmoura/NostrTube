@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import React from "react";
 import { BlossomSettings } from "@/routes/configurarion/@components/BlossomSettings.tsx";
 import { PermissionSettings } from "@/routes/configurarion/@components/PermissionSettings.tsx";
 import { Button } from "@/routes/configurarion/@components/CommonComponents.tsx";

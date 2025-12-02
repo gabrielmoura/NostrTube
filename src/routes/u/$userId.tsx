@@ -1,12 +1,22 @@
-import { createFileRoute, Link, notFound, useLoaderData } from "@tanstack/react-router";
+// routes/u/$userId.tsx
+import { createFileRoute, useLoaderData, useParams } from "@tanstack/react-router";
 import { NDKKind } from "@nostr-dev-kit/ndk";
-import { NDKEvent, type NDKUserProfile } from "@nostr-dev-kit/ndk-hooks";
-import { PageSpinner } from "@/components/PageSpinner.tsx";
-import { extractTag } from "@/helper/extractTag.ts";
-import { useEffect } from "react";
-import CreateProfile from "./@EditProfile.tsx";
-import { getVideosFromUserData, GetVideosFromUserDataParams } from "@/helper/loaders/getVideosFromUserData.ts";
+import { NDKEvent, type NDKUserProfile, useNDKCurrentUser } from "@nostr-dev-kit/ndk-hooks";
+import { PageSpinner } from "@/components/PageSpinner";
+import { getVideosFromUserData, type GetVideosFromUserDataParams } from "@/helper/loaders/getVideosFromUserData";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Grid, Info, List, PlaySquare } from "lucide-react";
 
+import CreateProfile from "./@components/EditProfile.tsx";
+import { Card } from "@/components/ui/card.tsx";
+import { FollowButton } from "@/routes/u/@components/FollowButton.tsx";
+import { VideoCard } from "@/routes/u/@components/VideoCard.tsx";
+import { DropdownMenuProfile } from "@/routes/u/@components/DropdownMenuProfile.tsx";
+import { PlaylistCard } from "@/routes/u/@components/PlaylistCard.tsx";
+import { nip19 } from "nostr-tools"; // Extraído para arquivo separado
 
 export const Route = createFileRoute("/u/$userId")({
   component: ProfilePage,
@@ -15,60 +25,206 @@ export const Route = createFileRoute("/u/$userId")({
     ndk
   } as GetVideosFromUserDataParams),
   pendingComponent: PageSpinner,
-  notFoundComponent: CreateProfile
+  notFoundComponent: NotFoundPage
 });
 
+function NotFoundPage() {
+  const { userId } = useParams({ strict: false });
+  const currentUser = useNDKCurrentUser();
+  const npub = currentUser?.npub!;
+  const pubkey = currentUser?.pubkey!;
 
+  if (currentUser && npub == userId || pubkey == userId) {
+    return <CreateProfile />;
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground">
+      <h1 className="text-3xl font-bold mb-4">Perfil não encontrado</h1>
+      <p className="text-muted-foreground">O usuário que você está procurando não existe ou não tem vídeos
+        publicados.</p>
+    </div>
+  );
+}
 
 function ProfilePage() {
   const events = useLoaderData({ from: "/u/$userId" }) as Set<NDKEvent>;
-  const user = JSON.parse([...events].filter(e => e.kind === NDKKind.Metadata)[0].content) as NDKUserProfile;
-  const videos = [...events].filter(e => [NDKKind.Video, NDKKind.HorizontalVideo].includes(e.kind as number));
-  useEffect(() => {
-    //
-    if (!user) {
-      throw notFound();
-    }
-  }, [user]);
+  const currentUser = useNDKCurrentUser();
+  const { userId } = useParams({ strict: false });
 
+
+  // Processamento de Dados
+  const metaEvent = [...events].find(e => e.kind === NDKKind.Metadata);
+  const userProfile = metaEvent ? JSON.parse(metaEvent.content) as NDKUserProfile : null;
+
+  // Separação de eventos por tipo
+  const videos = [...events].filter(e => [NDKKind.Video, NDKKind.HorizontalVideo].includes(e.kind as number));
+  // Mock de playlists (assumindo que o loader traria Kind 30001 também)
+  const playlists = [...events].filter(e => e.kind === NDKKind.VideoCurationSet);
+
+  // if (!userProfile) throw notFound();
+
+  // Função auxiliar para iniciais do avatar
+  const getInitials = (name: string) => name?.slice(0, 2).toUpperCase() || "U";
 
   return (
-    <div className={"container mx-auto p-4"}>
+    <div className="min-h-screen bg-background text-foreground pb-20">
+      {/* --- Header Section --- */}
+      <div className="relative">
+        {/* Banner */}
+        <div className="w-full h-48 md:h-64 lg:h-80 bg-muted overflow-hidden relative">
+          {userProfile?.banner ? (
+            <img
+              src={userProfile?.banner}
+              alt="Banner"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-r from-gray-800 to-gray-900" />
+          )}
+        </div>
 
-      <img src={user?.banner || undefined} alt={user?.name || "Banner"}
-           className={"w-full h-48 object-cover rounded-lg mb-4"} width={""} />
-      <div className={"flex items-center mb-8"}>
-        {user?.picture ?
-          <img src={user.picture} alt={user.name || "User"} className={"w-16 h-16 rounded-full mr-4"} /> :
-          <div className={"w-16 h-16 rounded-full bg-gray-300 mr-4"} />}
-        <div>
-          <h1 className={"text-2xl font-bold"}>{user?.name || "Unknown User"}</h1>
-          <p className={"text-gray-600"}>{user?.nip05}</p>
+        {/* Profile Info Bar */}
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-start md:items-end -mt-16 md:-mt-10 mb-6 gap-6 relative z-10">
+
+            {/* Avatar */}
+            <Avatar className="w-32 h-32 md:w-40 md:h-40 border-4 border-background shadow-xl">
+              <AvatarImage src={userProfile?.picture} alt={userProfile?.name} className="object-cover" />
+              <AvatarFallback className="text-4xl font-bold bg-secondary">
+                {getInitials(userProfile?.name || "")}
+              </AvatarFallback>
+            </Avatar>
+
+            {/* Info Text */}
+            <div className="flex-1 mt-2 md:mt-0 md:mb-4">
+              <div className="flex items-center gap-2">
+                <h1 className="text-3xl font-bold tracking-tight">{userProfile?.name || "Unknown User"}</h1>
+                {userProfile?.nip05 && (
+                  <Badge variant="secondary" className="text-xs font-normal">
+                    nip05 verified
+                  </Badge>
+                )}
+              </div>
+              <p className="text-muted-foreground font-mono text-sm mt-1">
+                {userProfile?.nip05 || ""}
+              </p>
+
+              {/* Stats Row (Mocked numbers for demo) */}
+              <div className="flex gap-4 mt-3 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1"><strong className="text-foreground">{videos.length}</strong> Videos</span>
+                {/* Nota: Seguidores reais requerem uma query complexa ou indexador */}
+                <span className="flex items-center gap-1"><strong
+                  className="text-foreground">--</strong> Seguidores</span>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-3 mb-4 w-full md:w-auto">
+              <FollowButton pubkey={metaEvent?.pubkey!} currentUser={currentUser!} />
+              <DropdownMenuProfile currentUser={currentUser!} />
+            </div>
+          </div>
+
+          {/* Bio Mobile/Desktop */}
+          {userProfile?.about && (
+            <div className="mb-8 max-w-3xl">
+              <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap text-muted-foreground">
+                {userProfile?.about}
+              </p>
+            </div>
+          )}
         </div>
       </div>
-      <div className={"grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"}>
-        {videos.map(video => {
-          const t = extractTag(video.tags);
-          return (
-            <Link
-              key={video.id}
-              className={"bg-white rounded-lg shadow-md overflow-hidden"}
-              to={"/v/$eventId"}
-              params={{ eventId: video.id }}
+
+      <Separator className="mb-6" />
+
+      {/* --- Content Tabs --- */}
+      <div className="container mx-auto px-4">
+        <Tabs defaultValue="videos" className="w-full">
+          <TabsList
+            className="w-full justify-start h-auto p-0 bg-transparent border-b border-border mb-8 rounded-none gap-6">
+            <TabsTrigger
+              value="videos"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all"
             >
-              {t.image ?
-                <img src={t.image ?? t.thumb} alt={t.title || "Video"}
-                     className={"w-full h-48 object-cover"} /> :
-                <div className={"w-full h-48 bg-gray-300"} />}
-              <div className={"p-4"}>
-                <h2 className={"text-lg font-semibold mb-2"}>{t.title || "Untitled Video"}</h2>
-                <p className={"text-gray-600 text-sm"}>{t.summary || "No description available."}</p>
+              <Grid className="w-4 h-4 mr-2" />
+              Vídeos
+            </TabsTrigger>
+            <TabsTrigger
+              value="playlists"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all"
+            >
+              <PlaySquare className="w-4 h-4 mr-2" />
+              Playlists
+            </TabsTrigger>
+            <TabsTrigger
+              value="about"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all"
+            >
+              <Info className="w-4 h-4 mr-2" />
+              Sobre
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Videos Grid */}
+          <TabsContent value="videos" className="mt-0">
+            {videos.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {videos.map(video => (
+                  <VideoCard key={video.id} event={video} />
+                ))}
               </div>
-            </Link>
-          );
-        })}
+            ) : (
+              <EmptyState label="Nenhum vídeo publicado ainda." />
+            )}
+          </TabsContent>
+
+          {/* Playlists Grid */}
+          <TabsContent value="playlists" className="mt-0">
+            {playlists.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {playlists.map((playlistEvent) => (
+                  <PlaylistCard key={playlistEvent.id} event={playlistEvent} />
+                ))}
+              </div>
+            ) : (
+              <EmptyState label="Nenhuma playlist criada por este usuário." />
+            )}
+          </TabsContent>
+
+          {/* About Section */}
+          <TabsContent value="about" className="mt-0">
+            <Card>
+              <div className="p-6 space-y-4">
+                <h3 className="font-bold text-lg">Detalhes</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground block">Entrou em</span>
+                    {/* Assumindo que o metadados tenha created_at, se não usar profile event created_at */}
+                    <span>{new Date(metaEvent?.created_at! * 1000)?.toLocaleDateString()}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground block">Chave Pública (Hex)</span>
+                    <span className="font-mono text-xs break-all">{metaEvent?.pubkey||nip19.decode(userId!)?.data as string}</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
-    </div>);
+    </div>
+  );
+}
 
-
+// Pequeno helper para estado vazio
+function EmptyState({ label }: { label: string }) {
+  return (
+    <div
+      className="flex flex-col items-center justify-center py-16 text-muted-foreground bg-muted/30 rounded-lg border border-dashed">
+      <List className="w-12 h-12 mb-4 opacity-20" />
+      <p>{label}</p>
+    </div>
+  );
 }

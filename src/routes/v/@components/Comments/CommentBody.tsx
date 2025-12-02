@@ -8,7 +8,7 @@ import {getNameToShow, getTwoLetters} from "@/helper/format.ts";
 import {relativeTime} from "@/helper/date.ts";
 import {Avatar} from "@radix-ui/themes";
 // import ReactionButtons from "@/routes/v/@components/Comments/ReactionButtons.tsx";
-import {NDKSubscriptionCacheUsage, NDKUserProfile} from "@nostr-dev-kit/ndk-hooks";
+import {NDKSubscriptionCacheUsage, type NDKUserProfile} from "@nostr-dev-kit/ndk-hooks";
 import {lazy, useEffect, useState} from "react";
 const ReactionButtons = lazy(()=>import("@/routes/v/@components/Comments/ReactionButtons.tsx"))
 

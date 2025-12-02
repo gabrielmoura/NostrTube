@@ -1,7 +1,11 @@
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "./dropdown-menu";
-
 import {RiMore2Fill} from "react-icons/ri";
 import {Button} from "@/components/button.tsx";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu.tsx";
 
 type DropDownOptionsProps = {
     options: { label: string; action: () => void }[];

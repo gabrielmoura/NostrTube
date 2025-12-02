@@ -19,14 +19,14 @@ export default function CountView({eventIdentifier}: CountViewProps) {
         if (!ndk || !currentPubkey) return;
         let viewEvent: NDKEvent | null = await ndk.fetchEvent({
             authors: [currentPubkey],
-            kinds: [NostrKind.VideoViewer as NDKKind],
+            kinds: [NostrKind.VideoViewer as unknown as NDKKind],
             "#a": [eventIdentifier],
         });
         if (!viewEvent) {
             viewEvent = await makeEvent({
                 ndk, event: {
                     content: "",
-                    kind: NostrKind.VideoViewer as NDKKind,
+                    kind: NostrKind.VideoViewer as unknown as NDKKind,
                     tags: [
                         ["a", eventIdentifier],
                         ["d", eventIdentifier],
@@ -49,7 +49,7 @@ export default function CountView({eventIdentifier}: CountViewProps) {
             viewEvent = await makeEvent({
                 ndk, event: {
                     content: "",
-                    kind: NostrKind.VideoViewer as NDKKind,
+                    kind: NostrKind.VideoViewer as unknown as NDKKind,
                     tags: [
                         ["a", eventIdentifier],
                         ["d", eventIdentifier],
