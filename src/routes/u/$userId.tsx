@@ -1,11 +1,11 @@
 import { createFileRoute, Link, notFound, useLoaderData } from "@tanstack/react-router";
 import { NDKKind } from "@nostr-dev-kit/ndk";
 import { NDKEvent, type NDKUserProfile } from "@nostr-dev-kit/ndk-hooks";
-import { getVideosFromUserData, type GetVideosFromUserDataParams } from "@/helper/nostr.ts";
 import { PageSpinner } from "@/components/PageSpinner.tsx";
 import { extractTag } from "@/helper/extractTag.ts";
 import { useEffect } from "react";
 import CreateProfile from "./@EditProfile.tsx";
+import { getVideosFromUserData, GetVideosFromUserDataParams } from "@/helper/loaders/getVideosFromUserData.ts";
 
 
 export const Route = createFileRoute("/u/$userId")({

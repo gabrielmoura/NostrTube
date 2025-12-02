@@ -3,11 +3,11 @@ import type { NDKEvent } from "@nostr-dev-kit/ndk-hooks";
 import { useNDK } from "@nostr-dev-kit/ndk-hooks";
 import { extractTag } from "@/helper/extractTag.ts";
 import { useParams } from "@tanstack/react-router";
-import { geVideoByEventIdData, type GeVideoByEventIdDataParams } from "@/helper/nostr.ts";
 import { NotFoundVideo } from "@/routes/v/@components/NotFoundVideo.tsx";
 import type { VideoMetaTypes } from "@/store/store/videoSession.ts";
 import { getTags, getTagValue } from "@welshman/util";
 import { mapImetaTag } from "@nostr-dev-kit/ndk";
+import { geVideoByEventIdData, type GeVideoByEventIdDataParams } from "@/helper/loaders/geVideoByEventIdData.ts";
 
 export interface VideoContextType {
   eventId: string,

@@ -16,12 +16,12 @@ import { Route as TermsIndexRouteImport } from './routes/terms/index'
 import { Route as SearchIndexRouteImport } from './routes/search/index'
 import { Route as FaqIndexRouteImport } from './routes/faq/index'
 import { Route as ConfigurarionIndexRouteImport } from './routes/configurarion/index'
+import { Route as VEventIdRouteImport } from './routes/v/$eventId'
 import { Route as UUserIdRouteImport } from './routes/u/$userId'
 import { Route as PNewRouteImport } from './routes/p/new'
 import { Route as PListIdRouteImport } from './routes/p/$listId'
 
 const NewIndexLazyRouteImport = createFileRoute('/new/')()
-const VEventIdLazyRouteImport = createFileRoute('/v/$eventId')()
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -53,11 +53,11 @@ const ConfigurarionIndexRoute = ConfigurarionIndexRouteImport.update({
   path: '/configurarion/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VEventIdLazyRoute = VEventIdLazyRouteImport.update({
+const VEventIdRoute = VEventIdRouteImport.update({
   id: '/v/$eventId',
   path: '/v/$eventId',
   getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/v/$eventId.lazy').then((d) => d.Route))
+} as any)
 const UUserIdRoute = UUserIdRouteImport.update({
   id: '/u/$userId',
   path: '/u/$userId',
@@ -79,7 +79,7 @@ export interface FileRoutesByFullPath {
   '/p/$listId': typeof PListIdRoute
   '/p/new': typeof PNewRoute
   '/u/$userId': typeof UUserIdRoute
-  '/v/$eventId': typeof VEventIdLazyRoute
+  '/v/$eventId': typeof VEventIdRoute
   '/configurarion': typeof ConfigurarionIndexRoute
   '/faq': typeof FaqIndexRoute
   '/search': typeof SearchIndexRoute
@@ -91,7 +91,7 @@ export interface FileRoutesByTo {
   '/p/$listId': typeof PListIdRoute
   '/p/new': typeof PNewRoute
   '/u/$userId': typeof UUserIdRoute
-  '/v/$eventId': typeof VEventIdLazyRoute
+  '/v/$eventId': typeof VEventIdRoute
   '/configurarion': typeof ConfigurarionIndexRoute
   '/faq': typeof FaqIndexRoute
   '/search': typeof SearchIndexRoute
@@ -104,7 +104,7 @@ export interface FileRoutesById {
   '/p/$listId': typeof PListIdRoute
   '/p/new': typeof PNewRoute
   '/u/$userId': typeof UUserIdRoute
-  '/v/$eventId': typeof VEventIdLazyRoute
+  '/v/$eventId': typeof VEventIdRoute
   '/configurarion/': typeof ConfigurarionIndexRoute
   '/faq/': typeof FaqIndexRoute
   '/search/': typeof SearchIndexRoute
@@ -155,7 +155,7 @@ export interface RootRouteChildren {
   PListIdRoute: typeof PListIdRoute
   PNewRoute: typeof PNewRoute
   UUserIdRoute: typeof UUserIdRoute
-  VEventIdLazyRoute: typeof VEventIdLazyRoute
+  VEventIdRoute: typeof VEventIdRoute
   ConfigurarionIndexRoute: typeof ConfigurarionIndexRoute
   FaqIndexRoute: typeof FaqIndexRoute
   SearchIndexRoute: typeof SearchIndexRoute
@@ -211,7 +211,7 @@ declare module '@tanstack/react-router' {
       id: '/v/$eventId'
       path: '/v/$eventId'
       fullPath: '/v/$eventId'
-      preLoaderRoute: typeof VEventIdLazyRouteImport
+      preLoaderRoute: typeof VEventIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/u/$userId': {
@@ -243,7 +243,7 @@ const rootRouteChildren: RootRouteChildren = {
   PListIdRoute: PListIdRoute,
   PNewRoute: PNewRoute,
   UUserIdRoute: UUserIdRoute,
-  VEventIdLazyRoute: VEventIdLazyRoute,
+  VEventIdRoute: VEventIdRoute,
   ConfigurarionIndexRoute: ConfigurarionIndexRoute,
   FaqIndexRoute: FaqIndexRoute,
   SearchIndexRoute: SearchIndexRoute,
