@@ -12,6 +12,7 @@ import { useClipboard } from "@/hooks/useClipboard.ts";
 import { useDownload } from "@/hooks/useDownload.ts";
 import { t } from "i18next";
 import { DrawerBody, DrawerFooter, DrawerHeader } from "@/components/modal_v2/Drawer.tsx";
+import { modal } from "@/components/modal_v2/modal-manager.ts";
 
 const log = LoggerAgent.create("LoginModal");
 
@@ -62,6 +63,7 @@ function LoginContent({ setLogin }: AuthProps) {
       log.error("Login with extension failed:", err);
     } finally {
       setIsLoading(false);
+      modal.dismissAll();
     }
   };
 
@@ -94,6 +96,7 @@ function LoginContent({ setLogin }: AuthProps) {
       log.error("Login failed:", err);
     } finally {
       setIsLoading(false);
+      modal.dismissAll();
     }
   };
   return (<>
@@ -163,6 +166,8 @@ function Register({ setLogin, ...props }: AuthProps) {
       log.info("Login successful");
     } catch (err: any) {
       log.error("Login failed:", err);
+    } finally {
+      modal.dismissAll();
     }
   }
 
