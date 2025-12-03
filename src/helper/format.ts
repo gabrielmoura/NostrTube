@@ -51,22 +51,6 @@ export function getLettersPlain(text?: string) {
         .join(" ");
 }
 
-export async function downloadVideo(url: string, filename?: string) {
-    let name = filename || "video";
-    const splitUrl = url.split(".");
-    if (splitUrl.length > 1) {
-        name += `.${splitUrl.at(-1)}`;
-    }
-    const video = await fetch(url);
-    const videoBlob = await video.blob();
-    const videoURL = URL.createObjectURL(videoBlob);
-    const link = document.createElement("a");
-    link.href = videoURL;
-    link.download = name;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
 
 export function btcToSats(amount: number) {
     return parseInt((amount * 100_000_000).toFixed());

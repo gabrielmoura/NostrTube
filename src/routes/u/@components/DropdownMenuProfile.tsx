@@ -1,11 +1,14 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
-import { MoreVertical } from "lucide-react";
+import { Download, MoreVertical } from "lucide-react";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { NDKUser } from "@nostr-dev-kit/ndk";
+import { type NDKEvent, NDKUser } from "@nostr-dev-kit/ndk";
+import { downloadJsonl } from "@/helper/download.ts";
+import { toast } from "sonner";
 
 interface DropdownMenuProfileProps {
   currentUser?: NDKUser; // O usuário logado
+  events?: NDKEvent[];
 }
 
 interface Option {
@@ -14,15 +17,28 @@ interface Option {
   action: () => Promise<void> | void;
 }
 
-export function DropdownMenuProfile({ currentUser }: DropdownMenuProfileProps) {
+export function DropdownMenuProfile({ currentUser, events }: DropdownMenuProfileProps) {
   const navigate = useNavigate();
   const { userId } = useParams({ strict: false });
   const npub = currentUser?.npub!;
   const pubkey = currentUser?.pubkey!;
 
-  const options: Option[] = [];
+  const options: Option[] = [
+    {
+      label: "Export User",
+      icon: <Download className="size-4" />,
+      action: async () => {
+        if (currentUser && events) {
+          downloadJsonl(events, `user-${userId || npub}.jsonl`)
+            .then(() => toast.success("User data has been downloaded"))
+            .catch(() => toast.error("Error downloading user data"));
+        }
+      }
 
-  if (currentUser && npub == userId|| pubkey == userId) {
+    }
+  ];
+
+  if (currentUser && npub == userId || pubkey == userId) {
     options.push({
       label: "Edit Profile",
       icon: <MoreVertical className="size-4" />,

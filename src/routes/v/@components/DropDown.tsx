@@ -1,22 +1,26 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { useNavigate } from "@tanstack/react-router";
-import { copyText, downloadVideo, getVideoDetails } from "@/helper/format.ts";
+import { copyText, getVideoDetails } from "@/helper/format.ts";
 import { useNDKCurrentPubkey } from "@nostr-dev-kit/ndk-hooks";
 import { getTagValue } from "@welshman/util";
 import { Download, ExternalLink, FileJson, Flag, ListPlus, MoreVertical, Pencil, Send, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { Share } from "@capacitor/share";
-import { modal } from "@/components/modal/state.tsx";
+// import { modal } from "@/components/modal/state.tsx";
+import type { NDKEvent } from "@nostr-dev-kit/ndk";
+import { downloadVideo } from "@/helper/download.ts";
+import AddToPlaylistModal from "@/routes/v/@components/AddToPlaylistModal.tsx";
+import { modal } from "@/components/modal_v2/modal-manager.ts";
 
 
-function AddToPlaylistModal({ eventIdentifier }: { eventIdentifier: string }) {
-  return <div className="p-4 text-wrap w-full">
-    Add to Playlist Modal for event {eventIdentifier} (Demo only)
-  </div>;
-}
+// function AddToPlaylistModal({ eventIdentifier }: { eventIdentifier: string }) {
+//   return <div className="p-4 text-wrap w-full">
+//     Add to Playlist Modal for event {eventIdentifier} (Demo only)
+//   </div>;
+// }
 
 
-export const DropdownMenuVideo = ({ event }) => {
+export const DropdownMenuVideo = ({ event }: { event: NDKEvent }) => {
   const navigate = useNavigate();
   const npub = useNDKCurrentPubkey();
   const rawEvent = event.rawEvent();
@@ -34,10 +38,10 @@ export const DropdownMenuVideo = ({ event }) => {
       label: "Share video",
       icon: <Share2 className="size-4" />,
       action: () => {
-
-        if (navigator.share) {
+        if ((navigator as Navigator).share) {
           Share.share({
             title: title,
+            text: title,
             url: `${
               import.meta.env.VITE_PUBLIC_ROOT_DOMAIN ?? "https://nostrtube.com"
             }/v/${naddr}`
@@ -55,7 +59,7 @@ export const DropdownMenuVideo = ({ event }) => {
       label: "Add to Playlist",
       icon: <ListPlus className="size-4" />,
       action: () => {
-        modal.show(<AddToPlaylistModal eventIdentifier={event.tagId()} />);
+        modal.show(<AddToPlaylistModal eventIdTag={event.tagId()} />);
         // toast.info("Demo only: Add to Playlist Modal would open");
       }
     },

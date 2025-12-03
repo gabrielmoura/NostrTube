@@ -20,7 +20,8 @@ import {
   useNDKSessionLogout
 } from "@nostr-dev-kit/ndk-hooks";
 import useUserStore from "@/store/useUserStore.ts";
-import { LoginModal } from "@/components/header/LoginModal";
+import { AuthModal } from "@/components/AuthModal.tsx";
+import { modal } from "@/components/modal_v2/modal-manager.ts";
 
 export default function Header() {
 
@@ -132,7 +133,8 @@ export default function Header() {
           </Button>
 
           {/* Profile */}
-          {currentUser ? <UserMenu /> : <LoginModal />}
+          {currentUser ? <UserMenu /> :
+            <Button onClick={() => modal.show(<AuthModal />, { id: "auth" })}>Login</Button>}
         </div>
       </div>
     </header>
@@ -284,13 +286,13 @@ function UserMenu() {
 
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuItem asChild>
-          <Link to="/u/$userId" params={{ userId: currentPubkey }}>
+          <Link to="/u/$userId" params={{ userId: currentPubkey! }}>
             <User className="mr-2 h-4 w-4" /> Perfil
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem>
           <Settings className="mr-2 h-4 w-4" />
-          <Link to="/configurarion/">Configurações</Link>
+          <Link to="/configurarion">Configurações</Link>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" /> Sair

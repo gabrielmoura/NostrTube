@@ -8,15 +8,15 @@ import type { StampedEvent } from "@welshman/util";
 export type AddToPlayListDataParams = {
   ndk: NDK__default;
   playListId: string;
-  eventId: string
+  eventIdTag: string
 };
 
-export async function addToPlayList({ ndk, playListId, eventId }: AddToPlayListDataParams) {
+export async function addToPlayList({ ndk, playListId, eventIdTag }: AddToPlayListDataParams) {
   // Busca Lista, caso não exista cria uma e adicione o evento ao final da lista.
   if (!playListId) {
     throw new Error("No PlayList ID provided");
   }
-  if (!eventId) {
+  if (!eventIdTag) {
     throw new Error("No Event ID provided");
   }
   const eventX = await ndk.fetchEvent([{
@@ -29,7 +29,7 @@ export async function addToPlayList({ ndk, playListId, eventId }: AddToPlayListD
   });
 
   if (eventX) {
-    eventX.tags.push(["e", `21:${eventId}`]);
+    eventX.tags.push(["e", eventIdTag]);
     await eventX.sign();
     await eventX.publish();
     return eventX;

@@ -10,12 +10,12 @@ import NDK, { NDKPool } from "@nostr-dev-kit/ndk";
 import { NDKSessionLocalStorage, useNDK, useNDKInit, useNDKSessionMonitor } from "@nostr-dev-kit/ndk-hooks";
 import "./helper/i18n";
 import "./main.css";
-import { Modstr } from "@/components/modal/Modal.tsx";
 import { Toaster } from "@/components/ui/sonner";
 import OfflineDetector from "@/components/OfflineDetector.tsx";
 import { Analytics } from "@vercel/analytics/react";
 import { HelmetProvider } from "react-helmet-async";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Modstr } from "@/components/modal_v2/ModalProvider.tsx";
 
 
 // register nostr: protocol handler

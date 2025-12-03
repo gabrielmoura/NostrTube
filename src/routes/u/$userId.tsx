@@ -122,7 +122,7 @@ function ProfilePage() {
             {/* Actions */}
             <div className="flex items-center gap-3 mb-4 w-full md:w-auto">
               <FollowButton pubkey={metaEvent?.pubkey!} currentUser={currentUser!} />
-              <DropdownMenuProfile currentUser={currentUser!} />
+              <DropdownMenuProfile currentUser={currentUser!} events={Array.from(events)} />
             </div>
           </div>
 
@@ -206,7 +206,8 @@ function ProfilePage() {
                   </div>
                   <div>
                     <span className="text-muted-foreground block">Chave Pública (Hex)</span>
-                    <span className="font-mono text-xs break-all">{metaEvent?.pubkey||nip19.decode(userId!)?.data as string}</span>
+                    <span
+                      className="font-mono text-xs break-all">{metaEvent?.pubkey || nip19.decode(userId!)?.data as string}</span>
                   </div>
                 </div>
               </div>
