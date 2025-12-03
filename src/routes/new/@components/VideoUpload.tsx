@@ -32,7 +32,7 @@ export default function Player({
   );
 }
 
-// TODO: incluir linguagem na geração de metadados
+
 export interface VideoMetadata {
   url?: string;
   title?: string;

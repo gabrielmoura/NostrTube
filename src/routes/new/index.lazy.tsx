@@ -13,7 +13,7 @@ import { makeEvent, type makeEventParams } from "@/helper/pow/pow.ts";
 import { nostrNow } from "@/helper/date.ts";
 import { Button } from "@/components/ui/button";
 import { t } from "i18next";
-import { useGenTagsVideo } from "@/hooks/gentTags.ts";
+import { generateVideoTags } from "@/hooks/gentTags.ts";
 import { Image } from "@/components/Image.tsx";
 import LanguagesCombo from "@/components/ComboBox/ComboLanguage.tsx";
 import { AddTagInput } from "@/routes/new/@components/BoxAddToModal.tsx";
@@ -21,9 +21,9 @@ import { toast } from "sonner";
 import { LoggerAgent } from "@/debug.ts";
 import { Helmet } from "react-helmet-async";
 import { ButtonWithLoader } from "@/components/ButtonWithLoader.tsx";
+import { ButtonUploadThumb } from "@/routes/new/@components/ButtonUploadThumb.tsx";
 
 
-const ButtonUpload = lazy(() => import("@/components/ButtonUpload.tsx"));
 const Textarea = lazy(() => import("@/components/textarea.tsx"));
 
 
@@ -46,9 +46,8 @@ function Page() {
 
   useEffect(() => {
     if (!currentUser) {
-      navigate({ to: "/" }).then(() => toast(t("you_must_be_logged_in_to_upload_videos", "You must be logged in to upload videos"), {
-        type: "warning",
-        autoClose: 5000
+      navigate({ to: "/" }).then(() => toast.warning(t("you_must_be_logged_in_to_upload_videos", "You must be logged in to upload videos"), {
+        duration: 5000
       }));
     }
   }, [currentUser, navigate]);
@@ -71,21 +70,18 @@ function Page() {
         // const encodedEvent = event.encode();
         navigate({ to: "/v/$eventId", params: { eventId: nip19Encode } });
         // router.push(`/v/${encodedEvent}`);
-        toast(t("video_published_successfully", "Video published successfully"), {
-          type: "success",
-          autoClose: 5000
+        toast.success(t("video_published_successfully", "Video published successfully"), {
+          duration: 5000
         });
       }).catch((err) => {
         log.error("error publishing event", err);
-        toast(t("error_publishing_video", "Error publishing video"), {
-          type: "error",
-          autoClose: 5000
+        toast.error(t("error_publishing_video", "Error publishing video"), {
+          duration: 5000
         });
       })
     ,
     onError: () => toast("Um erro encontrado")
   });
-  const { genTags } = useGenTagsVideo();
 
 
   function handleSubmit() {
@@ -94,12 +90,13 @@ function Page() {
     if (!videoData?.url || !videoData?.title) return;
 
     try {
-      const tags = genTags({
+      const tags = generateVideoTags({
         currentPubkey: currentUser.pubkey as string,
         hashtags,
         indexers,
         videoData,
-        language
+        language,
+        thumb
       });
       makeEventMut.mutate({
         ndk: ndk,
@@ -206,12 +203,12 @@ function Page() {
               className="mb-2 w-full rounded-md border object-cover"
               width={"288"}
             />) : (
-            <ButtonUpload
+            <ButtonUploadThumb
               setUrl={setThumb}
               url={thumb}
               accept={{ "image/*": [] }}>
               <Button variant="outline">Upload</Button>
-            </ButtonUpload>
+            </ButtonUploadThumb>
           )}
 
         </div>

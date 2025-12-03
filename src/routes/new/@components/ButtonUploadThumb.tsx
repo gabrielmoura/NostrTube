@@ -11,14 +11,14 @@ import { Button } from "@/components/ui/button.tsx";
 import { AddTagButton } from "@/routes/new/@components/BoxAddToModal.tsx";
 import { toast } from "sonner"; // Importe o componente Button se não tiver
 
-interface ButtonUploadProps {
+interface ButtonUploadThumbProps {
   children: ReactNode
   setUrl: Dispatch<SetStateAction<string | undefined>>
   url?: string,
   accept: Accept
 }
 
-export default function ButtonUpload({ children, url, setUrl, accept }: ButtonUploadProps) {
+export function ButtonUploadThumb({ children, url, setUrl, accept }: ButtonUploadThumbProps) {
   const { ndk } = useNDK();
   const [files, setFiles] = useState<(File & { preview: string })[]>([]);
   const [fileToUpload, setFileToUpload] = useState<File | null>(null); // Novo estado para o arquivo a ser enviado

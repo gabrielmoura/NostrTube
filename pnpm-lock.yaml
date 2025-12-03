@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@capacitor/share':
+        specifier: ^7.0.2
+        version: 7.0.2(@capacitor/core@7.4.4)
       '@headlessui/react':
         specifier: ^2.2.7
         version: 2.2.7(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -933,6 +936,14 @@ packages:
   '@babel/types@7.28.4':
     resolution: {integrity: sha512-bkFqkLhh3pMBUQQkpVgWDWq/lqzc2678eUyDlTBhRqhCHFguYYGM0Efga7tYk4TogG/3x0EEl66/OQ+WGbWB/Q==}
     engines: {node: '>=6.9.0'}
+
+  '@capacitor/core@7.4.4':
+    resolution: {integrity: sha512-xzjxpr+d2zwTpCaN0k+C6wKSZzWFAb9OVEUtmO72ihjr/NEDoLvsGl4WLfjWPcCO2zOy0b2X52tfRWjECFUjtw==}
+
+  '@capacitor/share@7.0.2':
+    resolution: {integrity: sha512-VyNPo/9831xnL17IMDeft5yNdBjoKNb451P95sRcr69hulRDqHc+kndqOVaMXnaA6IyBdWnnFv/n1HUf4cXpGw==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
 
   '@cashu/cashu-ts@2.7.1':
     resolution: {integrity: sha512-JtH1OGpMBSnJ1by6wylbXdGHT1jc8h3GPVFD5vPUSbgBjDhgz9gLEH64QpWRw5O2h56GDUgoaTzkDy184qjQlw==}
@@ -6186,6 +6197,14 @@ snapshots:
     dependencies:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.27.1
+
+  '@capacitor/core@7.4.4':
+    dependencies:
+      tslib: 2.8.1
+
+  '@capacitor/share@7.0.2(@capacitor/core@7.4.4)':
+    dependencies:
+      '@capacitor/core': 7.4.4
 
   '@cashu/cashu-ts@2.7.1':
     dependencies:
