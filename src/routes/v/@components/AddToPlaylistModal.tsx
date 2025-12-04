@@ -3,7 +3,7 @@ import { uniqBy } from "ramda";
 import { useNDK, useNDKCurrentPubkey, useSubscribe } from "@nostr-dev-kit/ndk-hooks";
 import { getTagValue } from "@welshman/util";
 import { toast } from "sonner";
-import { addToPlayList } from "@/helper/actions/playlist.ts";
+import { addToPlayList, addToPlayListEvent } from "@/helper/actions/playlist.ts";
 import { cn } from "@/lib/utils";
 import Spinner from "@/components/Spinner.tsx";
 import { modal } from "@/components/modal_v2/modal-manager.ts";
@@ -44,15 +44,10 @@ export default function AddToPlaylistModal({
       }
     })
   );
-  const { ndk } = useNDK();
-
 
   async function handleUpdateList(playlist: NDKEvent) {
-    if (!ndk) return;
     try {
-      const promise = addToPlayList({ ndk, playListId: playlist.id!, eventIdTag: eventIdTag });
-
-      toast.promise(promise, {
+      toast.promise(addToPlayListEvent({ playLisEvent: playlist, eventIdTag: eventIdTag }), {
         loading: "Adding to playlist",
         success: (data) => {
           console.log("Novo Evento ", data);
@@ -70,7 +65,7 @@ export default function AddToPlaylistModal({
   return (
     <SelectModal
       options={userPlaylists}
-      loadingOptions={loadingPlaylists}
+      loadingOptions={!loadingPlaylists}
       getKeyAndLabel={(e) => ({
         key: e.tagId(),
         label: getTagValue("title", e.tags) ?? e.id

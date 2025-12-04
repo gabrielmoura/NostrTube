@@ -15,7 +15,7 @@ export function PlaylistCard({ event }: PlaylistCardProps) {
   return (
     <Link
       to={"/p/$listId"} // Rota hipotética para visualizar a playlist
-      params={{ listId: event.encode() }} // Ou usar o ID, dependendo da sua rota
+      params={{ listId: event.dTag! }} // Ou usar o ID, dependendo da sua rota
       className="group block focus:outline-none"
     >
       <Card

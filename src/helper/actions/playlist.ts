@@ -10,6 +10,27 @@ export type AddToPlayListDataParams = {
   playListId: string;
   eventIdTag: string
 };
+export type AddToPlayListEventDataParams = {
+  playLisEvent: NDKEvent
+  eventIdTag: string
+};
+
+export async function addToPlayListEvent({ playLisEvent, eventIdTag }: AddToPlayListEventDataParams) {
+  // Busca Lista, caso não exista cria uma e adicione o evento ao final da lista.
+  if (!playLisEvent) {
+    throw new Error("No PlayList Event provided");
+  }
+  if (!eventIdTag) {
+    throw new Error("No Event ID provided");
+  }
+
+
+  playLisEvent.tags.push(["a", eventIdTag]);
+  await playLisEvent.sign();
+  await playLisEvent.publish();
+  return playLisEvent;
+}
+
 
 export async function addToPlayList({ ndk, playListId, eventIdTag }: AddToPlayListDataParams) {
   // Busca Lista, caso não exista cria uma e adicione o evento ao final da lista.

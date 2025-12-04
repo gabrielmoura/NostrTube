@@ -22,13 +22,19 @@ import { type Playlist } from "./types";
 import { playlistApi } from "./api";
 import { PlaylistItem } from "./PlaylistItem";
 import { EditPlaylistModal } from "./EditPlaylistModal";
+import { useParams } from "@tanstack/react-router";
+import { useNDK } from "@nostr-dev-kit/ndk-hooks";
+import type { NDKEvent } from "@nostr-dev-kit/ndk";
 
 export default function PlaylistScreen() {
+  const { listId } = useParams({ strict: false });
   const [loading, setLoading] = useState(true);
   const [playlist, setPlaylist] = useState<Playlist | null>(null);
   const [originalPlaylist, setOriginalPlaylist] = useState<Playlist | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [metaEvent, setMetaEvent] = useState<NDKEvent>();
+  const { ndk } = useNDK();
 
   // DnD Sensors
   const sensors = useSensors(
@@ -42,9 +48,10 @@ export default function PlaylistScreen() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const data = await playlistApi.fetchPlaylist("playlist-123");
-        setPlaylist(data);
-        setOriginalPlaylist(JSON.parse(JSON.stringify(data))); // Deep copy for comparison
+        const data = await playlistApi.fetchPlaylist(ndk!, listId);
+        setPlaylist(data.playlist);
+        setOriginalPlaylist(JSON.parse(JSON.stringify(data.playlist))); // Deep copy for comparison
+        setMetaEvent(data.metaEvent);
       } catch (error) {
         console.error("Erro ao carregar playlist", error);
       } finally {
@@ -52,7 +59,7 @@ export default function PlaylistScreen() {
       }
     };
     loadData();
-  }, []);
+  }, [listId, ndk]);
 
   // Computed: Is Dirty?
   const isDirty = JSON.stringify(playlist) !== JSON.stringify(originalPlaylist);
@@ -96,7 +103,7 @@ export default function PlaylistScreen() {
     if (!playlist) return;
     setIsSaving(true);
     try {
-      await playlistApi.savePlaylist(playlist);
+      await playlistApi.savePlaylist(metaEvent!, playlist);
       setOriginalPlaylist(JSON.parse(JSON.stringify(playlist))); // Reset dirty state
     } catch (error) {
       console.error("Erro ao salvar", error);

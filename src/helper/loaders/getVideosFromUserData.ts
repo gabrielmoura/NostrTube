@@ -61,7 +61,7 @@ export async function getVideosFromUserData({ ndk, userId }: GetVideosFromUserDa
     {
       authors: [pubkey],
       kinds: [NDKKind.VideoCurationSet],
-      limit: 10
+      // limit: 10
     }
   ];
 
@@ -75,6 +75,10 @@ export async function getVideosFromUserData({ ndk, userId }: GetVideosFromUserDa
   if (!events || events.size === 0) {
     throw notFound();
   }
+
+  // so deve haver um evento do kind NDKKind.VideoCurationSet com tag 'd' sendo usada como identificador, escolher o evento mais recente.
+
+  Array.from(events)
 
   // const hasMetadata = [...events].some(e => e.kind === NDKKind.Metadata);
   // if (!hasMetadata) {
