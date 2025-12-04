@@ -1,10 +1,12 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
-import { Download, MoreVertical } from "lucide-react";
+import { Download, MoreVertical, Share2 } from "lucide-react";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { type NDKEvent, NDKUser } from "@nostr-dev-kit/ndk";
 import { downloadJsonl } from "@/helper/download.ts";
 import { toast } from "sonner";
+import { Share } from "@capacitor/share";
+import { copyText } from "@/helper/format.ts";
 
 interface DropdownMenuProfileProps {
   currentUser?: NDKUser; // O usuário logado
@@ -25,13 +27,38 @@ export function DropdownMenuProfile({ currentUser, events }: DropdownMenuProfile
 
   const options: Option[] = [
     {
-      label: "Export User",
+      label: "Share Profile",
+      icon: <Share2 className="size-4" />,
+      action: () => {
+        if ((navigator as Navigator).share) {
+          Share.share({
+            title: currentUser?.profile?.name,
+            url: `${
+              import.meta.env.VITE_PUBLIC_ROOT_DOMAIN ?? "https://nostrtube.com"
+            }/u/${npub}`
+          }).catch(console.log);
+        } else {
+          copyText(
+            `${
+              import.meta.env.VITE_PUBLIC_ROOT_DOMAIN ?? "https://nostrtube.com"
+            }/u/${npub}`
+          ).then(() => toast.success("Link copied!"));
+        }
+      }
+    },
+    {
+      label: "Export Profile",
       icon: <Download className="size-4" />,
       action: async () => {
         if (currentUser && events) {
-          downloadJsonl(events, `user-${userId || npub}.jsonl`)
-            .then(() => toast.success("User data has been downloaded"))
-            .catch(() => toast.error("Error downloading user data"));
+          toast.promise(
+            downloadJsonl(events, `user-${userId || npub}.jsonl`),
+            {
+              loading: "Preparing download...",
+              success: "User data has been downloaded",
+              error: "Error downloading user data"
+            }
+          );
         }
       }
 

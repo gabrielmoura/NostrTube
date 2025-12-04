@@ -11,7 +11,7 @@ import {Link} from "@tanstack/react-router";
 import LikeToggleButton from "@/components/LikeToggleButton.tsx";
 // import {VideoMeta} from "@/routes/v/@components/VideoMeta.tsx";
 import {lazy, useEffect, useState} from "react";
-import {DropdownMenuVideo} from "@/routes/v/@components/DropDown.tsx";
+import {DropdownMenuVideo} from "@/routes/v/@components/DropdownMenuVideo.tsx";
 import FollowButton from "@/components/FollowButton.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 
