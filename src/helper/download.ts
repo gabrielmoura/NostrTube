@@ -1,3 +1,5 @@
+import type { NDKEvent } from "@nostr-dev-kit/ndk";
+
 export async function downloadVideo(url: string, filename?: string) {
   let name = filename || "video";
   const splitUrl = url.split(".");
@@ -16,10 +18,10 @@ export async function downloadVideo(url: string, filename?: string) {
 }
 
 export async function downloadJsonl(
-  data: object[],
+  data: NDKEvent[],
   filename: string = "data.jsonl"
 ) {
-  const jsonlData = data.map((item) => JSON.stringify(item)).join("\n");
+  const jsonlData = data.map((item) => JSON.stringify(item.rawEvent())).join("\n");
   const blob = new Blob([jsonlData], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
