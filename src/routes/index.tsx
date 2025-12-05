@@ -1,13 +1,12 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Helmet } from "react-helmet-async";
 import { t } from "i18next";
-import { NDKKind, NDKEvent } from "@nostr-dev-kit/ndk";
+import { NDKEvent, NDKKind } from "@nostr-dev-kit/ndk";
 import { NDKSubscriptionCacheUsage, useSubscribe } from "@nostr-dev-kit/ndk-hooks";
 import { uniqBy } from "ramda";
 import { getTagValue, getTagValues } from "@welshman/util";
-import { Flame, Clock, Languages, Search } from "lucide-react"; // Ícones sugeridos
-
+import { Clock, Flame, Languages, Search } from "lucide-react"; // Ícones sugeridos
 import { sortEventsByImages } from "@/helper/format.ts";
 import { detectLanguageMain } from "@/helper/userLang.ts";
 import { Section, SectionContent, SectionHeader, SectionTitle } from "@/components/containers/pageSection";
@@ -95,7 +94,8 @@ function VideoFeed({ events, title, isLoading, emptyMessage }: VideoFeedProps) {
     return (
       <Section className="px-5">
         <SectionHeader>
-          <SectionTitle className="font-main text-2xl font-semibold sm:text-3xl animate-pulse bg-muted/20 w-1/3 h-8 rounded" />
+          <SectionTitle
+            className="font-main text-2xl font-semibold sm:text-3xl animate-pulse bg-muted/20 w-1/3 h-8 rounded" />
         </SectionHeader>
         <SectionContent className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 relative mx-auto">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -153,12 +153,12 @@ function RecentVideos() {
     [{
       kinds: VIDEO_KINDS,
       limit: 50, // Reduzido de 100 para melhorar first paint, ajuste conforme necessidade
-      until: Math.floor(Date.now() / 1000), // Garante que pegamos até o momento atual
+      until: Math.floor(Date.now() / 1000) // Garante que pegamos até o momento atual
     }],
     {
       closeOnEose: false, // Mantive false para receber updates em tempo real, mude para true se preferir estático
       cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
-      relayUrls: SEARCH_RELAYS,
+      relayUrls: SEARCH_RELAYS
     },
     []
   );
@@ -180,16 +180,17 @@ function LanguageVideos() {
     lang ? [{
       kinds: VIDEO_KINDS,
       "#l": [lang], // NDK geralmente espera array ou string, mas array é mais seguro para filters
-      limit: 50,
+      limit: 50
     }] : [], // Não busca se não tiver lang
     {
-      cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
+      cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST
     },
     [lang]
   );
 
   if (!lang) {
-    return <div className="p-5 text-center text-muted-foreground">{t("Language not detected", "Idioma não detectado.")}</div>;
+    return <div
+      className="p-5 text-center text-muted-foreground">{t("Language not detected", "Idioma não detectado.")}</div>;
   }
 
   return (
@@ -207,7 +208,7 @@ function PopularVideos() {
   const { events: viewEvents } = useSubscribe([{
     kinds: [34237],
     limit: 100,
-    until: Math.floor(Date.now() / 1000),
+    until: Math.floor(Date.now() / 1000)
   }], {
     cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST
   });
@@ -230,7 +231,7 @@ function PopularVideos() {
     popularVideoIds.length > 0 ? [{
       kinds: VIDEO_KINDS,
       "#d": popularVideoIds, // Correção: filtro por tag 'd' geralmente é '#d' em queries genéricas ou 'd' dependendo do relay wrapper
-      limit: 50,
+      limit: 50
     }] : [], // Evita query vazia
     {
       cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST

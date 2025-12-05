@@ -18,8 +18,8 @@ export function FollowButton({ pubkey, currentUser }: FollowButtonProps) {
       // Verifica se o usuário logado segue o perfil atual (simplificado)
       // Em produção, verificar o Kind 3 do currentUser
       const checkFollow = async () => {
-        const follows = await currentUser.follows();
-        setIsFollowing(follows.has(pubkey));
+        const follows = await currentUser.followSet();
+        setIsFollowing(Array.from(follows).some(userKey => userKey === pubkey));
       };
       checkFollow();
     }

@@ -29,6 +29,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.62.0(react@19.1.1))
+      '@imgproxy/imgproxy-js-core':
+        specifier: ^1.6.0
+        version: 1.6.0
       '@noble/curves':
         specifier: ^2.0.0
         version: 2.0.0
@@ -1404,6 +1407,9 @@ packages:
   '@hutson/parse-repository-url@3.0.2':
     resolution: {integrity: sha512-H9XAx3hc0BQHY6l+IFSWHDySypcXsvsuLhgYLUGywmJ5pswRVQJUHpOsobnLYp2ZUaUlKiKDrgWWhosOwAEM8Q==}
     engines: {node: '>=6.9.0'}
+
+  '@imgproxy/imgproxy-js-core@1.6.0':
+    resolution: {integrity: sha512-cAZjme7b1tByDYJGvge/yUZTxuzlUuYM1Dx/fKkBs/tTxxbgRCxehQU9P+rSgNoJsdCXmnPT1QuxvS5Ok/tZYQ==}
 
   '@inquirer/external-editor@1.0.3':
     resolution: {integrity: sha512-RWbSrDiYmO4LbejWY7ttpxczuwQyZLBUyygsA9Nsv95hpzUWwnNTVQmAq3xuh7vNwCp07UTmE5i11XAEExx4RA==}
@@ -8099,6 +8105,8 @@ snapshots:
   '@humanwhocodes/retry@0.4.3': {}
 
   '@hutson/parse-repository-url@3.0.2': {}
+
+  '@imgproxy/imgproxy-js-core@1.6.0': {}
 
   '@inquirer/external-editor@1.0.3(@types/node@24.7.2)':
     dependencies:

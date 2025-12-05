@@ -1,23 +1,38 @@
-import type {ImgProxyProcessingOptions} from "@/helper/imgproxy.ts";
-import {buildProcessingPath} from "@/helper/imgproxy.ts";
+import { generateUrl, type Options } from "@imgproxy/imgproxy-js-core";
 
-export function imageNewSrc(src: string, width: number | string): string {
-    let newSrc: string
-    if (import.meta.env.VITE_APP_IMGPROXY && import.meta.env.VITE_APP_IMGPROXY.length > 5) {
-        newSrc = import.meta.env.VITE_APP_IMGPROXY + "/" + width + ",fit/plain/" + src
-    } else {
-        newSrc = src
+// --- Função de Alto Nível (Helper / Wrapper) ---
+
+/**
+ * Função utilitária para uso direto nos componentes.
+ * Responsabilidade: Decidir SE deve usar o proxy e aplicar defaults.
+ */
+export function getOptimizedImageSrc(
+  src: string,
+  width: number | string,
+  customOptions?: Options
+): string {
+  const envUrl = import.meta.env.VITE_APP_IMGPROXY;
+
+  // 1. Guard Clause: Se não houver URL configurada, retorna a original
+  if (!envUrl) {
+    return src;
+  }
+
+  // 2. Normalização das opções
+  // Se nenhuma opção for passada, assumimos o redimensionamento padrão baseado na largura
+  const options: Options = customOptions || {
+    resize: {
+      resizing_type: "fit",
+      width: Number(width),
+      height: Number(width)
     }
-    return newSrc
-}
+  };
 
-interface ImageProxyProps extends ImgProxyProcessingOptions {
-    src: string
-    imgProxyUrl: string
-}
+  const path = generateUrl({
+    type: "plain",
+    value: src
+  }, options);
 
-export function imageproxy(opts: ImageProxyProps): string {
-    if (!opts.imgProxyUrl) return opts.src
-    return opts.imgProxyUrl + "/" + buildProcessingPath(opts) + "/plain/" + opts.src
-
+  // 3. Delega a construção da URL
+  return `${envUrl}/insecure${path}`;
 }

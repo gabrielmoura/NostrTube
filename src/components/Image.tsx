@@ -1,5 +1,5 @@
 import type {DetailedHTMLProps, ImgHTMLAttributes} from "react";
-import {imageNewSrc} from "@/helper/http.ts";
+import {getOptimizedImageSrc} from "@/helper/http.ts";
 
 interface ImageProps extends DetailedHTMLProps<ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement> {
     src: string
@@ -9,7 +9,7 @@ interface ImageProps extends DetailedHTMLProps<ImgHTMLAttributes<HTMLImageElemen
 
 export function Image({alt, src, width, ...props}: ImageProps) {
     return <img
-        src={imageNewSrc(src, width)}
+        src={getOptimizedImageSrc(src, width)}
         alt={alt}
         width={width}
         {...props}
