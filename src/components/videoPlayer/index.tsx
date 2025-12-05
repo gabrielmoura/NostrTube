@@ -13,7 +13,7 @@ import {
 import type { DataVideo } from "./types.ts";
 import { useEffect, useRef } from "react";
 import { VideoLayout } from "./layout.tsx";
-import { imageNewSrc } from "@/helper/http.ts";
+import { getOptimizedImageSrc } from "@/helper/http.ts";
 import { cn } from "@/helper/format.ts";
 
 interface VideoPlayerParams extends DataVideo {
@@ -79,7 +79,7 @@ export function VideoPlayer({ image, src, title, onCanPlay, className }: VideoPl
     <MediaProvider>
       <Poster
         className="absolute inset-0 block h-full w-full border-0 object-cover opacity-0 outline-none ring-0 transition-opacity data-[visible]:opacity-100"
-        src={imageNewSrc(image, "500")}
+        src={getOptimizedImageSrc(image, "500")}
         alt={title}
       />
     </MediaProvider>
