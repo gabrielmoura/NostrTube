@@ -1,5 +1,4 @@
-import type { NDKFilter } from "@nostr-dev-kit/ndk";
-import NDK__default from "@nostr-dev-kit/ndk";
+import NDK__default, { type NDKFilter, NDKKind } from "@nostr-dev-kit/ndk";
 import { nip19 } from "nostr-tools";
 import { NDKSubscriptionCacheUsage } from "@nostr-dev-kit/ndk-hooks";
 import { notFound } from "@tanstack/react-router";
@@ -66,6 +65,7 @@ export async function geVideoByEventIdData({ ndk, eventId }: GeVideoByEventIdDat
     filters = [
       {
         "#d": [eventId],
+        kinds: [NDKKind.Video, NDKKind.HorizontalVideo],
         limit: 1
       }
     ];
