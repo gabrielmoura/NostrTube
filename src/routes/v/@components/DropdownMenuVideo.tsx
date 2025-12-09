@@ -11,6 +11,7 @@ import type { NDKEvent } from "@nostr-dev-kit/ndk";
 import { downloadVideo } from "@/helper/download.ts";
 import AddToPlaylistModal from "@/routes/v/@components/AddToPlaylistModal.tsx";
 import { modal } from "@/components/modal_v2/modal-manager.ts";
+import { ReportVideoModel } from "@/routes/v/@components/ReportVideoModal.tsx";
 
 
 // function AddToPlaylistModal({ eventIdentifier }: { eventIdentifier: string }) {
@@ -24,8 +25,9 @@ export const DropdownMenuVideo = ({ event }: { event: NDKEvent }) => {
   const navigate = useNavigate();
   const npub = useNDKCurrentPubkey();
   const rawEvent = event.rawEvent();
-  const { url, title } = getVideoDetails(event);
+  const { url, title, summary } = getVideoDetails(event);
   const naddr = event.encode();
+  const dTag = event.dTag;
 
   function handleDownload() {
     downloadVideo(url, title).then(() =>
@@ -33,27 +35,29 @@ export const DropdownMenuVideo = ({ event }: { event: NDKEvent }) => {
     );
   }
 
+  function handleCopy() {
+    if ((navigator as Navigator).share) {
+      Share.share({
+        title: title,
+        text: title,
+        url: `${
+          import.meta.env.VITE_PUBLIC_ROOT_DOMAIN ?? "https://nostrtube.com"
+        }/v/${dTag || naddr}`
+      }).catch(console.log);
+    } else {
+      copyText(
+        `${
+          import.meta.env.VITE_PUBLIC_ROOT_DOMAIN ?? "https://nostrtube.com"
+        }/v/${dTag || naddr}`
+      ).then(() => toast.success("Link copied!"));
+    }
+  }
+
   const options = [
     {
       label: "Share video",
       icon: <Share2 className="size-4" />,
-      action: () => {
-        if ((navigator as Navigator).share) {
-          Share.share({
-            title: title,
-            text: title,
-            url: `${
-              import.meta.env.VITE_PUBLIC_ROOT_DOMAIN ?? "https://nostrtube.com"
-            }/v/${naddr}`
-          }).catch(console.log);
-        } else {
-          copyText(
-            `${
-              import.meta.env.VITE_PUBLIC_ROOT_DOMAIN ?? "https://nostrtube.com"
-            }/v/${naddr}`
-          ).then(() => toast.success("Link copied!"));
-        }
-      }
+      action: handleCopy
     },
     {
       label: "Add to Playlist",
@@ -93,7 +97,11 @@ export const DropdownMenuVideo = ({ event }: { event: NDKEvent }) => {
     {
       label: "Report Event",
       icon: <Flag className="size-4 text-red-500" />,
-      action: () => toast.info("Reported! (demo only)")
+      action: () => modal.show(<ReportVideoModel data={{
+        title: title || summary[0],
+        eventIdTag: event.tagId(),
+        id: event.id,
+      }} />)
     },
     {
       label: "View on NJump",
