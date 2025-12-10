@@ -67,8 +67,8 @@ export async function getVideosFromUserData({ ndk, userId }: GetVideosFromUserDa
 
   // 3. Busca os eventos
   const events = await ndk.fetchEvents(filters, {
-    closeOnEose: true,
-    cacheUsage: NDKSubscriptionCacheUsage.PARALLEL
+    closeOnEose: false,
+    cacheUsage: NDKSubscriptionCacheUsage.ONLY_RELAY
   });
 
   // 4. Valida o retorno

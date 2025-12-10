@@ -38,8 +38,8 @@ export const playlistApi: IPlaylistAPI = {
 
     // 2. Buscar o Evento da Playlist
     const metaEvent = await ndk.fetchEvent(filter, {
-      cacheUsage: NDKSubscriptionCacheUsage.PARALLEL,
-      closeOnEose: true
+      cacheUsage: NDKSubscriptionCacheUsage.ONLY_RELAY,
+      closeOnEose: false
     });
 
     if (!metaEvent) throw notFound();
