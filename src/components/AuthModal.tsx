@@ -7,7 +7,7 @@ import { NDKNip07Signer, NDKNip46Signer, NDKPrivateKeySigner, type NDKSigner } f
 import { useNDK, useNDKSessionLogin } from "@nostr-dev-kit/ndk-hooks";
 import { generatePrivateKey, type KeyPair } from "@/helper/verify_event.ts";
 import { useMutation } from "@tanstack/react-query";
-import { LoggerAgent } from "@/debug.ts";
+import { LoggerAgent } from "@/lib/debug.ts";
 import { useClipboard } from "@/hooks/useClipboard.ts";
 import { useDownload } from "@/hooks/useDownload.ts";
 import { t } from "i18next";

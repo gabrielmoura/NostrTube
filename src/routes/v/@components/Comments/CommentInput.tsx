@@ -12,7 +12,7 @@ import { useMutation } from "@tanstack/react-query";
 import { nostrNow } from "@/helper/date.ts";
 import { t } from "i18next";
 import { Button } from "@/components/button.tsx";
-import { LoggerAgent } from "@/debug.ts";
+import { LoggerAgent } from "@/lib/debug.ts";
 
 const Textarea = lazy(() => import("@/components/textarea.tsx"));
 

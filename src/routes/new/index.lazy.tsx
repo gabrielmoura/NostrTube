@@ -18,7 +18,7 @@ import { Image } from "@/components/Image.tsx";
 import LanguagesCombo from "@/components/ComboBox/ComboLanguage.tsx";
 import { AddTagInput } from "@/routes/new/@components/BoxAddToModal.tsx";
 import { toast } from "sonner";
-import { LoggerAgent } from "@/debug.ts";
+import { LoggerAgent } from "@/lib/debug.ts";
 import { Helmet } from "react-helmet-async";
 import { ButtonWithLoader } from "@/components/ButtonWithLoader.tsx";
 import { ButtonUploadThumb } from "@/routes/new/@components/ButtonUploadThumb.tsx";

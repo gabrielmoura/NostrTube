@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { AlertCircle, Bell, Loader2, MapPin, Shield } from "lucide-react";
 import ngeohash from "ngeohash";
 import { Card, CardHeader, Switch } from "./CommonComponents";
-import { LoggerAgent } from "@/debug.ts";
+import { LoggerAgent } from "@/lib/debug.ts";
 import useUserStore from "@/store/useUserStore.ts";
 
 export const PermissionSettings = () => {

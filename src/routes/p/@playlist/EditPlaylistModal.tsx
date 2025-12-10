@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ export const EditPlaylistModal = ({ isOpen, onClose, playlist, onSave }: EditPla
   const [formData, setFormData] = useState({
     name: playlist.name,
     description: playlist.description,
-    coverImage: playlist.coverImage || "",
+    coverImage: playlist.coverImage || ""
   });
 
   // Reset form when playlist changes or modal opens
@@ -26,7 +26,7 @@ export const EditPlaylistModal = ({ isOpen, onClose, playlist, onSave }: EditPla
       setFormData({
         name: playlist.name,
         description: playlist.description,
-        coverImage: playlist.coverImage || "",
+        coverImage: playlist.coverImage || ""
       });
     }
   }, [isOpen, playlist]);
@@ -56,8 +56,12 @@ export const EditPlaylistModal = ({ isOpen, onClose, playlist, onSave }: EditPla
             <Textarea
               id="desc"
               value={formData.description}
+              maxLength={500}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
+            {formData?.description && <p className="text-xs text-right text-muted-foreground">
+              {formData?.description.length}/500
+            </p>}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="image">URL da Imagem de Capa</Label>

@@ -1,18 +1,19 @@
-import React from 'react';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, MoreVertical, Play, Trash2, ListVideo } from 'lucide-react';
-import { type VideoItem } from './types';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { GripVertical, ListVideo, MoreVertical, Play, Trash2 } from "lucide-react";
+import { type VideoItem } from "./types";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import { Link } from "@tanstack/react-router";
 
 interface PlaylistItemProps {
   item: VideoItem;
@@ -34,18 +35,18 @@ export const PlaylistItem = ({ item, onRemove, onPlay }: PlaylistItemProps) => {
   const style = {
     transform: CSS.Translate.toString(transform),
     transition,
-    zIndex: isDragging ? 50 : 'auto',
+    zIndex: isDragging ? 50 : "auto"
   };
 
   const formattedDuration = React.useMemo(() => {
     const minutes = Math.floor(item.duration / 60);
-    const seconds = String(item.duration % 60).padStart(2, '0');
+    const seconds = String(item.duration % 60).padStart(2, "0");
     return `${minutes}:${seconds}`;
   }, [item.duration]);
 
   const formattedDate = React.useMemo(() => {
     return new Date(item.publishedAt).toLocaleDateString(undefined, {
-      day: 'numeric', month: 'short', year: 'numeric'
+      day: "numeric", month: "short", year: "numeric"
     });
   }, [item.publishedAt]);
 
@@ -87,15 +88,20 @@ export const PlaylistItem = ({ item, onRemove, onPlay }: PlaylistItemProps) => {
             />
 
             {/* Overlay de Play (Apenas Desktop ou telas maiores para não poluir mobile) */}
-            <div className="hidden sm:flex absolute inset-0 bg-black/0 transition-all duration-300 group-hover/item:bg-black/30 items-center justify-center">
+            <Link
+              className="hidden sm:flex absolute inset-0 bg-black/0 transition-all duration-300 group-hover/item:bg-black/30 items-center justify-center"
+              to="/v/$eventId"
+              params={{ eventId: item.id }}
+            >
               <Play
                 size={32}
                 className="text-white fill-white opacity-0 -translate-y-2 transition-all duration-300 group-hover/item:opacity-100 group-hover/item:translate-y-0 drop-shadow-lg"
               />
-            </div>
+            </Link>
 
             {/* Duração - Texto menor no mobile */}
-            <span className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] sm:text-[11px] font-medium px-1 sm:px-1.5 py-0.5 rounded-sm leading-none backdrop-blur-sm">
+            <span
+              className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] sm:text-[11px] font-medium px-1 sm:px-1.5 py-0.5 rounded-sm leading-none backdrop-blur-sm">
               {formattedDuration}
             </span>
           </div>
@@ -116,9 +122,11 @@ export const PlaylistItem = ({ item, onRemove, onPlay }: PlaylistItemProps) => {
             </p>
 
             {/* Metadados: Autor e Data */}
-            <div className="text-[11px] sm:text-xs text-muted-foreground/70 flex items-center gap-1.5 sm:gap-2 truncate mt-1 sm:mt-auto sm:pt-1">
-              <span className="font-medium hover:text-foreground transition-colors cursor-pointer truncate max-w-[100px] sm:max-w-none">
-                {item.author.name || 'Desconhecido'}
+            <div
+              className="text-[11px] sm:text-xs text-muted-foreground/70 flex items-center gap-1.5 sm:gap-2 truncate mt-1 sm:mt-auto sm:pt-1">
+              <span
+                className="font-medium hover:text-foreground transition-colors cursor-pointer truncate max-w-[100px] sm:max-w-none">
+                {item.author.name || "Desconhecido"}
               </span>
               <span className="text-muted-foreground/40 hidden sm:inline">•</span>
               <span className="hidden sm:inline">{formattedDate}</span>

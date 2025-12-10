@@ -4,7 +4,7 @@ import {NDKEvent} from "@nostr-dev-kit/ndk-hooks";
 import NDK__default from "@nostr-dev-kit/ndk";
 
 // https://github.com/coracle-social/coracle/blob/master/src/util/pow.ts#L5
-import {LoggerAgent} from "@/debug.ts";
+import {LoggerAgent} from "@/lib/debug.ts";
 
 const log = LoggerAgent.create("POW");
 export interface makeEventParams {

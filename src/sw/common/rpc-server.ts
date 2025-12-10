@@ -20,7 +20,7 @@ import type {
   RPCResponseError,
   RPCResponseResult,
 } from "./interface";
-import {logger} from "@/debug.ts";
+import {logger} from "@/lib/debug.ts";
 
 const log = logger.extend("RPCServer");
 

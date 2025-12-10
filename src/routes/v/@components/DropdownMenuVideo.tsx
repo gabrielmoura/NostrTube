@@ -14,13 +14,6 @@ import { modal } from "@/components/modal_v2/modal-manager.ts";
 import { ReportVideoModel } from "@/routes/v/@components/ReportVideoModal.tsx";
 
 
-// function AddToPlaylistModal({ eventIdentifier }: { eventIdentifier: string }) {
-//   return <div className="p-4 text-wrap w-full">
-//     Add to Playlist Modal for event {eventIdentifier} (Demo only)
-//   </div>;
-// }
-
-
 export const DropdownMenuVideo = ({ event }: { event: NDKEvent }) => {
   const navigate = useNavigate();
   const npub = useNDKCurrentPubkey();
@@ -63,8 +56,8 @@ export const DropdownMenuVideo = ({ event }: { event: NDKEvent }) => {
       label: "Add to Playlist",
       icon: <ListPlus className="size-4" />,
       action: () => {
-        modal.show(<AddToPlaylistModal eventIdTag={event.tagId()} />);
-        // toast.info("Demo only: Add to Playlist Modal would open");
+        const dTagId = event.dTag ?? "";
+        modal.show(<AddToPlaylistModal eventIdTag={`${event.kind}:${event.pubkey}:${dTagId}`} />);
       }
     },
     {
@@ -100,7 +93,7 @@ export const DropdownMenuVideo = ({ event }: { event: NDKEvent }) => {
       action: () => modal.show(<ReportVideoModel data={{
         title: title || summary[0],
         eventIdTag: event.tagId(),
-        id: event.id,
+        id: event.id
       }} />)
     },
     {

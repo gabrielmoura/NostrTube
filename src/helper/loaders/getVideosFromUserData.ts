@@ -51,7 +51,7 @@ export async function getVideosFromUserData({ ndk, userId }: GetVideosFromUserDa
     {
       authors: [pubkey],
       kinds: [NDKKind.Video, NDKKind.HorizontalVideo],
-      limit: 50
+      limit: 100
     },
     {
       authors: [pubkey],
@@ -60,15 +60,15 @@ export async function getVideosFromUserData({ ndk, userId }: GetVideosFromUserDa
     },
     {
       authors: [pubkey],
-      kinds: [NDKKind.VideoCurationSet],
+      kinds: [NDKKind.VideoCurationSet]
       // limit: 10
     }
   ];
 
   // 3. Busca os eventos
   const events = await ndk.fetchEvents(filters, {
-     closeOnEose: true,
-    cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST
+    closeOnEose: true,
+    cacheUsage: NDKSubscriptionCacheUsage.PARALLEL
   });
 
   // 4. Valida o retorno
@@ -78,7 +78,7 @@ export async function getVideosFromUserData({ ndk, userId }: GetVideosFromUserDa
 
   // so deve haver um evento do kind NDKKind.VideoCurationSet com tag 'd' sendo usada como identificador, escolher o evento mais recente.
 
-  Array.from(events)
+  Array.from(events);
 
   // const hasMetadata = [...events].some(e => e.kind === NDKKind.Metadata);
   // if (!hasMetadata) {

@@ -1,9 +1,8 @@
 import { type NDKEvent, NDKKind, NDKSubscriptionCacheUsage } from "@nostr-dev-kit/ndk";
-import { uniqBy } from "ramda";
-import { useNDK, useNDKCurrentPubkey, useSubscribe } from "@nostr-dev-kit/ndk-hooks";
+import { useNDKCurrentPubkey, useSubscribe } from "@nostr-dev-kit/ndk-hooks";
 import { getTagValue } from "@welshman/util";
 import { toast } from "sonner";
-import { addToPlayList, addToPlayListEvent } from "@/helper/actions/playlist.ts";
+import { addToPlayListEvent } from "@/helper/actions/playlist.ts";
 import { cn } from "@/lib/utils";
 import Spinner from "@/components/Spinner.tsx";
 import { modal } from "@/components/modal_v2/modal-manager.ts";
@@ -33,17 +32,6 @@ export default function AddToPlaylistModal({
     { cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST }
   );
 
-  const processedPlaylists = uniqBy(
-    (e) => e.tagId(),
-    userPlaylists.sort((a, b) => {
-      if (!a.created_at || !b.created_at) return 0;
-      if (a.created_at > b.created_at) {
-        return -1;
-      } else {
-        return 1;
-      }
-    })
-  );
 
   async function handleUpdateList(playlist: NDKEvent) {
     try {

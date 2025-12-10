@@ -1,7 +1,7 @@
 import { filter, finalize, fromEvent, map, Observable, takeUntil, takeWhile, tap } from "rxjs";
 import { nanoid } from "nanoid";
 import type { RPCCommandDirectory, RPCMessage, RPCResponse } from "./interface";
-import { logger } from "@/debug";
+import { logger } from "@/lib/debug.ts";
 
 const log = logger.extend("RPCClient");
 

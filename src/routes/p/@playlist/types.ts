@@ -1,5 +1,6 @@
 import type NDK__default from "@nostr-dev-kit/ndk";
 import type { NDKEvent } from "@nostr-dev-kit/ndk";
+import { z } from "zod";
 
 export interface NostrUser {
   pubkey: string;
@@ -27,9 +28,10 @@ export interface Playlist {
   ownerPubkey: string;
 
 }
-export interface PlaylistFetch{
+
+export interface PlaylistFetch {
   metaEvent?: NDKEvent;
-  playlist:Playlist;
+  playlist: Playlist;
 }
 
 // Interfaces para as APIs Abstratas
@@ -40,3 +42,11 @@ export interface IPlaylistAPI {
 
   deleteItemFromPlaylist(playListEvent: NDKEvent, itemId: string): Promise<NDKEvent>;
 }
+
+export const playlistSchema = z.object({
+  name: z.string().min(3, "O nome deve ter pelo menos 3 caracteres").max(100),
+  description: z.string().max(500).optional(),
+  coverImage: z.url({message:"URL de imagem inválida"}).optional().or(z.literal(""))
+});
+
+export type PlaylistFormData = z.infer<typeof playlistSchema>;

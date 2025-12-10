@@ -1,4 +1,4 @@
-import { LoggerAgent } from "@/debug.ts";
+import { LoggerAgent } from "@/lib/debug.ts";
 
 const log = LoggerAgent.create("useDownload");
 

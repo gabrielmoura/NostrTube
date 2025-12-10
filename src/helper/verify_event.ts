@@ -1,4 +1,4 @@
-import { LoggerAgent } from "@/debug.ts";
+import { LoggerAgent } from "@/lib/debug.ts";
 import type { SignedEvent } from "@welshman/util/dist/util/src/Events";
 import type { NostrWasm } from "nostr-wasm";
 import * as nip19 from "nostr-tools/nip19";

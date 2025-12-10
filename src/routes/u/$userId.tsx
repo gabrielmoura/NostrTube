@@ -1,5 +1,4 @@
-// routes/u/$userId.tsx
-import { createFileRoute, useLoaderData, useParams } from "@tanstack/react-router";
+import { createFileRoute, Link, useLoaderData, useParams } from "@tanstack/react-router";
 import { NDKKind } from "@nostr-dev-kit/ndk";
 import { NDKEvent, type NDKUserProfile, useNDKCurrentUser } from "@nostr-dev-kit/ndk-hooks";
 import { PageSpinner } from "@/components/PageSpinner";
@@ -16,8 +15,13 @@ import { FollowButton } from "@/routes/u/@components/FollowButton.tsx";
 import { VideoCard } from "@/routes/u/@components/VideoCard.tsx";
 import { DropdownMenuProfile } from "@/routes/u/@components/DropdownMenuProfile.tsx";
 import { PlaylistCard } from "@/routes/u/@components/PlaylistCard.tsx";
-import { nip19 } from "nostr-tools"; // Extraído para arquivo separado
+import { nip19 } from "nostr-tools";
+import { z } from "zod"; // Extraído para arquivo separado
 
+export const ProfilePageSchema = z.object({
+  tab: z.enum(["videos", "playlists", "about"]).optional()
+
+});
 export const Route = createFileRoute("/u/$userId")({
   component: ProfilePage,
   loader: ({ params: { userId }, context: { ndk } }) => getVideosFromUserData({
@@ -25,7 +29,9 @@ export const Route = createFileRoute("/u/$userId")({
     ndk
   } as GetVideosFromUserDataParams),
   pendingComponent: PageSpinner,
-  notFoundComponent: NotFoundPage
+  notFoundComponent: NotFoundPage,
+  // aceita parametros search para tab
+  validateSearch: ProfilePageSchema
 });
 
 function NotFoundPage() {
@@ -50,7 +56,9 @@ function NotFoundPage() {
 function ProfilePage() {
   const events = useLoaderData({ from: "/u/$userId" }) as Set<NDKEvent>;
   const currentUser = useNDKCurrentUser();
-  const { userId } = useParams({ strict: false });
+  const { userId } = Route.useParams();
+  const { tab } = Route.useSearch();
+  const navigate = Route.useNavigate();
 
 
   // Processamento de Dados
@@ -141,10 +149,15 @@ function ProfilePage() {
 
       {/* --- Content Tabs --- */}
       <div className="container mx-auto px-4">
-        <Tabs defaultValue="videos" className="w-full">
+        <Tabs defaultValue={tab || "videos"} className="w-full">
           <TabsList
             className="w-full justify-start h-auto p-0 bg-transparent border-b border-border mb-8 rounded-none gap-6">
             <TabsTrigger
+              onClick={() => {
+                navigate({
+                  search: (old) => ({ ...old, tab: undefined })
+                });
+              }}
               value="videos"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all"
             >
@@ -153,6 +166,11 @@ function ProfilePage() {
             </TabsTrigger>
             <TabsTrigger
               value="playlists"
+              onClick={() => {
+                navigate({
+                  search: (old) => ({ ...old, tab: "playlists" })
+                });
+              }}
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all"
             >
               <PlaySquare className="w-4 h-4 mr-2" />
@@ -160,6 +178,11 @@ function ProfilePage() {
             </TabsTrigger>
             <TabsTrigger
               value="about"
+              onClick={() => {
+                navigate({
+                  search: (old) => ({ ...old, tab: "about" })
+                });
+              }}
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all"
             >
               <Info className="w-4 h-4 mr-2" />
@@ -182,6 +205,22 @@ function ProfilePage() {
 
           {/* Playlists Grid */}
           <TabsContent value="playlists" className="mt-0">
+            {/*// Uma faixa contendo a contagem de playlists a esquerda por extendo e a direita um botão de criar playlist se for o usuário atual*/}
+            <div className="flex items-center justify-between mb-6 h-2">
+              <h2 className="text-lg font-semibold">
+                Playlists ({playlists.length})
+              </h2>
+              {currentUser && (currentUser.npub === userId || currentUser.pubkey === userId) && (
+                <Link
+                  to="/p/new"
+                  className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+                >
+                  Criar Nova Playlist
+                </Link>
+              )}
+
+
+            </div>
             {playlists.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {playlists.map((playlistEvent) => (

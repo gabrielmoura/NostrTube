@@ -1,16 +1,15 @@
 import { NDKEvent, useNDK, useNDKCurrentUser } from "@nostr-dev-kit/ndk-hooks";
 import { VideoPlayer } from "@/components/videoPlayer";
 import { ErrorBoundaryVideo } from "@/routes/v/@components/error.tsx";
-import { lazy, useState } from "react";
+import { useState } from "react";
 
 import { useRecordView } from "@/hooks/useRecordView.ts";
 import { useVideoContext, VideoProvider } from "@/context/VideoContext.tsx";
 import { useLoaderData } from "@tanstack/react-router";
 import { PageSpinner } from "@/components/PageSpinner.tsx";
 import { Helmet } from "react-helmet-async";
-
-const VideoActions = lazy(() => import("@/routes/v/@components/VideoActions.tsx"));
-const CommentSection = lazy(() => import("@/routes/v/@components/Comments/comments.tsx"));
+import VideoActions from "./VideoActions.tsx";
+import CommentSection from "./Comments/comments.tsx";
 
 export function VideoPage() {
   const event = useLoaderData({ from: "/v/$eventId" }) as NDKEvent;

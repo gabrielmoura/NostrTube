@@ -12,7 +12,7 @@ import { CircleDotDashed } from "lucide-react";
 import { Progress } from "@/components/ui/progress.tsx";
 import { t } from "i18next";
 import { toast } from "sonner";
-import { LoggerAgent } from "@/debug.ts";
+import { LoggerAgent } from "@/lib/debug.ts";
 import { FileUploader } from "@/helper/blossom/BlossomUpload.ts";
 import type { EventTemplate } from "blossom-client-sdk";
 import type { UnsignedEvent } from "nostr-tools/core";

@@ -2,7 +2,7 @@
 import { precacheAndRoute, cleanupOutdatedCaches, getCacheKeyForURL, precache } from "workbox-precaching";
 import { clientsClaim } from "workbox-core";
 import { rpcServer } from "./rpc";
-import {logger} from "@/debug.ts";
+import {logger} from "@/lib/debug.ts";
 
 
 declare let self: ServiceWorkerGlobalScope;

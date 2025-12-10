@@ -8,7 +8,7 @@ interface LogRecord {
     app: string;
     namespace: string;
     level: LogLevel;
-    message: any[];
+    message: unknown[];
     timestamp: number;
 }
 

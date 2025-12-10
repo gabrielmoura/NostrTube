@@ -1,4 +1,4 @@
-import { LoggerAgent } from "@/debug.ts";
+import { LoggerAgent } from "@/lib/debug.ts";
 
 export const checkLatency = async (url: string, timeoutMs: number = 2000): Promise<number | null> => {
   const log = LoggerAgent.create("checkLatency");
