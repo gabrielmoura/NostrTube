@@ -1,0 +1,245 @@
+= NostrTube
+Gabriel Moura <gmouradev96@gmail.com>
+:doctype: book
+:toc: left
+:toc-title: Índice
+:icons: font
+:source-highlighter: highlight.js
+:sectnums:
+:imagesdir: assets/images
+
+Uma plataforma de vídeo descentralizada alimentada pelo protocolo Nostr.
+
+image:https://img.shields.io/github/issues/gabrielmoura/NostrTube[GitHub issues, link=https://github.com/gabrielmoura/NostrTube/issues]
+image:https://img.shields.io/github/forks/gabrielmoura/NostrTube[GitHub forks, link=https://github.com/gabrielmoura/NostrTube/network]
+image:https://img.shields.io/github/stars/gabrielmoura/NostrTube[GitHub stars, link=https://github.com/gabrielmoura/NostrTube/stargazers]
+image:https://deepwiki.com/badge.svg[Ask DeepWiki, link=https://deepwiki.com/gabrielmoura/NostrTube]
+
+== 📖 Sobre
+
+*NostrTube* é uma plataforma descentralizada de compartilhamento de vídeos, construída como um aplicativo de página única em React. O sistema utiliza o protocolo Nostr para recursos sociais e distribuição de metadados, enquanto usa servidores Blossom para armazenamento descentralizado de vídeos. Essa arquitetura permite a hospedagem de vídeos resistentes à censura sem depender de infraestrutura centralizada.
+
+[IMPORTANT]
+====
+**Estado Atual do Projeto:**
+
+* 🚧 Este é um rascunho de uma ideia, não um produto final.
+* 🎯 O foco até agora tem sido funcionalidade, não perfeição.
+* 🌱 O projeto está em constante evolução e aberto a melhorias.
+
+**NostrTube é um app feito pela comunidade, para a comunidade!**
+====
+
+== ✨ Funcionalidades
+
+* 📹 Upload e compartilhamento de vídeos
+* 🔍 Busca de conteúdo
+* 👤 Perfis de usuário
+* 🎬 Player de vídeo com suporte a HLS e DASH
+* 📱 Aplicativo móvel (Android/iOS) via Capacitor
+* 🌐 Progressive Web App (PWA)
+* 🌍 Suporte multilíngue (i18n)
+* 🎨 Interface moderna com tema claro/escuro
+* 🔐 Autenticação descentralizada via Nostr
+
+== 🛠️ Tecnologias
+
+=== Frontend
+* *React 19* - Biblioteca UI
+* *TypeScript* - Linguagem de programação
+* *Vite* - Build tool e dev server
+* *TanStack Router* - Roteamento
+* *TanStack Query* - Gerenciamento de estado assíncrono
+* *Tailwind CSS* - Framework CSS
+* *Radix UI* - Componentes acessíveis
+
+=== Nostr & Blockchain
+* *NDK (Nostr Development Kit)* - Kit de desenvolvimento Nostr
+* *nostr-tools* - Ferramentas Nostr
+* *Blossom Client SDK* - Cliente para armazenamento de mídia
+
+=== Vídeo
+* *Vidstack* - Player de vídeo
+* *HLS.js* - Streaming HLS
+* *Dash.js* - Streaming DASH
+
+=== Mobile
+* *Capacitor* - Framework para aplicativos nativos
+
+== 📋 Pré-requisitos
+
+* Node.js 20 ou superior
+* pnpm 10.24.0 ou superior
+
+== 🚀 Instalação e Desenvolvimento
+
+. Clone o repositório:
++
+[source,bash]
+----
+git clone https://github.com/gabrielmoura/NostrTube.git
+cd NostrTube
+----
+
+. Instale as dependências:
++
+[source,bash]
+----
+pnpm install
+----
+
+. Execute o servidor de desenvolvimento:
++
+[source,bash]
+----
+pnpm dev
+----
++
+A aplicação estará disponível em `http://localhost:5173`.
+
+=== Outros comandos úteis
+
+[source,bash]
+----
+# Build para produção
+pnpm build
+
+# Preview do build
+pnpm preview
+
+# Lint do código
+pnpm lint
+
+# Formatação do código
+pnpm format
+
+# Análise do bundle
+pnpm analyze
+----
+
+== 📱 Build Mobile
+
+=== Android
+
+[source,bash]
+----
+pnpm build
+npx cap sync android
+npx cap open android
+----
+
+=== iOS
+
+[source,bash]
+----
+pnpm build
+npx cap sync ios
+npx cap open ios
+----
+
+== 🐳 Docker
+
+Build da imagem:
+
+[source,bash]
+----
+docker build -t nostrtube .
+----
+
+Executar o container:
+
+[source,bash]
+----
+docker run -p 3000:80 nostrtube
+----
+
+=== Proxy Image
+
+Para configurar o proxy de imagens necessário:
+
+[source,bash]
+----
+docker run -d -e="IMGPROXY_ALLOWED_SOURCES:*,https://*,https://*/*,s3://*" -e="IMGPROXY_ALLOW_LOOPBACK_SOURCE_ADDRESSES:true" -e"IMGPROXY_ALLOW_LINK_LOCAL_SOURCE_ADDRESSES:true" -e"IMGPROXY_IGNORE_SSL_VERIFICATION:true" --add-host=host.docker.internal:host-gateway -p=9095:8080 --name="imgproxy"  ghcr.io/imgproxy/imgproxy:latest
+----
+
+Configure a variável de ambiente:
+
+[source,env]
+----
+VITE_APP_IMGPROXY=http://localhost:9095
+----
+
+== 📁 Estrutura do Projeto
+
+....
+NostrTube/
+├── src/
+│   ├── components/     # Componentes React
+│   ├── routes/         # Rotas da aplicação
+│   ├── hooks/          # Hooks customizados
+│   ├── lib/            # Bibliotecas e utilitários
+│   ├── store/          # Gerenciamento de estado
+│   └── context/        # Context providers
+├── public/             # Arquivos estáticos
+├── android/            # Projeto Android (Capacitor)
+├── ios/                # Projeto iOS (Capacitor)
+└── _doc/               # Documentação
+....
+
+== 🤝 Contribuindo
+
+Bem-vindo ao guia de contribuição! Não importa seu nível de experiência, todos são bem-vindos.
+
+=== Filosofia do Projeto
+* ✅ Aceitamos todas as contribuições, independente do estilo.
+* ✅ Valorizamos mais a funcionalidade do que o código perfeito.
+* ✅ Aprendemos juntos e crescemos como comunidade.
+* ✅ Não há contribuição pequena demais.
+
+=== Como contribuir com Código
+
+. Faça um *Fork* do repositório.
+. Crie uma *branch* para sua feature (`git checkout -b feature/MinhaFeature`).
+. *Commit* suas mudanças (não se preocupe muito com o formato, estamos aqui para aprender juntos!).
+. *Push* para a branch (`git push origin feature/MinhaFeature`).
+. Abra um *Pull Request*.
+
+==== Ideias para Contribuir
+* 🐛 Corrigir bugs
+* ✨ Adicionar novas features
+* 📚 Melhorar a documentação
+* ♻️ Refatorar código existente
+* 🎨 Melhorar a UI/UX
+* 🌐 Adicionar traduções
+* 🧪 Adicionar testes
+
+=== Contribuições Não-Técnicas
+
+Se não sabe programar, você ainda pode ajudar:
+
+* 💵 **Recursos Financeiros**: Ajude a manter o projeto vivo.
+* 🌐 **Domínio**: Patrocine um domínio para o projeto.
+* 🖥️ **Servidor Blossom**: Ofereça ou patrocine infraestrutura de servidor Blossom.
+* 🤝 **Parcerias**: Proponha parcerias que possam beneficiar o projeto.
+* 📢 **Divulgação**: Compartilhe o projeto nas redes sociais.
+* 🎨 **Design**: Contribua com designs, logos, ou material gráfico.
+
+Para bugs e sugestões, utilize as **Issues** do GitHub ou encontre-nos no Nostr.
+
+== 🔗 Links Úteis
+
+* link:https://nostrtube.vercel.app[Website Oficial]
+* link:https://nostr.com[Protocolo Nostr]
+* link:https://github.com/nostr-protocol/nips/blob/master/89.md#client-tag[NIP-89 Client Tag]
+* link:https://blossomservers.com/[Lista de Servidores Blossom]
+
+== 📄 Licença e Autor
+
+Este projeto está sob a licença especificada no arquivo LICENSE.
+
+**Gabriel Moura** +
+Email: gmouradev96@gmail.com +
+GitHub: link:https://github.com/gabrielmoura[@gabrielmoura]
+
+---
+_Feito com ❤️ usando Nostr_
