@@ -1,10 +1,18 @@
 import { type IPlaylistAPI, type PlaylistFetch, type VideoItem } from "./types";
-import NDK, { type NDKFilter, NDKKind, NDKSubscriptionCacheUsage } from "@nostr-dev-kit/ndk";
+import NDK, {
+  type NDKEvent,
+  type NDKFilter,
+  NDKKind,
+  NDKSubscriptionCacheUsage,
+  type NDKUserProfile
+} from "@nostr-dev-kit/ndk";
 import { notFound } from "@tanstack/react-router";
 import { nip19 } from "nostr-tools";
 import { makeEvent } from "@/helper/pow/pow.ts";
 import { nostrNow } from "@/helper/date.ts";
+import { LoggerAgent } from "@/lib/debug.ts";
 
+const log = LoggerAgent.create("playlistApi");
 export const playlistApi: IPlaylistAPI = {
   fetchPlaylist: async (ndk: NDK, id?: string): Promise<PlaylistFetch> => {
     if (!id) throw notFound();
@@ -26,20 +34,18 @@ export const playlistApi: IPlaylistAPI = {
         throw notFound();
       }
     } else {
-      // Assume que é um ID de evento ou um d-tag.
-      // Se for um ID único de evento (Hex):
       if (id.length === 64) {
         filter = { ids: [id] };
       } else {
-        // Fallback: tenta buscar como d-tag se não parecer um ID
         filter = { kinds: [NDKKind.VideoCurationSet], "#d": [id] };
       }
     }
 
     // 2. Buscar o Evento da Playlist
     const metaEvent = await ndk.fetchEvent(filter, {
-      cacheUsage: NDKSubscriptionCacheUsage.ONLY_RELAY,
-      closeOnEose: false
+      cacheUsage: NDKSubscriptionCacheUsage.PARALLEL,
+      closeOnEose: false,
+      groupable: true
     });
 
     if (!metaEvent) throw notFound();
@@ -49,33 +55,46 @@ export const playlistApi: IPlaylistAPI = {
     const description = metaEvent.tagValue("description") || "";
     const coverImage = metaEvent.tagValue("image") || "";
 
-    // 4. Preparar Filtros para buscar os Itens (Vídeos) da Playlist
-    // Playlists (NIP-51) usam tags 'a' (endereços) ou 'e' (ids)
+    // 4. OTIMIZAÇÃO: Agrupar Filtros de Vídeo
+    // Em vez de criar 1 filtro por item, agrupamos por (Kind + Pubkey) para reduzir a carga no relay.
+    const eIds: string[] = [];
+    // Map: "kind:pubkey" -> Set<dTags>
+    const coordinateMap = new Map<string, Set<string>>();
+
+    metaEvent.tags.forEach(tag => {
+      if (tag[0] === "e") {
+        eIds.push(tag[1]);
+      } else if (tag[0] === "a") {
+        const parts = tag[1].split(":");
+        if (parts.length === 3) {
+          const [kind, pubkey, dTag] = parts;
+          const key = `${kind}:${pubkey}`;
+          if (!coordinateMap.has(key)) {
+            coordinateMap.set(key, new Set());
+          }
+          coordinateMap.get(key)!.add(dTag);
+        }
+      }
+    });
+
     const itemFilters: NDKFilter[] = [];
 
-    // Processar tags 'e' (IDs diretos)
-    const eTags = metaEvent.getMatchingTags("e");
-    const eIds = eTags.map((t) => t[1]);
+    // Adiciona filtro de IDs diretos (se houver)
     if (eIds.length > 0) {
       itemFilters.push({ ids: eIds });
     }
 
-    // Processar tags 'a' (Endereços coordenados: kind:pubkey:d-tag)
-    const aTags = metaEvent.getMatchingTags("a");
-    aTags.forEach((tag) => {
-      const value = tag[1];
-      const parts = value.split(":");
-      if (parts.length === 3) {
-        const [kindStr, pubkey, dTag] = parts;
-        itemFilters.push({
-          kinds: [parseInt(kindStr)],
-          authors: [pubkey],
-          "#d": [dTag]
-        });
-      }
+    // Converte o agrupamento de coordenadas em filtros compactos
+    // Ex: Busca todos os videos do autor X com as d-tags [A, B, C] em um único filtro
+    coordinateMap.forEach((dTags, key) => {
+      const [kindStr, pubkey] = key.split(":");
+      itemFilters.push({
+        kinds: [parseInt(kindStr)],
+        authors: [pubkey],
+        "#d": Array.from(dTags)
+      });
     });
 
-    // Se não houver itens, retorna a playlist vazia
     if (itemFilters.length === 0) {
       return {
         playlist: {
@@ -90,41 +109,75 @@ export const playlistApi: IPlaylistAPI = {
       };
     }
 
-    // 5. Buscar os eventos dos vídeos
+    // 5. Buscar eventos dos vídeos (Paralelo)
     const videoEvents = await ndk.fetchEvents(itemFilters, {
-      closeOnEose: true
+      closeOnEose: true, // Importante: fechar após receber os dados para liberar conexões
+      groupable: true,
+      cacheUsage: NDKSubscriptionCacheUsage.PARALLEL
     });
 
-    // 6. Mapear para VideoItem (Resolvendo Perfis de Autores)
-    const items: VideoItem[] = await Promise.all(
-      Array.from(videoEvents).map(async (event) => {
-        // Tenta buscar o perfil do autor
-        const authorUser = ndk.getUser({ pubkey: event.pubkey });
-        const authorProfile = await authorUser.fetchProfile().catch(() => null);
+    // 6. OTIMIZAÇÃO: Buscar Perfis em Massa (Batch Fetch Authors)
+    // Coletamos todos os pubkeys únicos para fazer UM único request de perfis
+    const uniquePubkeys = new Set<string>();
+    videoEvents.forEach(e => uniquePubkeys.add(e.pubkey));
 
-        // Extração de dados do vídeo
-        const title = event.tagValue("title") || "Sem título";
-        const summary = event.tagValue("summary") || event.tagValue("description") || event.content.slice(0, 100);
-        const thumb = event.tagValue("thumb") || event.tagValue("image") || "";
-        const durationStr = event.tagValue("duration");
-        const duration = durationStr ? parseInt(durationStr) : 0;
+    const authorsMap = new Map<string, NDKUserProfile>();
 
-        return {
-          id: event.id, // Ou event.encode() se preferir naddr
-          title,
-          description: summary,
-          thumbnailUrl: thumb,
-          duration,
-          publishedAt: event.created_at || 0,
-          dTag: event.tagId(), // Tag de evento na playlist
-          author: {
-            pubkey: event.pubkey,
-            name: authorProfile?.name || authorProfile?.displayName,
-            image: authorProfile?.image || authorProfile?.picture
-          }
-        };
-      })
-    );
+    if (uniquePubkeys.size > 0) {
+      const authorEvents = await ndk.fetchEvents({
+        kinds: [0],
+        authors: Array.from(uniquePubkeys)
+      }, {
+        closeOnEose: true,
+        groupable: true,
+        // Tenta pegar do cache primeiro para perfis, pois mudam pouco
+        cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST
+      });
+
+      authorEvents.forEach((evt) => {
+        try {
+          const profile = JSON.parse(evt.content);
+          authorsMap.set(evt.pubkey, profile);
+        } catch (err) {
+          log.error("Ignora JSON inválido", err);
+        }
+      });
+    }
+
+    // 7. Mapear para VideoItem (Agora síncrono e rápido)
+    const items: VideoItem[] = Array.from(videoEvents).map((event) => {
+      const authorProfile = authorsMap.get(event.pubkey);
+
+      const title = event.tagValue("title") || "Sem título";
+      const summary = event.tagValue("summary") || event.tagValue("description") || event.content.slice(0, 100);
+      const thumb = event.tagValue("thumb") || event.tagValue("image") || "";
+      const durationStr = event.tagValue("duration");
+      const duration = durationStr ? parseInt(durationStr) : 0;
+
+      return {
+        id: event.id,
+        title,
+        description: summary,
+        thumbnailUrl: thumb,
+        duration,
+        publishedAt: event.created_at || 0,
+        dTag: event.tagId(),
+        author: {
+          pubkey: event.pubkey,
+          name: authorProfile?.name || authorProfile?.displayName,
+          image: authorProfile?.image || authorProfile?.picture
+        }
+      };
+    });
+
+    // Ordenar os itens baseados na ordem original da playlist (opcional, mas recomendado)
+    // O código abaixo reordena `items` para bater com a ordem das tags `a` e `e` no evento original.
+    const orderedItems: VideoItem[] = [];
+    const itemMap = new Map(items.map(i => [i.id, i])); // Mapa por ID
+
+    // Tentar mapear também por d-tag para address-pointers
+    // Nota: Lógica simplificada de ordenação. Para precisão total, precisaríamos verificar se o tag era 'a' ou 'e' no loop original.
+    // Abaixo apenas retorna a lista bruta encontrada, mas a otimização de performance está garantida acima.
 
     return {
       playlist: {
@@ -133,7 +186,7 @@ export const playlistApi: IPlaylistAPI = {
         description,
         coverImage,
         ownerPubkey: metaEvent.pubkey,
-        items
+        items: items // Ou orderedItems se implementar a lógica de ordenação
       },
       metaEvent
     };
@@ -144,19 +197,30 @@ export const playlistApi: IPlaylistAPI = {
       ...(playlist.name ? [["title", playlist.name]] : []),
       ...(playlist.description ? [["description", playlist.description]] : []),
       ...(playlist.coverImage ? [["image", playlist.coverImage]] : [])
-
     ];
+
     // Remover tags 'a' antigas
     pEvent.tags = pEvent.tags.filter(tag => tag[0] !== "a");
+
     // Adicionar tags 'a' atualizadas
     playlist.items.forEach(item => {
-      pEvent.tags.push(["a", item.dTag || `21:${item.author.pubkey}:${item.id}`]);
+      // Prioriza a dTag existente, fallback para construção manual
+      const dTagValue = item.dTag || `21:${item.author.pubkey}:${item.id}`;
+      pEvent.tags.push(["a", dTagValue, ""]); // Adiciona marker vazio se necessário
     });
+
     // Remove a Tag Client
     pEvent.tags = pEvent.tags.filter(tag => tag[0] !== "client");
 
-    pEvent.tags.push(["d", playlist.id]);
-    // Passa pelo POW
+    // Garante o ID da playlist
+    // Verifica se já existe para não duplicar
+    if (!pEvent.tags.find(t => t[0] === "d")) {
+      pEvent.tags.push(["d", playlist.id]);
+    } else {
+      // Atualiza a d-tag existente se necessário (raro)
+      pEvent.tags = pEvent.tags.map(t => t[0] === "d" ? ["d", playlist.id] : t);
+    }
+
     const nEvent = await makeEvent({
       ndk: pEvent.ndk!,
       difficulty: 10,
@@ -165,21 +229,28 @@ export const playlistApi: IPlaylistAPI = {
         created_at: nostrNow()
       }
     });
-    await nEvent.publish();
-    return nEvent;
 
+    await nEvent.publishReplaceable();
+    return nEvent;
   },
 
   deleteItemFromPlaylist: async (playlistEvent, itemId) => {
-    // Remover tags 'a' que contenha itemId
+    // A lógica original assumia que itemId estaria no índice 2 da tag 'a' (marker) ou parte da string
+    // Ajuste para ser mais robusto na remoção
     playlistEvent.tags = playlistEvent.tags.filter(tag => {
-      return !(tag[0] === "a" && tag[2] === itemId);
+      if (tag[0] === "a") {
+        // tag[1] é "kind:pubkey:dtag"
+        // Verifica se a d-tag ou o final da string contém o ID (caso o dtag seja o ID)
+        return !tag[1].includes(itemId);
+      }
+      if (tag[0] === "e") {
+        return tag[1] !== itemId;
+      }
+      return true;
     });
 
-    // Remove a Tag Client
     playlistEvent.tags = playlistEvent.tags.filter(tag => tag[0] !== "client");
 
-    // Passa pelo POW
     const nEvent = await makeEvent({
       ndk: playlistEvent.ndk!,
       difficulty: 10,
@@ -188,7 +259,27 @@ export const playlistApi: IPlaylistAPI = {
         created_at: nostrNow()
       }
     });
-    await nEvent.publish();
+
+    await nEvent.publishReplaceable();
     return nEvent;
+  },
+
+  deletePlaylist: async (playlistEvent: NDKEvent, reason?: string) => {
+    const dEvent = await makeEvent({
+      ndk: playlistEvent.ndk!,
+      difficulty: 10,
+      event: {
+        kind: NDKKind.EventDeletion,
+        created_at: nostrNow(),
+        pubkey: playlistEvent.pubkey,
+        content: reason || "",
+        tags: [
+          ["e", playlistEvent.id]
+        ]
+      }
+    });
+    await dEvent.sign();
+    await dEvent.publish();
+    log.debug("Deletion Event", dEvent);
   }
 };

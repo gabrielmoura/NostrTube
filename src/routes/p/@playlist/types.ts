@@ -41,12 +41,14 @@ export interface IPlaylistAPI {
   savePlaylist(playListEvent: NDKEvent, playlist: Playlist): Promise<NDKEvent>;
 
   deleteItemFromPlaylist(playListEvent: NDKEvent, itemId: string): Promise<NDKEvent>;
+
+  deletePlaylist(playlistEvent: NDKEvent,reason?:string): Promise<void>;
 }
 
 export const playlistSchema = z.object({
   name: z.string().min(3, "O nome deve ter pelo menos 3 caracteres").max(100),
   description: z.string().max(500).optional(),
-  coverImage: z.url({message:"URL de imagem inválida"}).optional().or(z.literal(""))
+  coverImage: z.url({ message: "URL de imagem inválida" }).optional().or(z.literal(""))
 });
 
 export type PlaylistFormData = z.infer<typeof playlistSchema>;

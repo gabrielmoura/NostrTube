@@ -14,7 +14,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy
 } from "@dnd-kit/sortable";
-import { Loader2, Pencil, PlayCircle, Save } from "lucide-react";
+import { Loader2, Pencil, PlayCircle, Save, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -22,9 +22,10 @@ import { type Playlist } from "./types";
 import { playlistApi } from "./api";
 import { PlaylistItem } from "./PlaylistItem";
 import { EditPlaylistModal } from "./EditPlaylistModal";
-import { useParams } from "@tanstack/react-router";
-import { useNDK } from "@nostr-dev-kit/ndk-hooks";
+import { useNavigate, useParams } from "@tanstack/react-router";
+import { useNDK, useNDKCurrentPubkey } from "@nostr-dev-kit/ndk-hooks";
 import type { NDKEvent } from "@nostr-dev-kit/ndk";
+import { toast } from "sonner";
 
 export default function PlaylistScreen() {
   const { listId } = useParams({ strict: false });
@@ -35,6 +36,8 @@ export default function PlaylistScreen() {
   const [isSaving, setIsSaving] = useState(false);
   const [metaEvent, setMetaEvent] = useState<NDKEvent>();
   const { ndk } = useNDK();
+  const navigate = useNavigate();
+  const pubkey = useNDKCurrentPubkey();
 
   // DnD Sensors
   const sensors = useSensors(
@@ -112,6 +115,21 @@ export default function PlaylistScreen() {
     }
   };
 
+  const handleDeleteEvent = () =>
+    toast.promise(playlistApi.deletePlaylist(metaEvent!), {
+      success: () => {
+        navigate({
+          to: "/u/$userId",
+          params: { userId: pubkey! }
+        });
+        return "Deletado com sucesso";
+      },
+      error: (e) => {
+        console.error("Deletion Fail", e);
+        return "Deletion Fail";
+      }
+    });
+
   if (loading) {
     return (
       <div className="container max-w-3xl mx-auto p-4 space-y-4">
@@ -153,10 +171,16 @@ export default function PlaylistScreen() {
                 </div>
               </div>
 
-              <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)}>
-                <Pencil className="w-4 h-4 mr-2" />
-                Editar
-              </Button>
+              <div className="gap-1 flex">
+                <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)}>
+                  <Pencil className="w-4 h-4 mr-2" />
+                  Editar
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => handleDeleteEvent()}>
+                  <Trash className="w-4 h-4 mr-2" />
+                  Deletar
+                </Button>
+              </div>
             </div>
           </div>
         </div>
