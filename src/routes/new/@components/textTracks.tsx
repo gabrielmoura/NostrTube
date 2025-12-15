@@ -1,5 +1,5 @@
 // import {Button} from "@radix-ui/themes";
-import {Button} from "@/components/button.tsx";
+import { Button } from "@/components/button.tsx";
 import {
   Tooltip,
   TooltipContent,
@@ -21,7 +21,7 @@ export default function TextTracks() {
     <TooltipProvider>
       <Tooltip delayDuration={100}>
         <TooltipTrigger>
-          <Button >Upload</Button>
+          <Button>Upload</Button>
         </TooltipTrigger>
         <TooltipContent align="center">
           <p>Coming Soon</p>

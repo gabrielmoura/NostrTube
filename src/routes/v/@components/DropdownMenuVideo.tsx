@@ -8,10 +8,10 @@ import { toast } from "sonner";
 import { Share } from "@capacitor/share";
 // import { modal } from "@/components/modal/state.tsx";
 import type { NDKEvent } from "@nostr-dev-kit/ndk";
-import { downloadVideo } from "@/helper/download.ts";
 import AddToPlaylistModal from "@/routes/v/@components/AddToPlaylistModal.tsx";
 import { modal } from "@/components/modal_v2/modal-manager.ts";
 import { ReportVideoModel } from "@/routes/v/@components/ReportVideoModal.tsx";
+import { useDownload } from "@/hooks/useDownload.ts";
 
 
 export const DropdownMenuVideo = ({ event }: { event: NDKEvent }) => {
@@ -21,11 +21,15 @@ export const DropdownMenuVideo = ({ event }: { event: NDKEvent }) => {
   const { url, title, summary } = getVideoDetails(event);
   const naddr = event.encode();
   const dTag = event.dTag;
+  const { downloadFile } = useDownload();
 
   function handleDownload() {
-    downloadVideo(url, title).then(() =>
-      toast.success("Video has been downloaded")
-    );
+    const promise = downloadFile(url, title);
+    toast.promise(promise, {
+      success: "Video has been downloaded",
+      error: "Video download fail"
+    });
+
   }
 
   function handleCopy() {

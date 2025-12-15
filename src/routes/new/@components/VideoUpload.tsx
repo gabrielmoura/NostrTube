@@ -1,8 +1,8 @@
-import { type Dispatch, lazy, type SetStateAction, useState } from "react";
+import { lazy } from "react";
 import Spinner from "@/components/Spinner.tsx";
 import { VideoPlayer } from "@/components/videoPlayer";
-import { type NDKImetaTag } from "@nostr-dev-kit/ndk-hooks";
-import { AgeEnum } from "@/store/store/sessionTypes.ts";
+import { newVideoStore } from "@/store/videoUploadStore.ts";
+import { useSnapshot } from "valtio/react";
 
 const LoadVideoFromOthers = lazy(() => import("@/routes/new/@components/upload/LoadVideosFromOthers.tsx"));
 const VideoUploadFile = lazy(() => import("@/routes/new/@components/upload/VideoUploadFile.tsx"));
@@ -33,40 +33,13 @@ export default function Player({
 }
 
 
-export interface VideoMetadata {
-  url?: string;
-  title?: string;
-  summary?: string;
-  thumbnail?: string;
-  fileType?: string;
-  fileHash?: string;
-  fileSize?: number;
-  duration?: number;
-  hashtags?: string;
-  contentWarning?: string;
-  blurhash?: string;
-  dim?: string;
-  mime_type?: string;
-  imetaVideo: NDKImetaTag;
-  imetaThumb?: NDKImetaTag;
-  imetaImage?: NDKImetaTag;
-  age?: AgeEnum;
-  language?: string;
-}
+export function VideoUpload() {
+  const snap = useSnapshot(newVideoStore);
 
-export function VideoUpload({ setVideo }: { setVideo: Dispatch<SetStateAction<VideoMetadata>> }) {
-  const [showEventInput, setShowEventInput] = useState(false);
-  const [videoUrl, setVideoUrl] = useState("");
-
-  if (showEventInput) {
-    return <LoadVideoFromOthers
-      setShowEventInput={setShowEventInput}
-      videoUrl={videoUrl}
-      setVideoUrl={setVideoUrl}
-      setVideo={setVideo}
-    />;
+  if (snap.showEventInput) {
+    return <LoadVideoFromOthers />;
   }
-  return <VideoUploadFile setShowEventInput={setShowEventInput} setVideo={setVideo} />;
+  return <VideoUploadFile />;
 }
 
 

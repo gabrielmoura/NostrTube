@@ -1,4 +1,4 @@
-import React, { type Dispatch, type SetStateAction, useState } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -99,7 +99,7 @@ export function AddTagButton({
 
 interface AddTagInputProps {
   initialTags?: string[];
-  onTagsChange: Dispatch<SetStateAction<string[]>>;
+  onTagsChange: (tags: string[]) => void;
   label: string;
   placeholder?: string;
   regex?: RegExp;

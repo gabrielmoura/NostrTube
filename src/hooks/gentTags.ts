@@ -2,84 +2,120 @@ import { nostrNow } from "@/helper/date.ts";
 import { nip19 } from "nostr-tools";
 import { imetaTagToTag, NDKKind } from "@nostr-dev-kit/ndk";
 import { ulid } from "ulid";
-import type { VideoMetadata } from "@/routes/new/@components/VideoUpload.tsx";
-import type { AgeEnum } from "@/store/store/sessionTypes.ts";
+import type { VideoMetadata } from "@/store/videoUploadStore.ts";
 
-// --- Tipos e Interfaces ---
+// --- Tipos ---
 
-export interface GenTagsProps {
-  videoData: Partial<VideoMetadata>;
+export interface GenTagsProps extends Partial<VideoMetadata> {
   currentPubkey: string;
-  hashtags?: string[];
-  indexers?: string[];
-  language?: string;
-  thumb?: string;
-  age?: AgeEnum;
 }
 
-// --- Configurações e Constantes ---
+interface AppConfig {
+  appName: string;
+  rootDomain: string;
+  relays: string[];
+}
 
-const CONFIG = {
-  APP_NAME: import.meta.env.VITE_APP_NAME || "NostrTube",
-  ROOT_DOMAIN: import.meta.env.VITE_PUBLIC_ROOT_DOMAIN || "https://nostr-tube.com",
-  RELAYS: import.meta.env.PROD
+// --- Configuração Centralizada ---
+
+const getConfig = (): AppConfig => {
+  const relaysString = import.meta.env.PROD
     ? import.meta.env.VITE_NOSTR_RELAYS
-    : import.meta.env.VITE_NOSTR_DEV_RELAYS
+    : import.meta.env.VITE_NOSTR_DEV_RELAYS;
+
+  return {
+    appName: import.meta.env.VITE_APP_NAME || "NostrTube",
+    rootDomain: import.meta.env.VITE_PUBLIC_ROOT_DOMAIN || "https://nostr-tube.com",
+    relays: (relaysString || "").split(",").filter(Boolean),
+  };
 };
 
-// --- Funções Auxiliares (Helpers) ---
+// --- Geradores de Tags Específicos (Helpers Puros) ---
 
 /**
- * Gera a tag 'alt' para acessibilidade e retrocompatibilidade (NIP-31).
+ * Gera o identificador único (d-tag) para o vídeo.
  */
-function generateAltTag(identifier: string, pubkey: string, relays: string): string[] {
+function generateIdentifier(appName: string): string {
+  return `${appName}-${ulid()}`;
+}
+
+/**
+ * Gera a tag 'alt' (NIP-31) para clientes que não suportam Kind Video.
+ */
+function generateAltTag(identifier: string, pubkey: string, config: AppConfig): string[] {
   const naddr = nip19.naddrEncode({
     identifier,
     kind: NDKKind.Video,
     pubkey,
-    relays: relays.split(",")
+    relays: config.relays,
   });
 
   return [
     "alt",
-    `This is a video event and can be viewed at ${CONFIG.ROOT_DOMAIN}/v/${naddr}`
+    `This is a video event and can be viewed at ${config.rootDomain}/v/${naddr}`,
   ];
 }
 
 /**
- * Processa a tag 'imeta' (NIP-94/NIP-96), adicionando thumbnails se necessário.
+ * Processa metadados de mídia (NIP-94) e anexa informações de thumbnail/imagem.
  */
-function generateImetaTag(videoData: Partial<VideoMetadata>, thumbFallback?: string): string[] | null {
-  if (!videoData.imetaVideo) return null;
+function generateImetaTags(videoData: Partial<VideoMetadata>, thumbFallback?: string): string[] | null {
+  // Se não houver dados estruturados de imeta, tentamos criar um básico se houver URL
+  if (!videoData.imetaVideo) {
+    if (videoData.url) {
+      return ["imeta", `url ${videoData.url}`];
+    }
+    return null;
+  }
 
   const imetaTags = imetaTagToTag(videoData.imetaVideo);
   const activeThumb = videoData.thumbnail || thumbFallback;
 
+  // Garante que a thumbnail esteja presente nos metadados do arquivo
   if (activeThumb) {
-    // Adiciona thumb dentro do imeta para contexto do arquivo
-    imetaTags.push(`thumb ${activeThumb}`);
-    imetaTags.push(`image ${activeThumb}`);
+    // Verifica se já não existe para evitar duplicata (opcional, mas boa prática)
+    const hasThumb = imetaTags.some(t => t.startsWith("thumb "));
+    if (!hasThumb) imetaTags.push(`thumb ${activeThumb}`);
+
+    const hasImage = imetaTags.some(t => t.startsWith("image "));
+    if (!hasImage) imetaTags.push(`image ${activeThumb}`);
   }
 
-  // Marca explicitamente como serviço NIP-96 se aplicável
+  // Indica compatibilidade com fluxo de upload NIP-96
   imetaTags.push("service nip96");
 
   return imetaTags;
 }
 
 /**
- * Gera as tags padrão de identificação e metadados básicos.
+ * Gera tags de categorização e busca (Hashtags, Indexers, Idioma, Idade).
  */
-function generateBasicTags(d: string, videoData: Partial<VideoMetadata>): string[][] {
-  const tags: string[][] = [
-    ["d", `${CONFIG.APP_NAME}-${d}`],
-    ["title", videoData.title || ""],
-    ["summary", videoData.summary || ""],
-    ["published_at", nostrNow().toString()]
-  ];
+function generateCategoryTags(props: GenTagsProps): string[][] {
+  const tags: string[][] = [];
 
-  if (videoData.url && !videoData.imetaVideo) {
-    tags.push(["imeta", `url ${videoData.url}`]);
+  // Hashtags (t)
+  if (props.hashtags) {
+    props.hashtags.forEach((t) => tags.push(["t", t]));
+  }
+
+  // Indexers (i) - ex: imdb, mal
+  if (props.indexers) {
+    props.indexers.forEach((i) => tags.push(["i", i]));
+  }
+
+  // Idioma (l)
+  if (props.language) {
+    tags.push(["l", props.language, "ISO-639-1"]);
+  }
+
+  // Classificação Etária (age)
+  if (props.age) {
+    tags.push(["age", props.age]);
+  }
+
+  // Aviso de Conteúdo (content-warning)
+  if (props.contentWarning) {
+    tags.push(["content-warning", props.contentWarning]);
   }
 
   return tags;
@@ -88,64 +124,47 @@ function generateBasicTags(d: string, videoData: Partial<VideoMetadata>): string
 // --- Função Principal ---
 
 /**
- * Gera a lista completa de tags para um evento de vídeo.
- * Esta é uma Pure Function, não necessita de Hooks do React.
+ * Gera a lista completa de tags para um evento de vídeo Nostr (Kind 1063).
+ * Função pura: Input -> Output determinístico.
  */
-export function generateVideoTags({
-                                    videoData,
-                                    currentPubkey,
-                                    hashtags = [],
-                                    indexers = [],
-                                    language,
-                                    thumb,
-                                    age
-                                  }: GenTagsProps): string[][] {
-  // Validações iniciais (Fail Fast)
-  if (!currentPubkey || !videoData?.title) {
-    console.warn("generateVideoTags: Missing required fields (pubkey or title)");
-    return [];
+export function generateVideoTags(props: GenTagsProps): string[][] {
+  const { currentPubkey, title, thumbnail, summary, ...videoData } = props;
+
+  // Validação Fail-Fast
+  if (!currentPubkey || !title) {
+    console.error("[generateVideoTags] Missing required fields: pubkey or title");
+    throw new Error("Missing required fields to generate video tags");
   }
 
-  const d = ulid();
+  const config = getConfig();
+  const dTagValue = generateIdentifier(config.appName);
   const tags: string[][] = [];
 
-  // 1. Tags Básicas (d, title, summary, published_at)
-  tags.push(...generateBasicTags(d, videoData));
+  // 1. Tags Identificadoras e Descritivas Básicas
+  tags.push(
+    ["d", dTagValue],
+    ["title", title],
+    ["summary", summary || ""],
+    ["published_at", nostrNow().toString()]
+  );
 
-  // 2. Alt Tag
-  tags.push(generateAltTag(d, currentPubkey, CONFIG.RELAYS));
-
-  // 3. Thumbnails (Tags de nível superior)
-  const activeThumb = videoData.thumbnail || thumb;
-  if (activeThumb) {
-    tags.push(["thumb", activeThumb], ["image", activeThumb]);
+  // 2. Thumbnail Global (nível do evento)
+  if (thumbnail) {
+    tags.push(["thumb", thumbnail]);
+    tags.push(["image", thumbnail]);
   }
 
-  // 4. Content Warning
-  if (videoData.contentWarning) {
-    tags.push(["content-warning", videoData.contentWarning]);
-  }
-
-  // 5. Hashtags e Indexadores
-  hashtags.forEach((t) => tags.push(["t", t]));
-  indexers.forEach((i) => tags.push(["i", i]));
-
-  // 6. Imeta (NIP-94/NIP-96)
-  const imetaTag = generateImetaTag(videoData, thumb);
+  // 3. Imeta (Metadados do arquivo de vídeo)
+  const imetaTag = generateImetaTags({ ...videoData, thumbnail }, thumbnail);
   if (imetaTag) {
     tags.push(imetaTag);
   }
 
-  // 7. Idioma
-  const activeLanguage = language || videoData.language;
-  if (activeLanguage) {
-    tags.push(["l", activeLanguage, "ISO-639-1"]);
-  }
+  // 4. Tags de Categoria e Metadados (Hashtags, Language, etc)
+  tags.push(...generateCategoryTags(props));
 
-  // 8. Idade Recomendável
-  if (age) {
-    tags.push(["age", age]);
-  }
+  // 5. Acessibilidade / Retrocompatibilidade (Alt Tag)
+  tags.push(generateAltTag(dTagValue, currentPubkey, config));
 
   return tags;
 }

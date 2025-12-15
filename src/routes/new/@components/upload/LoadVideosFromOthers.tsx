@@ -1,159 +1,112 @@
-import {useState} from "react";
-import {useNDK} from "@nostr-dev-kit/ndk-hooks";
-import {nip19} from "nostr-tools";
-import {getTagValue, getTagValues} from "@welshman/util";
-import {Label} from "@/components/label.tsx";
-import {Input} from "@/components/input.tsx";
-import {Button} from "@/components/button.tsx";
-import {RiSearchLine} from "react-icons/ri";
-import {toast} from "sonner";
+import { useState } from "react";
+import { RiArrowLeftLine, RiLinkM, RiSearchLine } from "react-icons/ri";
+import { t } from "i18next";
 
-export default function LoadVideoFromOthers({
-                                                setShowEventInput,
-                                                videoUrl,
-                                                setVideoUrl,
-                                                setVideo
-                                            }) {
+import { Label } from "@/components/label.tsx";
+import { Input } from "@/components/input.tsx";
+import { Button } from "@/components/button.tsx";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx";
+import { Separator } from "@/components/ui/separator.tsx"; // Opcional, ou use <hr />
+import { useVideoImporter } from "@/hooks/useVideoImporter.ts";
+import { newVideoStore } from "@/store/videoUploadStore.ts";
 
-    const [eventTagId, setEventTagId] = useState("");
-    const [isSearching, setIsSearching] = useState(false);
-    const {ndk} = useNDK();
+export default function LoadVideoFromOthers() {
+  // Estado local apenas para controle dos inputs antes do submit
+  const [eventString, setEventString] = useState("");
+  const [urlString, setUrlString] = useState("");
 
-    async function handleSearch() {
-        if (!eventTagId) return;
-        const {data, type} = nip19.decode(eventTagId);
-        if (["naddr", "nevent"].indexOf(type) === -1) {
-            toast.error("Invalid naddr or nevent")
-            console.log("Invalid naddr or nevent")
-            return;
-        }
-        setIsSearching(true);
-        try {
-            const filters = {
-                limit: 1,
-            }
-            if (data.kind) {
-                filters.kinds = [data.kind]
-            }
-            if (data.pubkey) {
-                filters.authors = [data.pubkey]
-            }
-            if (data.identifier) {
-                filters["#d"] = [data.identifier]
-            }
-            if (data.id) {
-                filters.ids = [data.id]
-            }
-            const eventsSet = await ndk!.fetchEvents(filters);
-            const events = Array.from(eventsSet)
-            console.log("Events found", events);
-            if (events.length && events[0]) {
-                const url = getTagValues("url", events[0].tags);
-                if (!url) return alert("Invalid event");
-                const title = getTagValues("url", events[0].tags);
-                const summary =
-                    getTagValues("summary", events[0].tags) ?? events[0].content;
-                const thumbnail =
-                    getTagValues("thumb", events[0].tags);
-                const image = getTagValues("image", events[0].tags);
-                const fileType = getTagValues("m", events[0].tags);
-                const fileHash = getTagValues("x", events[0].tags);
-                const fileSize = getTagValue("size", events[0].tags);
-                const duration = getTagValue("duration", events[0].tags);
-                const fallback: string[] = getTagValues("fallback", events[0].tags)
-                setVideo({
-                    url,
-                    title,
-                    summary,
-                    thumbnail: thumbnail ?? image,
-                    imetaVideo: {
-                        url: url,
-                        size: fileSize ? parseInt(fileSize) : undefined,
-                        m: fileType,
-                        dim: getTagValue("dim", events[0].tags),
-                        blurhash: getTagValue("blurhash", events[0].tags),
-                        x: fileHash,
-                        fallback: fallback,
-                        duration: duration ? parseInt(duration) : undefined,
-                        thumb: thumbnail ?? image,
-                        image: image ?? thumbnail
-                    },
-                });
-            }
-        } catch (err) {
-            console.log("Error searching", err);
-            toast.error("Error searching")
-        } finally {
-            setIsSearching(false);
-        }
-    }
+  const { importFromEvent, importFromUrl, isImporting } = useVideoImporter();
 
-    return (
-        <div
-            className="center relative w-full flex-col gap-y-2 overflow-hidden rounded-md bg-muted aspect-video md:aspect-square  h-80 max-h-full">
-            <div className="mx-auto w-full max-w-[300px] rounded-lg bg-background/40 px-3 py-3">
-                <Label>Kind 1063 event</Label>
-                <div className="flex gap-2">
-                    <Input
-                        value={eventTagId}
-                        onChange={(e) => setEventTagId(e.target.value)}
-                        placeholder={"naddr1..."}
-                    />
-                    <Button
-                        onClick={handleSearch}
-                        loading={isSearching}
-                        disabled={isSearching}
-                        size="icon"
-                        className="shrink-0"
-                    >
-                        <RiSearchLine className="h-5 w-5"/>
-                    </Button>
-                </div>
-            </div>
-            <div className="center">or</div>
-            <div className="mx-auto w-full max-w-[300px] rounded-lg bg-background/40 px-3 py-3">
-                <Label>Video Url</Label>
-                <div className="flex gap-2">
-                    <Input
-                        value={videoUrl}
-                        onChange={(e) => {
-                            if (e.target.value.includes("youtu")) {
-                                alert(
-                                    "Please enter the url to where the video is hosted. A youtube link will not work on all clients.",
-                                );
-                                return setVideoUrl("");
-                            }
-                            return setVideoUrl(e.target.value);
-                        }}
-                        placeholder={"https://... (not a YouTube link)"}
-                    />
-                    <Button
-                        onClick={() =>
-                            setVideo((prev) => ({
-                                ...prev,
-                                url: videoUrl,
-                                thumbnail: videoUrl.includes("youtu")
-                                    ? `http://i3.ytimg.com/vi/${
-                                        videoUrl.includes("/youtu.be/")
-                                            ? videoUrl.split("youtu.be/").pop()
-                                            : videoUrl.split("?v=").pop()
-                                    }/hqdefault.jpg`
-                                    : prev.thumbnail,
-                            }))
-                        }
-                        loading={isSearching}
-                        disabled={isSearching}
-                        size="icon"
-                        className="shrink-0"
-                    >
-                        <RiSearchLine className="h-5 w-5"/>
-                    </Button>
-                </div>
-            </div>
-            <Button onClick={() => setShowEventInput(false)} variant="ghost" className="border border-dashed">
-                Back
+  const handleEventSearch = () => {
+    importFromEvent(eventString);
+  };
+
+  const handleUrlImport = () => {
+    importFromUrl(urlString);
+  };
+
+  return (
+    <Card className="w-full max-w-lg mx-auto bg-muted/50 border-dashed">
+      <CardHeader>
+        <CardTitle className="text-lg">{t("import_video", "Import Video")}</CardTitle>
+        <CardDescription>
+          {t("import_video_desc", "Use an existing Nostr event or a direct URL link.")}
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="space-y-6">
+        {/* Opção 1: Evento Nostr */}
+        <div className="space-y-2">
+          <Label htmlFor="nostr-event">
+            {t("nostr_event_id", "Nostr Event ID (nevent/naddr)")}
+          </Label>
+          <div className="flex gap-2">
+            <Input
+              id="nostr-event"
+              value={eventString}
+              onChange={(e) => setEventString(e.target.value)}
+              placeholder="naddr1... ou nevent1..."
+              onKeyDown={(e) => e.key === "Enter" && handleEventSearch()}
+            />
+            <Button
+              onClick={handleEventSearch}
+              loading={isImporting}
+              disabled={!eventString || isImporting}
+              size="icon"
+              variant="secondary"
+            >
+              <RiSearchLine className="h-4 w-4" />
             </Button>
+          </div>
         </div>
-    );
-}
 
+        <div className="flex items-center gap-4">
+          <Separator className="flex-1" />
+          <span className="text-xs text-muted-foreground uppercase font-medium">
+            {t("or", "OR")}
+          </span>
+          <Separator className="flex-1" />
+        </div>
+
+        {/* Opção 2: URL Direta */}
+        <div className="space-y-2">
+          <Label htmlFor="video-url">
+            {t("video_url", "Direct Video URL")}
+          </Label>
+          <div className="flex gap-2">
+            <Input
+              id="video-url"
+              value={urlString}
+              onChange={(e) => setUrlString(e.target.value)}
+              placeholder="https://example.com/video.mp4"
+              onKeyDown={(e) => e.key === "Enter" && handleUrlImport()}
+            />
+            <Button
+              onClick={handleUrlImport}
+              disabled={!urlString}
+              size="icon"
+              variant="secondary"
+            >
+              <RiLinkM className="h-4 w-4" />
+            </Button>
+          </div>
+          <p className="text-[0.8rem] text-muted-foreground">
+            {t("youtube_warning", "Avoid YouTube links if possible.")}
+          </p>
+        </div>
+
+        {/* Botão Voltar */}
+        <div className="pt-2">
+          <Button
+            onClick={() => (newVideoStore.showEventInput = false)}
+            variant="ghost"
+            className="w-full gap-2 text-muted-foreground hover:text-foreground"
+          >
+            <RiArrowLeftLine />
+            {t("back_to_upload", "Back to file upload")}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
