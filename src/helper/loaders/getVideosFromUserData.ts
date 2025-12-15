@@ -76,7 +76,7 @@ export async function getVideosFromUserData({ ndk, userId }: GetVideosFromUserDa
     },
     {
       authors: [pubkey],
-      kinds: [NDKKind.VideoCurationSet] // Playlists podem vir duplicadas/antigas
+      kinds: [NDKKind.VideoCurationSet, NDKKind.EventDeletion] // Playlists podem vir duplicadas/antigas
     }
   ];
 
