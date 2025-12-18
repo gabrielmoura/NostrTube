@@ -34,6 +34,14 @@ const initialState: Partial<VideoMetadata> = {
 export const newVideoStore = proxy<Partial<VideoMetadata>>(initialState);
 devtools(newVideoStore, { name: "newVideoStore", enabled: import.meta.env.DEV });
 
+
 export const resetVideoStore = () => {
+  Object.keys(newVideoStore).forEach((key) => {
+    if (!(key in initialState)) {
+      delete (newVideoStore as any)[key];
+    }
+  });
+
+  // Restaura os valores padrão
   Object.assign(newVideoStore, initialState);
 };
