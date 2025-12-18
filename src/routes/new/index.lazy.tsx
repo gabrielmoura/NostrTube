@@ -1,10 +1,8 @@
-import { createLazyFileRoute, useNavigate } from "@tanstack/react-router";
-import { lazy, useEffect } from "react";
+import { createLazyFileRoute } from "@tanstack/react-router";
+import { lazy } from "react";
 import { Helmet } from "react-helmet-async";
 import { useSnapshot } from "valtio/react";
-import { toast } from "sonner";
 import { t } from "i18next";
-import { useNDKCurrentUser } from "@nostr-dev-kit/ndk-hooks";
 
 import { cn } from "@/helper/format.ts";
 import { newVideoStore } from "@/store/videoUploadStore.ts";
@@ -18,30 +16,21 @@ import Player, { VideoUpload } from "@/routes/new/@components/VideoUpload.tsx";
 import LanguagesCombo from "@/components/ComboBox/ComboLanguage.tsx";
 import { AddTagInput } from "@/routes/new/@components/BoxAddToModal.tsx";
 import { ButtonUploadThumb } from "@/routes/new/@components/ButtonUploadThumb.tsx";
+import { withAuth } from "@/components/AuthGuard.tsx";
 
 // Lazy imports para performance
 const Textarea = lazy(() => import("@/components/textarea.tsx"));
 
 export const Route = createLazyFileRoute("/new/")({
-  component: NewVideoPage
+  component: withAuth(NewVideoPage)
 });
 
+
 function NewVideoPage() {
-  const navigate = useNavigate();
-  const currentUser = useNDKCurrentUser();
   const snap = useSnapshot(newVideoStore);
 
   // Hook customizado encapsulando a mutação
   const { publish, isPending } = usePublishVideo();
-
-  // Auth Guard
-  useEffect(() => {
-    if (!currentUser) {
-      navigate({ to: "/" }).then(() =>
-        toast.warning(t("auth_required", "You must be logged in to upload videos"))
-      );
-    }
-  }, [currentUser, navigate]);
 
   const handlePublish = () => {
     publish(snap);
@@ -82,7 +71,8 @@ function NewVideoPage() {
             value={snap.summary}
             onChange={(e) => (newVideoStore.summary = e.target.value)}
             placeholder={t("write_summary") + "..."}
-            className="invisible-textarea min-h-[70px] text-base placeholder:text-muted-foreground/70"
+            // summary precisa ter uma altura maior
+            className="invisible-textarea min-h-[150px] text-base placeholder:text-muted-foreground/70"
           />
 
           <div className="flex items-center gap-3 pt-2">
