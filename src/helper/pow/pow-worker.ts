@@ -1,60 +1,63 @@
-import {createSHA256} from "hash-wasm"
-import {bytesToHex} from "@welshman/util/dist/lib/src";
-import type {HashedEvent} from "@welshman/util";
+// /helper/pow/pow-worker.ts
+import { createSHA256 } from "hash-wasm";
+import { bytesToHex } from "@welshman/util/dist/lib/src";
+import type { HashedEvent } from "@welshman/util";
 
-interface ProofOfWork {
-    event: Partial<HashedEvent>
-    difficulty: number
-    start: number
-    step: number
+interface PowRequest {
+    taskId: string;
+    event: Partial<HashedEvent>;
+    difficulty: number;
+    start?: number;
+    step?: number;
 }
 
-function getPow(id: Uint8Array<ArrayBufferLike>): number {
-    let count = 0
-
+function getPow(id: Uint8Array): number {
+    let count = 0;
     for (let i = 0; i < 32; i++) {
-        const nibble = id[i]
-        if (nibble === 0) {
-            count += 8
-        } else {
-            count += Math.clz32(nibble) - 24
-            break
+        const nibble = id[i];
+        if (nibble === 0) count += 8;
+        else {
+            count += Math.clz32(nibble) - 24;
+            break;
         }
     }
-
-    return count
+    return count;
 }
 
+self.addEventListener('message', async function (ev: MessageEvent<PowRequest>) {
+    const { taskId, event, difficulty, start = 0, step = 1 } = ev.data;
 
-self.addEventListener('message', async function (ev: MessageEvent<ProofOfWork>) {
-    const {event, difficulty, start = 0, step = 1} = ev.data
+    try {
+        let count = start;
+        const tag = ["nonce", count.toString(), String(difficulty)];
 
-    let count = start
+        if (!event.tags) event.tags = [];
+        event.tags.push(tag);
 
-    const tag = ["nonce", count.toString(), "" + difficulty + ""]
+        const hasher = await createSHA256();
 
-    event.tags?.push(tag)
+        while (true) {
+            count += step;
+            tag[1] = count.toString();
 
-    const hasher = await createSHA256()
+            hasher.init();
+            hasher.update(
+              JSON.stringify([0, event.pubkey, event.created_at, event.kind, event.tags, event.content]),
+            );
 
-    while (true) {
-        count += step
-        tag[1] = count.toString()
+            const id = hasher.digest("binary");
+            const pow = getPow(id);
 
-        hasher.init()
-        hasher.update(
-            JSON.stringify([0, event.pubkey, event.created_at, event.kind, event.tags, event.content]),
-        )
-
-        const id = hasher.digest("binary")
-        const pow = getPow(id)
-
-        if (pow >= difficulty) {
-            event.id = bytesToHex(id)
-            break
+            if (pow >= difficulty) {
+                event.id = bytesToHex(id);
+                break;
+            }
         }
-    }
 
-    self.postMessage(event)
-})
-export {}
+        self.postMessage({ taskId, event });
+    } catch (error: any) {
+        self.postMessage({ taskId, error: error.message });
+    }
+});
+
+export {};
