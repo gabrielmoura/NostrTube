@@ -1,4 +1,3 @@
-// /helper/pow/pow-worker.ts
 import { createSHA256 } from "hash-wasm";
 import { bytesToHex } from "@welshman/util/dist/lib/src";
 import type { HashedEvent } from "@welshman/util";

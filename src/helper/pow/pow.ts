@@ -1,4 +1,3 @@
-// /helper/pow/pow.ts
 import type { HashedEvent, OwnedEvent } from "@welshman/util";
 import { getTag } from "@welshman/util";
 import { NDKEvent } from "@nostr-dev-kit/ndk-hooks";
