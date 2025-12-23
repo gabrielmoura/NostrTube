@@ -51,7 +51,7 @@ export default i18n
     detection: {
       order: ["localStorage", "navigator"],
       caches: ["localStorage"]
-    },
+    }
   });
 
 

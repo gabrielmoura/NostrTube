@@ -21,5 +21,5 @@ export type DataVideo = {
   fallback?: string[];
   image: string;
   thumbnail?: string;
-  title?:string;
+  title?: string;
 }

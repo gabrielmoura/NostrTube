@@ -72,20 +72,23 @@
         --header-height: 56px;
       }
     } */
-
     @media all and (display-mode: standalone) {
         :root {
             --bottom-nav-height: 76px;
         }
+
         .bottom-tabs {
             padding-bottom: 20px;
         }
+
         .standalone-pb-8 {
             padding-bottom: 24px;
         }
+
         .standalone-hide {
             display: none !important;
         }
+
         .standalone-show {
             display: block !important;
         }
@@ -96,17 +99,21 @@
     .center {
         @apply flex items-center justify-center;
     }
+
     .invisible-input {
         @apply w-full border-0 bg-transparent file:border-0 file:bg-transparent placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50;
     }
+
     .invisible-textarea {
         @apply resize-none break-words !rounded-none !border-0 !bg-transparent !p-0 text-foreground !shadow-none !outline-none placeholder:text-muted/20 focus-visible:!ring-0;
     }
 }
+
 input[type="time"]::-webkit-calendar-picker-indicator {
     background: none;
     display: none;
 }
+
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -118,6 +125,7 @@ input::-webkit-inner-spin-button {
 input[type="number"] {
     -moz-appearance: textfield;
 }
+
 img:not([src]) {
     visibility: hidden;
 }
@@ -125,6 +133,7 @@ img:not([src]) {
 .odell-mode-lower {
     text-transform: lowercase !important;
 }
+
 .odell-mode-upper {
     text-transform: uppercase !important;
 }
@@ -136,12 +145,11 @@ img:not([src]) {
 /* Transição entre temas light/dark */
 html.theme-transition,
 html.theme-transition * {
-    transition:
-            background-color 0.2s ease,
-            color 0.2s ease,
-            border-color 0.2s ease,
-            fill 0.2s ease,
-            stroke 0.2s ease;
+    transition: background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    fill 0.2s ease,
+    stroke 0.2s ease;
 }
 
 /* shadcn */
@@ -298,6 +306,7 @@ html.theme-transition * {
     * {
         @apply border-border outline-ring/50;
     }
+
     body {
         @apply bg-background text-foreground;
     }
@@ -307,15 +316,19 @@ html.theme-transition * {
         :root {
             --bottom-nav-height: 76px;
         }
+
         .bottom-tabs {
             padding-bottom: 20px;
         }
+
         .standalone-pb-8 {
             padding-bottom: 24px;
         }
+
         .standalone-hide {
             display: none !important;
         }
+
         .standalone-show {
             display: block !important;
         }
@@ -326,9 +339,11 @@ html.theme-transition * {
     .center {
         @apply flex items-center justify-center;
     }
+
     .invisible-input {
         @apply w-full border-0 bg-transparent file:border-0 file:bg-transparent placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50;
     }
+
     .invisible-textarea {
         @apply resize-none break-words !rounded-none !border-0 !bg-transparent !p-0 text-foreground !shadow-none !outline-none placeholder:text-muted/20 focus-visible:!ring-0;
     }
@@ -339,6 +354,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     background: none;
     display: none;
 }
+
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -350,6 +366,7 @@ input::-webkit-inner-spin-button {
 input[type="number"] {
     -moz-appearance: textfield;
 }
+
 img:not([src]) {
     visibility: hidden;
 }
@@ -358,6 +375,7 @@ img:not([src]) {
 .odell-mode-lower {
     text-transform: lowercase !important;
 }
+
 .odell-mode-upper {
     text-transform: uppercase !important;
 }
@@ -370,12 +388,11 @@ img:not([src]) {
 /* Transição entre temas light/dark do CSS Antigo */
 html.theme-transition,
 html.theme-transition * {
-    transition:
-            background-color 0.2s ease,
-            color 0.2s ease,
-            border-color 0.2s ease,
-            fill 0.2s ease,
-            stroke 0.2s ease;
+    transition: background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    fill 0.2s ease,
+    stroke 0.2s ease;
 }
 
 @config "../tailwind.config.ts";

@@ -11,6 +11,7 @@
     position: relative;
     box-sizing: border-box;
 }
+
 .loader::after {
     content: '';
     left: 0;

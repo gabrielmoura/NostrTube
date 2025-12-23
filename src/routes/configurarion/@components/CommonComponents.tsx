@@ -46,7 +46,14 @@ export const Badge = ({ children, variant = "default", className = "" }: {
   );
 };
 
-export const Button = ({ children, onClick, variant = "primary", size = "md", disabled = false, className = "" }: any) => {
+export const Button = ({
+                         children,
+                         onClick,
+                         variant = "primary",
+                         size = "md",
+                         disabled = false,
+                         className = ""
+                       }: any) => {
   const base = "inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-50 disabled:pointer-events-none";
   const variants = {
     primary: "bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm",

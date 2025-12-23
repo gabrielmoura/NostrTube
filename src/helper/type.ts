@@ -1,3 +1,3 @@
 export enum NostrKind {
-    VideoViewer = 34237
+  VideoViewer = 34237
 }

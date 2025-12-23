@@ -3,11 +3,15 @@ import { useNDK } from "@nostr-dev-kit/ndk-hooks";
 import { nip19 } from "nostr-tools";
 import { getTagValue, getTagValues } from "@welshman/util";
 import { toast } from "sonner";
-import { newVideoStore } from "@/store/videoUploadStore.ts";
+import { useVideoUploadStore } from "@/store/videoUpload/useVideoUploadStore.ts";
 
 export function useVideoImporter() {
   const { ndk } = useNDK();
   const [isImporting, setIsImporting] = useState(false);
+  const setVideoUpload = useVideoUploadStore((s) => s.setVideoUpload);
+  const setShowEventInput = useVideoUploadStore((s) => s.setShowEventInput);
+  const setUrl = useVideoUploadStore((s) => s.setUrl);
+  const setThumbnail = useVideoUploadStore((s) => s.setThumbnail);
 
   // Lógica 1: Importar de Evento Nostr
   const importFromEvent = async (eventString: string) => {
@@ -59,19 +63,21 @@ export function useVideoImporter() {
         blurhash: getTagValue("blurhash", event.tags),
         x: getTagValue("x", event.tags),
         fallback: getTagValues("fallback", event.tags),
-        duration: Number(getTagValue("duration", event.tags)) || undefined,
+        duration: Number(getTagValue("duration", event.tags)) || undefined
       };
 
       // Atualização da Store
-      newVideoStore.url = url;
-      newVideoStore.title = title;
-      newVideoStore.summary = summary;
-      newVideoStore.thumbnail = thumbnail;
-      newVideoStore.imetaVideo = imeta as any;
-      newVideoStore.fallback = imeta.fallback;
+      setVideoUpload({
+        url,
+        title,
+        summary,
+        thumbnail,
+        imetaVideo: imeta as any,
+        fallback: imeta.fallback
+      });
 
       toast.success("Vídeo importado com sucesso!");
-      newVideoStore.showEventInput = false; // Fecha a tela de importação
+      setShowEventInput(false);
 
     } catch (err: any) {
       console.error(err);
@@ -88,7 +94,7 @@ export function useVideoImporter() {
     // Regra de Negócio: YouTube
     if (url.includes("youtu.be") || url.includes("youtube.com")) {
       toast.warning("Links do YouTube podem não funcionar em todos os clientes Nostr.", {
-        duration: 5000,
+        duration: 5000
       });
 
       // Extrair thumbnail do YouTube automaticamente (bônus de UX)
@@ -97,13 +103,13 @@ export function useVideoImporter() {
       else if (url.includes("v=")) videoId = url.split("v=").pop()?.split("&")[0] || "";
 
       if (videoId) {
-        newVideoStore.thumbnail = `https://i3.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+        setThumbnail(`https://i3.ytimg.com/vi/${videoId}/hqdefault.jpg`);
         toast.info("Thumbnail extraída do YouTube automaticamente.");
       }
     }
 
-    newVideoStore.url = url;
-    newVideoStore.showEventInput = false;
+    setUrl(url);
+    setShowEventInput(false);
   };
 
   return {

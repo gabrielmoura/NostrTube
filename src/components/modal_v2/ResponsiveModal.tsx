@@ -1,19 +1,6 @@
-
 import { useMediaQuery } from "./use-media-query";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "./Dialog"; // Seus componentes existentes
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
-} from "./Drawer"; // Seus componentes existentes
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./Dialog"; // Seus componentes existentes
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "./Drawer"; // Seus componentes existentes
 import { type ModalType } from "./modal-state";
 
 interface ResponsiveModalProps {

@@ -1,5 +1,5 @@
-import * as React from "react"
-import {cn} from "@/helper/format.ts";
+import * as React from "react";
+import { cn } from "@/helper/format.ts";
 
 //{
 //               // Ajuste de altura para múltiplas linhas
@@ -16,7 +16,8 @@ import {cn} from "@/helper/format.ts";
 
 
 export interface TextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+}
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ className, ...props }, ref) => {
@@ -29,10 +30,10 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         ref={ref}
         {...props}
       />
-    )
+    );
   }
-)
-Textarea.displayName = "Textarea"
+);
+Textarea.displayName = "Textarea";
 
-export { Textarea }
-export default Textarea
+export { Textarea };
+export default Textarea;

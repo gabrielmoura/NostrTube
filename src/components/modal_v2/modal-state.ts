@@ -16,7 +16,7 @@ export type ModalType = {
 
 // 2. Opções de UI (2º Parâmetro)
 // Tudo que é visual ou callback, exceto ID e Content
-export type ModalOptions = Omit<ModalType,  "content">;
+export type ModalOptions = Omit<ModalType, "content">;
 
 
 type ModalStore = {

@@ -1,6 +1,7 @@
 // Copyright 2018-2025 the Deno authors. MIT license.
 
 import type { Uint8Array_ } from "./_types.ts";
+
 export type { Uint8Array_ };
 
 export const alphabet = new TextEncoder().encode("0123456789abcdef");
@@ -33,7 +34,7 @@ export function encode(
   buffer: Uint8Array_,
   i: number,
   o: number,
-  alphabet: Uint8Array,
+  alphabet: Uint8Array
 ): number {
   for (; i < buffer.length; ++i) {
     const x = buffer[i]!;
@@ -47,13 +48,13 @@ export function decode(
   buffer: Uint8Array_,
   i: number,
   o: number,
-  alphabet: Uint8Array,
+  alphabet: Uint8Array
 ): number {
   if ((buffer.length - o) % 2 === 1) {
     throw new RangeError(
       `Cannot decode input as hex: Length (${
         buffer.length - o
-      }) must be divisible by 2`,
+      }) must be divisible by 2`
     );
   }
 
@@ -71,7 +72,7 @@ function getByte(char: number, alphabet: Uint8Array): number {
     throw new TypeError(
       `Cannot decode input as hex: Invalid character (${
         String.fromCharCode(char)
-      })`,
+      })`
     );
   }
   return byte;

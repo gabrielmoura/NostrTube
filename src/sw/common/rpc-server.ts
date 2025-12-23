@@ -7,10 +7,10 @@ import {
   mergeMap,
   Observable,
   of,
+  type OperatorFunction,
   switchMap,
   takeUntil,
-  tap,
-  type OperatorFunction,
+  tap
 } from "rxjs";
 import type {
   RPCCommandDirectory,
@@ -18,9 +18,9 @@ import type {
   RPCMessage,
   RPCResponse,
   RPCResponseError,
-  RPCResponseResult,
+  RPCResponseResult
 } from "./interface";
-import {logger} from "@/lib/debug.ts";
+import { logger } from "@/lib/debug.ts";
 
 const log = logger.extend("RPCServer");
 
@@ -46,9 +46,9 @@ export class RPCServer<Commands extends RPCCommandDirectory = {}> {
       mergeMap((message) =>
         this.call(message.id, message.command, message.payload).pipe(
           // Close the connection when the incoming stream receives a close message
-          takeUntil(incoming.pipe(filter((m) => m.id === message.id && m.type === "CLOSE"))),
-        ),
-      ),
+          takeUntil(incoming.pipe(filter((m) => m.id === message.id && m.type === "CLOSE")))
+        )
+      )
     );
   }
 
@@ -56,7 +56,7 @@ export class RPCServer<Commands extends RPCCommandDirectory = {}> {
   call<C extends keyof Commands>(
     id: string,
     command: C,
-    payload: Commands[C]["payload"],
+    payload: Commands[C]["payload"]
   ): Observable<RPCResponse<Commands[C]["result"]>> {
     const handler = this.handlers[command];
     if (!handler) throw new Error(`No handler registered for command: ${String(command)}`);
@@ -65,7 +65,7 @@ export class RPCServer<Commands extends RPCCommandDirectory = {}> {
     if (result instanceof Promise)
       return from(result).pipe(
         switchMap((r) => (isObservable(r) ? r : of(r))),
-        RPCServer.convertToResponse(id),
+        RPCServer.convertToResponse(id)
       );
     else if (isObservable(result)) return result.pipe(RPCServer.convertToResponse(id));
     else return of(result).pipe(RPCServer.convertToResponse(id));
@@ -84,9 +84,9 @@ export class RPCServer<Commands extends RPCCommandDirectory = {}> {
           return of({
             type: "ERROR",
             id,
-            error: error instanceof Error ? error.message : "Unknown error",
+            error: error instanceof Error ? error.message : "Unknown error"
           } satisfies RPCResponseError);
-        }),
+        })
       );
   }
 

@@ -4,7 +4,6 @@ import { notFound } from "@tanstack/react-router";
 import { z } from "zod";
 
 
-
 export const eventSearchSchema = z.object({
   search: z.string().optional(),
   tag: z.union([z.string(), z.array(z.string())]).optional(),
@@ -12,7 +11,7 @@ export const eventSearchSchema = z.object({
   lang: z.string().optional(),
   // Novos campos
   author: z.string().optional(), // Npub ou Hex
-  timeRange: z.enum(["all", "today", "week", "month", "year"]).optional().default("all"),
+  timeRange: z.enum(["all", "today", "week", "month", "year"]).optional().default("all")
 });
 
 export type eventSearchType = z.infer<typeof eventSearchSchema>;

@@ -1,18 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card } from "@radix-ui/themes";
 import { t } from "i18next";
-import { SEO } from "@/components/SEO.tsx";
 
 export const Route = createFileRoute("/terms/")({
-  component: RouteComponent
+  component: RouteComponent,
+  head: () => ({
+    meta: [
+      { title: t("Terms_Title") },
+      { description: t("Terms_Description") },
+      { property: "og:title", content: t("Terms_Title") }
+    ]
+  })
 });
 
 function RouteComponent() {
   return <div className="flex justify-center py-2.5">
-    <SEO
-      title={t("Terms_Title", "Legal Notice")}
-      description={t("Terms_Description", "Read the Legal Notice for NostrTube, a decentralized video sharing platform built on the Nostr protocol. Understand your rights and responsibilities while using our service.")}
-    />
     <Card>
       <div className="text-sm font-semibold">Aviso Legal</div>
       <p className="text-xs leading-relaxed prose">

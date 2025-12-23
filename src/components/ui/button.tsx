@@ -1,8 +1,8 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
   // Mantive suas classes originais, o 'gap-2' aqui é crucial para o espaço entre o spinner e o texto
@@ -19,7 +19,7 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
-        link: "text-primary underline-offset-4 hover:underline",
+        link: "text-primary underline-offset-4 hover:underline"
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
@@ -27,15 +27,15 @@ const buttonVariants = cva(
         lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
         icon: "size-9",
         "icon-sm": "size-8",
-        "icon-lg": "size-10",
-      },
+        "icon-lg": "size-10"
+      }
     },
     defaultVariants: {
       variant: "default",
-      size: "default",
-    },
+      size: "default"
+    }
   }
-)
+);
 
 // Spinner SVG inline para não depender de bibliotecas externas (ex: Lucide)
 const LoadingSpinner = ({ className }: { className?: string }) => (
@@ -52,13 +52,13 @@ const LoadingSpinner = ({ className }: { className?: string }) => (
   >
     <path d="M21 12a9 9 0 1 1-6.219-8.56" />
   </svg>
-)
+);
 
 export interface ButtonProps
   extends React.ComponentProps<"button">,
     VariantProps<typeof buttonVariants> {
-  asChild?: boolean
-  isLoading?: boolean
+  asChild?: boolean;
+  isLoading?: boolean;
 }
 
 function Button({
@@ -71,10 +71,10 @@ function Button({
                   disabled,
                   ...props
                 }: ButtonProps) {
-  const Comp = asChild ? Slot : "button"
+  const Comp = asChild ? Slot : "button";
 
   // UX: Se estiver carregando, o botão deve estar desabilitado
-  const isDisabled = disabled || isLoading
+  const isDisabled = disabled || isLoading;
 
   return (
     <Comp
@@ -94,7 +94,7 @@ function Button({
 
       {children}
     </Comp>
-  )
+  );
 }
 
-export { Button, buttonVariants }
+export { Button, buttonVariants };

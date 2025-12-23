@@ -8,12 +8,11 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { createFileRoute } from '@tanstack/react-router'
-
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TermsIndexRouteImport } from './routes/terms/index'
 import { Route as SearchIndexRouteImport } from './routes/search/index'
+import { Route as NewIndexRouteImport } from './routes/new/index'
 import { Route as FaqIndexRouteImport } from './routes/faq/index'
 import { Route as ConfigurarionIndexRouteImport } from './routes/configurarion/index'
 import { Route as VEventIdRouteImport } from './routes/v/$eventId'
@@ -22,18 +21,11 @@ import { Route as PNewRouteImport } from './routes/p/new'
 import { Route as PListIdRouteImport } from './routes/p/$listId'
 import { Route as UUserIdEditRouteImport } from './routes/u_/$userId/edit'
 
-const NewIndexLazyRouteImport = createFileRoute('/new/')()
-
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NewIndexLazyRoute = NewIndexLazyRouteImport.update({
-  id: '/new/',
-  path: '/new/',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/new/index.lazy').then((d) => d.Route))
 const TermsIndexRoute = TermsIndexRouteImport.update({
   id: '/terms/',
   path: '/terms/',
@@ -42,6 +34,11 @@ const TermsIndexRoute = TermsIndexRouteImport.update({
 const SearchIndexRoute = SearchIndexRouteImport.update({
   id: '/search/',
   path: '/search/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewIndexRoute = NewIndexRouteImport.update({
+  id: '/new/',
+  path: '/new/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FaqIndexRoute = FaqIndexRouteImport.update({
@@ -88,9 +85,9 @@ export interface FileRoutesByFullPath {
   '/v/$eventId': typeof VEventIdRoute
   '/configurarion': typeof ConfigurarionIndexRoute
   '/faq': typeof FaqIndexRoute
+  '/new': typeof NewIndexRoute
   '/search': typeof SearchIndexRoute
   '/terms': typeof TermsIndexRoute
-  '/new': typeof NewIndexLazyRoute
   '/u/$userId/edit': typeof UUserIdEditRoute
 }
 export interface FileRoutesByTo {
@@ -101,9 +98,9 @@ export interface FileRoutesByTo {
   '/v/$eventId': typeof VEventIdRoute
   '/configurarion': typeof ConfigurarionIndexRoute
   '/faq': typeof FaqIndexRoute
+  '/new': typeof NewIndexRoute
   '/search': typeof SearchIndexRoute
   '/terms': typeof TermsIndexRoute
-  '/new': typeof NewIndexLazyRoute
   '/u/$userId/edit': typeof UUserIdEditRoute
 }
 export interface FileRoutesById {
@@ -115,9 +112,9 @@ export interface FileRoutesById {
   '/v/$eventId': typeof VEventIdRoute
   '/configurarion/': typeof ConfigurarionIndexRoute
   '/faq/': typeof FaqIndexRoute
+  '/new/': typeof NewIndexRoute
   '/search/': typeof SearchIndexRoute
   '/terms/': typeof TermsIndexRoute
-  '/new/': typeof NewIndexLazyRoute
   '/u_/$userId/edit': typeof UUserIdEditRoute
 }
 export interface FileRouteTypes {
@@ -130,9 +127,9 @@ export interface FileRouteTypes {
     | '/v/$eventId'
     | '/configurarion'
     | '/faq'
+    | '/new'
     | '/search'
     | '/terms'
-    | '/new'
     | '/u/$userId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -143,9 +140,9 @@ export interface FileRouteTypes {
     | '/v/$eventId'
     | '/configurarion'
     | '/faq'
+    | '/new'
     | '/search'
     | '/terms'
-    | '/new'
     | '/u/$userId/edit'
   id:
     | '__root__'
@@ -156,9 +153,9 @@ export interface FileRouteTypes {
     | '/v/$eventId'
     | '/configurarion/'
     | '/faq/'
+    | '/new/'
     | '/search/'
     | '/terms/'
-    | '/new/'
     | '/u_/$userId/edit'
   fileRoutesById: FileRoutesById
 }
@@ -170,9 +167,9 @@ export interface RootRouteChildren {
   VEventIdRoute: typeof VEventIdRoute
   ConfigurarionIndexRoute: typeof ConfigurarionIndexRoute
   FaqIndexRoute: typeof FaqIndexRoute
+  NewIndexRoute: typeof NewIndexRoute
   SearchIndexRoute: typeof SearchIndexRoute
   TermsIndexRoute: typeof TermsIndexRoute
-  NewIndexLazyRoute: typeof NewIndexLazyRoute
   UUserIdEditRoute: typeof UUserIdEditRoute
 }
 
@@ -183,13 +180,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/new/': {
-      id: '/new/'
-      path: '/new'
-      fullPath: '/new'
-      preLoaderRoute: typeof NewIndexLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms/': {
@@ -204,6 +194,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/new/': {
+      id: '/new/'
+      path: '/new'
+      fullPath: '/new'
+      preLoaderRoute: typeof NewIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/faq/': {
@@ -266,9 +263,9 @@ const rootRouteChildren: RootRouteChildren = {
   VEventIdRoute: VEventIdRoute,
   ConfigurarionIndexRoute: ConfigurarionIndexRoute,
   FaqIndexRoute: FaqIndexRoute,
+  NewIndexRoute: NewIndexRoute,
   SearchIndexRoute: SearchIndexRoute,
   TermsIndexRoute: TermsIndexRoute,
-  NewIndexLazyRoute: NewIndexLazyRoute,
   UUserIdEditRoute: UUserIdEditRoute,
 }
 export const routeTree = rootRouteImport

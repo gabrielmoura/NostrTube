@@ -38,7 +38,7 @@ export class RPCClient<Commands extends RPCCommandDirectory = {}> {
           finalize(() => {
             callLog("Closing");
             this.outgoing({ type: "CLOSE", id });
-          }),
+          })
         )
         .subscribe(observer);
     });

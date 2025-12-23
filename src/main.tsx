@@ -21,6 +21,7 @@ declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router;
   }
+
   interface HistoryState {
     alert?: RouteAlert;
   }
@@ -34,8 +35,8 @@ const router = createRouter({
   scrollRestoration: true,
   context: {
     queryClient,
-    ndk: ndkInstance,
-  },
+    ndk: ndkInstance
+  }
 });
 
 // Renderização

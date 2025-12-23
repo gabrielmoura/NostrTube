@@ -43,7 +43,7 @@ export type RPCCommandDirectory = {
 
 // RPC handler function type
 export type RPCHandler<TPayload extends unknown = any, TResult extends unknown = any> = (
-  payload: TPayload,
+  payload: TPayload
 ) => Observable<TResult> | Promise<TResult> | Promise<Observable<TResult>> | TResult;
 
 // Registry for RPC handlers

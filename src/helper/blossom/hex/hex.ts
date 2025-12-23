@@ -29,6 +29,7 @@
 import { calcSizeHex, decode, encode } from "./_common16.js";
 import { detach } from "./_common_detach.js";
 import type { Uint8Array_ } from "./_types.ts";
+
 export type { Uint8Array_ };
 
 const alphabet = new TextEncoder()
@@ -61,7 +62,7 @@ export function encodeHex(src: string | Uint8Array | ArrayBuffer): string {
   else src = src.slice();
   const [output, i] = detach(
     src as Uint8Array_,
-    calcSizeHex((src as Uint8Array_).length),
+    calcSizeHex((src as Uint8Array_).length)
   );
   encode(output, i, 0, alphabet);
   return new TextDecoder().decode(output);

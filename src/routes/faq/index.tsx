@@ -5,11 +5,20 @@ import { Command, CommandEmpty, CommandInput, CommandList } from "@/components/u
 import { faqData } from "@/default.ts";
 import { detectLanguageMain } from "@/helper/userLang.ts";
 import { t } from "i18next";
-import { SEO } from "@/components/SEO.tsx";
 
 
 export const Route = createFileRoute("/faq/")({
-  component: RouteComponent
+  component: RouteComponent,
+  head: () => ({
+    meta: [
+      { title: t("FAQ_Title", "FAQ") },
+      {
+        name: "description",
+        content: t("FAQ_Description", "Frequently Asked Questions about NostrTube. Find answers to common questions and learn more about our platform.")
+      },
+      { property: "og:title", content: t("FAQ_Title", "FAQ") }
+    ]
+  })
 });
 
 
@@ -18,10 +27,10 @@ function RouteComponent() {
   const faqDataL = faqData[lang?.split("-")[0] as keyof typeof faqData] || faqData["en"];
   return (
     <div className="min-h-screen bg-gray-100">
-      <SEO
-        title={t("FAQ_Title", "FAQ")}
-        description={t("FAQ_Description", "Frequently Asked Questions about NostrTube. Find answers to common questions and learn more about our platform.")}
-      />
+      {/*<SEO*/}
+      {/*  title={t("FAQ_Title", "FAQ")}*/}
+      {/*  description={t("FAQ_Description", "Frequently Asked Questions about NostrTube. Find answers to common questions and learn more about our platform.")}*/}
+      {/*/>*/}
       <FaqPage faqData={faqDataL} />
     </div>
   );

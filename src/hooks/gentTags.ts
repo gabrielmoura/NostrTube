@@ -26,7 +26,7 @@ const getConfig = (): AppConfig => {
   return {
     appName: import.meta.env.VITE_APP_NAME || "NostrTube",
     rootDomain: import.meta.env.VITE_PUBLIC_ROOT_DOMAIN || "https://nostr-tube.com",
-    relays: (relaysString || "").split(",").filter(Boolean),
+    relays: (relaysString || "").split(",").filter(Boolean)
   };
 };
 
@@ -47,12 +47,12 @@ function generateAltTag(identifier: string, pubkey: string, config: AppConfig): 
     identifier,
     kind: NDKKind.Video,
     pubkey,
-    relays: config.relays,
+    relays: config.relays
   });
 
   return [
     "alt",
-    `This is a video event and can be viewed at ${config.rootDomain}/v/${naddr}`,
+    `This is a video event and can be viewed at ${config.rootDomain}/v/${naddr}`
   ];
 }
 

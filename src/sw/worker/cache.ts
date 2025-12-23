@@ -1,8 +1,8 @@
 /// <reference lib="webworker" />
-import { precacheAndRoute, cleanupOutdatedCaches, getCacheKeyForURL, precache } from "workbox-precaching";
+import { cleanupOutdatedCaches, getCacheKeyForURL, precache, precacheAndRoute } from "workbox-precaching";
 import { clientsClaim } from "workbox-core";
 import { rpcServer } from "./rpc";
-import {logger} from "@/lib/debug.ts";
+import { logger } from "@/lib/debug.ts";
 
 
 declare let self: ServiceWorkerGlobalScope;
@@ -84,7 +84,7 @@ export const getAllCachedFiles = async (): Promise<CacheInfo[]> => {
           cacheKey,
           size,
           lastModified,
-          type,
+          type
         });
       }
     }
@@ -93,7 +93,7 @@ export const getAllCachedFiles = async (): Promise<CacheInfo[]> => {
       name: cacheName,
       size: totalSize,
       fileCount: files.length,
-      files: files.sort((a, b) => a.url.localeCompare(b.url)),
+      files: files.sort((a, b) => a.url.localeCompare(b.url))
     });
   }
 
@@ -128,7 +128,7 @@ export const getCachedFilesByCache = async (cacheName: string): Promise<CachedFi
         cacheKey,
         size,
         lastModified,
-        type,
+        type
       });
     }
   }

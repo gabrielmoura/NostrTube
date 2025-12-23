@@ -10,12 +10,13 @@ import { Button } from "@/components/button.tsx";
 import { Card, CardContent } from "@/components/ui/card.tsx";
 import { Progress } from "@/components/ui/progress.tsx";
 import { useVideoUploader } from "@/hooks/useVideoUploader.ts";
-import { newVideoStore } from "@/store/videoUploadStore.ts";
+import { useVideoUploadStore } from "@/store/videoUpload/useVideoUploadStore.ts";
 
 export default function VideoUploadFile() {
   const { upload, isLoading, progress, errorCount } = useVideoUploader();
   // Estado local apenas para preview da imagem/nome antes do upload começar
   const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const setShowEventInput = useVideoUploadStore((s) => s.setShowEventInput);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
@@ -77,7 +78,7 @@ export default function VideoUploadFile() {
       </div>
 
       <Button
-        onClick={() => (newVideoStore.showEventInput = true)}
+        onClick={() => setShowEventInput(true)}
         variant="ghost"
         className="border-dashed border"
       >

@@ -1,25 +1,26 @@
-import type {InputHTMLAttributes, ReactNode} from "react";
-import {cn} from "@/helper/format.ts";
-import {forwardRef} from "react";
+import type { InputHTMLAttributes, ReactNode } from "react";
+import { forwardRef } from "react";
+import { cn } from "@/helper/format.ts";
 
 
 export interface InputProps
-  extends InputHTMLAttributes<HTMLInputElement> {}
+  extends InputHTMLAttributes<HTMLInputElement> {
+}
 
-const Input =forwardRef<HTMLInputElement, InputProps>(
+const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, ...props }, ref) => {
     return (
       <input
         type={type}
         className={cn(
           "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[16px] shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm",
-          className,
+          className
         )}
         ref={ref}
         {...props}
       />
     );
-  },
+  }
 );
 Input.displayName = "Input";
 
@@ -30,14 +31,15 @@ type InputPostProps = InputProps & {
 const InputPost = forwardRef<HTMLInputElement, InputPostProps>(
   ({ className, type, post, ...props }, ref) => {
     return (
-      <div className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[16px] shadow-sm transition-colors focus-within:outline-none focus-within:ring-1 focus-within:ring-ring disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm">
+      <div
+        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-[16px] shadow-sm transition-colors focus-within:outline-none focus-within:ring-1 focus-within:ring-ring disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm">
         <input className="invisible-input" ref={ref} {...props} />
         <span className="flex select-none items-center pl-3 text-muted-foreground">
           {post}
         </span>
       </div>
     );
-  },
+  }
 );
 InputPost.displayName = "InputPost";
 

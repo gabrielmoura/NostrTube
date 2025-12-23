@@ -124,6 +124,7 @@ export interface BlossomServer {
   name: string;
   region: string;
 }
+
 // Mock Blossom servers data
 export const MOCK_BLOSSOM_SERVERS: BlossomServer[] = [
   { url: "https://cdn.nostr.build", name: "Nostr.Build CDN", region: "Global" },

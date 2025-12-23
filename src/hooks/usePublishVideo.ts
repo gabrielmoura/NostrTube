@@ -5,11 +5,12 @@ import { nip19 } from "nostr-tools";
 import { toast } from "sonner";
 import { useNavigate } from "@tanstack/react-router";
 import { t } from "i18next";
-import { makeEvent, type makeEventParams } from "@/helper/pow/pow.ts";
+import { makeEvent, type MakeEventParams } from "@/helper/pow/pow.ts";
 import { generateVideoTags } from "@/hooks/gentTags.ts";
 import { nostrNow } from "@/helper/date.ts";
-import { resetVideoStore, type VideoMetadata } from "@/store/videoUploadStore.ts";
+
 import { LoggerAgent } from "@/lib/debug.ts";
+import { useVideoUploadStore, type VideoMetadata } from "@/store/videoUpload/useVideoUploadStore.ts";
 
 const log = LoggerAgent.create("usePublishVideo");
 
@@ -17,10 +18,11 @@ export function usePublishVideo() {
   const navigate = useNavigate();
   const { ndk } = useNDK();
   const currentUser = useNDKCurrentUser();
+  const resetForm = useVideoUploadStore((s) => s.resetForm);
 
   const mutation = useMutation({
     mutationKey: ["event:generate:new:video"],
-    mutationFn: ({ ndk, event, difficulty }: makeEventParams): Promise<NDKEvent> =>
+    mutationFn: ({ ndk, event, difficulty }: MakeEventParams): Promise<NDKEvent> =>
       makeEvent({ ndk, event, difficulty }),
     onSuccess: async (event: NDKEvent) => {
       try {
@@ -39,7 +41,7 @@ export function usePublishVideo() {
           to: "/v/$eventId",
           params: { eventId: nip19Encode }
         }).catch(e => log.info("Fail to redirect", e, nip19Encode)).then(() => {
-          resetVideoStore();
+          resetForm();
         });
       } catch (err) {
         log.error("error publishing event", err);

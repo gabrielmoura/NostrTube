@@ -76,6 +76,7 @@ export function ImageCard({ event }: { event: NDKEvent }) {
           {/* Caso 3: A Imagem e o Fallback de Erro */}
           {newThumbnail && !imageError ? (
             <img
+              loading="lazy"
               src={newThumbnail}
               alt={title ? `Thumbnail do vídeo: ${title}` : "Thumbnail do vídeo"}
               onLoad={handleLoad}

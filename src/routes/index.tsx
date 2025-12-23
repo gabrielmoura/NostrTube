@@ -11,7 +11,6 @@ import { detectLanguageMain } from "@/helper/userLang.ts";
 import { Section, SectionContent, SectionHeader, SectionTitle } from "@/components/containers/pageSection";
 import VideoCard, { VideoCardLoading } from "@/components/cards/videoCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs.tsx";
-import { SEO } from "@/components/SEO.tsx";
 
 // --- Constantes ---
 const VIDEO_KINDS = [NDKKind.Video, NDKKind.HorizontalVideo];
@@ -26,10 +25,6 @@ export const Route = createFileRoute("/")({
 function IndexPageWithHelmet() {
   return (
     <div className="w-full pb-10">
-      <SEO
-        description={t("Home_Page_Description", "Welcome to the home page of NostrTube, the decentralized video sharing platform built on the Nostr protocol.")}
-        title="Home"
-      />
 
       <div className="w-full space-y-6">
         <Tabs defaultValue="recent" className="w-full">

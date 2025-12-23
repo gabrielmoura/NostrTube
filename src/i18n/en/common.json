@@ -27,6 +27,16 @@
   "Search": "Search",
   "Generating": "Generating",
   "Generate": "Generate",
+  "Untitled": "Untitled",
+  "upload_new_video": "Upload New Video",
+  "upload_desc": "Upload a new video to NostrTube.",
+  "FAQ_Title": "FAQ",
+  "FAQ_Description": "Frequently Asked Questions about NostrTube. Find answers to common questions and learn more about our platform.",
+  "content_warning_placeholder": "Optional warning (e.g. sensitive content)",
+  "Terms_Description": "Read the Legal Notice for NostrTube, a decentralized video sharing platform built on the Nostr protocol. Understand your rights and responsibilities while using our service.",
+  "search_page_description": "Search and discover videos on NostrTube.",
+  "search_page_title": "Search Videos",
+  "Terms_Title": "Legal Notice",
   "components": {
     "comboLanguage": {
       "noLanguageFound": "No language found",

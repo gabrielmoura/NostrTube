@@ -7,7 +7,6 @@ import { useRecordView } from "@/hooks/useRecordView.ts";
 import { useVideoContext, VideoProvider } from "@/context/VideoContext.tsx";
 import { useLoaderData } from "@tanstack/react-router";
 import { PageSpinner } from "@/components/PageSpinner.tsx";
-import { Helmet } from "react-helmet-async";
 import VideoActions from "./VideoActions.tsx";
 import CommentSection from "./Comments/comments.tsx";
 
@@ -49,17 +48,6 @@ function EventLoaded() {
   }
 
   return <div className="mx-auto max-w-7xl pb-4 sm:py-4">
-    <Helmet>
-      <title>{video?.title || "Untitled"} - NostrTube</title>
-      <meta name="description" content={video?.summary || ""} />
-      {/*  Og */}
-      <meta property="og:image" content={video?.image || ""} />
-      <meta property="og:title" content={video?.title || ""} />
-      <meta property="og:description" content={video?.summary || ""} />
-      <meta property="og:type" content="video.other" />
-      <meta property="og:video" content={video.url || ""} />
-      <meta property="og:video:secure_url" content={video.url || ""} />
-    </Helmet>
     <div className="flex flex-col gap-6 lg:flex-row">
       <div className="shrink-1 flex-1 md:min-w-[500px]">
         {/* Video Player */}

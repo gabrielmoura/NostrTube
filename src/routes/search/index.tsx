@@ -9,11 +9,10 @@ import { uniqBy } from "ramda";
 import { getTagValues } from "@welshman/util";
 import { Section, SectionContent, SectionHeader, SectionTitle } from "@/components/containers/pageSection";
 import { PageSpinner } from "@/components/PageSpinner.tsx";
-import React, { lazy, useEffect, useMemo } from "react";
+import { lazy, useMemo } from "react";
 import { t } from "i18next";
-import { Helmet } from "react-helmet-async";
 import { nip19 } from "nostr-tools";
-import { subDays, subWeeks, subMonths, subYears, startOfDay } from "date-fns";
+import { startOfDay, subMonths, subWeeks, subYears } from "date-fns";
 import { AdvancedSearch } from "./@AdvancedSearch"; // Importe o novo componente
 import { eventSearchSchema } from "@/helper/loaders/getVideosFromSearchData.ts";
 import { SearchIcon } from "lucide-react";
@@ -27,6 +26,16 @@ export const Route = createFileRoute("/search/")({
   loaderDeps: ({ search: { search, nsfw, tag, lang, author, timeRange } }) => ({
     search, nsfw, tag, lang, author, timeRange
   }),
+  head: () => ({
+    meta: [
+      { title: `${t("search_page_title")} - ${import.meta.env.VITE_APP_NAME}` },
+      { description: t("search_page_description") },
+      {
+        property: "og:title",
+        content: `${t("search_page_title")} - ${import.meta.env.VITE_APP_NAME}`
+      }
+    ]
+  }),
   pendingComponent: PageSpinner,
   errorComponent: HasError
 });
@@ -34,19 +43,12 @@ export const Route = createFileRoute("/search/")({
 // ... (Manter função HasError igual ao original) ...
 function HasError({ error }: { error: Error }) {
   // ... código original do HasError ...
-  return <div>Error: {error.message}</div> // Simplificado para brevidade, use o original
+  return <div>Error: {error.message}</div>; // Simplificado para brevidade, use o original
 }
 
 function RouteComponent() {
   return (
     <div className="relative space-y-6 pt-5 sm:pt-7 max-w-7xl mx-auto px-4 sm:px-6">
-      <Helmet>
-        <title>{t("search_page_title", "Search Videos")} - NostrTube</title>
-        <meta
-          name="description"
-          content={t("search_page_description", "Search and discover videos on NostrTube.")}
-        />
-      </Helmet>
 
       {/* Componente de Busca Inserido Aqui */}
       <AdvancedSearch />
@@ -66,7 +68,7 @@ function SearchResults() {
   const filters = useMemo(() => {
     const f: NDKFilter = {
       kinds: [NDKKind.Video, NDKKind.HorizontalVideo],
-      limit: 50, // Paginação simples via limite por enquanto
+      limit: 50 // Paginação simples via limite por enquanto
     };
 
     // Filtro de Texto (NIP-50)
@@ -111,10 +113,18 @@ function SearchResults() {
       let sinceDate;
 
       switch (timeRange) {
-        case "today": sinceDate = startOfDay(now); break;
-        case "week": sinceDate = subWeeks(now, 1); break;
-        case "month": sinceDate = subMonths(now, 1); break;
-        case "year": sinceDate = subYears(now, 1); break;
+        case "today":
+          sinceDate = startOfDay(now);
+          break;
+        case "week":
+          sinceDate = subWeeks(now, 1);
+          break;
+        case "month":
+          sinceDate = subMonths(now, 1);
+          break;
+        case "year":
+          sinceDate = subYears(now, 1);
+          break;
       }
 
       if (sinceDate) {
@@ -130,7 +140,7 @@ function SearchResults() {
     ? import.meta.env.VITE_NOSTR_SEARCH_RELAYS.split(",")
     : undefined;
 
-  const { events, eose:isEose } = useSubscribe(filters, {
+  const { events, eose: isEose } = useSubscribe(filters, {
     closeOnEose: true,
     cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
     relayUrls: relaysSearch
@@ -141,7 +151,7 @@ function SearchResults() {
     let list = uniqBy((e) => getTagValues("title", e.tags), events);
 
     // Filtragem Client-side de idioma se o relay não suportar
-    if (lang && lang !== 'all') {
+    if (lang && lang !== "all") {
       // Exemplo: assumindo que o idioma pode estar numa tag 'language' ou 'l'
       // list = list.filter(e => getTagValues("l", e.tags).includes(lang));
     }

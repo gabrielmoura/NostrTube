@@ -7,7 +7,7 @@ export const rpcServer = new RPCServer<ClientWorkerCommands>();
 // Create a stream of incoming messages
 const messages = fromEvent<MessageEvent>(self, "message").pipe(
   filter((event) => Reflect.has(event.data, "type")),
-  share(),
+  share()
 );
 
 // Listen for incoming CALL messages
@@ -25,8 +25,8 @@ messages.subscribe((message) => {
         // 1. A close message is received, OR
         // 2. The client disconnects (postMessage fails)
         takeUntil(
-          merge(messages.pipe(filter((e) => e.data.id === data.id && e.data.type === "CLOSE")), clientDisconnect$),
-        ),
+          merge(messages.pipe(filter((e) => e.data.id === data.id && e.data.type === "CLOSE")), clientDisconnect$)
+        )
       )
       .subscribe({
         next: (response) => {
@@ -43,12 +43,12 @@ messages.subscribe((message) => {
           try {
             message.source?.postMessage({
               id: data.id,
-              type: "COMPLETE",
+              type: "COMPLETE"
             } satisfies RPCResponseComplete);
           } catch (error) {
             console.warn("[RPC] Failed to send complete message, client likely disconnected:", error);
           }
-        },
+        }
       });
   }
 });

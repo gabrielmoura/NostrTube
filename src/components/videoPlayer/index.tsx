@@ -7,7 +7,7 @@ import {
   type MediaPlayerInstance,
   MediaProvider,
   type MediaProviderAdapter,
-  Poster,
+  Poster
 } from "@vidstack/react";
 
 import { useEffect, useRef } from "react";
@@ -26,7 +26,7 @@ export function VideoPlayer({
                               src,
                               title,
                               onCanPlay,
-                              className,
+                              className
                             }: VideoPlayerParams) {
   const playerRef = useRef<MediaPlayerInstance | null>(null);
 

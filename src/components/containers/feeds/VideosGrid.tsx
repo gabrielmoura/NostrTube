@@ -1,11 +1,7 @@
 "use client";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import HorizontalVideoCard, {
-  HorizontalVideoCardLoading,
-} from "@/components/cards/videoCard/horizontalCard.tsx";
 import VideoCard, { VideoCardLoading } from "@/components/cards/videoCard";
-import {JSX, ReactNode} from "react";
+import { JSX, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import type { NDKEvent, NDKFilter } from "@nostr-dev-kit/ndk";
 import useEvents from "@/lib/hooks/useEvents";
@@ -21,11 +17,11 @@ type VerticalVideosFeedProps = {
 };
 
 export default function VerticalVideosFeed({
-  title,
-  action,
-  className,
-  ...props
-}: VerticalVideosFeedProps) {
+                                             title,
+                                             action,
+                                             className,
+                                             ...props
+                                           }: VerticalVideosFeedProps) {
   return (
     <div className={cn("w-full", className)}>
       {!!title && (
@@ -40,12 +36,13 @@ export default function VerticalVideosFeed({
     </div>
   );
 }
+
 export function VerticalVideosFeedLoading({
-  title,
-  action,
-  className,
-  ...props
-}: VerticalVideosFeedProps) {
+                                            title,
+                                            action,
+                                            className,
+                                            ...props
+                                          }: VerticalVideosFeedProps) {
   return (
     <div className={cn("w-full", className)}>
       {!!title && (
@@ -68,22 +65,22 @@ export function VerticalVideosFeedLoading({
 }
 
 function RawFeed({
-  filter,
-  secondaryFilter,
-  loader: Loader,
-  empty: Empty = () => (
-    <div className="center text-center text-sm text-muted-foreground">
-      <p>No videos found</p>
-    </div>
-  ),
-}: {
+                   filter,
+                   secondaryFilter,
+                   loader: Loader,
+                   empty: Empty = () => (
+                     <div className="center text-center text-sm text-muted-foreground">
+                       <p>No videos found</p>
+                     </div>
+                   )
+                 }: {
   filter?: NDKFilter;
   secondaryFilter?: (event: NDKEvent) => boolean;
   loader?: () => JSX.Element;
   empty?: () => JSX.Element;
 }) {
   const { events, isLoading } = useEvents({
-    filter: { ...filter },
+    filter: { ...filter }
   });
   if (isLoading) {
     if (Loader) {

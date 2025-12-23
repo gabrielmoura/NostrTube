@@ -42,7 +42,7 @@ export interface IPlaylistAPI {
 
   deleteItemFromPlaylist(playListEvent: NDKEvent, itemId: string): Promise<NDKEvent>;
 
-  deletePlaylist(playlistEvent: NDKEvent,reason?:string): Promise<void>;
+  deletePlaylist(playlistEvent: NDKEvent, reason?: string): Promise<void>;
 }
 
 export const playlistSchema = z.object({

@@ -8,12 +8,13 @@ import { Button } from "@/components/button.tsx";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx";
 import { Separator } from "@/components/ui/separator.tsx"; // Opcional, ou use <hr />
 import { useVideoImporter } from "@/hooks/useVideoImporter.ts";
-import { newVideoStore } from "@/store/videoUploadStore.ts";
+import { useVideoUploadStore } from "@/store/videoUpload/useVideoUploadStore.ts";
 
 export default function LoadVideoFromOthers() {
   // Estado local apenas para controle dos inputs antes do submit
   const [eventString, setEventString] = useState("");
   const [urlString, setUrlString] = useState("");
+  const setShowEventInput = useVideoUploadStore((s) => s.setShowEventInput);
 
   const { importFromEvent, importFromUrl, isImporting } = useVideoImporter();
 
@@ -98,7 +99,7 @@ export default function LoadVideoFromOthers() {
         {/* Botão Voltar */}
         <div className="pt-2">
           <Button
-            onClick={() => (newVideoStore.showEventInput = false)}
+            onClick={() => setShowEventInput(false)}
             variant="ghost"
             className="w-full gap-2 text-muted-foreground hover:text-foreground"
           >

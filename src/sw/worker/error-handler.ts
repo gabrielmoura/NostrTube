@@ -1,5 +1,5 @@
 /// <reference lib="webworker" />
-import { openDB, type DBSchema, type IDBPDatabase } from "idb";
+import { type DBSchema, type IDBPDatabase, openDB } from "idb";
 import { rpcServer } from "./rpc";
 
 declare let self: ServiceWorkerGlobalScope;
@@ -34,13 +34,13 @@ const initDB = async (): Promise<IDBPDatabase<ErrorLogDB>> => {
   db = await openDB<ErrorLogDB>("sw-error-logs", 1, {
     upgrade(db) {
       const store = db.createObjectStore("errors", {
-        keyPath: "timestamp",
+        keyPath: "timestamp"
       });
 
       // Create indexes for better querying
       store.createIndex("by-timestamp", "timestamp");
       store.createIndex("by-context", "context");
-    },
+    }
   });
 
   return db;
@@ -53,7 +53,7 @@ const logError = async (error: any, context: string) => {
     context,
     message: error instanceof Error ? error.message : String(error),
     stack: error instanceof Error ? error.stack : undefined,
-    url: self.location.href,
+    url: self.location.href
   };
 
   console.error(`[SW Error - ${context}]:`, errorLog);

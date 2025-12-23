@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNDK } from "@nostr-dev-kit/ndk-hooks";
 import { NDKBlossom } from "@nostr-dev-kit/ndk-blossom";
 import type { UnsignedEvent } from "nostr-tools/core";
@@ -18,7 +18,9 @@ export function useBlossomUpload(options?: UseBlossomUploadOptions) {
 
   // Referência estável para evitar recriação do NDK durante upload
   const ndkRef = useRef(ndk);
-  useEffect(() => { ndkRef.current = ndk; }, [ndk]);
+  useEffect(() => {
+    ndkRef.current = ndk;
+  }, [ndk]);
 
   const uploadFile = async (file: File) => {
     const ndkInstance = ndkRef.current;

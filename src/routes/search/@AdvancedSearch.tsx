@@ -1,21 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { useForm,Controller } from "react-hook-form";
+import React, { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { Search as SearchIcon, SlidersHorizontal, X, Plus } from "lucide-react";
+import { Plus, Search as SearchIcon, SlidersHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { type eventSearchType } from "@/helper/loaders/getVideosFromSearchData";
@@ -25,7 +15,7 @@ const LANGUAGES = [
   { value: "en", label: "Inglês" },
   { value: "pt", label: "Português" },
   { value: "es", label: "Espanhol" },
-  { value: "ja", label: "Japonês" },
+  { value: "ja", label: "Japonês" }
 ];
 
 export function AdvancedSearch() {
@@ -41,14 +31,14 @@ export function AdvancedSearch() {
 
   const [tags, setTags] = useState<string[]>(initialTags);
 
-  const { register, handleSubmit, setValue, watch,control } = useForm<eventSearchType>({
+  const { register, handleSubmit, setValue, watch, control } = useForm<eventSearchType>({
     defaultValues: {
       search: searchParams.search || "",
       author: searchParams.author || "",
       lang: searchParams.lang || "",
       timeRange: searchParams.timeRange || "all",
-      nsfw: searchParams.nsfw || false,
-    },
+      nsfw: searchParams.nsfw || false
+    }
   });
 
   useEffect(() => {
@@ -82,7 +72,7 @@ export function AdvancedSearch() {
 
     navigate({
       to: "/search/",
-      search: cleanData as any,
+      search: cleanData as any
     });
   };
 

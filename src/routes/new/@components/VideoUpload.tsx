@@ -1,8 +1,8 @@
 import { lazy } from "react";
 import Spinner from "@/components/Spinner.tsx";
 import { VideoPlayer } from "@/components/videoPlayer";
-import { newVideoStore } from "@/store/videoUploadStore.ts";
-import { useSnapshot } from "valtio/react";
+import { useVideoUploadStore } from "@/store/videoUpload/useVideoUploadStore.ts";
+import { t } from "i18next";
 
 const LoadVideoFromOthers = lazy(() => import("@/routes/new/@components/upload/LoadVideosFromOthers.tsx"));
 const VideoUploadFile = lazy(() => import("@/routes/new/@components/upload/VideoUploadFile.tsx"));
@@ -27,16 +27,16 @@ export default function Player({
   }
   return (
     <div className="">
-      <VideoPlayer src={url} title={title ?? "Untitled"} thumbnail={image} image={image} />
+      <VideoPlayer src={url} title={title ?? t("Untitled", "Untitled")} thumbnail={image} image={image} />
     </div>
   );
 }
 
 
 export function VideoUpload() {
-  const snap = useSnapshot(newVideoStore);
+  const showEventInput = useVideoUploadStore((s) => s.showEventInput);
 
-  if (snap.showEventInput) {
+  if (showEventInput) {
     return <LoadVideoFromOthers />;
   }
   return <VideoUploadFile />;

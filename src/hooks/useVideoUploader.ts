@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNDK } from "@nostr-dev-kit/ndk-hooks";
 import { NDKBlossom } from "@nostr-dev-kit/ndk-blossom";
 import type { NDKImetaTag } from "@nostr-dev-kit/ndk";
@@ -9,7 +9,8 @@ import { toast } from "sonner";
 import { t } from "i18next";
 import { LoggerAgent } from "@/lib/debug.ts";
 import useUserStore from "@/store/useUserStore.ts";
-import { newVideoStore } from "@/store/videoUploadStore.ts";
+import { useVideoUploadStore } from "@/store/videoUpload/useVideoUploadStore.ts";
+
 
 const logger = LoggerAgent.create("useVideoUploader");
 
@@ -20,6 +21,9 @@ export function useVideoUploader() {
   const [errorCount, setErrorCount] = useState(0);
   const session = useUserStore((state) => state?.session);
   const ndkRef = useRef(ndk);
+
+  const setVideoUpload = useVideoUploadStore((s) => s.setVideoUpload);
+  const setShowEventInput = useVideoUploadStore((s) => s.setShowEventInput);
 
   useEffect(() => {
     ndkRef.current = ndk;
@@ -40,7 +44,7 @@ export function useVideoUploader() {
         const event: UnsignedEvent = { ...draft, pubkey: ndkInstance.activeUser!.pubkey };
         const sig = await ndkInstance.signer!.sign(event);
         return { ...event, sig, id: getEventHash(event) };
-      },
+      }
     };
 
     const blossom = new NDKBlossom(ndkInstance);
@@ -61,7 +65,7 @@ export function useVideoUploader() {
 
     try {
       const imeta = await blossom.upload(file, {
-        fallbackServer: import.meta.env.VITE_NOSTR_BLOSSOM_FALLBACK || undefined,
+        fallbackServer: import.meta.env.VITE_NOSTR_BLOSSOM_FALLBACK || undefined
       });
 
       // Mirror Logic
@@ -76,21 +80,24 @@ export function useVideoUploader() {
       // Update Store
       const { url, sha256, size, blurhash, dim, m, uploaded, type, owner } = imeta;
 
-      newVideoStore.url = url;
-      newVideoStore.title = file.name;
-      newVideoStore.fileType = file.type;
-      newVideoStore.fileHash = sha256;
-      newVideoStore.fileSize = size;
-      newVideoStore.blurhash = blurhash || undefined;
-      newVideoStore.dim = dim || undefined;
-      newVideoStore.mime_type = m || undefined;
-      newVideoStore.imetaVideo = {
-        ...imeta,
-        fallback: Array.from(mirrorSet).map((t) => t.url).filter((u) => u !== url),
-      };
+
+      setVideoUpload({
+        url,
+        title: file.name,
+        fileType: file.type,
+        fileHash: sha256 as string,
+        fileSize: size ? parseInt(size) : undefined,
+        blurhash: blurhash || undefined,
+        dim: dim || undefined,
+        mime_type: m || undefined,
+        imetaVideo: {
+          ...imeta,
+          fallback: Array.from(mirrorSet).map((t) => t.url).filter((u) => u !== url)
+        }
+      });
 
       toast.success(t("upload_success", "File uploaded successfully"));
-      newVideoStore.showEventInput = false;
+      setShowEventInput(false);
 
     } catch (error) {
       logger.error("Fatal upload error", error);

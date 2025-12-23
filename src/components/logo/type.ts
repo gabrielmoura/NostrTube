@@ -1,5 +1,5 @@
-import type {SVGProps} from "react";
+import type { SVGProps } from "react";
 
 interface IconProps extends SVGProps<SVGSVGElement> {
-    title?: string;
+  title?: string;
 }
