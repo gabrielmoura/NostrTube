@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 
 // Imports locais
-import "./helper/i18n";
+import "./i18n";
 import "./main.css";
 import { routeTree } from "./routeTree.gen";
 import { ndkInstance } from "@/lib/ndk";

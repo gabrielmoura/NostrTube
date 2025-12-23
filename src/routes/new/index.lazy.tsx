@@ -1,6 +1,5 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
 import { lazy } from "react";
-import { Helmet } from "react-helmet-async";
 import { useSnapshot } from "valtio/react";
 import { t } from "i18next";
 
@@ -17,6 +16,7 @@ import LanguagesCombo from "@/components/ComboBox/ComboLanguage.tsx";
 import { AddTagInput } from "@/routes/new/@components/BoxAddToModal.tsx";
 import { ButtonUploadThumb } from "@/routes/new/@components/ButtonUploadThumb.tsx";
 import { withAuth } from "@/components/AuthGuard.tsx";
+import { SEO } from "@/components/SEO.tsx";
 
 // Lazy imports para performance
 const Textarea = lazy(() => import("@/components/textarea.tsx"));
@@ -38,13 +38,10 @@ function NewVideoPage() {
 
   return (
     <div className="flex flex-col gap-8 lg:flex-row py-2.5 px-5">
-      <Helmet>
-        <title>{t("upload_new_video", "Upload New Video")} - NostrTube</title>
-        <meta
-          name="description"
-          content={t("upload_desc", "Upload a new video to NostrTube.")}
-        />
-      </Helmet>
+      <SEO
+        title={t("upload_new_video", "Upload New Video")}
+        description={t("upload_desc", "Upload a new video to NostrTube.")}
+      />
 
       {/* Main Column: Player & Meta */}
       <div className="flex-1 min-w-[320px] md:min-w-[500px] space-y-6">

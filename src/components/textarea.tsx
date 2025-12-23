@@ -1,6 +1,18 @@
 import * as React from "react"
 import {cn} from "@/helper/format.ts";
 
+//{
+//               // Ajuste de altura para múltiplas linhas
+//               "min-h-[70px]": snap?.title?.length <= 60,
+//               "min-h-[90px]": snap?.title?.length > 60 && snap?.title?.length <= 120,
+//               "min-h-[110px]": snap?.title?.length > 120,
+//               // Limite máximo de altura
+//               "max-h-[150px]": snap?.title?.length > 180,
+//               // Ponha uma barra de rolagem caso exceda o limite
+//               "overflow-y-auto": snap?.title?.length > 180,
+//               // Ponha uma margem em vemelhor caso title seja vazio
+//               "mt-2": snap?.title?.length === 0,
+//             }
 
 
 export interface TextareaProps
