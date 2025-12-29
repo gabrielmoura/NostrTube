@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { t } from "i18next";
-import { NDKEvent, NDKFilter, NDKKind } from "@nostr-dev-kit/ndk";
+import { NDKEvent, type NDKFilter, NDKKind } from "@nostr-dev-kit/ndk";
 import { NDKSubscriptionCacheUsage, useSubscribe } from "@nostr-dev-kit/ndk-hooks";
 import { uniqBy } from "ramda";
 import { getTagValue, getTagValues } from "@welshman/util";
