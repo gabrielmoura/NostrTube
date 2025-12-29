@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs.t
 // --- Constantes ---
 const VIDEO_KINDS = [NDKKind.Video, NDKKind.HorizontalVideo];
 const SEARCH_RELAYS = import.meta.env.VITE_NOSTR_SEARCH_RELAYS?.length > 5
-  ? import.meta.env.VITE_NOSTR_SEARCH_RELAYS.split(",")
+  ? import.meta.env.VITE_NOSTR_SEARCH_RELAYS
   : undefined;
 
 export const Route = createFileRoute("/")({

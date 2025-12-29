@@ -12,7 +12,7 @@ interface DufflePudRelaysResponse {
 
 export const RelaySettings = () => {
   const setRelays = useUserStore((state) => state.setRelays);
-  const defaultRelays = import.meta.env.VITE_NOSTR_RELAYS?.split(",");
+  const defaultRelays = import.meta.env.VITE_NOSTR_RELAYS;
   const [selectedRelays, setSelectedRelays] = useState<string[]>(defaultRelays || []);
   const [latencies, setLatencies] = useState<Record<string, number | null>>({});
   const [isPinging, setIsPinging] = useState(false);
@@ -20,10 +20,11 @@ export const RelaySettings = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ["relays"],
     queryFn: async (): Promise<DufflePudRelaysResponse> => {
-      return fetch("https://dufflepud.onrender.com/relay").then(res => res.json());
+      return fetch(import.meta.env.VITE_DUFFLEPUD_URL as string).then(res => res.json());
     },
     networkMode: "online",
-    staleTime: 1000 * 60 * 60 * 24 // 24 horas
+    staleTime: 1000 * 60 * 60 * 24, // 24 horas
+    enabled: !!import.meta.env.VITE_DUFFLEPUD_URL
   });
 
   // Real Ping Logic

@@ -29,7 +29,7 @@ export const ndkInstance = new NDK({
 });
 
 // 5. Pool Setup
-const pool = new NDKPool(relays.split(","), [], ndkInstance);
+const pool = new NDKPool(relays, [], ndkInstance);
 ndkInstance.pool = pool;
 
 // 6. Connect (Client-side only)
