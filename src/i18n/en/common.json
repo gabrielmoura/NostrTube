@@ -37,6 +37,9 @@
   "search_page_description": "Search and discover videos on NostrTube.",
   "search_page_title": "Search Videos",
   "Terms_Title": "Legal Notice",
+  "Trending": "Trending",
+  "Popular": "Popular",
+  "By Language": "By Language",
   "components": {
     "comboLanguage": {
       "noLanguageFound": "No language found",

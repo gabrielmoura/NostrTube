@@ -37,6 +37,9 @@
   "search_page_description": "Ищите и открывайте для себя видео на NostrTube.",
   "search_page_title": "Поиск видео",
   "Terms_Title": "Юридическое уведомление",
+  "Trending": "В тренде",
+  "Popular": "Популярное",
+  "By Language": "По языку",
   "components": {
     "comboLanguage": {
       "noLanguageFound": "Язык не найден",

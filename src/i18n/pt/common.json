@@ -1,6 +1,6 @@
 {
   "title": "Título",
-  "comment": "Comentário",
+  "comment": "Comentar",
   "comments": "Comentários",
   "leave_a_comment": "Deixe um comentário",
   "no_comments_yet": "Nenhum comentário ainda",
@@ -37,6 +37,9 @@
   "search_page_description": "Pesquise e descubra vídeos no NostrTube.",
   "search_page_title": "Pesquisar vídeos",
   "Terms_Title": "Termos de uso",
+  "Trending": "Tendências",
+  "Popular": "Populares",
+  "By Language": "Por Idioma",
   "components": {
     "comboLanguage": {
       "noLanguageFound": "Nenhum idioma encontrado",

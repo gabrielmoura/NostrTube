@@ -37,6 +37,9 @@
   "search_page_description": "Busca y descubre videos en NostrTube.",
   "search_page_title": "Buscar videos",
   "Terms_Title": "Aviso Legal",
+  "Trending": "Tendencias",
+  "Popular": "Popular",
+  "By Language": "Por idioma",
   "components": {
     "comboLanguage": {
       "noLanguageFound": "No se encontró el idioma",
