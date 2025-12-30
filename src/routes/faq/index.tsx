@@ -5,6 +5,7 @@ import { Command, CommandEmpty, CommandInput, CommandList } from "@/components/u
 import { faqData } from "@/default.ts";
 import { detectLanguageMain } from "@/helper/userLang.ts";
 import { t } from "i18next";
+import LinkifyText from "@/components/LinkifyText.tsx";
 
 
 export const Route = createFileRoute("/faq/")({
@@ -51,7 +52,7 @@ function FaqItem({ id, question, answer }: FaqEntry) {
         {question}
       </AccordionTrigger>
       <AccordionContent className="px-6 pb-4 text-base text-gray-700 leading-relaxed">
-        {answer}
+        <LinkifyText text={answer} />
       </AccordionContent>
     </AccordionItem>
   );

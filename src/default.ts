@@ -49,7 +49,7 @@ const faqDataEn: FaqEntry[] = [
   {
     "id": "q7",
     "question": "Where can I find the documentation?",
-    "answer": "This application follows the standards defined in the official Nostr repository: https://github.com/nostr-protocol/nips."
+    "answer": "This application follows the standards defined in the official Nostr repository: https://github.com/nostr-protocol/nips"
   },
   {
     "id": "q8",
@@ -60,6 +60,15 @@ const faqDataEn: FaqEntry[] = [
     "id": "q9",
     "question": "What is the purpose of this application?",
     "answer": "This is an independent application — developed without financial support — aimed at making video consumption and uploads easier within the Nostr community. Created by a Brazilian developer, it may take some time to be translated into other languages. It’s a PWA in an early stage but designed to help new users visually understand Nostr’s potential. The app follows the KISS principle (Keep It Simple, Stupid), focusing on simplicity and usefulness. The source code remains private for now, as it’s not yet mature enough for external contributions."
+  }, {
+    "id": "q10",
+    "question": "What is a Blossom server?",
+    "answer": "Blossom servers are decentralized hosting services that allow users to efficiently store and distribute videos, leveraging the Nostr network infrastructure to ensure availability and performance. See: https://nips.nostr.com/B7"
+
+  }, {
+    "id": "q11",
+    "question": "Where did you find the project repository?",
+    "answer": "The official project repository is available on GitHub: https://github.com/gabrielmoura/NostrTube"
   }
 ];
 
@@ -97,7 +106,7 @@ const faqDataPt: FaqEntry[] = [
   {
     "id": "q7",
     "question": "Onde posso encontrar a documentação?",
-    "answer": "A aplicação segue os padrões definidos no repositório oficial do Nostr: https://github.com/nostr-protocol/nips."
+    "answer": "A aplicação segue os padrões definidos no repositório oficial do Nostr: https://github.com/nostr-protocol/nips"
   },
   {
     "id": "q8",
@@ -112,6 +121,10 @@ const faqDataPt: FaqEntry[] = [
     "id": "q10",
     "question": "O que é um servidor Blossom?",
     "answer": "Servidores Blossom são serviços de hospedagem descentralizados que permitem aos usuários armazenar e distribuir vídeos de forma eficiente, aproveitando a infraestrutura da rede Nostr para garantir disponibilidade e desempenho. Veja: https://nips.nostr.com/B7"
+  }, {
+    "id": "q11",
+    "question": "Onde encontro o repositório do projeto?",
+    "answer": "O repositório oficial do projeto está disponível no GitHub: https://github.com/gabrielmoura/NostrTube"
   }
 ];
 export const faqData = {
