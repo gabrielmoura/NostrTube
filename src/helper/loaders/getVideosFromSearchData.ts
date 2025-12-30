@@ -4,6 +4,7 @@ import { nip19 } from "nostr-tools";
 import { startOfDay, subMonths, subWeeks, subYears } from "date-fns";
 import { sortEventsByImages } from "@/helper/format.ts";
 import { notFound } from "@tanstack/react-router";
+import { deduplicateEvents } from "@/helper/deduplicateEvents.ts";
 
 // --- Erros Personalizados ---
 export class VideoSearchError extends Error {
@@ -124,26 +125,4 @@ export async function getVideosFromSearchData({
       "FETCH_ERROR"
     );
   }
-}
-
-/**
- * Remove eventos duplicados baseando-se no ID único do Nostr.
- * Opcionalmente, pode-se usar uma tag específica (como 'd' ou 'title')
- * para evitar conteúdo repetido de diferentes IDs.
- */
-export function deduplicateEvents(events: NDKEvent[]): NDKEvent[] {
-  const seen = new Set<string>();
-
-  return events.filter((event) => {
-    // Chave primária: ID do evento
-    // Se quiser ser mais rigoroso com vídeos idênticos (re-posts),
-    // poderia usar: const key = getTagValues("d", event.tags)[0] || event.id;
-    const key = event.id;
-
-    if (seen.has(key)) {
-      return false;
-    }
-    seen.add(key);
-    return true;
-  });
 }

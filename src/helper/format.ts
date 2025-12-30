@@ -3,7 +3,7 @@ import clsx, { type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { unixTimeNowInSeconds } from "./date.ts";
 import { extractTag } from "@/helper/extractTag.ts";
-import { type NDKEvent, type NDKKind } from "@nostr-dev-kit/ndk";
+import { type NDKEvent } from "@nostr-dev-kit/ndk";
 
 /**
  * Formata uma chave pública (pubkey) truncando o meio e mantendo os primeiros e últimos 8 caracteres.
@@ -283,42 +283,4 @@ export function sortEventsByImages(a: NDKEvent, b: NDKEvent): number {
 
   // true vem antes de false
   return (hasImageB ? 1 : 0) - (hasImageA ? 1 : 0);
-}
-
-/**
- * Filtra eventos parametrizados (NIP-33), mantendo apenas a versão mais recente
- * baseada na tag 'd' para um Kind específico.
- * * @param events Conjunto ou Array de eventos brutos
- * @param events
- * @param targetKind O Kind que deve ser deduplicado (ex: NDKKind.VideoCurationSet)
- * @returns Um Set contendo os eventos únicos (mais recentes) + eventos de outros kinds
- */
-export function deduplicateParameterizedEvents(
-  events: Set<NDKEvent> | NDKEvent[],
-  targetKind: NDKKind
-): Set<NDKEvent> {
-  const processedEvents = new Set<NDKEvent>();
-  const dedupMap = new Map<string, NDKEvent>();
-
-  for (const event of events) {
-    // Se não for o kind alvo, passa direto
-    if (event.kind !== targetKind) {
-      processedEvents.add(event);
-      continue;
-    }
-
-    // Lógica de Deduplicação (NIP-33)
-    const dTag = event.tagId(); // Retorna o valor da tag "d"
-    const existing = dedupMap.get(dTag);
-
-    // Se é o primeiro que vemos OU é mais novo que o guardado, atualizamos
-    if (!existing || (event.created_at || 0) > (existing.created_at || 0)) {
-      dedupMap.set(dTag, event);
-    }
-  }
-
-  // Adiciona os vencedores da deduplicação ao set final
-  dedupMap.forEach((evt) => processedEvents.add(evt));
-
-  return processedEvents;
 }

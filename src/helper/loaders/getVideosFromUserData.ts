@@ -2,7 +2,7 @@ import { nip19 } from "nostr-tools";
 import type { NDKEvent, NDKFilter } from "@nostr-dev-kit/ndk";
 import NDK, { NDKKind, NDKSubscriptionCacheUsage } from "@nostr-dev-kit/ndk";
 import { notFound } from "@tanstack/react-router";
-import { deduplicateParameterizedEvents } from "@/helper/format.ts";
+import { deduplicateParameterizedEvents } from "@/helper/deduplicateEvents.ts";
 
 
 export type GetVideosFromUserDataParams = {
