@@ -40,6 +40,35 @@
   "Trending": "Trending",
   "Popular": "Popular",
   "By Language": "By Language",
+  "Age_Restriction": "Age Restriction",
+  "Select_Age_Restriction": "Select Age Restriction",
+  "age": {
+    "combo": {
+      "title": "Age Rating",
+      "placeholder": "Select an age...",
+      "helper": "Define the appropriate audience for this content.",
+      "search": "Search rating...",
+      "empty": "No options found."
+    },
+    "options": {
+      "kids": {
+        "label": "Kids",
+        "description": "Content suitable for children."
+      },
+      "teen": {
+        "label": "Teen",
+        "description": "Content recommended for teenagers."
+      },
+      "adult": {
+        "label": "Adult",
+        "description": "Content intended for adults."
+      },
+      "porn": {
+        "label": "NSFW",
+        "description": "Explicit content for mature audiences."
+      }
+    }
+  },
   "components": {
     "comboLanguage": {
       "noLanguageFound": "No language found",

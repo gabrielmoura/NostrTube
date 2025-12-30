@@ -57,7 +57,7 @@ export default function VideoUploadFile() {
 
   return (
     <div
-      className="center relative w-full flex-col gap-y-3 overflow-hidden rounded-md bg-muted aspect-video md:aspect-square h-80 max-h-full">
+      className="center relative w-full flex-col gap-y-3 overflow-hidden rounded-md bg-muted aspect-video md:aspect-square h-full">
       <div
         {...getRootProps()}
         className={cn(

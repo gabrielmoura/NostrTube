@@ -58,6 +58,7 @@ export interface VideoUploadState {
   setSummary: (summary: string) => void;
   setContentWarning: (contentWarning: string) => void;
   setVideoUpload: (data: Partial<VideoMetadata>) => void;
+  setAge: (age: AgeEnum) => void;
 
   // Ações de Persistência Manual
   saveDraft: () => void;
@@ -133,6 +134,11 @@ export const useVideoUploadStore = create<VideoUploadState>()(
         set((state) => {
           state.videoData = data;
         }, false, "video/setVideoUpload"),
+
+      setAge: (age) =>
+        set((state) => {
+          state.videoData.age = age;
+        }, false, "video/setAge"),
 
       setUploadingState: (isUploading) =>
         set((state) => {

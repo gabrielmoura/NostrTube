@@ -27,7 +27,7 @@ export default function LoadVideoFromOthers() {
   };
 
   return (
-    <Card className="w-full max-w-lg mx-auto bg-muted/50 border-dashed">
+    <Card className="w-full max-w-lg mx-auto shadow-none border-none h-full flex-col ">
       <CardHeader>
         <CardTitle className="text-lg">{t("import_video", "Import Video")}</CardTitle>
         <CardDescription>

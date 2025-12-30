@@ -91,7 +91,6 @@
     "nostr-tools": "^2.16.2",
     "nostr-wasm": "^0.1.0",
     "qrcode": "^1.5.4",
-    "ramda": "^0.31.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-dropzone": "^14.3.8",

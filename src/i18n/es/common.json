@@ -40,6 +40,33 @@
   "Trending": "Tendencias",
   "Popular": "Popular",
   "By Language": "Por idioma",
+  "age": {
+    "combo": {
+      "title": "Clasificación por Edad",
+      "placeholder": "Seleccione la edad...",
+      "helper": "Defina la audiencia adecuada para este contenido.",
+      "search": "Buscar clasificación...",
+      "empty": "No se encontraron opciones."
+    },
+    "options": {
+      "kids": {
+        "label": "Infantil",
+        "description": "Contenido adecuado para niños."
+      },
+      "teen": {
+        "label": "Juvenil",
+        "description": "Contenido recomendado para adolescentes."
+      },
+      "adult": {
+        "label": "Adulto",
+        "description": "Contenido destinado a adultos."
+      },
+      "porn": {
+        "label": "Pornografía",
+        "description": "Contenido explícito para adultos."
+      }
+    }
+  },
   "components": {
     "comboLanguage": {
       "noLanguageFound": "No se encontró el idioma",

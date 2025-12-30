@@ -236,9 +236,6 @@ importers:
       qrcode:
         specifier: ^1.5.4
         version: 1.5.4
-      ramda:
-        specifier: ^0.31.3
-        version: 0.31.3
       react:
         specifier: ^19.1.1
         version: 19.1.1
@@ -6041,9 +6038,6 @@ packages:
         optional: true
       '@types/react-dom':
         optional: true
-
-  ramda@0.31.3:
-    resolution: {integrity: sha512-xKADKRNnqmDdX59PPKLm3gGmk1ZgNnj3k7DryqWwkamp4TJ6B36DdpyKEQ0EoEYmH2R62bV4Q+S0ym2z8N2f3Q==}
 
   random-access-file@4.1.2:
     resolution: {integrity: sha512-GQM6R78DceZDcQod8KxlDFwXIiUvlvuy1EOzxTDsjuDjW5NlnlZi0MOk6iI4itAj/2vcvdqcEExYbVpC/dJcEw==}
@@ -13693,8 +13687,6 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.1.12
       '@types/react-dom': 19.1.9(@types/react@19.1.12)
-
-  ramda@0.31.3: {}
 
   random-access-file@4.1.2(bare-url@2.3.2):
     dependencies:

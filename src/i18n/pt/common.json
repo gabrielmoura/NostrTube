@@ -40,6 +40,35 @@
   "Trending": "Tendências",
   "Popular": "Populares",
   "By Language": "Por Idioma",
+  "Age_Restriction": "Restrição de idade",
+  "Select_Age_Restriction": "Selecione a Restrição de Idade",
+  "age": {
+    "combo": {
+      "title": "Classificação Etária",
+      "placeholder": "Selecione a idade...",
+      "helper": "Defina a audiência apropriada para este conteúdo.",
+      "search": "Buscar classificação...",
+      "empty": "Nenhuma opção encontrada."
+    },
+    "options": {
+      "kids": {
+        "label": "Infantil",
+        "description": "Conteúdo adequado para crianças."
+      },
+      "teen": {
+        "label": "Juvenil",
+        "description": "Conteúdo recomendado para adolescentes."
+      },
+      "adult": {
+        "label": "Adulto",
+        "description": "Conteúdo destinado ao público adulto."
+      },
+      "porn": {
+        "label": "Pornografia",
+        "description": "Conteúdo explícito para adultos."
+      }
+    }
+  },
   "components": {
     "comboLanguage": {
       "noLanguageFound": "Nenhum idioma encontrado",

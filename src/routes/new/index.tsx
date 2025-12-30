@@ -15,6 +15,7 @@ import { AddTagInput } from "@/routes/new/@components/BoxAddToModal.tsx";
 import { ButtonUploadThumb } from "@/routes/new/@components/ButtonUploadThumb.tsx";
 import { withAuth } from "@/components/AuthGuard.tsx";
 import { useVideoUploadStore } from "@/store/videoUpload/useVideoUploadStore.ts";
+import AgeCombo from "@/components/ComboBox/AgeCombo.tsx";
 
 // Lazy imports para performance
 const Textarea = lazy(() => import("@/components/textarea.tsx"));
@@ -39,90 +40,94 @@ function NewVideoPage() {
   const setIndexers = useVideoUploadStore((s) => s.setIndexers);
 
   return (
-    <div className="flex flex-col gap-8 lg:flex-row py-2.5 px-5">
+    <div className="mx-auto w-full max-w-screen-2xl px-4 py-4">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
 
-      {/* Main Column: Player & Meta */}
-      <div className="flex-1 min-w-[320px] md:min-w-[500px] space-y-6">
-        {/* Player / Upload Switcher */}
-        <PlayerSwitch />
+        {/* MAIN */}
+        <main className="space-y-6">
+          <PlayerSwitch />
 
-        {/* Inputs */}
-        <div className="space-y-4">
+          <section className="space-y-4">
+            <TitleInput />
+            <SummaryInput />
+          </section>
 
-          <TitleInput />
-          <SummaryInput />
-
+          {/* Actions closer to content */}
           <ActionForm />
-        </div>
+        </main>
+
+        {/* SIDEBAR */}
+        <aside className="space-y-5">
+          <ThumbNailSection />
+
+          <div className="rounded-xl border bg-card p-4 shadow-sm space-y-4">
+            <AddTagInput
+              onTagsChange={setHashtags}
+              label="Hashtags"
+              placeholder="Ex: Bitcoin, Nostr"
+            />
+
+            <AddTagInput
+              onTagsChange={setIndexers}
+              label="Indexers"
+              placeholder="Ex: imdb:tt12345"
+            />
+          </div>
+
+          <ContentWarningInput />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <LanguageInput />
+            <AgeRestrictionInput />
+          </div>
+        </aside>
       </div>
-
-      {/* Sidebar: Settings */}
-      <aside className="w-full lg:max-w-[380px] space-y-5">
-        {/* Thumbnail Section */}
-        <ThumbNailSection />
-
-        <AddTagInput
-          onTagsChange={(tags) => setHashtags(tags)}
-          label="Hashtags"
-          placeholder="Ex: Bitcoin, Nostr"
-        />
-
-        <AddTagInput
-          onTagsChange={(idx) => setIndexers(idx)}
-          label="Indexers"
-          placeholder="Ex: imdb:tt12345"
-        />
-
-        <ContentWarningInput />
-        <LanguageInput />
-
-      </aside>
     </div>
   );
 }
 
+
 function ActionForm() {
   const saveDraft = useVideoUploadStore(s => s.saveDraft);
   const snap = useVideoUploadStore(s => s.videoData);
-
-  // Hook customizado encapsulando a mutação
   const { publish, isPending } = usePublishVideo();
 
-  const handlePublish = () => {
-    publish(snap);
-  };
-  return <div className="flex items-center gap-3 pt-2">
-    <Button
-      variant="outline"
-      size="sm"
+  return (
+    <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end pt-2">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={saveDraft}
+      >
+        {t("save_as_draft")}
+      </Button>
 
-      onClick={() => saveDraft()}
-    >
-      {t("save_as_draft")}
-    </Button>
-    <ButtonWithLoader
-      size="sm"
-      onClick={handlePublish}
-      isLoading={isPending}
-      disabled={!snap.url || !snap.title}
-    >
-      {t("Publish")}
-    </ButtonWithLoader>
-  </div>;
+      <ButtonWithLoader
+        size="sm"
+        onClick={() => publish(snap)}
+        isLoading={isPending}
+        disabled={!snap.url || !snap.title}
+      >
+        {t("Publish")}
+      </ButtonWithLoader>
+    </div>
+  );
 }
 
 function PlayerSwitch() {
-  const url = useVideoUploadStore((s) => s.videoData.url);
-  const title = useVideoUploadStore((s) => s.videoData.title);
-  const thumbnail = useVideoUploadStore((s) => s.videoData.thumbnail);
-  return <div className="w-full overflow-hidden rounded-2xl border bg-background shadow-sm">
-    {url ? (
-      <Player url={url} title={title} image={thumbnail} />
-    ) : (
-      <VideoUpload />
-    )}
-  </div>;
+  const { url, title, thumbnail } = useVideoUploadStore(s => s.videoData);
+
+  return (
+    <div className="w-full overflow-hidden rounded-2xl border bg-background shadow-sm aspect-video">
+      {url ? (
+        <Player url={url} title={title} image={thumbnail} />
+      ) : (
+        <VideoUpload />
+      )}
+    </div>
+  );
 }
+
 
 function TitleInput() {
   const title = useVideoUploadStore((s) => s.videoData.title);
@@ -203,4 +208,15 @@ function ThumbNailSection() {
       </ButtonUploadThumb>
     )}
   </div>;
+}
+
+function AgeRestrictionInput() {
+  const setAge = useVideoUploadStore((s) => s.setAge);
+  const age = useVideoUploadStore((s) => s.videoData.age);
+  return <AgeCombo
+    label={t("Age_Restriction")}
+    placeholder={t("Select_Age_Restriction")}
+    onChange={(age) => age && setAge(age)}
+    value={age}
+  />;
 }
