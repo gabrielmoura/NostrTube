@@ -11,11 +11,13 @@ import { Image } from "@/components/Image.tsx";
 import { ButtonWithLoader } from "@/components/ButtonWithLoader.tsx";
 import Player, { VideoUpload } from "@/routes/new/@components/VideoUpload.tsx";
 import LanguagesCombo from "@/components/ComboBox/ComboLanguage.tsx";
-import { AddTagInput } from "@/routes/new/@components/BoxAddToModal.tsx";
+import { AddTagInputControlled } from "@/routes/new/@components/BoxAddToModal.tsx";
 import { ButtonUploadThumb } from "@/routes/new/@components/ButtonUploadThumb.tsx";
 import { withAuth } from "@/components/AuthGuard.tsx";
 import { useVideoUploadStore } from "@/store/videoUpload/useVideoUploadStore.ts";
 import AgeCombo from "@/components/ComboBox/AgeCombo.tsx";
+import { Tooltip } from "@radix-ui/themes";
+
 
 // Lazy imports para performance
 const Textarea = lazy(() => import("@/components/textarea.tsx"));
@@ -36,8 +38,7 @@ export const Route = createFileRoute("/new/")({
 
 
 function NewVideoPage() {
-  const setHashtags = useVideoUploadStore((s) => s.setHashtags);
-  const setIndexers = useVideoUploadStore((s) => s.setIndexers);
+
 
   return (
     <div className="mx-auto w-full max-w-screen-2xl px-4 py-4">
@@ -61,17 +62,8 @@ function NewVideoPage() {
           <ThumbNailSection />
 
           <div className="rounded-xl border bg-card p-4 shadow-sm space-y-4">
-            <AddTagInput
-              onTagsChange={setHashtags}
-              label="Hashtags"
-              placeholder="Ex: Bitcoin, Nostr"
-            />
-
-            <AddTagInput
-              onTagsChange={setIndexers}
-              label="Indexers"
-              placeholder="Ex: imdb:tt12345"
-            />
+            <HashtagInput />
+            <IndexerInput />
           </div>
 
           <ContentWarningInput />
@@ -88,19 +80,22 @@ function NewVideoPage() {
 
 
 function ActionForm() {
-  const saveDraft = useVideoUploadStore(s => s.saveDraft);
+  const resetForm = useVideoUploadStore(s => s.resetForm);
   const snap = useVideoUploadStore(s => s.videoData);
   const { publish, isPending } = usePublishVideo();
 
   return (
     <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end pt-2">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={saveDraft}
-      >
-        {t("save_as_draft")}
-      </Button>
+      <Tooltip content={t("autoSave.info")}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => resetForm()}
+        >
+          {t("autoSave.clear")}
+        </Button>
+      </Tooltip>
+
 
       <ButtonWithLoader
         size="sm"
@@ -218,5 +213,27 @@ function AgeRestrictionInput() {
     placeholder={t("Select_Age_Restriction")}
     onChange={(age) => age && setAge(age)}
     value={age}
+  />;
+}
+
+function HashtagInput() {
+  const setHashtags = useVideoUploadStore((s) => s.setHashtags);
+  const hashtags = useVideoUploadStore((s) => s.videoData.hashtags);
+  return <AddTagInputControlled
+    tags={hashtags || []}
+    setTags={setHashtags}
+    label="Hashtags"
+    placeholder="Ex: Bitcoin, Nostr"
+  />;
+}
+
+function IndexerInput() {
+  const setIndexers = useVideoUploadStore((s) => s.setIndexers);
+  const indexers = useVideoUploadStore((s) => s.videoData.indexers);
+  return <AddTagInputControlled
+    tags={indexers ?? []}
+    setTags={setIndexers}
+    label="Indexers"
+    placeholder="Ex: imdb:tt12345"
   />;
 }

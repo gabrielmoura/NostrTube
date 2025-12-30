@@ -69,6 +69,10 @@
       }
     }
   },
+  "autoSave": {
+    "info": "Seu rascunho foi salvo automaticamente.",
+    "clear": "Limpar rascunho"
+  },
   "components": {
     "comboLanguage": {
       "noLanguageFound": "Nenhum idioma encontrado",

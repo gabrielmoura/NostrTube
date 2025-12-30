@@ -69,6 +69,10 @@
       }
     }
   },
+  "autoSave": {
+    "info": "Your draft has been auto-saved.",
+    "clear": "Clear draft"
+  },
   "components": {
     "comboLanguage": {
       "noLanguageFound": "No language found",

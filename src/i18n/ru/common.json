@@ -67,6 +67,10 @@
       }
     }
   },
+  "autoSave": {
+    "info": "Черновик сохранен автоматически",
+    "clear": "Очистить черновик"
+  },
   "components": {
     "comboLanguage": {
       "noLanguageFound": "Язык не найден",

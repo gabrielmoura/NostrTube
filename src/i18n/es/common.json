@@ -67,6 +67,10 @@
       }
     }
   },
+  "autoSave": {
+    "info": "Borrador guardado automáticamente",
+    "clear": "Borrar borrador"
+  },
   "components": {
     "comboLanguage": {
       "noLanguageFound": "No se encontró el idioma",

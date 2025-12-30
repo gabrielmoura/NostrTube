@@ -97,6 +97,126 @@ export function AddTagButton({
   );
 }
 
+interface AddTagInputControlledProps {
+  initialTags?: string[];
+  setTags: (tags: string[]) => void;
+  label: string;
+  placeholder?: string;
+  regex?: RegExp;
+  description?: string;
+  className?: string;
+  tags: string[];
+}
+
+export function AddTagInputControlled({
+                                        setTags,
+                                        tags = [],
+                                        label,
+                                        placeholder,
+                                        regex,
+                                        description,
+                                        className
+                                      }: AddTagInputControlledProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentInput, setCurrentInput] = useState<string>("");
+
+  const [error, setError] = useState<string | null>(null);
+
+
+  const handleAddTag = () => {
+    if (currentInput.trim() === "") {
+      setError(t("components.addTagInput.error.empty", "The field cannot be empty."));
+      return;
+    }
+
+    if (regex && !regex.test(currentInput)) {
+
+      setError(t("components.addTagInput.error.invalidFormat", "Invalid format."));
+      return;
+    }
+
+    if (tags?.includes(currentInput.trim())) {
+      setError(t("components.addTagInput.error.duplicate", "This tag already exists."));
+      return;
+    }
+
+    setTags([...tags, currentInput.trim()]);
+    setCurrentInput("");
+    setError(null);
+    setIsOpen(false); // Fecha o modal após adicionar
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    // setTags((prev) => prev.filter((tag) => tag !== tagToRemove));
+    setTags([
+      ...tags.filter(t => t !== tagToRemove)
+    ]);
+  };
+
+  const isInputInvalid = !!error || (regex && currentInput && !regex.test(currentInput));
+
+  return (
+    <div className={cn("rounded-xl border bg-card p-4 shadow-sm space-y-3", className)}>
+      <Label className="text-sm font-medium">{label}</Label>
+
+      {tags.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {tags.map((tag, index) => (
+            <Tag key={index} onRemove={() => handleRemoveTag(tag)}>
+              {tag}
+            </Tag>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground">{placeholder || `Adicione ${label.toLowerCase()}`}</p>
+      )}
+
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          <Button variant="outline" className="w-full">
+            {t("Add", "Add")} {label}
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{t("Add", "Add")} {label}</DialogTitle>
+            {description && <DialogDescription>{description}</DialogDescription>}
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="tag-input">{t("New")} {label}</Label>
+              <Input
+                id="tag-input"
+                value={currentInput}
+                onChange={(e) => {
+                  setCurrentInput(e.target.value);
+                  setError(null); // Limpa o erro ao digitar
+                }}
+                placeholder={placeholder}
+                className={cn({ "border-destructive focus-visible:ring-destructive": isInputInvalid })}
+                onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
+              />
+              {error && <p className="text-sm text-destructive mt-1">{error}</p>}
+              {regex && currentInput && !regex.test(currentInput) && (
+                <p
+                  className="text-sm text-destructive mt-1">{t("components.addTagInput.error.invalidFormat", "Invalid format.")}</p>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsOpen(false)}>
+              {t("Cancel", "Cancel")}
+            </Button>
+            <Button type="submit" onClick={handleAddTag} disabled={!currentInput || isInputInvalid}>
+              {t("Add", "Add")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
 interface AddTagInputProps {
   initialTags?: string[];
   onTagsChange: (tags: string[]) => void;
