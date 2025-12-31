@@ -7,6 +7,7 @@ import { Avatar } from "@radix-ui/themes";
 import { RenderText } from "@/components/RenderText.tsx";
 import { getNameToShow, getTwoLetters } from "@/helper/format.ts";
 import { relativeTime } from "@/helper/date.ts";
+import { Link } from "@tanstack/react-router";
 
 type CommentFeedProps = {
   comments: NDKEvent[];
@@ -107,12 +108,17 @@ export function CommentItem({ event, replies, depth }: CommentItemProps) {
     <div className={`flex flex-col ${indentationClass}`}>
       <div className="flex w-full gap-x-3 sm:gap-x-4 overflow-hidden items-start">
         {/* Avatar */}
-        <Avatar
-          className="flex-shrink-0 h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-gray-200 object-cover"
-          src={profile?.image}
-          alt={profile?.displayName}
-          fallback={getTwoLetters({ npub, profile })}
-        />
+        <Link
+          to={`/u/$userId`}
+          params={{ userId: npub }}
+        >
+          <Avatar
+            className="flex-shrink-0 h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-gray-200 object-cover"
+            src={profile?.image}
+            alt={profile?.displayName}
+            fallback={getTwoLetters({ npub, profile })}
+          />
+        </Link>
 
         <div className="flex-1 space-y-1 overflow-hidden">
           {/* Header: Nome e Data */}

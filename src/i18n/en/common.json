@@ -73,6 +73,23 @@
     "info": "Your draft has been auto-saved.",
     "clear": "Clear draft"
   },
+  "visibility": {
+    "title": "Privacy & Visibility",
+    "error_nsfw": "Could not update content filter.",
+    "error_age": "Error saving age preference.",
+    "nsfw_label": "Sensitive Content (NSFW)",
+    "nsfw_on": "Showing adult and sensitive content.",
+    "nsfw_off": "Sensitive content hidden by default.",
+    "age_label": "Age Filter",
+    "age_description": "Adjusts content based on age group.",
+    "search_placeholder": "Search age...",
+    "no_results": "No results found.",
+    "ages": {
+      "KID": "Child (General)",
+      "TEEN": "Teen (14+)",
+      "ADULT": "Adult (18+)"
+    }
+  },
   "components": {
     "comboLanguage": {
       "noLanguageFound": "No language found",

@@ -5,8 +5,8 @@ import { Badge, Button, Card, CardContent, CardHeader } from "./CommonComponents
 import useUserStore from "@/store/useUserStore.ts";
 
 export const BlossomSettings = () => {
-  const setMirrors = useUserStore((state) => state.blossom.setMirrors);
-  const setDefault = useUserStore((state) => state.blossom.setDefault);
+  const setMirrors = useUserStore((state) => state.setBlossomMirrors);
+  const setDefault = useUserStore((state) => state.setBlossomDefault);
   const [primary, setPrimary] = useState<string>(MOCK_BLOSSOM_SERVERS[0].url);
   const [secondaries, setSecondaries] = useState<string[]>([MOCK_BLOSSOM_SERVERS[1].url]);
   const [servers, setServers] = useState<BlossomServer[]>([]);

@@ -4,6 +4,9 @@ import { PermissionSettings } from "@/routes/configurarion/@components/Permissio
 import { Button } from "@/routes/configurarion/@components/CommonComponents.tsx";
 import { RelaySettings } from "@/routes/configurarion/@components/RelaySettings.tsx";
 import { useNDKCurrentUser } from "@nostr-dev-kit/ndk-hooks";
+import { EmptyState } from "@/components/EmptyState.tsx";
+import { Ban } from "lucide-react";
+import { VisibilitySettings } from "@/routes/configurarion/@components/VisibilitySettings.tsx";
 
 export const Route = createFileRoute("/configurarion/")({
   component: RouteComponent
@@ -13,11 +16,7 @@ export const Route = createFileRoute("/configurarion/")({
 function RouteComponent() {
   const currentUser = useNDKCurrentUser();
   if (!currentUser) {
-    return (
-      <div>
-        É necessário estar logado
-      </div>
-    );
+    return <EmptyState title="Não autenticado" icon={Ban}/>;
   }
   return (
 
@@ -31,6 +30,7 @@ function RouteComponent() {
       <div className="space-y-6">
         <BlossomSettings />
         <PermissionSettings />
+        <VisibilitySettings/>
         <RelaySettings />
       </div>
       <div

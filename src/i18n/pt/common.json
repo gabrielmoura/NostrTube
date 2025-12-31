@@ -73,6 +73,23 @@
     "info": "Seu rascunho foi salvo automaticamente.",
     "clear": "Limpar rascunho"
   },
+  "visibility": {
+    "title": "Privacidade e Visibilidade",
+    "error_nsfw": "Não foi possível atualizar o filtro de conteúdo.",
+    "error_age": "Erro ao salvar preferência de idade.",
+    "nsfw_label": "Conteúdo Sensível (NSFW)",
+    "nsfw_on": "Exibindo conteúdo adulto e sensível.",
+    "nsfw_off": "Conteúdo sensível ocultado por padrão.",
+    "age_label": "Filtro de Idade",
+    "age_description": "Ajusta o conteúdo com base na faixa etária.",
+    "search_placeholder": "Buscar idade...",
+    "no_results": "Nenhum resultado.",
+    "ages": {
+      "KID": "Criança (Livre)",
+      "TEEN": "Adolescente (14+)",
+      "ADULT": "Adulto (18+)"
+    }
+  },
   "components": {
     "comboLanguage": {
       "noLanguageFound": "Nenhum idioma encontrado",

@@ -71,6 +71,23 @@
     "info": "Borrador guardado automáticamente",
     "clear": "Borrar borrador"
   },
+  "visibility": {
+    "title": "Privacidad y Visibilidad",
+    "error_nsfw": "No se pudo actualizar el filtro de contenido.",
+    "error_age": "Error al guardar la preferencia de edad.",
+    "nsfw_label": "Contenido Sensible (NSFW)",
+    "nsfw_on": "Mostrando contenido adulto y sensible.",
+    "nsfw_off": "Contenido sensible oculto por defecto.",
+    "age_label": "Filtro de Edad",
+    "age_description": "Ajusta el contenido según el grupo de edad.",
+    "search_placeholder": "Buscar edad...",
+    "no_results": "Sin resultados.",
+    "ages": {
+      "KID": "Niño (General)",
+      "TEEN": "Adolescente (14+)",
+      "ADULT": "Adulto (18+)"
+    }
+  },
   "components": {
     "comboLanguage": {
       "noLanguageFound": "No se encontró el idioma",
