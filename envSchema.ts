@@ -24,7 +24,8 @@ export default function envSchemaValidate() {
       VITE_NOSTR_BLOSSOM_FALLBACK: z.url(),
       VITE_PUBLIC_ROOT_DOMAIN: z.url(),
       VITE_APP_IMGPROXY: z.url().optional(),
-      VITE_DUFFLEPUD_URL: z.url().optional()
+      VITE_DUFFLEPUD_URL: z.url().optional(),
+      VITE_NJUMP_URL: z.url().optional().default("https://nostr.com")
     }
   });
 }

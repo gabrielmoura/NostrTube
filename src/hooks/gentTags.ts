@@ -2,7 +2,8 @@ import { nostrNow } from "@/helper/date.ts";
 import { nip19 } from "nostr-tools";
 import { imetaTagToTag, NDKKind } from "@nostr-dev-kit/ndk";
 import { ulid } from "ulid";
-import type { VideoMetadata } from "@/store/videoUploadStore.ts";
+import type { VideoMetadata } from "@/store/videoUpload/useVideoUploadStore.ts";
+
 
 // --- Tipos ---
 
@@ -26,7 +27,7 @@ const getConfig = (): AppConfig => {
   return {
     appName: import.meta.env.VITE_APP_NAME || "NostrTube",
     rootDomain: import.meta.env.VITE_PUBLIC_ROOT_DOMAIN || "https://nostr-tube.com",
-    relays: (relaysString || "").split(",").filter(Boolean)
+    relays: (relaysString || "").filter(Boolean)
   };
 };
 
@@ -128,7 +129,7 @@ function generateCategoryTags(props: GenTagsProps): string[][] {
  * Função pura: Input -> Output determinístico.
  */
 export function generateVideoTags(props: GenTagsProps): string[][] {
-  const { currentPubkey, title, thumbnail, summary, ...videoData } = props;
+  const { currentPubkey, title, thumbnail, summary, age, ...videoData } = props;
 
   // Validação Fail-Fast
   if (!currentPubkey || !title) {
@@ -165,6 +166,12 @@ export function generateVideoTags(props: GenTagsProps): string[][] {
 
   // 5. Acessibilidade / Retrocompatibilidade (Alt Tag)
   tags.push(generateAltTag(dTagValue, currentPubkey, config));
+
+  // 6. Insert Age Recommendation
+  if (age) {
+    tags.push(["age", age]);
+  }
+
 
   return tags;
 }

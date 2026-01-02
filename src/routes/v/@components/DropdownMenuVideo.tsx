@@ -103,7 +103,7 @@ export const DropdownMenuVideo = ({ event }: { event: NDKEvent }) => {
     {
       label: "View on NJump",
       icon: <ExternalLink className="size-4" />,
-      action: () => window.open(`https://njump.me/${event.id}`, "_blank")
+      action: () => window.open(`${import.meta.env.VITE_NJUMP_URL}/${event.id}`, "_blank")
     },
     {
       label: "Open Native",

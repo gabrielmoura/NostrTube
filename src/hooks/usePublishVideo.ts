@@ -30,8 +30,8 @@ export function usePublishVideo() {
         const nip19Encode = nip19.naddrEncode({
           identifier: event.dTag!,
           relays: import.meta.env.PROD
-            ? import.meta.env.VITE_NOSTR_RELAYS?.split(",")
-            : import.meta.env.VITE_NOSTR_DEV_RELAYS?.split(","),
+            ? import.meta.env.VITE_NOSTR_RELAYS
+            : import.meta.env.VITE_NOSTR_DEV_RELAYS,
           pubkey: event.pubkey,
           kind: event.kind!
         });
