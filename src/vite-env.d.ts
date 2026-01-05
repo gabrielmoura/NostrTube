@@ -11,6 +11,7 @@ interface ImportMetaEnv {
   readonly VITE_BEACON_URL?: string;
   readonly VITE_DUFFLEPUD_URL: ?string;
   readonly VITE_NJUMP_URL: ?string;
+  readonly VITE_SENTRY_DSN?: string;
 }
 
 interface ImportMeta {

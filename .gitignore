@@ -276,3 +276,5 @@ next-env.d.ts
 keystore.jks
 app_spec.md
 stats.html
+# Sentry Config File
+.env.sentry-build-plugin

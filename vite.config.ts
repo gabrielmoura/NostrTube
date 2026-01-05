@@ -9,6 +9,7 @@ import wasm from "vite-plugin-wasm";
 import sri from "vite-plugin-sri";
 import path from "path";
 import envSchemaValidate from "./envSchema.ts";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 
 
 export default defineConfig(({ mode }) => {
@@ -105,10 +106,15 @@ export default defineConfig(({ mode }) => {
       }),
       wasm(),
       sri(),
-      envSchemaValidate()
+      envSchemaValidate(),
+      sentryVitePlugin({
+        authToken: process.env.SENTRY_AUTH_TOKEN,
+        org: process.env.SENTRY_ORG,
+        project: process.env.SENTRY_PROJECT
+      })
     ],
     build: {
-      sourcemap: false, //True to generate sourcemaps for debugging
+      sourcemap: true, //True to generate sourcemaps for debugging
       cssMinify: true,
       minify: true,
       cssCodeSplit: true,
