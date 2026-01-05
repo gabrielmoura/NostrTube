@@ -17,6 +17,9 @@ export function getOptimizedImageSrc(
   if (!envUrl) {
     return src;
   }
+  if (!src){
+    return src;
+  }
 
   // 2. Normalização das opções
   // Se nenhuma opção for passada, assumimos o redimensionamento padrão baseado na largura
