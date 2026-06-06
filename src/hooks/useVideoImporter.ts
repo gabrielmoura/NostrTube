@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { useNDK } from "@nostr-dev-kit/ndk-hooks";
+import { NDKBlossom } from "@nostr-dev-kit/ndk-blossom";
 import { nip19 } from "nostr-tools";
 import { getTagValue, getTagValues } from "@welshman/util";
 import { toast } from "sonner";
 import { useVideoUploadStore } from "@/store/videoUpload/useVideoUploadStore.ts";
 import { normalizeVideoEventAssets } from "@/features/video/services/video-imeta.service";
+import { generateVideoThumbnailFromUrl } from "@/features/upload/services/local-media-processing.service";
+import { fetchVideoEventByReference } from "@/features/nostr/services/ndk-query.service";
 
 export function useVideoImporter() {
   const { ndk } = useNDK();
@@ -13,6 +16,7 @@ export function useVideoImporter() {
   const setShowEventInput = useVideoUploadStore((s) => s.setShowEventInput);
   const setUrl = useVideoUploadStore((s) => s.setUrl);
   const setThumbnail = useVideoUploadStore((s) => s.setThumbnail);
+  const setVideoData = useVideoUploadStore((s) => s.setVideoData);
 
   // Lógica 1: Importar de Evento Nostr
   const importFromEvent = async (eventString: string) => {
@@ -34,16 +38,7 @@ export function useVideoImporter() {
         throw new Error("Formato inválido (deve ser nevent ou naddr)");
       }
 
-      // Construção do Filtro
-      const filters: any = { limit: 1 };
-      if ("kind" in data && data.kind) filters.kinds = [data.kind];
-      if ("pubkey" in data && data.pubkey) filters.authors = [data.pubkey];
-      if ("identifier" in data && data.identifier) filters["#d"] = [data.identifier];
-      if ("id" in data && data.id) filters.ids = [data.id];
-
-      // Busca
-      const eventsSet = await ndk.fetchEvents(filters);
-      const event = Array.from(eventsSet)[0];
+      const event = await fetchVideoEventByReference(ndk, eventString, { mode: "parallel" });
 
       if (!event) throw new Error("Evento não encontrado nos relays conectados.");
 
@@ -117,7 +112,7 @@ export function useVideoImporter() {
   };
 
   // Lógica 2: Importar de URL direta
-  const importFromUrl = (url: string) => {
+  const importFromUrl = async (url: string) => {
     if (!url.trim()) return;
 
     // Regra de Negócio: YouTube
@@ -137,6 +132,42 @@ export function useVideoImporter() {
       }
     }
 
+    let generatedThumbnail: string | undefined;
+    const mimeType = inferMimeTypeFromUrl(url);
+
+    if (ndk && mimeType?.startsWith("video/")) {
+      try {
+        const blossom = new NDKBlossom(ndk);
+        const generated = await generateVideoThumbnailFromUrl(url, url.split("/").pop()?.split("?")[0] || "external-video");
+        const thumbnailUpload = await blossom.upload(generated.file, {
+          fallbackServer: import.meta.env.VITE_NOSTR_BLOSSOM_FALLBACK || undefined
+        });
+        generatedThumbnail = thumbnailUpload.url;
+        if (generatedThumbnail) {
+          setThumbnail(generatedThumbnail);
+        }
+        toast.success("Thumbnail gerada a partir do vídeo externo.");
+      } catch (error) {
+        console.warn("External thumbnail generation failed", error);
+      }
+    }
+
+    setVideoData({
+      url,
+      title: url.split("/").pop()?.split("?")[0] || "Imported video",
+      thumbnail: generatedThumbnail,
+      mime_type: mimeType,
+      imetaVideo: {
+        url,
+        image: generatedThumbnail,
+        m: mimeType
+      } as never,
+      imetaVariants: [{
+        url,
+        image: generatedThumbnail,
+        m: mimeType
+      } as never]
+    });
     setUrl(url);
     setShowEventInput(false);
   };
@@ -146,4 +177,14 @@ export function useVideoImporter() {
     importFromUrl,
     isImporting
   };
+}
+
+function inferMimeTypeFromUrl(url: string): string | undefined {
+  const normalized = url.toLowerCase();
+  if (normalized.endsWith(".m3u8")) return "application/vnd.apple.mpegurl";
+  if (normalized.endsWith(".mpd")) return "application/dash+xml";
+  if (normalized.endsWith(".webm")) return "video/webm";
+  if (normalized.endsWith(".mov")) return "video/quicktime";
+  if (normalized.endsWith(".mp4")) return "video/mp4";
+  return undefined;
 }

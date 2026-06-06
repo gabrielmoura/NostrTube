@@ -10,14 +10,11 @@ export const Route = createFileRoute("/p/new")({
 function RouteComponent() {
   const navigate = useNavigate();
 
-  const handleSuccess = (dTag: string) => {
-    // Redireciona para a página de "Meus Vídeos/Playlists" ou para a playlist criada
-    // navigate({ to: '/library' }) ou similar
-
+  const handleSuccess = (listId: string) => {
     toast.success("Playlist criada com sucesso! (Redirecionando...)");
     navigate({
       to: "/p/$listId",
-      params: { listId: dTag }
+      params: { listId }
     });
 
   };

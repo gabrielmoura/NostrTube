@@ -1,5 +1,5 @@
-import { type Dispatch, type SetStateAction, useState } from "react";
-import { Blocks, GalleryVerticalEnd } from "lucide-react";
+import { type Dispatch, type FormEvent, type SetStateAction, useState } from "react";
+import { Blocks, GalleryVerticalEnd, KeyRound, ShieldCheck, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Label } from "@/components/ui/label.tsx";
@@ -11,34 +11,43 @@ import { LoggerAgent } from "@/lib/debug.ts";
 import { useClipboard } from "@/hooks/useClipboard.ts";
 import { useDownload } from "@/hooks/useDownload.ts";
 import { t } from "i18next";
-import { DrawerBody, DrawerFooter, DrawerHeader } from "@/components/modal_v2/Drawer.tsx";
+import { DrawerBody, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/modal_v2/Drawer.tsx";
 import { modal } from "@/components/modal_v2/modal-manager.ts";
 
 const log = LoggerAgent.create("LoginModal");
 
-
 export function AuthModal() {
-  const [login, setLogin] = useState<boolean>(true); // Add error state
-
+  const [login, setLogin] = useState(true);
 
   return (
     <>
-      <DrawerHeader></DrawerHeader>
-      <DrawerBody className="">
-
-        {login ? <LoginContent setLogin={setLogin} /> :
-          <Register setLogin={setLogin} />}
+      <DrawerHeader className="border-b pb-4 text-left">
+        <DrawerTitle className="flex items-center gap-3 text-xl font-semibold tracking-tight">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <GalleryVerticalEnd className="size-5" />
+          </div>
+          Entrar no {import.meta.env.VITE_APP_NAME}
+        </DrawerTitle>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Use sua extensão Nostr, um `nsec` ou gere uma identidade nova sem sair da interface.
+        </p>
+      </DrawerHeader>
+      <DrawerBody className="space-y-6 pt-5">
+        {login ? <LoginContent setLogin={setLogin} /> : <Register setLogin={setLogin} />}
       </DrawerBody>
-      <DrawerFooter></DrawerFooter>
+      <DrawerFooter className="border-t pt-4 text-xs text-muted-foreground">
+        Suas chaves continuam sob seu controle. Evite colar `nsec` em máquinas que você não confia.
+      </DrawerFooter>
     </>
   );
 }
 
-function Or() {
-  return <div
-    className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-    <span className="relative z-10 bg-background px-2 text-muted-foreground">Or</span>
-  </div>;
+function SectionDivider() {
+  return (
+    <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
+      <span className="relative z-10 bg-background px-2 text-muted-foreground">Ou continue com</span>
+    </div>
+  );
 }
 
 interface AuthProps {
@@ -47,9 +56,9 @@ interface AuthProps {
 
 function LoginContent({ setLogin }: AuthProps) {
   const login = useNDKSessionLogin();
-  const [nsec, setNsec] = useState<string>(""); // Initialize with empty string
-  const [isLoading, setIsLoading] = useState<boolean>(false); // Add loading state
-  const [error, setError] = useState<string | null>(null); // Add error state
+  const [nsec, setNsec] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { ndk } = useNDK();
 
   const loginWithExtension = async () => {
@@ -58,202 +67,186 @@ function LoginContent({ setLogin }: AuthProps) {
     try {
       const signer = new NDKNip07Signer();
       await login(signer, true);
+      modal.dismissAll();
     } catch (err: any) {
-      setError(err.message || "Failed to login with extension.");
+      setError(err.message || "Falha ao conectar com a extensão.");
       log.error("Login with extension failed:", err);
     } finally {
       setIsLoading(false);
-      modal.dismissAll();
     }
   };
 
-  const handleLoginNsec = async () => {
-    if (!nsec) {
-      setError("NSEC cannot be empty.");
+  const handleLoginNsec = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!nsec.trim()) {
+      setError("NSEC não pode estar vazio.");
       return;
     }
+
     setIsLoading(true);
     setError(null);
-    let signer: NDKSigner;
-
 
     try {
-      // Create a signer from the private key
+      let signer: NDKSigner;
       if (nsec.startsWith("bunker://")) {
         signer = new NDKNip46Signer(ndk!, nsec);
       } else {
         signer = new NDKPrivateKeySigner(nsec);
       }
 
-      // Login and create a session
       await login(signer);
-
-      // Success! User is now logged in
-      log.info("Login successful");
-      // Optionally close the dialog here or redirect
+      modal.dismissAll();
     } catch (err: any) {
-      setError(err.message || "Login with NSEC failed.");
+      setError(err.message || "Falha ao autenticar com a chave fornecida.");
       log.error("Login failed:", err);
     } finally {
       setIsLoading(false);
-      modal.dismissAll();
     }
   };
-  return (<>
-    <div className="flex flex-col items-center gap-2">
-      <a href="#" className="flex flex-col items-center gap-2 font-medium">
-        <div className="flex h-8 w-8 items-center justify-center rounded-md">
-          <GalleryVerticalEnd className="size-6" />
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-2xl border bg-card p-4 shadow-sm">
+        <div className="flex items-start gap-3">
+          <ShieldCheck className="mt-0.5 size-5 text-primary" />
+          <div>
+            <p className="font-medium">Entrada recomendada</p>
+            <p className="text-sm text-muted-foreground">Prefira sua extensão Nostr para não expor a chave privada diretamente na interface.</p>
+          </div>
         </div>
-        <span className="sr-only">{import.meta.env.VITE_APP_NAME}</span>
-      </a>
-      <div className="text-xl font-bold">Welcome to {import.meta.env.VITE_APP_NAME}</div>
-      <div className="text-center text-sm">
-        Don&apos;t have an account?{" "}
-        <button className="underline underline-offset-4" onClick={() => setLogin(false)}>
-          Sign up
+      </div>
+
+      <form className="space-y-4" onSubmit={handleLoginNsec}>
+        <div className="space-y-2">
+          <Label htmlFor="nsec">NSEC ou bunker</Label>
+          <Input
+            id="nsec"
+            type="password"
+            placeholder="nsec1... ou bunker://..."
+            value={nsec}
+            onChange={(e) => setNsec(e.target.value)}
+            disabled={isLoading}
+            autoComplete="current-password"
+            aria-describedby="auth-nsec-help"
+          />
+          <p id="auth-nsec-help" className="text-xs text-muted-foreground">
+            Você pode colar um `nsec` ou uma URL `bunker://` para NIP-46.
+          </p>
+          {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        </div>
+
+        <Button type="submit" className="w-full" disabled={isLoading} isLoading={isLoading}>
+          <KeyRound className="size-4" />
+          Entrar com chave
+        </Button>
+      </form>
+
+      <SectionDivider />
+
+      <Button variant="outline" className="w-full" onClick={loginWithExtension} disabled={isLoading} isLoading={isLoading}>
+        <Blocks className="size-4" />
+        Entrar com extensão
+      </Button>
+
+      <div className="rounded-2xl border bg-secondary/40 p-4 text-sm text-muted-foreground">
+        Ainda não tem identidade?
+        <button className="ml-1 font-medium text-foreground underline underline-offset-4" onClick={() => setLogin(false)}>
+          Gerar uma agora
         </button>
       </div>
     </div>
-
-    <div className="flex flex-col gap-6">
-      <div className="grid gap-2">
-        <Label htmlFor="nsec">NSEC Private Key</Label>
-        <Input
-          id="nsec"
-          type="password" // Use password type for NSEC for security
-          placeholder="Enter your NSEC"
-          value={nsec}
-          onChange={(e) => setNsec(e.target.value)}
-          required
-          disabled={isLoading}
-        />
-        {error && <p className="text-red-500 text-sm">{error}</p>}
-      </div>
-      <Button type="submit" className="w-full" onClick={handleLoginNsec} disabled={isLoading}>
-        {isLoading ? "Logging in..." : "Login with NSEC"}
-      </Button>
-    </div>
-
-    <Or />
-
-    <div className=" gap-4 sm:grid-cols-2 flex  justify-center">
-      {/*// O botão precisa estart centralizado no meio*/}
-      <Button variant="outline" className="w-full"
-              onClick={loginWithExtension} disabled={isLoading}>
-        <Blocks />
-        {isLoading ? "Connecting..." : "Login with Extension"}
-      </Button>
-    </div>
-    <div
-      className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary  ">
-      By clicking continue, you agree to our <a href="/terms" aria-modal={true}>Terms of Service</a>{" "}
-      and <a href="/terms">Privacy Policy</a>.
-    </div>
-  </>);
+  );
 }
 
-function Register({ setLogin, ...props }: AuthProps) {
+function Register({ setLogin }: AuthProps) {
   const [kP, setKeyPair] = useState<KeyPair | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const login = useNDKSessionLogin();
 
   async function handleLoginWithKeyPair(keyPair: KeyPair) {
     try {
       const signer = new NDKPrivateKeySigner(keyPair.sk);
-      // Login and create a session
       await login(signer);
-      // Success! User is now logged in
-      log.info("Login successful");
-    } catch (err: any) {
-      log.error("Login failed:", err);
-    } finally {
       modal.dismissAll();
+    } catch (err: any) {
+      setError(err.message || "Falha ao entrar com a chave gerada.");
+      log.error("Login failed:", err);
     }
   }
 
   const { mutate, isPending } = useMutation({
     mutationFn: generatePrivateKey,
     mutationKey: ["generate-private-key"],
-    onSuccess: (keyPair: KeyPair) => setKeyPair(keyPair)
+    onSuccess: (keyPair: KeyPair) => {
+      setError(null);
+      setKeyPair(keyPair);
+    },
+    onError: (err: any) => {
+      setError(err.message || "Falha ao gerar a chave.");
+    }
   });
 
   const { copyToClipboard, isLoading: copyLoad } = useClipboard();
   const { downloadString } = useDownload();
 
   if (kP) {
-    return <div {...props}>
-      <div className="flex flex-col items-center gap-2">
-        {/*Copiar chaves e baixar chaves formatadas.*/}
-        <a href="#" className="flex flex-col items-center gap-2 font-medium">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md">
-            <GalleryVerticalEnd className="size-6" />
+    return (
+      <div className="space-y-5">
+        <div className="rounded-2xl border bg-card p-5 shadow-sm">
+          <div className="flex items-center gap-3">
+            <Sparkles className="size-5 text-primary" />
+            <div>
+              <p className="font-medium">Sua identidade foi criada</p>
+              <p className="text-sm text-muted-foreground">Salve sua chave privada antes de continuar. Sem ela, você perde acesso à conta.</p>
+            </div>
           </div>
-          <span className="sr-only">{import.meta.env.VITE_APP_NAME}</span>
-        </a>
-        <div className="text-xl font-bold">Your Account is Ready!</div>
-        <div className="text-center text-sm">
-          Please save your private key (NSEC) securely. You will need it to log in.
         </div>
-        <div className="w-full max-w-md rounded-md border p-4 bg-muted">
-          <Label className="mb-2 block text-center">Your NSEC Private Key</Label>
-          <Input
-            type="text"
-            value={kP.privateKey}
-            readOnly
-            className="w-full font-mono"
-          />
+
+        <div className="space-y-2">
+          <Label htmlFor="generated-nsec">Sua NSEC</Label>
+          <Input id="generated-nsec" type="text" value={kP.privateKey} readOnly className="font-mono" />
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
           <Button
             variant="outline"
-            className="mt-2 w-full"
             disabled={copyLoad}
-            onClick={() => {
-              copyToClipboard(kP!.sk).catch(err => log.warn("Failed to copy NSEC to clipboard:", err));
-            }}
+            onClick={() => copyToClipboard(kP.sk).catch((err) => log.warn("Failed to copy NSEC to clipboard:", err))}
           >
-            Copy to Clipboard
+            Copiar chave
           </Button>
+          <Button onClick={() => downloadString("nostr-keys.txt", kP.formated!)}>Baixar arquivo</Button>
         </div>
-        <Button
-          className="mt-4"
-          onClick={() => downloadString("nostr-keys.txt", kP!.formated!)}>
-          Download Keys as File
-        </Button>
 
-        <div className="mt-4 w-full max-w-md text-center">
-          <Button onClick={() => handleLoginWithKeyPair(kP!)}>
-            Login
-          </Button>
-        </div>
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+
+        <Button className="w-full" onClick={() => handleLoginWithKeyPair(kP)}>
+          Entrar com esta identidade
+        </Button>
       </div>
-    </div>;
+    );
   }
 
+  return (
+    <div className="space-y-6">
+      <div className="rounded-2xl border bg-card p-4 shadow-sm">
+        <p className="font-medium">Criação rápida</p>
+        <p className="text-sm text-muted-foreground">Gere uma nova identidade Nostr localmente e entre imediatamente depois de salvar a chave.</p>
+      </div>
 
-  return <div {...props}>
-    <div className="flex flex-col items-center gap-2">
-      <a href="#" className="flex flex-col items-center gap-2 font-medium">
-        <div className="flex h-8 w-8 items-center justify-center rounded-md">
-          <GalleryVerticalEnd className="size-6" />
-        </div>
-        <span className="sr-only">{import.meta.env.VITE_APP_NAME}</span>
-      </a>
-      <div className="text-xl font-bold">Welcome to {import.meta.env.VITE_APP_NAME}</div>
-      <div className="text-center text-sm">
-        You have an account?{" "}
-        <button className="underline underline-offset-4" onClick={() => setLogin(true)}>
-          Login
+      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+
+      <Button variant="outline" className="w-full" onClick={() => mutate()} disabled={isPending} isLoading={isPending}>
+        <Blocks className="size-4" />
+        {isPending ? t("Generatin", "Generating") + "..." : "Gerar identidade"}
+      </Button>
+
+      <div className="rounded-2xl border bg-secondary/40 p-4 text-sm text-muted-foreground">
+        Já tem uma identidade?
+        <button className="ml-1 font-medium text-foreground underline underline-offset-4" onClick={() => setLogin(true)}>
+          Voltar para login
         </button>
       </div>
     </div>
-    <div className=" gap-4 sm:grid-cols-2 flex  justify-center">
-      {/*// O botão precisa estart centralizado no meio*/}
-      <Button variant="outline" className="w-full"
-              onClick={() => mutate()} disabled={isPending}
-      >
-        <Blocks />
-        {isPending ? t("Generatin", "Generating") + "..." : t("Generate", "Generate")}
-      </Button>
-    </div>
-
-  </div>;
+  );
 }

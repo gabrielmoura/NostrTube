@@ -1,9 +1,10 @@
 import { useCallback } from "react";
-import NDK, { NDKEvent, NDKKind, NDKSubscriptionCacheUsage } from "@nostr-dev-kit/ndk";
+import NDK, { NDKEvent, NDKKind } from "@nostr-dev-kit/ndk";
 import { getTagValue, getTagValues } from "@welshman/util";
 import { makeEvent } from "@/helper/pow/pow.ts";
 import { nostrNow } from "@/helper/date.ts";
 import { NostrKind } from "@/helper/type.ts";
+import { fetchEventCached, fetchEventsCached } from "@/features/nostr/services/ndk-query.service";
 
 /**
  * Interface para os parâmetros da função `markView`.
@@ -64,11 +65,11 @@ export function useRecordView(): useRecordView {
 
     try {
       // 2. Tenta buscar um evento de visualização existente para este usuário e identificador
-      const existingViewEvent: NDKEvent | null = await ndk.fetchEvent({
+      const existingViewEvent: NDKEvent | null = await fetchEventCached(ndk, {
         authors: [pubKey],
         kinds: [NostrKind.VideoViewer as unknown as NDKKind],
         "#a": [eventIdentifier]
-      });
+      }, { mode: "cache-first" });
 
       let currentViewCount = 0; // Inicializa a contagem de visualizações
 
@@ -138,16 +139,12 @@ export function useRecordView(): useRecordView {
     }
 
 
-    const events: Set<NDKEvent> = await ndk.fetchEvents(
+    const events: Set<NDKEvent> = await fetchEventsCached(ndk,
       [{
         kinds: [NostrKind.VideoViewer as unknown as NDKKind],
         "#a": [eventIdentifier]
       }], {
-        // Usar CACHE_FIRST para obter resultados rapidamente, e CACHE_THEN_RELAY para atualizar
-        // se houver novos eventos nos relays.
-        cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
-        closeOnEose: false // Manter a subscrição aberta para atualizações em tempo real
-        // A subscrição será fechada quando o componente que usa este hook for desmontado.
+        mode: "cache-first"
       });
 
     const evtArray = Array.from(events);

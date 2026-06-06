@@ -6,6 +6,7 @@ import type { VideoMetadata } from "@/store/videoUpload/useVideoUploadStore";
 export interface BuildAddressableVideoEventParams {
   draft: Partial<VideoMetadata>;
   currentPubkey: string;
+  identifier?: string;
 }
 
 const ADDRESSABLE_VIDEO_KIND = 34235;
@@ -27,12 +28,45 @@ function buildImetaTags(draft: Partial<VideoMetadata>): string[][] {
       : [];
 
   const audioTracks = draft.imetaAudioTracks ?? [];
-  return [...videoVariants, ...audioTracks].map((imeta) => imetaTagToTag(imeta));
+
+  const imetas = [...videoVariants, ...audioTracks];
+  if (imetas.length > 0) {
+    return imetas.map((imeta) => imetaTagToTag(imeta));
+  }
+
+  if (!draft.url) {
+    return [];
+  }
+
+  const syntheticImeta = {
+    url: draft.url,
+    m: draft.mime_type || draft.fileType || guessMimeTypeFromUrl(draft.url),
+    x: draft.fileHash,
+    image: draft.thumbnail,
+    fallback: draft.fallback,
+    duration: draft.duration ? String(draft.duration) : undefined,
+    dim: draft.dim,
+    size: draft.fileSize ? String(draft.fileSize) : undefined,
+    blurhash: draft.blurhash
+  };
+
+  return [imetaTagToTag(syntheticImeta as never)];
+}
+
+function guessMimeTypeFromUrl(url: string): string | undefined {
+  const normalized = url.toLowerCase();
+  if (normalized.endsWith(".m3u8")) return "application/vnd.apple.mpegurl";
+  if (normalized.endsWith(".mpd")) return "application/dash+xml";
+  if (normalized.endsWith(".webm")) return "video/webm";
+  if (normalized.endsWith(".mov")) return "video/quicktime";
+  if (normalized.endsWith(".mp4")) return "video/mp4";
+  return undefined;
 }
 
 export function buildAddressableVideoEvent({
   draft,
-  currentPubkey
+  currentPubkey,
+  identifier: providedIdentifier
 }: BuildAddressableVideoEventParams) {
   if (!draft.title) {
     throw new Error("Title is required to publish a video event");
@@ -40,7 +74,7 @@ export function buildAddressableVideoEvent({
 
   const appName = import.meta.env.VITE_APP_NAME || "NostrTube";
   const publishedAt = nostrNow();
-  const identifier = buildIdentifier(appName);
+  const identifier = providedIdentifier || buildIdentifier(appName);
   const imetaTags = buildImetaTags(draft);
 
   if (imetaTags.length === 0) {
@@ -66,6 +100,10 @@ export function buildAddressableVideoEvent({
 
   if (draft.contentWarning) {
     tags.push(["content-warning", draft.contentWarning]);
+  }
+
+  if (draft.language) {
+    tags.push(["l", draft.language, "ISO-639-1"]);
   }
 
   normalizeTagValues(draft.hashtags).forEach((tag) => {

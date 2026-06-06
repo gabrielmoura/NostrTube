@@ -20,6 +20,7 @@ import { Route as UUserIdRouteImport } from './routes/u/$userId'
 import { Route as PNewRouteImport } from './routes/p/new'
 import { Route as PListIdRouteImport } from './routes/p/$listId'
 import { Route as UUserIdEditRouteImport } from './routes/u_/$userId/edit'
+import { Route as VEventIdEditRouteImport } from './routes/v_/$eventId/edit'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -76,6 +77,11 @@ const UUserIdEditRoute = UUserIdEditRouteImport.update({
   path: '/u/$userId/edit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VEventIdEditRoute = VEventIdEditRouteImport.update({
+  id: '/v_/$eventId/edit',
+  path: '/v/$eventId/edit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SearchIndexRoute
   '/terms': typeof TermsIndexRoute
   '/u/$userId/edit': typeof UUserIdEditRoute
+  '/v/$eventId/edit': typeof VEventIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/search': typeof SearchIndexRoute
   '/terms': typeof TermsIndexRoute
   '/u/$userId/edit': typeof UUserIdEditRoute
+  '/v/$eventId/edit': typeof VEventIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/search/': typeof SearchIndexRoute
   '/terms/': typeof TermsIndexRoute
   '/u_/$userId/edit': typeof UUserIdEditRoute
+  '/v_/$eventId/edit': typeof VEventIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/terms'
     | '/u/$userId/edit'
+    | '/v/$eventId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/terms'
     | '/u/$userId/edit'
+    | '/v/$eventId/edit'
   id:
     | '__root__'
     | '/'
@@ -157,6 +168,7 @@ export interface FileRouteTypes {
     | '/search/'
     | '/terms/'
     | '/u_/$userId/edit'
+    | '/v_/$eventId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -171,6 +183,7 @@ export interface RootRouteChildren {
   SearchIndexRoute: typeof SearchIndexRoute
   TermsIndexRoute: typeof TermsIndexRoute
   UUserIdEditRoute: typeof UUserIdEditRoute
+  VEventIdEditRoute: typeof VEventIdEditRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -180,6 +193,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/v_/$eventId/edit': {
+      id: '/v_/$eventId/edit'
+      path: '/v/$eventId/edit'
+      fullPath: '/v/$eventId/edit'
+      preLoaderRoute: typeof VEventIdEditRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms/': {

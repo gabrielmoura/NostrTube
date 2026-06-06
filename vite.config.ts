@@ -83,10 +83,6 @@ export default defineConfig(({ mode }) => {
               {
                 protocol: "web+nostr",
                 url: "/l/%s"
-              },
-              {
-                protocol: "nostr",
-                url: "/l/%s"
               }
             ]
           }

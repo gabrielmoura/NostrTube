@@ -1,4 +1,4 @@
-import NDK, { NDKPool } from "@nostr-dev-kit/ndk";
+import NDK, { NDKPool, NDKRelay } from "@nostr-dev-kit/ndk";
 import NDKCacheAdapterDexie from "@nostr-dev-kit/ndk-cache-dexie";
 import { NDKSessionLocalStorage } from "@nostr-dev-kit/ndk-hooks";
 
@@ -19,6 +19,10 @@ const relays = import.meta.env.PROD
   ? import.meta.env.VITE_NOSTR_RELAYS
   : import.meta.env.VITE_NOSTR_DEV_RELAYS;
 
+export function normalizeRelayUrls(relayUrls: string[] = []): string[] {
+  return Array.from(new Set(relayUrls.filter((relay) => relay.startsWith("ws://") || relay.startsWith("wss://"))));
+}
+
 // 4. NDK Instance
 export const ndkInstance = new NDK({
   clientName: import.meta.env.VITE_APP_NAME,
@@ -29,7 +33,7 @@ export const ndkInstance = new NDK({
 });
 
 // 5. Pool Setup
-const pool = new NDKPool(relays, [], ndkInstance);
+const pool = new NDKPool(normalizeRelayUrls(relays), [], ndkInstance);
 ndkInstance.pool = pool;
 
 // 6. Connect (Client-side only)
@@ -39,3 +43,20 @@ if (typeof window !== "undefined") {
 
 // 7. Session Storage
 export const sessionStorage = new NDKSessionLocalStorage();
+
+export function syncNdkRelayPool(relayUrls: string[]) {
+  const normalized = normalizeRelayUrls(relayUrls);
+  const existingRelayUrls = new Set(Array.from(ndkInstance.pool.relays.keys()));
+
+  for (const relayUrl of existingRelayUrls) {
+    if (!normalized.includes(relayUrl)) {
+      ndkInstance.pool.removeRelay(relayUrl);
+    }
+  }
+
+  normalized.forEach((relayUrl) => {
+    if (!existingRelayUrls.has(relayUrl)) {
+      ndkInstance.pool.addRelay(new NDKRelay(relayUrl, undefined, ndkInstance), true);
+    }
+  });
+}

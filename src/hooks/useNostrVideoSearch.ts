@@ -4,6 +4,7 @@ import { nip19 } from "nostr-tools";
 import { getTagValue, getTagValues } from "@welshman/util";
 import { toast } from "sonner";
 import { newVideoStore } from "@/store/videoUploadStore.ts";
+import { fetchVideoEventByReference } from "@/features/nostr/services/ndk-query.service";
 
 export function useNostrVideoSearch() {
   const { ndk } = useNDK();
@@ -13,22 +14,14 @@ export function useNostrVideoSearch() {
     if (!eventTagId || !ndk) return;
 
     try {
-      const { data, type } = nip19.decode(eventTagId);
+      const { type } = nip19.decode(eventTagId);
       if (!["naddr", "nevent"].includes(type)) {
         throw new Error("Invalid format");
       }
 
       setIsSearching(true);
 
-      const filters: any = { limit: 1 };
-      // ... (Lógica de construção de filtro igual ao original) ...
-      if (data.kind) filters.kinds = [data.kind];
-      if (data.pubkey) filters.authors = [data.pubkey];
-      if (data.identifier) filters["#d"] = [data.identifier];
-      if (data.id) filters.ids = [data.id];
-
-      const eventsSet = await ndk.fetchEvents(filters);
-      const event = Array.from(eventsSet)[0];
+      const event = await fetchVideoEventByReference(ndk, eventTagId, { mode: "parallel" });
 
       if (event) {
         const url = getTagValues("url", event.tags);

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNDK, useNDKCurrentUser } from "@nostr-dev-kit/ndk-hooks";
 import { useRecordView } from "@/hooks/useRecordView";
 import { useVideoContext } from "@/context/VideoContext";
+import { recordWatchHistory } from "@/features/recommendations/services/watch-history.service";
 
 export function useVideoPageController() {
   const [shouldRecordView, setShouldRecordView] = useState(true);
@@ -26,6 +27,9 @@ export function useVideoPageController() {
     }
 
     await viewEvent.publish();
+    if (video.event) {
+      recordWatchHistory(video.event);
+    }
     setShouldRecordView(false);
   };
 

@@ -90,7 +90,7 @@ export function VideoActionsView({
           </ErrorBoundaryVideo>
           <div className="mt-2 flex flex-wrap gap-2">
             {tags.map((value, index) => (
-              <Link to="/search" search={{ tag: value }} key={`${value}-${index}`}>
+              <Link to="/search" search={{ search: undefined, tag: value }} key={`${value}-${index}`}>
                 <Badge>{value}</Badge>
               </Link>
             ))}

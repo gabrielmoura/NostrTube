@@ -4,6 +4,7 @@ import { makeEvent } from "@/helper/pow/pow.ts";
 import { nostrNow } from "@/helper/date.ts";
 import NDK__default, { NDKKind } from "@nostr-dev-kit/ndk";
 import { ulid } from "ulid";
+import { nip19 } from "nostr-tools";
 
 interface PlaylistConfigProps {
   ndk: NDK__default;
@@ -13,10 +14,10 @@ interface PlaylistConfigProps {
 // STUB: Função de criação do evento Nostr
 // Esta função deve criar um evento kind:30001 (NIP-51) ou similar
 const createNostrPlaylistEvent = async ({
-                                          name,
-                                          description,
-                                          coverImage
-                                        }: PlaylistFormData, { ndk, pubkey }: PlaylistConfigProps): Promise<string> => {
+                                           name,
+                                           description,
+                                           coverImage
+                                         }: PlaylistFormData, { ndk, pubkey }: PlaylistConfigProps): Promise<string> => {
   const newDTag = `${import.meta.env.VITE_APP_NAME}-playlist-${ulid()}`;
 
   const event = await makeEvent({
@@ -38,8 +39,12 @@ const createNostrPlaylistEvent = async ({
 
   await event.publish();
 
-  console.log("Simulando criação de playlist no Nostr...", event);
-  return newDTag;
+  return nip19.naddrEncode({
+    identifier: newDTag,
+    pubkey,
+    kind: NDKKind.VideoCurationSet,
+    relays: import.meta.env.PROD ? import.meta.env.VITE_NOSTR_RELAYS : import.meta.env.VITE_NOSTR_DEV_RELAYS
+  });
 };
 
 interface useCreatePlaylistProps extends PlaylistConfigProps {

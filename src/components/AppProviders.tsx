@@ -6,8 +6,9 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Modstr } from "@/components/modal_v2/ModalProvider.tsx";
 import OfflineDetector from "@/components/OfflineDetector.tsx";
-import { useNDK, useNDKInit, useNDKSessionMonitor } from "@nostr-dev-kit/ndk-hooks";
+import { useNDK, useNDKCurrentUser, useNDKInit, useNDKSessionMonitor } from "@nostr-dev-kit/ndk-hooks";
 import { ndkInstance, sessionStorage } from "@/lib/ndk"; // Importe do arquivo criado acima
+import { startNdkMessenger } from "@/lib/ndk-messages";
 
 // Configuração do QueryClient
 export const queryClient = new QueryClient({
@@ -34,6 +35,20 @@ function NDKInitializer({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+function NDKMessagingInitializer() {
+  const { ndk } = useNDK();
+  const currentUser = useNDKCurrentUser();
+
+  useEffect(() => {
+    if (!ndk || !currentUser) return;
+    startNdkMessenger(ndk).catch((error) => {
+      console.warn("Failed to start NDK messenger", error);
+    });
+  }, [currentUser, ndk]);
+
+  return null;
+}
+
 export function AppProviders({ children }: { children: ReactNode }) {
   // Protocol Handler Registration
   useEffect(() => {
@@ -48,10 +63,11 @@ export function AppProviders({ children }: { children: ReactNode }) {
 
   return (
     <NDKInitializer>
-      <QueryClientProvider client={queryClient}>
-        <Theme>
-          {children}
-          <Toaster />
+        <QueryClientProvider client={queryClient}>
+          <Theme>
+            <NDKMessagingInitializer />
+            {children}
+            <Toaster />
           <Modstr />
           <OfflineDetector />
           <Analytics />

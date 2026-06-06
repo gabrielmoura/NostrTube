@@ -7,6 +7,8 @@ import useUserStore from "@/store/useUserStore.ts";
 
 export const PermissionSettings = () => {
   const log = LoggerAgent.create("PermissionSettings");
+  const storedGeoHash = useUserStore((state) => state.session?.geoHash);
+  const storedPushEnabled = useUserStore((state) => state.session?.pushNotificationsEnabled ?? false);
   const setGeoHash = useUserStore((state) => state.setGeoHash);
   const setPushNotificationsEnabled = useUserStore((state) => state.setPushNotificationsEnabled);
   const [pushEnabled, setPushEnabled] = useState(false);
@@ -19,14 +21,10 @@ export const PermissionSettings = () => {
 
   // Verifica o status inicial das permissões ao montar o componente
   useEffect(() => {
-    // Verificar Permissão de Notificação
-    if ("Notification" in window && Notification.permission === "granted") {
-      setPushEnabled(true);
-    }
-
-    // Verificar Permissão de Geolocalização (Opcional: navegadores modernos não expõem "granted" facilmente sem pedir,
-    // então mantemos false até o usuário interagir ou persistimos isso no localStorage/Store)
-  }, []);
+    setPushEnabled(storedPushEnabled || ("Notification" in window && Notification.permission === "granted"));
+    setLocationEnabled(Boolean(storedGeoHash));
+    setCurrentGeohash(storedGeoHash ?? null);
+  }, [storedGeoHash, storedPushEnabled]);
 
   /**
    * Lida com a solicitação de Notificações Push
@@ -35,8 +33,8 @@ export const PermissionSettings = () => {
     setError(null);
 
     if (!checked) {
-      // Se estiver desativando, apenas muda o estado visual (lógica real de desinscrição do Service Worker iria aqui)
       setPushEnabled(false);
+      setPushNotificationsEnabled(false);
       return;
     }
 
@@ -51,9 +49,10 @@ export const PermissionSettings = () => {
 
       if (permission === "granted") {
         setPushEnabled(true);
-        // TODO: Registrar o Service Worker que enviaria a subscription para o backend
+        setPushNotificationsEnabled(true);
       } else {
         setPushEnabled(false);
+        setPushNotificationsEnabled(false);
         throw new Error("Permissão de notificação negada.");
       }
     } catch (err) {
@@ -74,6 +73,7 @@ export const PermissionSettings = () => {
     if (!checked) {
       setLocationEnabled(false);
       setCurrentGeohash(null);
+      setGeoHash("");
       return;
     }
 
@@ -95,7 +95,6 @@ export const PermissionSettings = () => {
         setCurrentGeohash(hash);
         setGeoHash(hash);
         setLocationEnabled(true);
-        setPushNotificationsEnabled(true);
         setLoading(null);
       },
       (err) => {
@@ -107,7 +106,6 @@ export const PermissionSettings = () => {
 
         setError(msg);
         setLocationEnabled(false);
-        setPushNotificationsEnabled(false);
         setLoading(null);
       },
       { enableHighAccuracy: true, timeout: 5000 }

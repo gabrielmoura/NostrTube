@@ -1,7 +1,6 @@
-import NDK__default, { type NDKFilter, NDKKind } from "@nostr-dev-kit/ndk";
-import { nip19 } from "nostr-tools";
-import { NDKSubscriptionCacheUsage } from "@nostr-dev-kit/ndk-hooks";
+import NDK__default from "@nostr-dev-kit/ndk";
 import { notFound } from "@tanstack/react-router";
+import { fetchVideoEventByReference } from "@/features/nostr/services/ndk-query.service";
 
 export type GeVideoByEventIdDataParams = {
   ndk: NDK__default;
@@ -17,64 +16,7 @@ export async function geVideoByEventIdData({ ndk, eventId }: GeVideoByEventIdDat
     throw new Error("ID invalid");
   }
 
-  let filters: NDKFilter[] = [];
-
-  if (eventId.startsWith("n")) {
-    const { type, data } = nip19.decode(eventId);
-
-    switch (type) {
-      case "note":
-        filters = [
-          {
-            ids: [data],
-            limit: 1
-          }
-        ];
-        break;
-      case "naddr":
-        filters = [
-          {
-            authors: [data.pubkey],
-            kinds: [data.kind],
-            "#d": [data.identifier],
-            limit: 1
-          }
-        ];
-        break;
-      case "nevent":
-        filters = [
-          {
-            ids: [data.id],
-            authors: [data.author as string],
-            limit: 1
-          }
-        ];
-        break;
-      default:
-        throw new Error(`Invalid ID provided: ${type} ${JSON.stringify(data)}`);
-    }
-
-  } else if (eventId.length === 64) {
-    filters = [
-      {
-        ids: [eventId],
-        limit: 1
-      }
-    ];
-  } else {
-    filters = [
-        {
-          "#d": [eventId],
-          kinds: [NDKKind.Video, NDKKind.HorizontalVideo, 34235, 34236],
-          limit: 1
-        }
-      ];
-  }
-
-  const event = await ndk.fetchEvent(filters, {
-    closeOnEose: true,
-    cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST
-  });
+  const event = await fetchVideoEventByReference(ndk, eventId);
   if (!event) throw notFound();
   return event;
 }

@@ -1,9 +1,9 @@
 import { nip19 } from "nostr-tools";
-import type { NDKEvent, NDKFilter } from "@nostr-dev-kit/ndk";
-import NDK, { NDKKind, NDKSubscriptionCacheUsage } from "@nostr-dev-kit/ndk";
+import type { NDKEvent } from "@nostr-dev-kit/ndk";
+import NDK, { NDKKind } from "@nostr-dev-kit/ndk";
 import { notFound } from "@tanstack/react-router";
 import { deduplicateParameterizedEvents } from "@/helper/format.ts";
-import { VIDEO_EVENT_KINDS } from "@/features/video/services/video-kinds";
+import { fetchUserContentBundle } from "@/features/nostr/services/ndk-query.service";
 
 
 export type GetVideosFromUserDataParams = {
@@ -63,30 +63,7 @@ export async function getVideosFromUserData({ ndk, userId }: GetVideosFromUserDa
   // 1. Resolve o Pubkey
   const pubkey = resolvePubkey(userId);
 
-  // 2. Define filtros
-  const filters: NDKFilter[] = [
-    {
-      authors: [pubkey],
-      kinds: VIDEO_EVENT_KINDS,
-      limit: 100
-    },
-    {
-      authors: [pubkey],
-      kinds: [NDKKind.Metadata],
-      limit: 1
-    },
-    {
-      authors: [pubkey],
-      kinds: [NDKKind.VideoCurationSet, NDKKind.EventDeletion] // Playlists podem vir duplicadas/antigas
-    }
-  ];
-
-  // 3. Busca os eventos
-  const events = await ndk.fetchEvents(filters, {
-    groupable: true,
-    closeOnEose: true, // Fecha conexão ao terminar
-    cacheUsage: NDKSubscriptionCacheUsage.PARALLEL // Cache + Rede
-  });
+  const events = await fetchUserContentBundle(ndk, pubkey);
 
   // 4. Valida se veio algo
   if (!events || events.size === 0) {

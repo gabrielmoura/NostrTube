@@ -112,6 +112,13 @@ export const useUserStore = create<UserStore>()(
             (state) => {
               if (state.session) {
                 state.session.pushNotificationsEnabled = enabled;
+              } else {
+                state.session = {
+                  profile: {} as NDKUserProfile,
+                  darkTheme: false,
+                  nsfw: false,
+                  pushNotificationsEnabled: enabled
+                };
               }
             },
             false,
@@ -123,6 +130,13 @@ export const useUserStore = create<UserStore>()(
             (state) => {
               if (state.session) {
                 state.session.geoHash = geoHash;
+              } else {
+                state.session = {
+                  profile: {} as NDKUserProfile,
+                  darkTheme: false,
+                  nsfw: false,
+                  geoHash
+                };
               }
             },
             false,
@@ -143,7 +157,13 @@ export const useUserStore = create<UserStore>()(
         setRelays: (relays) => set((state) => {
           if (state.session) {
             state.session.relays = relays;
-
+          } else {
+            state.session = {
+              profile: {} as NDKUserProfile,
+              darkTheme: false,
+              nsfw: false,
+              relays
+            };
           }
         }, false, "setRelays"),
         blossom: {

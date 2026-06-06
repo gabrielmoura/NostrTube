@@ -2,14 +2,14 @@ import * as React from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useNDKCurrentPubkey } from "@nostr-dev-kit/ndk-hooks";
 import { getTagValue } from "@welshman/util";
-import { Download, ExternalLink, FileJson, Flag, ListPlus, Pencil, Send, Share2 } from "lucide-react";
+import { Download, ExternalLink, FileJson, Flag, ListPlus, Pencil, Send, ShieldAlert, Share2, Wrench } from "lucide-react";
 import { toast } from "sonner";
 import { Share } from "@capacitor/share";
 import type { NDKEvent } from "@nostr-dev-kit/ndk";
 import { copyText, getVideoDetails } from "@/helper/format";
 import AddToPlaylistModal from "@/routes/v/@components/AddToPlaylistModal";
 import { modal } from "@/components/modal_v2/modal-manager";
-import { ReportVideoModel } from "@/routes/v/@components/ReportVideoModal";
+import { ReportContentModal, ReportTechnicalModal } from "@/routes/v/@components/ReportVideoModal";
 import { useDownload } from "@/hooks/useDownload";
 
 export function useVideoMenuActions(event: NDKEvent) {
@@ -73,18 +73,29 @@ export function useVideoMenuActions(event: NDKEvent) {
       icon: <Pencil className="size-4" />,
       action: async () => {
         await navigate({
-          to: "/v/$eventId",
-          params: { eventId: getTagValue("d", event.tags) ?? "" }
+          to: "/v/$eventId/edit",
+          params: { eventId: event.encode() }
         });
       }
     }] : []),
     {
-      label: "Report Event",
-      icon: <Flag className="size-4 text-red-500" />,
-      action: () => modal.show(<ReportVideoModel data={{
+      label: "Notificar problema técnico",
+      icon: <Wrench className="size-4 text-amber-500" />,
+      action: () => modal.show(<ReportTechnicalModal data={{
         title: title || summary[0],
-        eventIdTag: event.tagId(),
-        id: event.id
+        id: event.id,
+        authorPubkey: event.pubkey,
+        relayUrls: import.meta.env.VITE_NOSTR_RELAYS
+      }} />)
+    },
+    {
+      label: "Reportar violação de conteúdo",
+      icon: <ShieldAlert className="size-4 text-red-500" />,
+      action: () => modal.show(<ReportContentModal data={{
+        title: title || summary[0],
+        id: event.id,
+        authorPubkey: event.pubkey,
+        relayUrls: import.meta.env.VITE_NOSTR_RELAYS
       }} />)
     },
     {

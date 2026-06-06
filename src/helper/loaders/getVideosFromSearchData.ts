@@ -1,10 +1,11 @@
-import NDK__default, { NDKEvent, type NDKFilter, NDKSubscriptionCacheUsage } from "@nostr-dev-kit/ndk";
+import NDK__default, { NDKEvent, type NDKFilter } from "@nostr-dev-kit/ndk";
 import { z } from "zod";
 import { nip19 } from "nostr-tools";
 import { startOfDay, subMonths, subWeeks, subYears } from "date-fns";
 import { sortEventsByImages } from "@/helper/format.ts";
 import { notFound } from "@tanstack/react-router";
 import { VIDEO_EVENT_KINDS } from "@/features/video/services/video-kinds";
+import { fetchEventsCached, getSearchRelayUrls } from "@/features/nostr/services/ndk-query.service";
 
 // --- Erros Personalizados ---
 export class VideoSearchError extends Error {
@@ -15,7 +16,7 @@ export class VideoSearchError extends Error {
 }
 
 export const eventSearchSchema = z.object({
-  search: z.string().optional(),
+  search: z.union([z.string(), z.number().transform((value) => String(value))]).optional(),
   tag: z.union([z.string(), z.array(z.string())]).optional(),
   nsfw: z.boolean().optional(),
   lang: z.string().optional(),
@@ -85,9 +86,7 @@ export async function getVideosFromSearchData({
 
   if (search) {
     filter.search = search;
-    filter["#t"] = [search];
   }
-  ;
   if (nsfw) filter["#content-warning"] = [""];
   if (tag) filter["#t"] = Array.isArray(tag) ? tag : [tag];
   if (lang && lang !== "all") filter["#l"] = [lang];
@@ -97,10 +96,9 @@ export async function getVideosFromSearchData({
   if (until) filter.until = until;
 
   try {
-    const eventsSet = await ndk.fetchEvents(filter, {
-      closeOnEose: false,
-      cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
-      relayUrls: import.meta.env.VITE_NOSTR_SEARCH_RELAYS
+    const eventsSet = await fetchEventsCached(ndk, filter, {
+      mode: until ? "cache-first" : "parallel",
+      relayUrls: getSearchRelayUrls()
     });
 
     const rawEvents = Array.from(eventsSet);

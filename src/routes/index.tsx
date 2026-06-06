@@ -26,7 +26,6 @@ export const Route = createFileRoute("/")({
 function IndexPageWithHelmet() {
   return (
     <div className="w-full pb-10">
-
       <div className="w-full space-y-6">
         <Tabs defaultValue="recent" className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-6">

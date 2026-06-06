@@ -10,6 +10,7 @@ export interface NostrUser {
 
 export interface VideoItem {
   id: string; // NIP-19 naddr ou event id
+  kind: number;
   title: string;
   description: string;
   thumbnailUrl: string;
@@ -17,6 +18,7 @@ export interface VideoItem {
   author: NostrUser;
   publishedAt: number;
   dTag?: string; // tag de evento na playlist
+  address?: string;
 }
 
 export interface Playlist {
