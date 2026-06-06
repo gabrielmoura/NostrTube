@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useNDK } from "@nostr-dev-kit/ndk-hooks";
 import { NDKBlossom } from "@nostr-dev-kit/ndk-blossom";
 import { toast } from "sonner";
@@ -8,18 +8,21 @@ import { useVideoUploadStore } from "@/store/videoUpload/useVideoUploadStore.ts"
 import { generateBlurhashFromImageFile, generateVideoThumbnailLocally } from "@/features/upload/services/local-media-processing.service";
 import { requestDvmThumbnails } from "@/features/upload/services/dvm-thumbnail.service";
 
-
 const logger = LoggerAgent.create("useVideoUploader");
 
 export function useVideoUploader() {
   const { ndk } = useNDK();
-  const [isLoading, setIsLoading] = useState(false);
-  const [progress, setProgress] = useState<number>(0);
-  const [errorCount, setErrorCount] = useState(0);
   const ndkRef = useRef(ndk);
 
   const setVideoUpload = useVideoUploadStore((s) => s.setVideoUpload);
   const setShowEventInput = useVideoUploadStore((s) => s.setShowEventInput);
+  const setUploadingState = useVideoUploadStore((s) => s.setUploadingState);
+  const setUploadProgress = useVideoUploadStore((s) => s.setUploadProgress);
+  const setUploadStage = useVideoUploadStore((s) => s.setUploadStage);
+  const setError = useVideoUploadStore((s) => s.setError);
+  const isLoading = useVideoUploadStore((s) => s.isUploading);
+  const progress = useVideoUploadStore((s) => s.uploadProgress);
+  const uploadStage = useVideoUploadStore((s) => s.uploadStage);
 
   useEffect(() => {
     ndkRef.current = ndk;
@@ -29,23 +32,25 @@ export function useVideoUploader() {
     const ndkInstance = ndkRef.current;
     if (!ndkInstance) return;
 
-    setIsLoading(true);
-    setProgress(0);
-    setErrorCount(0);
+    setUploadingState(true);
+    setUploadProgress(0);
+    setUploadStage("validating");
+    setError(undefined);
 
     const blossom = new NDKBlossom(ndkInstance);
     blossom.debug = import.meta.env.DEV;
 
-    // Configuração de Callbacks
     blossom.onUploadProgress = (p) => {
       const percentage = Math.round((p.loaded / p.total) * 100);
-      setProgress(percentage);
+      setUploadStage("uploading");
+      setUploadProgress(percentage);
       return "continue";
     };
 
     blossom.onUploadFailed = (err) => {
       logger.error("Upload failed", err);
-      setErrorCount((prev) => prev + 1);
+      setUploadStage("error");
+      setError(String(err));
       toast.error(`${t("Upload_failed")}: ${String(err)}`);
     };
 
@@ -61,6 +66,7 @@ export function useVideoUploader() {
 
       if (file.type.startsWith("video/")) {
         try {
+          setUploadStage("processing");
           const generated = await generateVideoThumbnailLocally(file);
           const thumbnailUpload = await blossom.upload(generated.file, {
             fallbackServer: import.meta.env.VITE_NOSTR_BLOSSOM_FALLBACK || undefined
@@ -87,7 +93,6 @@ export function useVideoUploader() {
       }
 
       const fallbackUrls = imeta.fallback ?? [];
-
 
       setVideoUpload({
         url: imeta.url,
@@ -118,17 +123,19 @@ export function useVideoUploader() {
         }]
       });
 
+      setUploadStage("complete");
+      setUploadProgress(100);
       toast.success(t("upload_success", "File uploaded successfully"));
       setShowEventInput(false);
-
     } catch (error) {
       logger.error("Fatal upload error", error);
+      setUploadStage("error");
+      setError(error instanceof Error ? error.message : String(error));
       toast.error(t("upload_error", "Error during file upload"));
-      setErrorCount((prev) => prev + 1);
     } finally {
-      setIsLoading(false);
+      setUploadingState(false);
     }
-  }, []);
+  }, [setError, setShowEventInput, setUploadProgress, setUploadStage, setUploadingState, setVideoUpload]);
 
-  return { upload, isLoading, progress, errorCount };
+  return { upload, isLoading, progress, uploadStage };
 }

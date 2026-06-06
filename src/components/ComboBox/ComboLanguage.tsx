@@ -46,6 +46,11 @@ export default function LanguagesCombo({
   }
 
   useEffect(() => {
+    setValue(controlledValue || null);
+  }, [controlledValue]);
+
+  useEffect(() => {
+    if (controlledValue) return;
     const newDef = detectLanguageMain()!;
     if (newDef) {
       const lang = COMBOBOX_LANGUAGES.find(l => l.id === newDef?.split("-")[0]);
@@ -54,7 +59,7 @@ export default function LanguagesCombo({
         onChange?.(lang);
       }
     }
-  }, [onChange, setValue]);
+  }, [controlledValue, onChange, setValue]);
 
   return (
     <Card className="w-full max-w-sm">

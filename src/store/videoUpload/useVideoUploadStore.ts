@@ -33,24 +33,20 @@ export interface VideoMetadata {
     originalUrl: string;
     metadata?: string;
   };
-
 }
 
 const DRAFT_KEY = "video-upload-draft";
 
 export interface VideoUploadState {
-  // Dados do vídeo
   videoData: Partial<VideoMetadata>;
-
-  // Estados de UI
+  currentStep: 1 | 2 | 3;
   isUploading: boolean;
   uploadProgress: number;
-  uploadStage: "idle" | "validating" | "uploading" | "mirroring" | "complete" | "error";
+  uploadStage: "idle" | "validating" | "uploading" | "processing" | "mirroring" | "complete" | "error";
   error?: string;
-  showEventInput: boolean; // Usado para importar vídeo de outros eventos
-
-  // Ações
+  showEventInput: boolean;
   setVideoData: (data: Partial<VideoMetadata>) => void;
+  setCurrentStep: (step: 1 | 2 | 3) => void;
   setIndexers: (indexers: string[]) => void;
   setHashtags: (hashtags: string[]) => void;
   setLanguage: (language?: string) => void;
@@ -66,14 +62,14 @@ export interface VideoUploadState {
   setSummary: (summary: string) => void;
   setContentWarning: (contentWarning: string) => void;
   setVideoUpload: (data: Partial<VideoMetadata>) => void;
-
-  // Ações de Persistência Manual
+  clearUploadedMedia: () => void;
   saveDraft: () => void;
   loadDraft: () => void;
 }
 
 const initialState = {
   videoData: {},
+  currentStep: 1 as const,
   isUploading: false,
   uploadProgress: 0,
   uploadStage: "idle" as const,
@@ -91,6 +87,11 @@ export const useVideoUploadStore = create<VideoUploadState>()(
           state.videoData = { ...state.videoData, ...data };
         }, false, "video/setVideoData"),
 
+      setCurrentStep: (step) =>
+        set((state) => {
+          state.currentStep = step;
+        }, false, "ui/setCurrentStep"),
+
       setIndexers: (indexers) =>
         set((state) => {
           state.videoData.indexers = indexers;
@@ -100,7 +101,6 @@ export const useVideoUploadStore = create<VideoUploadState>()(
         set((state) => {
           state.videoData.hashtags = hashtags;
         }, false, "video/setHashtags"),
-
 
       setLanguage: (language) =>
         set((state) => {
@@ -142,6 +142,31 @@ export const useVideoUploadStore = create<VideoUploadState>()(
           state.videoData = data;
         }, false, "video/setVideoUpload"),
 
+      clearUploadedMedia: () =>
+        set((state) => {
+          state.videoData.url = undefined;
+          state.videoData.fallback = undefined;
+          state.videoData.fileType = undefined;
+          state.videoData.fileHash = undefined;
+          state.videoData.fileSize = undefined;
+          state.videoData.duration = undefined;
+          state.videoData.dim = undefined;
+          state.videoData.mime_type = undefined;
+          state.videoData.imetaVideo = undefined;
+          state.videoData.imetaVariants = undefined;
+          state.videoData.imetaAudioTracks = undefined;
+          state.videoData.origin = undefined;
+          state.videoData.thumbnail = undefined;
+          state.isUploading = false;
+          state.uploadProgress = 0;
+          state.uploadStage = "idle";
+          state.error = undefined;
+          state.showEventInput = false;
+          if (state.currentStep > 1) {
+            state.currentStep = 1;
+          }
+        }, false, "video/clearUploadedMedia"),
+
       setUploadingState: (isUploading) =>
         set((state) => {
           state.isUploading = isUploading;
@@ -170,8 +195,8 @@ export const useVideoUploadStore = create<VideoUploadState>()(
       },
 
       saveDraft: () => {
-        const { videoData } = get();
-        const draft = JSON.stringify({ videoData });
+        const { videoData, currentStep } = get();
+        const draft = JSON.stringify({ videoData, currentStep });
         localStorage.setItem(DRAFT_KEY, draft);
         console.log("Rascunho salvo com sucesso!");
       },
@@ -183,10 +208,7 @@ export const useVideoUploadStore = create<VideoUploadState>()(
             const parsed = JSON.parse(draft);
             set((state) => {
               state.videoData = parsed.videoData || {};
-              // state.indexers = parsed.indexers || [];
-              // state.hashtags = parsed.hashtags || [];
-              // state.thumb = parsed.thumb;
-              // state.language = parsed.language;
+              state.currentStep = parsed.currentStep || 1;
             }, false, "video/loadDraft");
           } catch (e) {
             console.error("Falha ao carregar rascunho:", e);
