@@ -15,10 +15,19 @@ export const Route = createFileRoute("/search/")({
   component: RouteComponent,
   validateSearch: zodValidator(eventSearchSchema),
   loader: async ({ context: { ndk }, deps }) => {
+    const searchDeps = deps as {
+      search?: string;
+      nsfw?: boolean;
+      tag?: string | string[];
+      lang?: string;
+      author?: string;
+      timeRange?: "all" | "today" | "week" | "month" | "year";
+    };
     // Passamos o objeto consolidado para a função performática
     return getVideosFromSearchData({
       ndk,
-      ...deps
+      ...searchDeps,
+      timeRange: searchDeps.timeRange ?? "all"
     });
   },
   // Atualizar loaderDeps para incluir novos campos
@@ -92,14 +101,18 @@ function SearchResults() {
   } = useInfiniteQuery({
     queryKey: ["videoSearch", searchParams],
     queryFn: ({ pageParam }) => getVideosFromSearchData({
-      ndk, ...searchParams, until: pageParam
+      ndk,
+      ...searchParams,
+      timeRange: searchParams.timeRange ?? "all",
+      until: pageParam
     }),
     initialPageParam: undefined as number | undefined,
     // Conecta o loader data ao TanStack Query para evitar "loading" na primeira página
     initialData: { pages: [initialData], pageParams: [undefined] },
     getNextPageParam: (lastPage) => {
       if (!lastPage || lastPage.length < 20) return undefined;
-      return lastPage[lastPage.length - 1].created_at - 1;
+      const lastEvent = lastPage[lastPage.length - 1];
+      return lastEvent?.created_at ? lastEvent.created_at - 1 : undefined;
     }
   });
 
@@ -169,7 +182,7 @@ function SearchResults() {
                 ) : (
                   // Grid Original Preservado
                   <ul className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {rowVideos.map((e) => (
+                    {(rowVideos ?? []).map((e) => (
                       <li key={e.id} className="flex h-full animate-in fade-in duration-300">
                         <Link
                           to="/v/$eventId"

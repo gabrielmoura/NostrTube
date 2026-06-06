@@ -4,6 +4,8 @@ import { extractTag } from "@/helper/extractTag.ts";
 import { AgeEnum } from "@/store/store/sessionTypes.ts";
 import { getTags, getTagValue } from "@welshman/util";
 import { mapImetaTag } from "@nostr-dev-kit/ndk";
+import type { VideoAssetSet } from "@/features/video/services/video-imeta.service";
+import { normalizeVideoEventAssets } from "@/features/video/services/video-imeta.service";
 
 interface VideoSessionAction {
   clanSession: () => void,
@@ -24,6 +26,7 @@ export interface VideoMetaTypes {
   age?: AgeEnum,
   identification: string
   image?: string
+  assets?: VideoAssetSet
 }
 
 export interface VideoSession {
@@ -41,6 +44,8 @@ export const createVideoSlice: StateCreator<
     clanSession: () => set(() => ({ session: undefined }), false, "clanSession"),
     setVideo: (e) => {
       const tEvent = extractTag(e.tags);
+      const assets = normalizeVideoEventAssets(e.tags);
+      const primaryVariant = assets.variants[0];
       let url: string;
       if (getTags("imeta", e.tags).length > 0) {
         getTags("imeta", e.tags).forEach((imetaTag) => {
@@ -60,12 +65,12 @@ export const createVideoSlice: StateCreator<
           event: e,
           title: tEvent.title,
           summary: tEvent.summary,
-          url: url,
+          url: primaryVariant?.candidates[0]?.url ?? url,
           identification: e.dTag,
-          image: tEvent.image
+          image: primaryVariant?.posterUrls[0] ?? tEvent.image,
+          assets
         }
       }), false, "SetVideo");
     }
   });
 };
-

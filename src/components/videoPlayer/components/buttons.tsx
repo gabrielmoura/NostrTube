@@ -40,7 +40,7 @@ export const tooltipClass =
 //           BOTÕES              //
 // ----------------------------- //
 
-export function Play({ tooltipOffset = 0, tooltipPlacement }: MediaButtonProps) {
+export function Play({ tooltipOffset: _tooltipOffset = 0, tooltipPlacement }: MediaButtonProps) {
   const isPaused = useMediaState("paused");
 
   return (
@@ -56,7 +56,6 @@ export function Play({ tooltipOffset = 0, tooltipPlacement }: MediaButtonProps) 
       </Tooltip.Trigger>
       <Tooltip.Content
         className={tooltipClass}
-        sideOffset={tooltipOffset}
         placement={tooltipPlacement}
       >
         {isPaused ? "Play" : "Pause"}
@@ -65,7 +64,7 @@ export function Play({ tooltipOffset = 0, tooltipPlacement }: MediaButtonProps) 
   );
 }
 
-export function Mute({ tooltipOffset = 0, tooltipPlacement }: MediaButtonProps) {
+export function Mute({ tooltipOffset: _tooltipOffset = 0, tooltipPlacement }: MediaButtonProps) {
   const volume = useMediaState("volume");
   const isMuted = useMediaState("muted");
 
@@ -85,7 +84,6 @@ export function Mute({ tooltipOffset = 0, tooltipPlacement }: MediaButtonProps) 
       </Tooltip.Trigger>
       <Tooltip.Content
         className={tooltipClass}
-        sideOffset={tooltipOffset}
         placement={tooltipPlacement}
       >
         {isMuted ? "Unmute" : "Mute"}
@@ -95,7 +93,7 @@ export function Mute({ tooltipOffset = 0, tooltipPlacement }: MediaButtonProps) 
 }
 
 export function Caption({
-                          tooltipOffset = 0,
+                          tooltipOffset: _tooltipOffset = 0,
                           tooltipPlacement
                         }: MediaButtonProps) {
   const track = useMediaState("textTrack");
@@ -115,7 +113,6 @@ export function Caption({
       <Tooltip.Content
         className={tooltipClass}
         placement={tooltipPlacement}
-        sideOffset={tooltipOffset}
       >
         {isOn ? "Subtitles Off" : "Subtitles On"}
       </Tooltip.Content>
@@ -123,7 +120,7 @@ export function Caption({
   );
 }
 
-export function PIP({ tooltipOffset = 0, tooltipPlacement }: MediaButtonProps) {
+export function PIP({ tooltipOffset: _tooltipOffset = 0, tooltipPlacement }: MediaButtonProps) {
   const isActive = useMediaState("pictureInPicture");
   const Icon = isActive ? PictureInPictureExitIcon : PictureInPictureIcon;
 
@@ -137,7 +134,6 @@ export function PIP({ tooltipOffset = 0, tooltipPlacement }: MediaButtonProps) {
       <Tooltip.Content
         className={tooltipClass}
         placement={tooltipPlacement}
-        sideOffset={tooltipOffset}
       >
         {isActive ? "Exit PIP" : "Enter PIP"}
       </Tooltip.Content>
@@ -146,7 +142,7 @@ export function PIP({ tooltipOffset = 0, tooltipPlacement }: MediaButtonProps) {
 }
 
 export function Fullscreen({
-                             tooltipOffset = 0,
+                             tooltipOffset: _tooltipOffset = 0,
                              tooltipPlacement
                            }: MediaButtonProps) {
   const isActive = useMediaState("fullscreen");
@@ -162,7 +158,6 @@ export function Fullscreen({
       <Tooltip.Content
         className={tooltipClass}
         placement={tooltipPlacement}
-        sideOffset={tooltipOffset}
       >
         {isActive ? "Exit Fullscreen" : "Enter Fullscreen"}
       </Tooltip.Content>

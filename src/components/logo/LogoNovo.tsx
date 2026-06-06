@@ -1954,7 +1954,7 @@ export const LogoNovoIcon = (props: SVGProps<SVGSVGElement>) => (
     style={{
       shapeRendering: "geometricPrecision",
       textRendering: "geometricPrecision",
-      imageRendering: "optimizeQuality",
+      imageRendering: "auto",
       fillRule: "evenodd",
       clipRule: "evenodd"
     }}

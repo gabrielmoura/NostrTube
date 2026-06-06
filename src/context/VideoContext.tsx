@@ -8,11 +8,13 @@ import type { VideoMetaTypes } from "@/store/store/videoSession.ts";
 import { getTags, getTagValue } from "@welshman/util";
 import { mapImetaTag } from "@nostr-dev-kit/ndk";
 import { geVideoByEventIdData, type GeVideoByEventIdDataParams } from "@/helper/loaders/geVideoByEventIdData.ts";
+import { normalizeVideoEventAssets, type VideoAssetSet } from "@/features/video/services/video-imeta.service";
 
 export interface VideoContextType {
   eventId: string,
   event: NDKEvent,
   video: Partial<VideoMetaTypes>
+  assets: VideoAssetSet
 }
 
 // Crie o contexto para o App
@@ -22,7 +24,9 @@ export const VideoContext = createContext<Partial<VideoContextType>>({});
 function wrapSetVideo(setVideoState: (value: (((prevState: Partial<VideoMetaTypes>) => Partial<VideoMetaTypes>) | Partial<VideoMetaTypes>)) => void) {
   return (event: NDKEvent) => {
     const tEvent = extractTag(event.tags);
-    let url: string;
+    const assets = normalizeVideoEventAssets(event.tags);
+    const primaryVariant = assets.variants[0];
+    let url = "";
     let image: string | undefined;
     let fallbacks: string[] | undefined;
 
@@ -34,7 +38,7 @@ function wrapSetVideo(setVideoState: (value: (((prevState: Partial<VideoMetaType
           url = imeta.url;
         }
         if (imeta.image) {
-          image = imeta.image;
+          image = Array.isArray(imeta.image) ? imeta.image[0] : imeta.image;
         }
         if (imeta.fallback) {
           fallbacks = imeta.fallback;
@@ -44,14 +48,17 @@ function wrapSetVideo(setVideoState: (value: (((prevState: Partial<VideoMetaType
       url = tEvent.url ?? getTagValue("src", event.tags)!;
     }
 
+    const resolvedUrl = primaryVariant?.candidates[0]?.url ?? url ?? "";
+
     setVideoState({
       event: event,
       title: tEvent.title,
       summary: tEvent.summary,
-      url: url,
+      url: resolvedUrl,
       identification: event.dTag,
-      image: tEvent.image || image,
-      fallbacks: fallbacks
+      image: primaryVariant?.posterUrls[0] ?? tEvent.image ?? image,
+      fallbacks: primaryVariant?.candidates.slice(1).map((candidate) => candidate.url) ?? fallbacks,
+      assets
     });
   };
 }
@@ -66,7 +73,7 @@ export function VideoProvider({ children, event }: {
   const { eventId } = useParams({ from: "/v/$eventId" });
 
   const [isNotFound, setNotFound] = useState(false);
-  const [video, setVideoState] = useState<Partial<VideoMetaTypes>>(null);
+  const [video, setVideoState] = useState<Partial<VideoMetaTypes>>({});
 
   useEffect(() => {
     if (event) {
@@ -92,7 +99,7 @@ export function VideoProvider({ children, event }: {
   }
 
   return <VideoContext.Provider
-    value={{ eventId: eventId as string, event, video }}>{children}</VideoContext.Provider>;
+    value={{ eventId: eventId as string, event, video, assets: video?.assets ?? { variants: [], audioTracks: [] } }}>{children}</VideoContext.Provider>;
 }
 
 // Crie um hook personalizado para acessar o contexto do App

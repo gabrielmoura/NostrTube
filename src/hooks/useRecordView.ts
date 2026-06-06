@@ -66,7 +66,7 @@ export function useRecordView(): useRecordView {
       // 2. Tenta buscar um evento de visualização existente para este usuário e identificador
       const existingViewEvent: NDKEvent | null = await ndk.fetchEvent({
         authors: [pubKey],
-        kinds: [NostrKind.VideoViewer as NDKKind],
+        kinds: [NostrKind.VideoViewer as unknown as NDKKind],
         "#a": [eventIdentifier]
       });
 
@@ -98,7 +98,7 @@ export function useRecordView(): useRecordView {
         ndk,
         event: {
           content: "",
-          kind: NostrKind.VideoViewer as NDKKind,
+          kind: NostrKind.VideoViewer as unknown as NDKKind,
           tags: tags,
           created_at: nostrNow(),
           pubkey: pubKey
@@ -140,7 +140,7 @@ export function useRecordView(): useRecordView {
 
     const events: Set<NDKEvent> = await ndk.fetchEvents(
       [{
-        kinds: [NostrKind.VideoViewer as NDKKind],
+        kinds: [NostrKind.VideoViewer as unknown as NDKKind],
         "#a": [eventIdentifier]
       }], {
         // Usar CACHE_FIRST para obter resultados rapidamente, e CACHE_THEN_RELAY para atualizar

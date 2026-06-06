@@ -3,9 +3,9 @@ import react from "@vitejs/plugin-react-swc";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 import legacy from "@vitejs/plugin-legacy";
-import VitePaths from "vite-tsconfig-paths";
-import { tanstackRouter } from "@tanstack/router-plugin/vite";
+// import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import wasm from "vite-plugin-wasm";
+// @ts-expect-error vite-plugin-sri does not publish types.
 import sri from "vite-plugin-sri";
 import path from "path";
 import envSchemaValidate from "./envSchema.ts";
@@ -15,7 +15,6 @@ export default defineConfig(({ mode }) => {
   // Load environment variables based on the current mode
   const env = loadEnv(mode, process.cwd(), ""); // The third argument is the prefix for client-side variables (e.g., 'VITE_')
   const chunkVideo = ["node_modules/@vidstack/react", "hls.js", "dashjs"];
-  const chunkIcons = ["react-icons", "@heroicons/react", "media-icons", "lucide-react"];
   // const chunkI18next = ['i18next', 'i18next-browser-languagedetector', 'i18next-http-backend']
   // const chunckCore = ['src', '@nostr-dev-kit', '@radix-ui', '@tanstack', 'react', 'zustand']
 
@@ -31,6 +30,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     resolve: {
+      tsconfigPaths: true,
       alias: {
         "@": path.resolve(__dirname, "./src")
       }
@@ -97,12 +97,11 @@ export default defineConfig(({ mode }) => {
         modernPolyfills: ["es.promise.finally"],
         targets: ["defaults", "not IE 11"]
       }),
-      VitePaths(),
-      tanstackRouter({
-        target: "react",
-        autoCodeSplitting: true,
-        routeFileIgnorePrefix: "@"
-      }),
+      // tanstackRouter({
+      //   target: "react",
+      //   autoCodeSplitting: true,
+      //   routeFileIgnorePrefix: "@"
+      // }),
       wasm(),
       sri(),
       envSchemaValidate()

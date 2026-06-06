@@ -1,13 +1,12 @@
 import { formatNumber, getVideoDetails } from "@/helper/format.ts";
 import { relativeTime } from "@/helper/date.ts";
-import type { VideoActionsProps } from "@/routes/v/@components/VideoActions.tsx";
 import { useEffect, useState } from "react";
 import { Spinner } from "@radix-ui/themes";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/videoPlayer/components/Tooltip.tsx";
 import { useRecordView } from "@/hooks/useRecordView.ts";
 import { useNDK } from "@nostr-dev-kit/ndk-hooks";
 
-export default function VideoMeta({ event }: VideoActionsProps) {
+export default function VideoMeta({ event }: { event: Parameters<typeof getVideoDetails>[0] }) {
   const [count, setCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const { ndk } = useNDK();

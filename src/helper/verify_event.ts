@@ -1,15 +1,14 @@
 import { LoggerAgent } from "@/lib/debug.ts";
 import type { SignedEvent } from "@welshman/util/dist/util/src/Events";
-import type { NostrWasm } from "nostr-wasm";
 import * as nip19 from "nostr-tools/nip19";
 
 
 const log = LoggerAgent.create("NOSTR_WASM");
 
 // Lazily initialize WebAssembly and store the instance
-let nostrWasmInstance: NostrWasm | null = null;
+let nostrWasmInstance: NostrWasmInstance | null = null;
 
-async function getWasmInstance(): Promise<NostrWasm> {
+async function getWasmInstance(): Promise<NostrWasmInstance> {
   if (nostrWasmInstance) {
     return nostrWasmInstance;
   }
@@ -85,3 +84,8 @@ export function fromHex(hex: string): Uint8Array<ArrayBuffer> {
     parseInt(hex.slice(i * 2, i * 2 + 2), 16)
   );
 }
+type NostrWasmInstance = {
+  verifyEvent: (event: SignedEvent) => void;
+  generateSecretKey: () => Uint8Array<ArrayBuffer>;
+  getPublicKey: (sk: Uint8Array<ArrayBuffer>) => Uint8Array<ArrayBuffer>;
+};

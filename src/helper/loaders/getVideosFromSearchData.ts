@@ -1,13 +1,13 @@
-import NDK__default, { NDKEvent, type NDKFilter, NDKKind, NDKSubscriptionCacheUsage } from "@nostr-dev-kit/ndk";
+import NDK__default, { NDKEvent, type NDKFilter, NDKSubscriptionCacheUsage } from "@nostr-dev-kit/ndk";
 import { z } from "zod";
 import { nip19 } from "nostr-tools";
 import { startOfDay, subMonths, subWeeks, subYears } from "date-fns";
 import { sortEventsByImages } from "@/helper/format.ts";
 import { notFound } from "@tanstack/react-router";
+import { VIDEO_EVENT_KINDS } from "@/features/video/services/video-kinds";
 
 // --- Erros Personalizados ---
 export class VideoSearchError extends Error {
-  // @ts-expect-error code is valid
   constructor(message: string, public code = "SEARCH_ERROR") {
     super(message);
     this.name = "VideoSearchError";
@@ -79,7 +79,7 @@ export async function getVideosFromSearchData({
 }): Promise<NDKEvent[]> {
 
   const filter: NDKFilter = {
-    kinds: [NDKKind.Video, NDKKind.HorizontalVideo],
+    kinds: VIDEO_EVENT_KINDS,
     limit: 40 // Aumentamos um pouco o limite para compensar as deduplicações
   };
 

@@ -3,6 +3,7 @@ import type { NDKEvent, NDKFilter } from "@nostr-dev-kit/ndk";
 import NDK, { NDKKind, NDKSubscriptionCacheUsage } from "@nostr-dev-kit/ndk";
 import { notFound } from "@tanstack/react-router";
 import { deduplicateParameterizedEvents } from "@/helper/format.ts";
+import { VIDEO_EVENT_KINDS } from "@/features/video/services/video-kinds";
 
 
 export type GetVideosFromUserDataParams = {
@@ -66,7 +67,7 @@ export async function getVideosFromUserData({ ndk, userId }: GetVideosFromUserDa
   const filters: NDKFilter[] = [
     {
       authors: [pubkey],
-      kinds: [NDKKind.Video, NDKKind.HorizontalVideo],
+      kinds: VIDEO_EVENT_KINDS,
       limit: 100
     },
     {

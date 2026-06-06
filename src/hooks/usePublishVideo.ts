@@ -1,16 +1,15 @@
 import { useMutation } from "@tanstack/react-query";
 import { useNDK, useNDKCurrentUser } from "@nostr-dev-kit/ndk-hooks";
-import { NDKEvent, NDKKind } from "@nostr-dev-kit/ndk";
+import { NDKEvent } from "@nostr-dev-kit/ndk";
 import { nip19 } from "nostr-tools";
 import { toast } from "sonner";
 import { useNavigate } from "@tanstack/react-router";
 import { t } from "i18next";
 import { makeEvent, type MakeEventParams } from "@/helper/pow/pow.ts";
-import { generateVideoTags } from "@/hooks/gentTags.ts";
-import { nostrNow } from "@/helper/date.ts";
 
 import { LoggerAgent } from "@/lib/debug.ts";
 import { useVideoUploadStore, type VideoMetadata } from "@/store/videoUpload/useVideoUploadStore.ts";
+import { buildAddressableVideoEvent } from "@/features/upload/services/video-event-builder.service";
 
 const log = LoggerAgent.create("usePublishVideo");
 
@@ -30,8 +29,8 @@ export function usePublishVideo() {
         const nip19Encode = nip19.naddrEncode({
           identifier: event.dTag!,
           relays: import.meta.env.PROD
-            ? import.meta.env.VITE_NOSTR_RELAYS?.split(",")
-            : import.meta.env.VITE_NOSTR_DEV_RELAYS?.split(","),
+            ? import.meta.env.VITE_NOSTR_RELAYS
+            : import.meta.env.VITE_NOSTR_DEV_RELAYS,
           pubkey: event.pubkey,
           kind: event.kind!
         });
@@ -59,25 +58,21 @@ export function usePublishVideo() {
     if (!snap.url || !snap.title) {
       toast.warning(t("missing_fields", "Please fill in all required fields"));
       return;
-    }
+      }
 
-    try {
-      const tags = generateVideoTags({
-        ...snap,
-        currentPubkey: currentUser.pubkey
-      });
+      try {
+        const addressableEvent = buildAddressableVideoEvent({
+          draft: snap,
+          currentPubkey: currentUser.pubkey
+        });
 
-      mutation.mutate({
-        ndk,
-        event: {
-          tags,
-          pubkey: currentUser.pubkey,
-          kind: NDKKind.Video,
-          content: snap.summary ?? "",
-          created_at: nostrNow()
-        },
-        difficulty: 16
-      });
+        mutation.mutate({
+          ndk,
+          event: {
+            ...addressableEvent
+          },
+          difficulty: 16
+        });
     } catch (err) {
       log.error("error preparing event", err);
       toast.error("Error preparing event");

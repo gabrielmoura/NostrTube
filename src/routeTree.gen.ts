@@ -15,7 +15,7 @@ import { Route as SearchIndexRouteImport } from './routes/search/index'
 import { Route as NewIndexRouteImport } from './routes/new/index'
 import { Route as FaqIndexRouteImport } from './routes/faq/index'
 import { Route as ConfigurarionIndexRouteImport } from './routes/configurarion/index'
-import { Route as VEventIdRouteImport } from './routes/v/$eventId'
+import { Route as vEventIdRouteImport } from './routes/v/$eventId'
 import { Route as UUserIdRouteImport } from './routes/u/$userId'
 import { Route as PNewRouteImport } from './routes/p/new'
 import { Route as PListIdRouteImport } from './routes/p/$listId'
@@ -51,7 +51,7 @@ const ConfigurarionIndexRoute = ConfigurarionIndexRouteImport.update({
   path: '/configurarion/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VEventIdRoute = VEventIdRouteImport.update({
+const vEventIdRoute = vEventIdRouteImport.update({
   id: '/v/$eventId',
   path: '/v/$eventId',
   getParentRoute: () => rootRouteImport,
@@ -82,7 +82,7 @@ export interface FileRoutesByFullPath {
   '/p/$listId': typeof PListIdRoute
   '/p/new': typeof PNewRoute
   '/u/$userId': typeof UUserIdRoute
-  '/v/$eventId': typeof VEventIdRoute
+  '/v/$eventId': typeof vEventIdRoute
   '/configurarion': typeof ConfigurarionIndexRoute
   '/faq': typeof FaqIndexRoute
   '/new': typeof NewIndexRoute
@@ -95,7 +95,7 @@ export interface FileRoutesByTo {
   '/p/$listId': typeof PListIdRoute
   '/p/new': typeof PNewRoute
   '/u/$userId': typeof UUserIdRoute
-  '/v/$eventId': typeof VEventIdRoute
+  '/v/$eventId': typeof vEventIdRoute
   '/configurarion': typeof ConfigurarionIndexRoute
   '/faq': typeof FaqIndexRoute
   '/new': typeof NewIndexRoute
@@ -109,7 +109,7 @@ export interface FileRoutesById {
   '/p/$listId': typeof PListIdRoute
   '/p/new': typeof PNewRoute
   '/u/$userId': typeof UUserIdRoute
-  '/v/$eventId': typeof VEventIdRoute
+  '/v/$eventId': typeof vEventIdRoute
   '/configurarion/': typeof ConfigurarionIndexRoute
   '/faq/': typeof FaqIndexRoute
   '/new/': typeof NewIndexRoute
@@ -164,7 +164,7 @@ export interface RootRouteChildren {
   PListIdRoute: typeof PListIdRoute
   PNewRoute: typeof PNewRoute
   UUserIdRoute: typeof UUserIdRoute
-  VEventIdRoute: typeof VEventIdRoute
+  vEventIdRoute: typeof vEventIdRoute
   ConfigurarionIndexRoute: typeof ConfigurarionIndexRoute
   FaqIndexRoute: typeof FaqIndexRoute
   NewIndexRoute: typeof NewIndexRoute
@@ -221,7 +221,7 @@ declare module '@tanstack/react-router' {
       id: '/v/$eventId'
       path: '/v/$eventId'
       fullPath: '/v/$eventId'
-      preLoaderRoute: typeof VEventIdRouteImport
+      preLoaderRoute: typeof vEventIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/u/$userId': {
@@ -260,7 +260,7 @@ const rootRouteChildren: RootRouteChildren = {
   PListIdRoute: PListIdRoute,
   PNewRoute: PNewRoute,
   UUserIdRoute: UUserIdRoute,
-  VEventIdRoute: VEventIdRoute,
+  vEventIdRoute: vEventIdRoute,
   ConfigurarionIndexRoute: ConfigurarionIndexRoute,
   FaqIndexRoute: FaqIndexRoute,
   NewIndexRoute: NewIndexRoute,

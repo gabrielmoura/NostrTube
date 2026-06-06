@@ -1,4 +1,4 @@
-import { Outlet, type Redirect, useNavigate } from "@tanstack/react-router";
+import { Outlet, useNavigate } from "@tanstack/react-router";
 import { useNDKCurrentUser } from "@nostr-dev-kit/ndk-hooks";
 import { type ComponentType, useEffect } from "react";
 import { toast } from "sonner";

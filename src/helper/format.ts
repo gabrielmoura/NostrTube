@@ -163,7 +163,16 @@ export function formatNumber(number: number): string {
  * @param {NDKEvent} event - O evento Nostr a ser processado.
  * @returns {Object} Objeto contendo url, autor, data de publicação, thumbnail, título e resumo.
  */
-export function getVideoDetails(event: NDKEvent): object {
+export interface VideoDetails {
+  url: string;
+  author: string;
+  publishedAt: number;
+  thumbnail: string[];
+  title: string;
+  summary: string[] | string;
+}
+
+export function getVideoDetails(event: NDKEvent): VideoDetails {
   const url = getTagValues("url", event.tags)[0] ?? "";
   return {
     url: url,

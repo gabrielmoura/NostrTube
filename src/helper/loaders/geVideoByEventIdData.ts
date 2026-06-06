@@ -63,12 +63,12 @@ export async function geVideoByEventIdData({ ndk, eventId }: GeVideoByEventIdDat
     ];
   } else {
     filters = [
-      {
-        "#d": [eventId],
-        kinds: [NDKKind.Video, NDKKind.HorizontalVideo],
-        limit: 1
-      }
-    ];
+        {
+          "#d": [eventId],
+          kinds: [NDKKind.Video, NDKKind.HorizontalVideo, 34235, 34236],
+          limit: 1
+        }
+      ];
   }
 
   const event = await ndk.fetchEvent(filters, {

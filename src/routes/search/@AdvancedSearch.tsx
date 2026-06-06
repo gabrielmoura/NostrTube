@@ -71,7 +71,7 @@ export function AdvancedSearch() {
     if (tags.length === 0) delete cleanData.tag;
 
     navigate({
-      to: "/search/",
+      to: "/search",
       search: cleanData as any
     });
   };

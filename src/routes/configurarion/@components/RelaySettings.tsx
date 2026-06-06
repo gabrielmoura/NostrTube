@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type MouseEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { checkLatency } from "@/helper/checkLatency.ts";
 import { Activity, AlertCircle, RefreshCw, Wifi } from "lucide-react";
@@ -171,7 +171,7 @@ export const RelaySettings = () => {
                     variant="ghost"
                     size="icon"
                     className="p-0 hover:bg-zinc-350 dark:hover:bg-zinc-700 transition-colors"
-                    onClick={(e) => {
+                    onClick={(e: MouseEvent<HTMLButtonElement>) => {
                       e.preventDefault();
                       e.stopPropagation();
                       forcePing(relayUrl);

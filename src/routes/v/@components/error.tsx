@@ -47,7 +47,9 @@ export class ErrorBoundaryVideo extends Component<Props, State> {
     // Idealmente, você logaria o erro em um serviço externo aqui
     // Ex: Sentry, LogRocket, DataDog, etc.
     console.error("Uncaught error in <ErrorBoundaryVideo />:", error, errorInfo);
-    navigator.sendBeacon(import.meta.env.VITE_BEACON_URL, JSON.stringify(error));
+    if (import.meta.env.VITE_BEACON_URL) {
+      navigator.sendBeacon(import.meta.env.VITE_BEACON_URL, JSON.stringify(error));
+    }
   }
 
   public render() {

@@ -1,0 +1,101 @@
+import * as React from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { useNDKCurrentPubkey } from "@nostr-dev-kit/ndk-hooks";
+import { getTagValue } from "@welshman/util";
+import { Download, ExternalLink, FileJson, Flag, ListPlus, Pencil, Send, Share2 } from "lucide-react";
+import { toast } from "sonner";
+import { Share } from "@capacitor/share";
+import type { NDKEvent } from "@nostr-dev-kit/ndk";
+import { copyText, getVideoDetails } from "@/helper/format";
+import AddToPlaylistModal from "@/routes/v/@components/AddToPlaylistModal";
+import { modal } from "@/components/modal_v2/modal-manager";
+import { ReportVideoModel } from "@/routes/v/@components/ReportVideoModal";
+import { useDownload } from "@/hooks/useDownload";
+
+export function useVideoMenuActions(event: NDKEvent) {
+  const navigate = useNavigate();
+  const currentPubkey = useNDKCurrentPubkey();
+  const rawEvent = event.rawEvent();
+  const { url, title, summary } = getVideoDetails(event);
+  const naddr = event.encode();
+  const dTag = event.dTag;
+  const { downloadFile } = useDownload();
+
+  const handleDownload = React.useCallback(() => {
+    const promise = downloadFile(url, title);
+    toast.promise(promise, {
+      success: "Video has been downloaded",
+      error: "Video download fail"
+    });
+  }, [downloadFile, title, url]);
+
+  const handleShare = React.useCallback(() => {
+    const shareUrl = `${import.meta.env.VITE_PUBLIC_ROOT_DOMAIN ?? "https://nostrtube.com"}/v/${dTag || naddr}`;
+
+    if ((navigator as Navigator).share) {
+      Share.share({
+        title,
+        text: title,
+        url: shareUrl
+      }).catch(console.log);
+      return;
+    }
+
+    copyText(shareUrl).then(() => toast.success("Link copied!"));
+  }, [dTag, naddr, title]);
+
+  return React.useMemo(() => ([
+    {
+      label: "Share video",
+      icon: <Share2 className="size-4" />,
+      action: handleShare
+    },
+    {
+      label: "Add to Playlist",
+      icon: <ListPlus className="size-4" />,
+      action: () => {
+        const dTagId = event.dTag ?? "";
+        modal.show(<AddToPlaylistModal eventIdTag={`${event.kind}:${event.pubkey}:${dTagId}`} />);
+      }
+    },
+    {
+      label: "Download video",
+      icon: <Download className="size-4" />,
+      action: handleDownload
+    },
+    {
+      label: "Copy raw event",
+      icon: <FileJson className="size-4" />,
+      action: () => copyText(JSON.stringify(rawEvent)).then(() => toast.success("Copied event"))
+    },
+    ...(currentPubkey === event.author.pubkey ? [{
+      label: "Edit Event",
+      icon: <Pencil className="size-4" />,
+      action: async () => {
+        await navigate({
+          to: "/v/$eventId",
+          params: { eventId: getTagValue("d", event.tags) ?? "" }
+        });
+      }
+    }] : []),
+    {
+      label: "Report Event",
+      icon: <Flag className="size-4 text-red-500" />,
+      action: () => modal.show(<ReportVideoModel data={{
+        title: title || summary[0],
+        eventIdTag: event.tagId(),
+        id: event.id
+      }} />)
+    },
+    {
+      label: "View on NJump",
+      icon: <ExternalLink className="size-4" />,
+      action: () => window.open(`https://njump.me/${event.id}`, "_blank")
+    },
+    {
+      label: "Open Native",
+      icon: <Send className="size-4" />,
+      action: () => window.open(`nostr://${naddr}`)
+    }
+  ]), [currentPubkey, dTag, event, handleDownload, handleShare, naddr, navigate, rawEvent, summary, title]);
+}

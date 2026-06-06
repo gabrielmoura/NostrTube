@@ -21,10 +21,18 @@ export interface VideoMetadata {
   dim: string;
   mime_type: string;
   imetaVideo: NDKImetaTag;
+  imetaVariants?: NDKImetaTag[];
+  imetaAudioTracks?: NDKImetaTag[];
   imetaThumb: NDKImetaTag;
   imetaImage: NDKImetaTag;
   age: AgeEnum;
   language?: string;
+  origin?: {
+    platform: string;
+    externalId: string;
+    originalUrl: string;
+    metadata?: string;
+  };
 
 }
 

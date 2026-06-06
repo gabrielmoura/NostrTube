@@ -17,6 +17,7 @@ import { DropdownMenuProfile } from "@/routes/u/@components/DropdownMenuProfile.
 import { PlaylistCard } from "@/routes/u/@components/PlaylistCard.tsx";
 import { nip19 } from "nostr-tools";
 import { z } from "zod"; // Extraído para arquivo separado
+import { VIDEO_EVENT_KINDS } from "@/features/video/services/video-kinds";
 
 export const ProfilePageSchema = z.object({
   tab: z.enum(["videos", "playlists", "about"]).optional()
@@ -66,7 +67,7 @@ function ProfilePage() {
   const userProfile = metaEvent ? JSON.parse(metaEvent.content) as NDKUserProfile : null;
 
   // Separação de eventos por tipo
-  const videos = [...events].filter(e => [NDKKind.Video, NDKKind.HorizontalVideo].includes(e.kind as number));
+  const videos = [...events].filter(e => VIDEO_EVENT_KINDS.includes(e.kind as number));
   // Mock de playlists (assumindo que o loader traria Kind 30001 também)
   const playlists = [...events].filter(e => e.kind === NDKKind.VideoCurationSet);
 

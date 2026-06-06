@@ -38,7 +38,7 @@ function ProfileMenuHeader() {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-48">
         <DropdownMenuItem asChild>
-          <Link to="/u/$userId" params={{ userId: currentPubkey }}>
+          <Link to="/u/$userId" params={{ userId: currentPubkey ?? "" }}>
             Your Profile
           </Link>
         </DropdownMenuItem>

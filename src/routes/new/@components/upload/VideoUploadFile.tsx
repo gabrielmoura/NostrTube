@@ -15,7 +15,7 @@ import { useVideoUploadStore } from "@/store/videoUpload/useVideoUploadStore.ts"
 export default function VideoUploadFile() {
   const { upload, isLoading, progress, errorCount } = useVideoUploader();
   // Estado local apenas para preview da imagem/nome antes do upload começar
-  const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [, setPreviewFile] = useState<File | null>(null);
   const setShowEventInput = useVideoUploadStore((s) => s.setShowEventInput);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {

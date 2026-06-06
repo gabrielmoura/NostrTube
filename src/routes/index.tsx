@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { t } from "i18next";
-import { NDKEvent, NDKKind } from "@nostr-dev-kit/ndk";
+import { NDKEvent } from "@nostr-dev-kit/ndk";
 import { NDKSubscriptionCacheUsage, useSubscribe } from "@nostr-dev-kit/ndk-hooks";
 import { uniqBy } from "ramda";
 import { getTagValue, getTagValues } from "@welshman/util";
@@ -11,9 +11,10 @@ import { detectLanguageMain } from "@/helper/userLang.ts";
 import { Section, SectionContent, SectionHeader, SectionTitle } from "@/components/containers/pageSection";
 import VideoCard, { VideoCardLoading } from "@/components/cards/videoCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs.tsx";
+import { VIDEO_EVENT_KINDS } from "@/features/video/services/video-kinds";
 
 // --- Constantes ---
-const VIDEO_KINDS = [NDKKind.Video, NDKKind.HorizontalVideo];
+const VIDEO_KINDS = VIDEO_EVENT_KINDS;
 const SEARCH_RELAYS = import.meta.env.VITE_NOSTR_SEARCH_RELAYS?.length > 5
   ? import.meta.env.VITE_NOSTR_SEARCH_RELAYS
   : undefined;
@@ -198,7 +199,7 @@ function LanguageVideos() {
 function PopularVideos() {
   // 1. Busca eventos de View Count (Kind 34237)
   const { events: viewEvents } = useSubscribe([{
-    kinds: [34237],
+      kinds: [34237 as never],
     limit: 100,
     until: Math.floor(Date.now() / 1000)
   }], {
@@ -221,7 +222,7 @@ function PopularVideos() {
   // 3. Busca os vídeos baseados nos IDs encontrados
   const { events: videoEvents } = useSubscribe(
     popularVideoIds.length > 0 ? [{
-      kinds: VIDEO_KINDS,
+        kinds: VIDEO_KINDS,
       "#d": popularVideoIds, // Correção: filtro por tag 'd' geralmente é '#d' em queries genéricas ou 'd' dependendo do relay wrapper
       limit: 50
     }] : [], // Evita query vazia

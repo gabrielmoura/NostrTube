@@ -276,3 +276,5 @@ next-env.d.ts
 keystore.jks
 app_spec.md
 stats.html
+.agents
+docs

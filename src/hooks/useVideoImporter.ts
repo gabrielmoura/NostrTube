@@ -4,6 +4,7 @@ import { nip19 } from "nostr-tools";
 import { getTagValue, getTagValues } from "@welshman/util";
 import { toast } from "sonner";
 import { useVideoUploadStore } from "@/store/videoUpload/useVideoUploadStore.ts";
+import { normalizeVideoEventAssets } from "@/features/video/services/video-imeta.service";
 
 export function useVideoImporter() {
   const { ndk } = useNDK();
@@ -20,25 +21,25 @@ export function useVideoImporter() {
     setIsImporting(true);
     try {
       // Decodificação segura
-      let data, type;
+      let data: nip19.AddressPointer | nip19.EventPointer;
+      let type: "naddr" | "nevent";
       try {
         const decoded = nip19.decode(eventString);
-        data = decoded.data;
+        if (decoded.type !== "naddr" && decoded.type !== "nevent") {
+          throw new Error("Tipo não suportado. Use nevent ou naddr.");
+        }
+        data = decoded.data as nip19.AddressPointer | nip19.EventPointer;
         type = decoded.type;
       } catch (e) {
         throw new Error("Formato inválido (deve ser nevent ou naddr)");
       }
 
-      if (!["naddr", "nevent"].includes(type)) {
-        throw new Error("Tipo não suportado. Use nevent ou naddr.");
-      }
-
       // Construção do Filtro
       const filters: any = { limit: 1 };
-      if (data.kind) filters.kinds = [data.kind];
-      if (data.pubkey) filters.authors = [data.pubkey];
-      if (data.identifier) filters["#d"] = [data.identifier];
-      if (data.id) filters.ids = [data.id];
+      if ("kind" in data && data.kind) filters.kinds = [data.kind];
+      if ("pubkey" in data && data.pubkey) filters.authors = [data.pubkey];
+      if ("identifier" in data && data.identifier) filters["#d"] = [data.identifier];
+      if ("id" in data && data.id) filters.ids = [data.id];
 
       // Busca
       const eventsSet = await ndk.fetchEvents(filters);
@@ -47,33 +48,61 @@ export function useVideoImporter() {
       if (!event) throw new Error("Evento não encontrado nos relays conectados.");
 
       // Extração de Dados (Parsing)
-      const url = getTagValue("url", event.tags);
-      if (!url) throw new Error("Este evento não possui uma tag 'url' válida.");
-
       const title = getTagValue("title", event.tags) || getTagValue("name", event.tags);
       const summary = getTagValue("summary", event.tags) ?? event.content;
       const thumbnail = getTagValue("thumb", event.tags) || getTagValue("image", event.tags);
+      const assetSet = normalizeVideoEventAssets(event.tags);
+      const primaryVariant = assetSet.variants[0];
+      const url = primaryVariant?.candidates[0]?.url ?? getTagValue("url", event.tags);
+      if (!url) throw new Error("Este evento nao possui nenhuma fonte de video reproduzivel.");
 
       // IMETA Tags
       const imeta = {
-        url: url,
+        url: primaryVariant?.candidates[0]?.url ?? url,
         size: Number(getTagValue("size", event.tags)) || undefined,
-        m: getTagValue("m", event.tags),
-        dim: getTagValue("dim", event.tags),
+        m: primaryVariant?.mimeType ?? getTagValue("m", event.tags),
+        dim: primaryVariant?.dimension ?? getTagValue("dim", event.tags),
         blurhash: getTagValue("blurhash", event.tags),
-        x: getTagValue("x", event.tags),
-        fallback: getTagValues("fallback", event.tags),
-        duration: Number(getTagValue("duration", event.tags)) || undefined
+        x: primaryVariant?.hash ?? getTagValue("x", event.tags),
+        fallback: primaryVariant?.candidates.slice(1).map((candidate) => candidate.url) ?? getTagValues("fallback", event.tags),
+        duration: primaryVariant?.duration ?? (Number(getTagValue("duration", event.tags)) || undefined)
       };
 
       // Atualização da Store
       setVideoUpload({
-        url,
+        url: primaryVariant?.candidates[0]?.url ?? url,
         title,
         summary,
-        thumbnail,
+        thumbnail: primaryVariant?.posterUrls[0] ?? thumbnail,
+        mime_type: primaryVariant?.mimeType,
         imetaVideo: imeta as any,
-        fallback: imeta.fallback
+        imetaVariants: assetSet.variants.map((variant) => ({
+          url: variant.candidates[0]?.url,
+          m: variant.mimeType,
+          dim: variant.dimension,
+          x: variant.hash,
+          blurhash: variant.blurhash,
+          duration: variant.duration?.toString(),
+          bitrate: variant.bitrate?.toString(),
+          image: variant.posterUrls[0],
+          fallback: variant.candidates.slice(1).map((candidate) => candidate.url)
+        } as any)),
+        imetaAudioTracks: assetSet.audioTracks.map((track) => ({
+          url: track.candidates[0]?.url,
+          m: track.mimeType,
+          l: track.language ? `${track.language}${track.isOriginalVersion ? " ISO-639-1 ov" : " ISO-639-1"}` : undefined,
+          waveform: track.waveform,
+          duration: track.duration?.toString(),
+          bitrate: track.bitrate?.toString(),
+          fallback: track.candidates.slice(1).map((candidate) => candidate.url)
+        } as any)),
+        fallback: imeta.fallback,
+        origin: {
+          platform: "nostr",
+          externalId: event.id,
+          originalUrl: eventString,
+          metadata: event.kind.toString()
+        }
       });
 
       toast.success("Vídeo importado com sucesso!");
