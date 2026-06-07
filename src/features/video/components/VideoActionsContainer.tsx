@@ -1,6 +1,5 @@
-import type { NDKEvent, NDKUserProfile } from "@nostr-dev-kit/ndk-hooks";
-import { NDKSubscriptionCacheUsage, useFollows } from "@nostr-dev-kit/ndk-hooks";
-import { useEffect, useState } from "react";
+import type { NDKEvent } from "@nostr-dev-kit/ndk-hooks";
+import { useFollows, useProfileValue } from "@nostr-dev-kit/ndk-hooks";
 import { getVideoDetails } from "@/helper/format";
 import { VideoActionsView } from "@/features/video/components/VideoActionsView";
 
@@ -9,17 +8,9 @@ interface VideoActionsContainerProps {
 }
 
 export function VideoActionsContainer({ event }: VideoActionsContainerProps) {
-  const [profile, setProfile] = useState<NDKUserProfile | undefined>();
+  const profile = useProfileValue(event.author.pubkey);
   const follows = useFollows();
   const { summary, title } = getVideoDetails(event);
-
-  useEffect(() => {
-    event.author.fetchProfile({ cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST }, true).then((nextProfile) => {
-      if (nextProfile) {
-        setProfile(nextProfile);
-      }
-    });
-  }, [event.author]);
 
   return (
     <VideoActionsView

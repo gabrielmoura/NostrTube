@@ -12,6 +12,7 @@ import { Section, SectionContent, SectionHeader, SectionTitle } from "@/componen
 import VideoCard, { VideoCardLoading } from "@/components/cards/videoCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs.tsx";
 import { VIDEO_EVENT_KINDS } from "@/features/video/services/video-kinds";
+import { useBatchProfiles } from "@/features/nostr/hooks/useBatchProfiles";
 
 // --- Constantes ---
 const VIDEO_KINDS = VIDEO_EVENT_KINDS;
@@ -72,7 +73,6 @@ interface VideoFeedProps {
 }
 
 function VideoFeed({ events, title, isLoading, emptyMessage }: VideoFeedProps) {
-  // Processamento memoizado para evitar recalculos caros no render
   const processedEvents = useMemo(() => {
     if (!events.length) return [];
     return uniqBy(
@@ -81,7 +81,9 @@ function VideoFeed({ events, title, isLoading, emptyMessage }: VideoFeedProps) {
     ).sort(sortEventsByImages);
   }, [events]);
 
-  // Estado de Loading
+  const profiles = useBatchProfiles(processedEvents);
+  const getProfile = (pubkey: string) => profiles[pubkey];
+
   if (isLoading && processedEvents.length === 0) {
     return (
       <Section className="px-5">
@@ -128,7 +130,7 @@ function VideoFeed({ events, title, isLoading, emptyMessage }: VideoFeedProps) {
                 params={{ eventId: e.encode() }}
                 className="block w-full focus:outline-none focus:ring-2 focus:ring-primary rounded-lg transition-transform hover:scale-[1.01]"
               >
-                <VideoCard event={e} />
+                <VideoCard event={e} profile={getProfile(e.author.pubkey)} />
               </Link>
             </li>
           ))}

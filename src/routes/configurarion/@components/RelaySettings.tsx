@@ -11,10 +11,12 @@ interface DufflePudRelaysResponse {
 }
 
 export const RelaySettings = () => {
-  const storedRelays = useUserStore((state) => state.session?.relays ?? []);
+  const storedRelays = useUserStore((state) => state.session?.relays);
   const setRelays = useUserStore((state) => state.setRelays);
   const defaultRelays = import.meta.env.VITE_NOSTR_RELAYS || [];
-  const [selectedRelays, setSelectedRelays] = useState<string[]>(storedRelays.length ? storedRelays : defaultRelays);
+  const [selectedRelays, setSelectedRelays] = useState<string[]>(
+    () => storedRelays?.length ? storedRelays : defaultRelays
+  );
   const [latencies, setLatencies] = useState<Record<string, number | null>>({});
   const [isPinging, setIsPinging] = useState(false);
 
@@ -31,12 +33,6 @@ export const RelaySettings = () => {
     staleTime: 1000 * 60 * 60 * 24,
     enabled: !!import.meta.env.VITE_DUFFLEPUD_URL
   });
-
-  useEffect(() => {
-    if (storedRelays.length) {
-      setSelectedRelays(storedRelays);
-    }
-  }, [storedRelays]);
 
   const validRelays = useMemo(() => {
     const remoteRelays = data?.relays ?? [];

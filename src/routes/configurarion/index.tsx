@@ -18,7 +18,7 @@ export const Route = createFileRoute("/configurarion/")({
 function RouteComponent() {
   const currentUser = useNDKCurrentUser();
   const { ndk } = useNDK();
-  const selectedRelays = useUserStore((state) => state.session?.relays ?? import.meta.env.VITE_NOSTR_RELAYS ?? []);
+  const selectedRelays = useUserStore((state) => state.session?.relays) ?? import.meta.env.VITE_NOSTR_RELAYS ?? [];
 
   if (!currentUser) {
     return (

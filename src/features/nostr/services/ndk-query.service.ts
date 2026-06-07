@@ -56,11 +56,7 @@ export function buildVideoLookupFilters(reference: string): NDKFilter[] {
         return [{ ids: [data], limit: 1 }];
       case "nevent": {
         const eventData = data as nip19.EventPointer;
-        return [{
-          ids: [eventData.id],
-          ...(eventData.author ? { authors: [eventData.author] } : {}),
-          limit: 1
-        }];
+        return [{ ids: [eventData.id], limit: 1 }];
       }
       case "naddr": {
         const addr = data as nip19.AddressPointer;
@@ -95,11 +91,31 @@ export function buildVideoLookupFilters(reference: string): NDKFilter[] {
 }
 
 export async function fetchVideoEventByReference(ndk: NDK, reference: string, options: QueryOptions = {}) {
-  const relayUrls = options.relayUrls ?? getSearchRelayUrls();
+  let relayHints: string[] = [];
+
+  if (reference.startsWith("n")) {
+    try {
+      const { type, data } = nip19.decode(reference);
+      if (type === "nevent") {
+        const eventData = data as nip19.EventPointer;
+        if (eventData.relays?.length) relayHints = eventData.relays;
+      } else if (type === "naddr") {
+        const addr = data as nip19.AddressPointer;
+        if (addr.relays?.length) relayHints = addr.relays;
+      }
+    } catch { /* ignore decode errors */ }
+  }
+
+  const searchRelays = options.relayUrls ?? getSearchRelayUrls();
+  const allRelays = [...(searchRelays ?? []), ...relayHints];
+  const dedupedRelays = allRelays.length > 0
+    ? Array.from(new Set(allRelays.map(r => r.replace(/\/$/, ""))))
+    : undefined;
+
   return fetchEventCached(ndk, buildVideoLookupFilters(reference), {
     ...options,
     mode: options.mode ?? "parallel",
-    relayUrls
+    relayUrls: dedupedRelays
   });
 }
 

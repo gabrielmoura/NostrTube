@@ -1,15 +1,15 @@
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { PageSpinner } from "@/components/PageSpinner.tsx";
-import { lazy, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { t } from "i18next";
-import { AdvancedSearch } from "./@AdvancedSearch"; // Importe o novo componente
+import { NDKEvent } from "@nostr-dev-kit/ndk";
+import { AdvancedSearch } from "./@AdvancedSearch";
 import { eventSearchSchema, getVideosFromSearchData } from "@/helper/loaders/getVideosFromSearchData.ts";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { VideoCardLoading } from "@/components/cards/videoCard";
-
-const VideoCard = lazy(() => import("@/components/cards/videoCard"));
+import VideoCard, { VideoCardLoading } from "@/components/cards/videoCard";
+import { useBatchProfiles } from "@/features/nostr/hooks/useBatchProfiles";
 
 export const Route = createFileRoute("/search/")({
   component: RouteComponent,
@@ -116,8 +116,11 @@ function SearchResults() {
     }
   });
 
-  // 2. Agrupar vídeos em linhas baseadas nas colunas atuais
+  // 2. Batch profile fetch para todas as profiles da página
   const allVideos = data?.pages.flatMap((page) => page) ?? [];
+  const profiles = useBatchProfiles(allVideos);
+
+  // 3. Agrupar vídeos em linhas baseadas nas colunas atuais
   const rows = useMemo(() => {
     const r = [];
     for (let i = 0; i < allVideos.length; i += columns) {
@@ -189,7 +192,7 @@ function SearchResults() {
                           params={{ eventId: e.encode() }}
                           className="block w-full focus:outline-none focus:ring-2 focus:ring-primary rounded-lg transition-transform hover:scale-[1.02]"
                         >
-                          <VideoCard event={e} />
+                          <VideoCard event={e} profile={profiles[e.author?.pubkey]} />
                         </Link>
                       </li>
                     ))}
