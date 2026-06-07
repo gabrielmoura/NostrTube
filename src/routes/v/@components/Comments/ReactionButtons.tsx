@@ -46,7 +46,7 @@ export default function ReactionButtons({ event }: ReactionButtonsProps) {
 
   async function handleLike(action: likeOptions) {
     await makeEventMut.mutateAsync({
-      difficulty: 10,
+      difficulty: Number(import.meta.env.VITE_MIN_COMMENT_POW ?? 10),
       ndk: ndk!,
       event: {
         created_at: nostrNow(),

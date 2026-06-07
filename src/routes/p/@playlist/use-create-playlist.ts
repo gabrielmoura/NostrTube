@@ -21,7 +21,7 @@ const createNostrPlaylistEvent = async ({
   const newDTag = `${import.meta.env.VITE_APP_NAME}-playlist-${ulid()}`;
 
   const event = await makeEvent({
-    difficulty: 10,
+    difficulty: Number(import.meta.env.VITE_MIN_PLAYLIST_POW ?? 10),
     event: {
       created_at: nostrNow(),
       kind: NDKKind.VideoCurationSet,

@@ -227,7 +227,7 @@ export const playlistApi: IPlaylistAPI = {
 
     const nEvent = await makeEvent({
       ndk: pEvent.ndk!,
-      difficulty: 10,
+      difficulty: Number(import.meta.env.VITE_MIN_PLAYLIST_POW ?? 10),
       event: {
         ...pEvent.rawEvent(),
         created_at: nostrNow()
@@ -253,7 +253,7 @@ export const playlistApi: IPlaylistAPI = {
 
     const nEvent = await makeEvent({
       ndk: playlistEvent.ndk!,
-      difficulty: 10,
+      difficulty: Number(import.meta.env.VITE_MIN_PLAYLIST_POW ?? 10),
       event: {
         ...playlistEvent.rawEvent(),
         created_at: nostrNow()
@@ -267,7 +267,7 @@ export const playlistApi: IPlaylistAPI = {
   deletePlaylist: async (playlistEvent: NDKEvent, reason?: string) => {
     const dEvent = await makeEvent({
       ndk: playlistEvent.ndk!,
-      difficulty: 10,
+      difficulty: Number(import.meta.env.VITE_MIN_PLAYLIST_POW ?? 10),
       event: {
         kind: NDKKind.EventDeletion,
         created_at: nostrNow(),

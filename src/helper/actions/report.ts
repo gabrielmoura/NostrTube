@@ -31,7 +31,7 @@ export async function reportContentAction({
   category
 }: ContentReportActionProps): Promise<NDKEvent> {
   const reportEvent = await makeEvent({
-    difficulty: 10,
+    difficulty: Number(import.meta.env.VITE_MIN_COMMENT_POW ?? 10),
     event: {
       created_at: nostrNow(),
       kind: NDKKind.Report,
@@ -70,7 +70,7 @@ export async function reportTechnicalAction({
   await sendTechnicalIssueMessage(ndk, authorPubkey, messageLines.join("\n"));
 
   const reportEvent = await makeEvent({
-    difficulty: 10,
+    difficulty: Number(import.meta.env.VITE_MIN_COMMENT_POW ?? 10),
     event: {
       created_at: nostrNow(),
       kind: TECHNICAL_REPORT_KIND,

@@ -24,7 +24,12 @@ export default function envSchemaValidate() {
       VITE_NOSTR_BLOSSOM_FALLBACK: z.url(),
       VITE_PUBLIC_ROOT_DOMAIN: z.url(),
       VITE_APP_IMGPROXY: z.url().optional(),
-      VITE_DUFFLEPUD_URL: z.url().optional()
+      VITE_DUFFLEPUD_URL: z.url().optional(),
+
+      // Coerção para número com valor padrão (Proof of Work)
+      VITE_MIN_VIDEO_POW: z.coerce.number().optional().default(16),
+      VITE_MIN_COMMENT_POW: z.coerce.number().optional().default(10),
+      VITE_MIN_PLAYLIST_POW: z.coerce.number().optional().default(10)
     }
   });
 }

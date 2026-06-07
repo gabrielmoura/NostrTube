@@ -49,7 +49,7 @@ export function usePublishVideo() {
         event: {
           ...addressableEvent
         },
-        difficulty: 16
+        difficulty: Number(import.meta.env.VITE_MIN_VIDEO_POW ?? 16)
       });
 
       await event.publish();

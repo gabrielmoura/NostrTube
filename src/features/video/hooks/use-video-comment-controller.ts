@@ -49,7 +49,7 @@ export function useVideoCommentController(initialTags?: string[][]) {
       await mutation.mutateAsync({
         ndk,
         event: eventDraft,
-        difficulty: 10
+        difficulty: Number(import.meta.env.VITE_MIN_COMMENT_POW ?? 10)
       });
     } catch (error) {
       log.error("err", error);

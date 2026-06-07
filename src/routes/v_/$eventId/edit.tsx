@@ -77,7 +77,7 @@ function VideoEditRoute() {
 
       const signedEvent = await makeEvent({
         ndk,
-        difficulty: 16,
+        difficulty: Number(import.meta.env.VITE_MIN_VIDEO_POW ?? 16),
         event: {
           ...nextEvent,
           created_at: nostrNow()
@@ -101,7 +101,7 @@ function VideoEditRoute() {
     try {
       const deletionEvent = await makeEvent({
         ndk,
-        difficulty: 16,
+        difficulty: Number(import.meta.env.VITE_MIN_VIDEO_POW ?? 16),
         event: {
           kind: NDKKind.EventDeletion,
           created_at: nostrNow(),
