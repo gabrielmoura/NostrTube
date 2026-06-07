@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { createJSONStorage, devtools, persist } from "zustand/middleware";
+import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import type { NDKImetaTag } from "@nostr-dev-kit/ndk-hooks";
 import { AgeEnum } from "@/store/store/sessionTypes.ts";
@@ -21,28 +21,32 @@ export interface VideoMetadata {
   dim: string;
   mime_type: string;
   imetaVideo: NDKImetaTag;
+  imetaVariants?: NDKImetaTag[];
+  imetaAudioTracks?: NDKImetaTag[];
   imetaThumb: NDKImetaTag;
   imetaImage: NDKImetaTag;
   age: AgeEnum;
   language?: string;
-
+  origin?: {
+    platform: string;
+    externalId: string;
+    originalUrl: string;
+    metadata?: string;
+  };
 }
 
 const DRAFT_KEY = "video-upload-draft";
 
 export interface VideoUploadState {
-  // Dados do vídeo
   videoData: Partial<VideoMetadata>;
-
-  // Estados de UI
+  currentStep: 1 | 2 | 3;
   isUploading: boolean;
   uploadProgress: number;
-  uploadStage: "idle" | "validating" | "uploading" | "mirroring" | "complete" | "error";
+  uploadStage: "idle" | "validating" | "uploading" | "processing" | "mirroring" | "complete" | "error";
   error?: string;
-  showEventInput: boolean; // Usado para importar vídeo de outros eventos
-
-  // Ações
+  showEventInput: boolean;
   setVideoData: (data: Partial<VideoMetadata>) => void;
+  setCurrentStep: (step: 1 | 2 | 3) => void;
   setIndexers: (indexers: string[]) => void;
   setHashtags: (hashtags: string[]) => void;
   setLanguage: (language?: string) => void;
@@ -58,11 +62,14 @@ export interface VideoUploadState {
   setSummary: (summary: string) => void;
   setContentWarning: (contentWarning: string) => void;
   setVideoUpload: (data: Partial<VideoMetadata>) => void;
-  setAge: (age: AgeEnum) => void;
+  clearUploadedMedia: () => void;
+  saveDraft: () => void;
+  loadDraft: () => void;
 }
 
 const initialState = {
   videoData: {},
+  currentStep: 1 as const,
   isUploading: false,
   uploadProgress: 0,
   uploadStage: "idle" as const,
@@ -72,104 +79,143 @@ const initialState = {
 
 export const useVideoUploadStore = create<VideoUploadState>()(
   devtools(
-    persist(
-      immer((set, get) => ({
-        ...initialState,
+    immer((set, get) => ({
+      ...initialState,
 
-        setVideoData: (data) =>
-          set((state) => {
-            state.videoData = { ...state.videoData, ...data };
-          }, false, "video/setVideoData"),
+      setVideoData: (data) =>
+        set((state) => {
+          state.videoData = { ...state.videoData, ...data };
+        }, false, "video/setVideoData"),
 
-        setIndexers: (indexers) =>
-          set((state) => {
-            state.videoData.indexers = indexers;
-          }, false, "video/setIndexers"),
+      setCurrentStep: (step) =>
+        set((state) => {
+          state.currentStep = step;
+        }, false, "ui/setCurrentStep"),
 
-        setHashtags: (hashtags) =>
-          set((state) => {
-            state.videoData.hashtags = hashtags;
-          }, false, "video/setHashtags"),
+      setIndexers: (indexers) =>
+        set((state) => {
+          state.videoData.indexers = indexers;
+        }, false, "video/setIndexers"),
 
+      setHashtags: (hashtags) =>
+        set((state) => {
+          state.videoData.hashtags = hashtags;
+        }, false, "video/setHashtags"),
 
-        setLanguage: (language) =>
-          set((state) => {
-            state.videoData.language = language;
-          }, false, "video/setLanguage"),
+      setLanguage: (language) =>
+        set((state) => {
+          state.videoData.language = language;
+        }, false, "video/setLanguage"),
 
-        setShowEventInput: (show) =>
-          set((state) => {
-            state.showEventInput = show;
-          }, false, "video/setShowEventInput"),
+      setShowEventInput: (show) =>
+        set((state) => {
+          state.showEventInput = show;
+        }, false, "video/setShowEventInput"),
 
-        setTitle: (title) =>
-          set((state) => {
-            state.videoData.title = title;
-          }, false, "video/setTitle"),
+      setTitle: (title) =>
+        set((state) => {
+          state.videoData.title = title;
+        }, false, "video/setTitle"),
 
-        setUrl: (url) =>
-          set((state) => {
-            state.videoData.url = url;
-          }, false, "video/setUrl"),
+      setUrl: (url) =>
+        set((state) => {
+          state.videoData.url = url;
+        }, false, "video/setUrl"),
 
-        setThumbnail: (thumbnail) =>
-          set((state) => {
-            state.videoData.thumbnail = thumbnail;
-          }, false, "video/setThumbnail"),
+      setThumbnail: (thumbnail) =>
+        set((state) => {
+          state.videoData.thumbnail = thumbnail;
+        }, false, "video/setThumbnail"),
 
-        setSummary: (summary) =>
-          set((state) => {
-            state.videoData.summary = summary;
-          }, false, "video/setSummary"),
+      setSummary: (summary) =>
+        set((state) => {
+          state.videoData.summary = summary;
+        }, false, "video/setSummary"),
 
-        setContentWarning: (contentWarning) =>
-          set((state) => {
-            state.videoData.contentWarning = contentWarning;
-          }, false, "video/setContentWarning"),
+      setContentWarning: (contentWarning) =>
+        set((state) => {
+          state.videoData.contentWarning = contentWarning;
+        }, false, "video/setContentWarning"),
 
-        setVideoUpload: (data) =>
-          set((state) => {
-            state.videoData = data;
-          }, false, "video/setVideoUpload"),
+      setVideoUpload: (data) =>
+        set((state) => {
+          state.videoData = data;
+        }, false, "video/setVideoUpload"),
 
-        setAge: (age) =>
-          set((state) => {
-            state.videoData.age = age;
-          }, false, "video/setAge"),
+      clearUploadedMedia: () =>
+        set((state) => {
+          state.videoData.url = undefined;
+          state.videoData.fallback = undefined;
+          state.videoData.fileType = undefined;
+          state.videoData.fileHash = undefined;
+          state.videoData.fileSize = undefined;
+          state.videoData.duration = undefined;
+          state.videoData.dim = undefined;
+          state.videoData.mime_type = undefined;
+          state.videoData.imetaVideo = undefined;
+          state.videoData.imetaVariants = undefined;
+          state.videoData.imetaAudioTracks = undefined;
+          state.videoData.origin = undefined;
+          state.videoData.thumbnail = undefined;
+          state.isUploading = false;
+          state.uploadProgress = 0;
+          state.uploadStage = "idle";
+          state.error = undefined;
+          state.showEventInput = false;
+          if (state.currentStep > 1) {
+            state.currentStep = 1;
+          }
+        }, false, "video/clearUploadedMedia"),
 
-        setUploadingState: (isUploading) =>
-          set((state) => {
-            state.isUploading = isUploading;
-          }, false, "ui/setUploadingState"),
+      setUploadingState: (isUploading) =>
+        set((state) => {
+          state.isUploading = isUploading;
+        }, false, "ui/setUploadingState"),
 
-        setUploadProgress: (progress) =>
-          set((state) => {
-            state.uploadProgress = progress;
-          }, false, "ui/setUploadProgress"),
+      setUploadProgress: (progress) =>
+        set((state) => {
+          state.uploadProgress = progress;
+        }, false, "ui/setUploadProgress"),
 
-        setUploadStage: (stage) =>
-          set((state) => {
-            state.uploadStage = stage;
-          }, false, "ui/setUploadStage"),
+      setUploadStage: (stage) =>
+        set((state) => {
+          state.uploadStage = stage;
+        }, false, "ui/setUploadStage"),
 
-        setError: (error) =>
-          set((state) => {
-            state.error = error;
-          }, false, "ui/setError"),
+      setError: (error) =>
+        set((state) => {
+          state.error = error;
+        }, false, "ui/setError"),
 
-        resetForm: () => {
-          localStorage.removeItem(DRAFT_KEY);
-          set(() => ({
-            ...initialState,
-          }), false, "video/resetForm");
-        },
+      resetForm: () => {
+        localStorage.removeItem(DRAFT_KEY);
+        set((state) => {
+          Object.assign(state, initialState);
+        }, false, "video/resetForm");
+      },
 
-      })), {
-        name: DRAFT_KEY,
-        storage: createJSONStorage(() => localStorage),
-        // Importante: Salva apenas o videoData. Ignora estados de UI/Upload.
-        partialize: (state) => ({ videoData: state.videoData }),
-      }),
+      saveDraft: () => {
+        const { videoData, currentStep } = get();
+        const draft = JSON.stringify({ videoData, currentStep });
+        localStorage.setItem(DRAFT_KEY, draft);
+        console.log("Rascunho salvo com sucesso!");
+      },
+
+      loadDraft: () => {
+        const draft = localStorage.getItem(DRAFT_KEY);
+        if (draft) {
+          try {
+            const parsed = JSON.parse(draft);
+            set((state) => {
+              state.videoData = parsed.videoData || {};
+              state.currentStep = parsed.currentStep || 1;
+            }, false, "video/loadDraft");
+          } catch (e) {
+            console.error("Falha ao carregar rascunho:", e);
+          }
+        }
+      }
+    })),
     { name: "VideoUploadStore" }
   )
 );

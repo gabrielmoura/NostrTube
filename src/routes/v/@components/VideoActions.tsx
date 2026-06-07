@@ -1,16 +1,14 @@
-import type { NDKEvent, NDKUserProfile } from "@nostr-dev-kit/ndk-hooks";
-import { NDKSubscriptionCacheUsage, useCurrentUserProfile, useFollows } from "@nostr-dev-kit/ndk-hooks";
+import type { NDKEvent } from "@nostr-dev-kit/ndk-hooks";
+import { useCurrentUserProfile, useFollows, useProfileValue } from "@nostr-dev-kit/ndk-hooks";
 import { Avatar, Badge, Button, Skeleton } from "@radix-ui/themes";
 import { HiCheckBadge } from "react-icons/hi2";
 import { cn, formatCount, getLettersPlain, getNameToShow, getVideoDetails } from "@/helper/format.ts";
 import { RenderText } from "@/components/RenderText.tsx";
 import { ErrorBoundaryVideo } from "./error.tsx";
 import { getTagValues } from "@welshman/util";
-// import LikeButton from "@/routes/v/@components/LikeButton.tsx";
 import { Link } from "@tanstack/react-router";
 import LikeToggleButton from "@/components/LikeToggleButton.tsx";
-// import {VideoMeta} from "@/routes/v/@components/VideoMeta.tsx";
-import { lazy, useEffect, useState } from "react";
+import { lazy } from "react";
 import { DropdownMenuVideo } from "@/routes/v/@components/DropdownMenuVideo.tsx";
 import FollowButton from "@/components/FollowButton.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
@@ -23,21 +21,8 @@ export type VideoActionsProps = {
   eventIdentifier?: string;
 };
 export default function VideoActions({ event }: VideoActionsProps) {
-  const [profile, setProfile] = useState<NDKUserProfile | undefined>();
-
   const npub = event.author.npub;
-
-
-  // const profile = useProfileValue(event.author.npub, {
-  //     subOpts: {
-  //         closeOnEose: true,
-  //         cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
-  //     }
-  // })
-  useEffect(() => {
-    event.author.fetchProfile({ cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST }, true).then((p) => (p) ? setProfile(p) : "");
-  }, [event.author]);
-
+  const profile = useProfileValue(event.author.pubkey);
   const followers = useFollows();
 
 

@@ -1,122 +1,94 @@
-"use client";
-import Link from "next/link";
+import { useNavigate } from "@tanstack/react-router";
 import VideoCard, { VideoCardLoading } from "@/components/cards/videoCard";
-import { JSX, ReactNode } from "react";
-import { cn } from "@/lib/utils";
-import type { NDKEvent, NDKFilter } from "@nostr-dev-kit/ndk";
-import useEvents from "@/lib/hooks/useEvents";
+import type { ReactNode } from "react";
+import { cn } from "@/helper/format.ts";
+import type { NDKEvent } from "@nostr-dev-kit/ndk";
 
-type VerticalVideosFeedProps = {
+type VideosGridProps = {
+  events: NDKEvent[];
   title?: string;
   action?: ReactNode;
   className?: string;
-  filter?: NDKFilter;
-  secondaryFilter?: (event: NDKEvent) => boolean;
-  loader?: () => JSX.Element;
-  empty?: () => JSX.Element;
+  isLoading?: boolean;
+  empty?: () => ReactNode;
 };
 
-export default function VerticalVideosFeed({
-                                             title,
-                                             action,
-                                             className,
-                                             ...props
-                                           }: VerticalVideosFeedProps) {
-  return (
-    <div className={cn("w-full", className)}>
-      {!!title && (
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">{title}</h2>
-          {action}
-        </div>
-      )}
-      <div className="py-3">
-        <RawFeed {...props} />
-      </div>
-    </div>
-  );
-}
+export function VideosGrid({
+                             events,
+                             title,
+                             action,
+                             className,
+                             isLoading,
+                             empty: Empty
+                           }: VideosGridProps) {
+  const navigate = useNavigate();
 
-export function VerticalVideosFeedLoading({
-                                            title,
-                                            action,
-                                            className,
-                                            ...props
-                                          }: VerticalVideosFeedProps) {
-  return (
-    <div className={cn("w-full", className)}>
-      {!!title && (
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">{title}</h2>
-          {action}
-        </div>
-      )}
-      <div className="py-3">
-        <div className="md-feed-cols relative mx-auto gap-4">
-          <VideoCardLoading />
-          <VideoCardLoading />
-          <VideoCardLoading />
-          <VideoCardLoading />
-          <VideoCardLoading />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function RawFeed({
-                   filter,
-                   secondaryFilter,
-                   loader: Loader,
-                   empty: Empty = () => (
-                     <div className="center text-center text-sm text-muted-foreground">
-                       <p>No videos found</p>
-                     </div>
-                   )
-                 }: {
-  filter?: NDKFilter;
-  secondaryFilter?: (event: NDKEvent) => boolean;
-  loader?: () => JSX.Element;
-  empty?: () => JSX.Element;
-}) {
-  const { events, isLoading } = useEvents({
-    filter: { ...filter }
-  });
   if (isLoading) {
-    if (Loader) {
-      return <Loader />;
-    }
     return (
-      <div className="md-feed-cols relative mx-auto gap-4">
-        <VideoCardLoading />
-        <VideoCardLoading />
-        <VideoCardLoading />
-        <VideoCardLoading />
-        <VideoCardLoading />
+      <div className={cn("w-full", className)}>
+        {title && (
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">{title}</h2>
+            {action}
+          </div>
+        )}
+        <div className="md-feed-cols relative mx-auto gap-4 py-3">
+          <VideoCardLoading />
+          <VideoCardLoading />
+          <VideoCardLoading />
+          <VideoCardLoading />
+          <VideoCardLoading />
+        </div>
       </div>
     );
   }
+
   if (Empty && events.length === 0) {
-    return <Empty />;
-  }
-  if (secondaryFilter) {
     return (
-      <div className="md-feed-cols relative mx-auto gap-4">
-        {events.filter(secondaryFilter).map((e) => (
-          <Link key={e.id} href={`/w/${e.encode()}`}>
+      <div className={cn("w-full", className)}>
+        {title && (
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">{title}</h2>
+            {action}
+          </div>
+        )}
+        <div className="py-3">
+          <Empty />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn("w-full", className)}>
+      {title && (
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">{title}</h2>
+          {action}
+        </div>
+      )}
+      <div className="md-feed-cols relative mx-auto gap-4 py-3">
+        {events.map((e) => (
+          <div
+            key={e.id}
+            role="link"
+            tabIndex={0}
+            className="cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary rounded-lg"
+            onClick={(event) => {
+              if ((event.target as HTMLElement).closest("a")) return;
+              navigate({ to: "/v/$eventId", params: { eventId: e.encode() } });
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                navigate({ to: "/v/$eventId", params: { eventId: e.encode() } });
+              }
+            }}
+          >
             <VideoCard event={e} />
-          </Link>
+          </div>
         ))}
       </div>
-    );
-  }
-  return (
-    <div className="md-feed-cols relative mx-auto gap-4">
-      {events.map((e) => (
-        <Link key={e.id} href={`/w/${e.encode()}`}>
-          <VideoCard event={e} />
-        </Link>
-      ))}
     </div>
   );
 }

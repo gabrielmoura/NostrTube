@@ -15,11 +15,19 @@ import { Route as SearchIndexRouteImport } from './routes/search/index'
 import { Route as NewIndexRouteImport } from './routes/new/index'
 import { Route as FaqIndexRouteImport } from './routes/faq/index'
 import { Route as ConfigurarionIndexRouteImport } from './routes/configurarion/index'
-import { Route as VEventIdRouteImport } from './routes/v/$eventId'
+import { Route as vEventIdRouteImport } from './routes/v/$eventId'
 import { Route as UUserIdRouteImport } from './routes/u/$userId'
 import { Route as PNewRouteImport } from './routes/p/new'
 import { Route as PListIdRouteImport } from './routes/p/$listId'
 import { Route as UUserIdEditRouteImport } from './routes/u_/$userId/edit'
+import { Route as VEventIdEditRouteImport } from './routes/v_/$eventId/edit'
+import { Route as DebugIndexRouteImport } from './routes/debug/index'
+
+const DebugIndexRoute = DebugIndexRouteImport.update({
+  id: '/debug/',
+  path: '/debug/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -51,7 +59,7 @@ const ConfigurarionIndexRoute = ConfigurarionIndexRouteImport.update({
   path: '/configurarion/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VEventIdRoute = VEventIdRouteImport.update({
+const vEventIdRoute = vEventIdRouteImport.update({
   id: '/v/$eventId',
   path: '/v/$eventId',
   getParentRoute: () => rootRouteImport,
@@ -76,32 +84,41 @@ const UUserIdEditRoute = UUserIdEditRouteImport.update({
   path: '/u/$userId/edit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VEventIdEditRoute = VEventIdEditRouteImport.update({
+  id: '/v_/$eventId/edit',
+  path: '/v/$eventId/edit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/p/$listId': typeof PListIdRoute
   '/p/new': typeof PNewRoute
   '/u/$userId': typeof UUserIdRoute
-  '/v/$eventId': typeof VEventIdRoute
+  '/v/$eventId': typeof vEventIdRoute
   '/configurarion': typeof ConfigurarionIndexRoute
   '/faq': typeof FaqIndexRoute
+  '/debug': typeof DebugIndexRoute
   '/new': typeof NewIndexRoute
   '/search': typeof SearchIndexRoute
   '/terms': typeof TermsIndexRoute
   '/u/$userId/edit': typeof UUserIdEditRoute
+  '/v/$eventId/edit': typeof VEventIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/p/$listId': typeof PListIdRoute
   '/p/new': typeof PNewRoute
   '/u/$userId': typeof UUserIdRoute
-  '/v/$eventId': typeof VEventIdRoute
+  '/v/$eventId': typeof vEventIdRoute
   '/configurarion': typeof ConfigurarionIndexRoute
   '/faq': typeof FaqIndexRoute
+  '/debug': typeof DebugIndexRoute
   '/new': typeof NewIndexRoute
   '/search': typeof SearchIndexRoute
   '/terms': typeof TermsIndexRoute
   '/u/$userId/edit': typeof UUserIdEditRoute
+  '/v/$eventId/edit': typeof VEventIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -109,13 +126,15 @@ export interface FileRoutesById {
   '/p/$listId': typeof PListIdRoute
   '/p/new': typeof PNewRoute
   '/u/$userId': typeof UUserIdRoute
-  '/v/$eventId': typeof VEventIdRoute
+  '/v/$eventId': typeof vEventIdRoute
   '/configurarion/': typeof ConfigurarionIndexRoute
+  '/debug/': typeof DebugIndexRoute
   '/faq/': typeof FaqIndexRoute
   '/new/': typeof NewIndexRoute
   '/search/': typeof SearchIndexRoute
   '/terms/': typeof TermsIndexRoute
   '/u_/$userId/edit': typeof UUserIdEditRoute
+  '/v_/$eventId/edit': typeof VEventIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -126,11 +145,13 @@ export interface FileRouteTypes {
     | '/u/$userId'
     | '/v/$eventId'
     | '/configurarion'
+    | '/debug'
     | '/faq'
     | '/new'
     | '/search'
     | '/terms'
     | '/u/$userId/edit'
+    | '/v/$eventId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -139,11 +160,13 @@ export interface FileRouteTypes {
     | '/u/$userId'
     | '/v/$eventId'
     | '/configurarion'
+    | '/debug'
     | '/faq'
     | '/new'
     | '/search'
     | '/terms'
     | '/u/$userId/edit'
+    | '/v/$eventId/edit'
   id:
     | '__root__'
     | '/'
@@ -152,25 +175,29 @@ export interface FileRouteTypes {
     | '/u/$userId'
     | '/v/$eventId'
     | '/configurarion/'
+    | '/debug/'
     | '/faq/'
     | '/new/'
     | '/search/'
     | '/terms/'
     | '/u_/$userId/edit'
+    | '/v_/$eventId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DebugIndexRoute: typeof DebugIndexRoute
   PListIdRoute: typeof PListIdRoute
   PNewRoute: typeof PNewRoute
   UUserIdRoute: typeof UUserIdRoute
-  VEventIdRoute: typeof VEventIdRoute
+  vEventIdRoute: typeof vEventIdRoute
   ConfigurarionIndexRoute: typeof ConfigurarionIndexRoute
   FaqIndexRoute: typeof FaqIndexRoute
   NewIndexRoute: typeof NewIndexRoute
   SearchIndexRoute: typeof SearchIndexRoute
   TermsIndexRoute: typeof TermsIndexRoute
   UUserIdEditRoute: typeof UUserIdEditRoute
+  VEventIdEditRoute: typeof VEventIdEditRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -180,6 +207,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/v_/$eventId/edit': {
+      id: '/v_/$eventId/edit'
+      path: '/v/$eventId/edit'
+      fullPath: '/v/$eventId/edit'
+      preLoaderRoute: typeof VEventIdEditRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms/': {
@@ -221,7 +255,7 @@ declare module '@tanstack/react-router' {
       id: '/v/$eventId'
       path: '/v/$eventId'
       fullPath: '/v/$eventId'
-      preLoaderRoute: typeof VEventIdRouteImport
+      preLoaderRoute: typeof vEventIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/u/$userId': {
@@ -229,6 +263,13 @@ declare module '@tanstack/react-router' {
       path: '/u/$userId'
       fullPath: '/u/$userId'
       preLoaderRoute: typeof UUserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/debug/': {
+      id: '/debug/'
+      path: '/debug'
+      fullPath: '/debug'
+      preLoaderRoute: typeof DebugIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/p/new': {
@@ -257,10 +298,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DebugIndexRoute: DebugIndexRoute,
   PListIdRoute: PListIdRoute,
   PNewRoute: PNewRoute,
   UUserIdRoute: UUserIdRoute,
-  VEventIdRoute: VEventIdRoute,
+  vEventIdRoute: vEventIdRoute,
   ConfigurarionIndexRoute: ConfigurarionIndexRoute,
   FaqIndexRoute: FaqIndexRoute,
   NewIndexRoute: NewIndexRoute,

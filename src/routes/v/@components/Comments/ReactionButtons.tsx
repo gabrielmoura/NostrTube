@@ -6,7 +6,7 @@ import { HiHandThumbDown, HiHandThumbUp, HiOutlineHandThumbDown, HiOutlineHandTh
 // import AuthModal from "@/components/modals/auth";
 import { NDKSubscriptionCacheUsage, useNDK, useNDKCurrentPubkey, useSubscribe } from "@nostr-dev-kit/ndk-hooks";
 import { Button } from "@/components/button.tsx";
-import { makeEvent, type makeEventParams } from "@/helper/pow/pow.ts";
+import { makeEvent, type MakeEventParams } from "@/helper/pow/pow.ts";
 import { formatCount } from "@/helper/format.ts";
 import { nostrNow } from "@/helper/date.ts";
 import Spinner from "@/components/Spinner.tsx";
@@ -29,7 +29,7 @@ export default function ReactionButtons({ event }: ReactionButtonsProps) {
 
   const makeEventMut = useMutation({
     mutationKey: ["event:generate:new:video"],
-    mutationFn: ({ ndk, event, difficulty }: makeEventParams): Promise<NDKEvent> => makeEvent({
+    mutationFn: ({ ndk, event, difficulty }: MakeEventParams): Promise<NDKEvent> => makeEvent({
       ndk,
       event,
       difficulty
@@ -46,7 +46,7 @@ export default function ReactionButtons({ event }: ReactionButtonsProps) {
 
   async function handleLike(action: likeOptions) {
     await makeEventMut.mutateAsync({
-      difficulty: 10,
+      difficulty: Number(import.meta.env.VITE_MIN_COMMENT_POW ?? 10),
       ndk: ndk!,
       event: {
         created_at: nostrNow(),
@@ -60,7 +60,7 @@ export default function ReactionButtons({ event }: ReactionButtonsProps) {
 
   const activeReaction = Array.from(events).filter(e => e.pubkey == currentPubkey)[0]?.content as likeOptions;
   const downVotes = Array.from(events)?.filter((e) => e.content === "-").length;
-  const upVotes = (events?.size || events?.length) - downVotes;
+  const upVotes = events.length - downVotes;
 
 
   return (

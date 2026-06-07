@@ -27,7 +27,7 @@ export function Volume() {
           className="block h-[15px] w-[15px] rounded-full border border-[#cacaca] bg-white opacity-0 outline-none ring-white/40 transition-opacity will-change-[left] focus:opacity-100 focus:ring-4 group-hocus/volume-slider:opacity-100"
         />
       </Slider.Root>
-      <div className="pointer-events-none w-0 transition-all group-hover/volume:w-[80px]" />
+      <div className="pointer-events-none w-0 transition-[width] group-hover/volume:w-[80px]" />
     </div>
   );
 }
@@ -137,7 +137,7 @@ export function PersistentProgress({ thumbnails }: TimeSliderProps) {
   useEffect(() => {
     if (seeking) return;
     setValue((time / duration) * 100);
-  }, [time, duration]);
+  }, [time, duration, seeking]);
   return (
     <Slider.Root
       className="group relative inline-flex h-[2px] w-full cursor-pointer touch-none select-none items-center outline-none"

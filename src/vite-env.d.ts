@@ -10,8 +10,9 @@ interface ImportMetaEnv {
   readonly VITE_NOSTR_BLOSSOM_FALLBACK?: string;
   readonly VITE_BEACON_URL?: string;
   readonly VITE_DUFFLEPUD_URL: ?string;
-  readonly VITE_NJUMP_URL: ?string;
-  readonly VITE_SENTRY_DSN?: string;
+  readonly VITE_MIN_VIDEO_POW?: number;
+  readonly VITE_MIN_COMMENT_POW?: number;
+  readonly VITE_MIN_PLAYLIST_POW?: number;
 }
 
 interface ImportMeta {

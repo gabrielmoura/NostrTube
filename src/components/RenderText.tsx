@@ -72,7 +72,7 @@ export const RenderText = ({ text }: { text?: unknown }): JSX.Element | null => 
         // hashtag
         if (hashtagPattern.test(part)) {
           return (
-            <Link key={idx} to="/search/" params={{ tag: part.substring(1) }}>
+            <Link key={idx} to="/search" search={{ search: undefined, tag: part.substring(1) }}>
               <span className="break-words text-primary hover:underline">{part}</span>
             </Link>
           );

@@ -25,8 +25,11 @@ export default function envSchemaValidate() {
       VITE_PUBLIC_ROOT_DOMAIN: z.url(),
       VITE_APP_IMGPROXY: z.url().optional(),
       VITE_DUFFLEPUD_URL: z.url().optional(),
-      VITE_NJUMP_URL: z.url().optional().default("https://nostr.com"),
-      VITE_SENTRY_DSN: z.url().optional().default("https://b02a7e26371094ae30edf63ab3d9e636@o4507808439533568.ingest.us.sentry.io/4510658439544832")
+
+      // Coerção para número com valor padrão (Proof of Work)
+      VITE_MIN_VIDEO_POW: z.coerce.number().optional().default(16),
+      VITE_MIN_COMMENT_POW: z.coerce.number().optional().default(10),
+      VITE_MIN_PLAYLIST_POW: z.coerce.number().optional().default(10)
     }
   });
 }

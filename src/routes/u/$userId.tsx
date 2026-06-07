@@ -1,13 +1,14 @@
 import { createFileRoute, Link, useLoaderData, useParams } from "@tanstack/react-router";
 import { NDKKind } from "@nostr-dev-kit/ndk";
-import { NDKEvent, type NDKUserProfile, useNDKCurrentUser } from "@nostr-dev-kit/ndk-hooks";
+import { NDKEvent, type NDKUserProfile, useNDK, useNDKCurrentUser } from "@nostr-dev-kit/ndk-hooks";
 import { PageSpinner } from "@/components/PageSpinner";
 import { getVideosFromUserData, type GetVideosFromUserDataParams } from "@/helper/loaders/getVideosFromUserData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Grid, Info, List, PlaySquare } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, Grid, Info, List, PlaySquare, Wrench } from "lucide-react";
 
 import CreateProfile from "./@components/EditProfile.tsx";
 import { Card } from "@/components/ui/card.tsx";
@@ -17,9 +18,12 @@ import { DropdownMenuProfile } from "@/routes/u/@components/DropdownMenuProfile.
 import { PlaylistCard } from "@/routes/u/@components/PlaylistCard.tsx";
 import { nip19 } from "nostr-tools";
 import { z } from "zod"; // Extraído para arquivo separado
+import { VIDEO_EVENT_KINDS } from "@/features/video/services/video-kinds";
+import { useQuery } from "@tanstack/react-query";
+import { TECHNICAL_REPORT_KIND } from "@/helper/actions/report";
 
 export const ProfilePageSchema = z.object({
-  tab: z.enum(["videos", "playlists", "about"]).optional()
+  tab: z.enum(["videos", "playlists", "about", "alerts"]).optional()
 
 });
 export const Route = createFileRoute("/u/$userId")({
@@ -56,6 +60,7 @@ function NotFoundPage() {
 function ProfilePage() {
   const events = useLoaderData({ from: "/u/$userId" }) as Set<NDKEvent>;
   const currentUser = useNDKCurrentUser();
+  const { ndk } = useNDK();
   const { userId } = Route.useParams();
   const { tab } = Route.useSearch();
   const navigate = Route.useNavigate();
@@ -66,9 +71,10 @@ function ProfilePage() {
   const userProfile = metaEvent ? JSON.parse(metaEvent.content) as NDKUserProfile : null;
 
   // Separação de eventos por tipo
-  const videos = [...events].filter(e => [NDKKind.Video, NDKKind.HorizontalVideo].includes(e.kind as number));
+  const videos = [...events].filter(e => VIDEO_EVENT_KINDS.includes(e.kind as number));
   // Mock de playlists (assumindo que o loader traria Kind 30001 também)
   const playlists = [...events].filter(e => e.kind === NDKKind.VideoCurationSet);
+  const isOwner = Boolean(currentUser && (currentUser.npub === userId || currentUser.pubkey === userId));
 
   // if (!userProfile) throw notFound();
 
@@ -188,6 +194,20 @@ function ProfilePage() {
               <Info className="w-4 h-4 mr-2" />
               Sobre
             </TabsTrigger>
+            {isOwner ? (
+              <TabsTrigger
+                value="alerts"
+                onClick={() => {
+                  navigate({
+                    search: (old) => ({ ...old, tab: "alerts" })
+                  });
+                }}
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all"
+              >
+                <AlertTriangle className="w-4 h-4 mr-2" />
+                Alertas
+              </TabsTrigger>
+            ) : null}
           </TabsList>
 
           {/* Videos Grid */}
@@ -252,7 +272,104 @@ function ProfilePage() {
               </div>
             </Card>
           </TabsContent>
+          {isOwner ? (
+            <TabsContent value="alerts" className="mt-0">
+              <AuthorAlertsPanel ndkReady={Boolean(ndk)} ownerPubkey={metaEvent?.pubkey || currentUser?.pubkey || ""} videos={videos} />
+            </TabsContent>
+          ) : null}
         </Tabs>
+      </div>
+    </div>
+  );
+}
+
+function AuthorAlertsPanel({ ownerPubkey, videos, ndkReady }: { ownerPubkey: string; videos: NDKEvent[]; ndkReady: boolean }) {
+  const { ndk } = useNDK();
+  const videoIds = videos.map((video) => video.id);
+  const videoMap = new Map(videos.map((video) => [video.id, video]));
+
+  const alertsQuery = useQuery({
+    queryKey: ["author-alerts", ownerPubkey, videoIds],
+    enabled: Boolean(ndkReady && ndk && ownerPubkey && videoIds.length > 0),
+    queryFn: async () => {
+      const reportEvents = await ndk!.fetchEvents([
+        { kinds: [NDKKind.Report], "#e": videoIds },
+        { kinds: [TECHNICAL_REPORT_KIND as never], "#p": [ownerPubkey] }
+      ]);
+      return Array.from(reportEvents);
+    }
+  });
+
+  const technicalAlerts = alertsQuery.data?.filter((event) => event.kind === TECHNICAL_REPORT_KIND) ?? [];
+  const communityAlerts = alertsQuery.data?.filter((event) => event.kind === NDKKind.Report) ?? [];
+
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <div className="p-5">
+            <div className="flex items-center gap-2 text-amber-600">
+              <Wrench className="h-4 w-4" />
+              <p className="text-sm font-medium">Problemas técnicos</p>
+            </div>
+            <p className="mt-2 text-2xl font-semibold">{technicalAlerts.length}</p>
+          </div>
+        </Card>
+        <Card>
+          <div className="p-5">
+            <div className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="h-4 w-4" />
+              <p className="text-sm font-medium">Sinalizações da comunidade</p>
+            </div>
+            <p className="mt-2 text-2xl font-semibold">{communityAlerts.length}</p>
+          </div>
+        </Card>
+      </div>
+
+      {alertsQuery.isLoading ? <PageSpinner /> : null}
+
+      {!alertsQuery.isLoading && alertsQuery.data?.length === 0 ? (
+        <EmptyState label="Nenhum alerta encontrado para seus vídeos." />
+      ) : null}
+
+      <div className="space-y-4">
+        {communityAlerts.map((alert) => {
+          const targetId = alert.tags.find((tag) => tag[0] === "e")?.[1] || "";
+          const targetVideo = videoMap.get(targetId);
+          return (
+            <Card key={alert.id}>
+              <div className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-red-600">Sinalização da comunidade</p>
+                  <p className="mt-1 font-medium">{targetVideo?.tagValue("title") || "Vídeo sem título"}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Categoria: {alert.tags.find((tag) => tag[0] === "l")?.[1] || alert.tags.find((tag) => tag[0] === "e")?.[2] || "other"}</p>
+                </div>
+                <Button asChild>
+                  <Link to="/v/$eventId/edit" params={{ eventId: targetVideo?.encode() || targetId }}>Ajustar metadados</Link>
+                </Button>
+              </div>
+            </Card>
+          );
+        })}
+
+        {technicalAlerts.map((alert) => {
+          const targetId = alert.tags.find((tag) => tag[0] === "e")?.[1] || "";
+          const targetVideo = videoMap.get(targetId);
+          return (
+            <Card key={alert.id}>
+              <div className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-amber-600">Problema técnico</p>
+                  <p className="mt-1 font-medium">{targetVideo?.tagValue("title") || "Vídeo sem título"}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Tipo: {alert.tags.find((tag) => tag[0] === "type")?.[1] || "other"}</p>
+                </div>
+                <Button asChild>
+                  <Link to="/v/$eventId/edit" params={{ eventId: targetVideo?.encode() || targetId }}>Corrigir link / URL</Link>
+                </Button>
+              </div>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );

@@ -1,24 +1,33 @@
-import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { PageSpinner } from "@/components/PageSpinner.tsx";
-import { lazy, useEffect, useMemo, useRef, useState } from "react";
+import { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { t } from "i18next";
-import { AdvancedSearch } from "./@AdvancedSearch"; // Importe o novo componente
+import { NDKEvent } from "@nostr-dev-kit/ndk";
+import { AdvancedSearch } from "./@AdvancedSearch";
 import { eventSearchSchema, getVideosFromSearchData } from "@/helper/loaders/getVideosFromSearchData.ts";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { VideoCardLoading } from "@/components/cards/videoCard";
-
-const VideoCard = lazy(() => import("@/components/cards/videoCard"));
+import VideoCard, { VideoCardLoading } from "@/components/cards/videoCard";
+import { useBatchProfiles } from "@/features/nostr/hooks/useBatchProfiles";
 
 export const Route = createFileRoute("/search/")({
   component: RouteComponent,
   validateSearch: zodValidator(eventSearchSchema),
   loader: async ({ context: { ndk }, deps }) => {
+    const searchDeps = deps as {
+      search?: string;
+      nsfw?: boolean;
+      tag?: string | string[];
+      lang?: string;
+      author?: string;
+      timeRange?: "all" | "today" | "week" | "month" | "year";
+    };
     // Passamos o objeto consolidado para a função performática
     return getVideosFromSearchData({
       ndk,
-      ...deps
+      ...searchDeps,
+      timeRange: searchDeps.timeRange ?? "all"
     });
   },
   // Atualizar loaderDeps para incluir novos campos
@@ -92,19 +101,29 @@ function SearchResults() {
   } = useInfiniteQuery({
     queryKey: ["videoSearch", searchParams],
     queryFn: ({ pageParam }) => getVideosFromSearchData({
-      ndk, ...searchParams, until: pageParam
+      ndk,
+      ...searchParams,
+      timeRange: searchParams.timeRange ?? "all",
+      until: pageParam
     }),
     initialPageParam: undefined as number | undefined,
     // Conecta o loader data ao TanStack Query para evitar "loading" na primeira página
     initialData: { pages: [initialData], pageParams: [undefined] },
     getNextPageParam: (lastPage) => {
       if (!lastPage || lastPage.length < 20) return undefined;
-      return lastPage[lastPage.length - 1].created_at - 1;
+      const lastEvent = lastPage[lastPage.length - 1];
+      return lastEvent?.created_at ? lastEvent.created_at - 1 : undefined;
     }
   });
 
-  // 2. Agrupar vídeos em linhas baseadas nas colunas atuais
-  const allVideos = data?.pages.flatMap((page) => page) ?? [];
+  // 2. Batch profile fetch para todas as profiles da página
+  const allVideos = useMemo(
+    () => data?.pages.flatMap((page) => page) ?? [],
+    [data?.pages]
+  );
+  const profiles = useBatchProfiles(allVideos);
+
+  // 3. Agrupar vídeos em linhas baseadas nas colunas atuais
   const rows = useMemo(() => {
     const r = [];
     for (let i = 0; i < allVideos.length; i += columns) {
@@ -121,7 +140,22 @@ function SearchResults() {
     overscan: 3
   });
 
-  // 4. Trigger de busca ao chegar no fim
+  // 4. Navegação por clique no card (evita <a> dentro de <a> com VideoCard)
+  const navigate = useNavigate();
+  const handleCardClick = useCallback((eventId: string) => (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("a")) return;
+    navigate({ to: "/v/$eventId", params: { eventId } });
+  }, [navigate]);
+
+  const handleCardKeyDown = useCallback((eventId: string) => (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      navigate({ to: "/v/$eventId", params: { eventId } });
+    }
+  }, [navigate]);
+
+  // 5. Trigger de busca ao chegar no fim
   const virtualItems = rowVirtualizer.getVirtualItems();
   useEffect(() => {
     const lastItem = virtualItems[virtualItems.length - 1];
@@ -169,15 +203,17 @@ function SearchResults() {
                 ) : (
                   // Grid Original Preservado
                   <ul className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {rowVideos.map((e) => (
+                    {(rowVideos ?? []).map((e) => (
                       <li key={e.id} className="flex h-full animate-in fade-in duration-300">
-                        <Link
-                          to="/v/$eventId"
-                          params={{ eventId: e.encode() }}
-                          className="block w-full focus:outline-none focus:ring-2 focus:ring-primary rounded-lg transition-transform hover:scale-[1.02]"
+                        <div
+                          role="link"
+                          tabIndex={0}
+                          className="block w-full focus:outline-none focus:ring-2 focus:ring-primary rounded-lg transition-transform hover:scale-[1.02] cursor-pointer"
+                          onClick={handleCardClick(e.encode())}
+                          onKeyDown={handleCardKeyDown(e.encode())}
                         >
-                          <VideoCard event={e} />
-                        </Link>
+                          <VideoCard event={e} profile={profiles[e.author?.pubkey]} />
+                        </div>
                       </li>
                     ))}
                   </ul>

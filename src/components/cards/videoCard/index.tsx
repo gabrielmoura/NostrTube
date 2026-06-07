@@ -1,41 +1,25 @@
 import type { NDKEvent, NDKUserProfile } from "@nostr-dev-kit/ndk-hooks";
-import { NDKSubscriptionCacheUsage } from "@nostr-dev-kit/ndk-hooks";
+import { useProfileValue } from "@nostr-dev-kit/ndk-hooks";
 import { cn, getNameToShow, getTwoLetters } from "@/helper/format.ts";
 import { AspectRatio, Avatar, Skeleton } from "@radix-ui/themes";
 import { HiCheckBadge } from "react-icons/hi2";
 import { relativeTime } from "@/helper/date.ts";
 import { Link } from "@tanstack/react-router";
 import { extractTag } from "@/helper/extractTag.ts";
-import { useEffect, useState } from "react";
 import { ImageCard } from "@/components/cards/videoCard/ImageCard.tsx";
 
 type VideoCardProps = {
   className?: string;
   event: NDKEvent;
+  profile?: NDKUserProfile;
 };
 
 
-export default function VideoCard({ className, event }: VideoCardProps) {
+export default function VideoCard({ className, event, profile: propProfile }: VideoCardProps) {
   const npub = event.author.npub;
-  const [isLoading, setLoading] = useState<boolean>(true);
+  const profile = propProfile ?? useProfileValue(event.author.pubkey);
 
   const { title, published_at: publishedAt } = extractTag(event.tags);
-  const [profile, setProfile] = useState<NDKUserProfile | undefined>();
-
-  // if (!thumbnail ||thumbnail=="") return null;
-  useEffect(() => {
-    event.author.fetchProfile({ cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST }, true).then((p) => {
-      if (p) {
-        setProfile(p);
-      }
-      setLoading(false);
-    });
-  }, [event.author]);
-
-
-  if (isLoading) {
-    return <VideoCardLoading />;
-  }
   return (
     <div
       className={cn(

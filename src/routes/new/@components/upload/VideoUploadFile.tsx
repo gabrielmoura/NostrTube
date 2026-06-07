@@ -13,10 +13,11 @@ import { useVideoUploader } from "@/hooks/useVideoUploader.ts";
 import { useVideoUploadStore } from "@/store/videoUpload/useVideoUploadStore.ts";
 
 export default function VideoUploadFile() {
-  const { upload, isLoading, progress, errorCount } = useVideoUploader();
+  const { upload, isLoading, progress, uploadStage } = useVideoUploader();
   // Estado local apenas para preview da imagem/nome antes do upload começar
-  const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [, setPreviewFile] = useState<File | null>(null);
   const setShowEventInput = useVideoUploadStore((s) => s.setShowEventInput);
+  const uploadError = useVideoUploadStore((s) => s.error);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
@@ -34,12 +35,12 @@ export default function VideoUploadFile() {
     onDropRejected: () => toast.error(t("invalid_file_type", "Invalid file type"))
   });
 
-  // Limpa o preview se houver muitos erros para permitir tentar de novo
+  // Limpa o preview se houver erro para permitir nova tentativa imediatamente.
   useEffect(() => {
-    if (errorCount >= 2) {
+    if (uploadStage === "error") {
       setPreviewFile(null);
     }
-  }, [errorCount]);
+  }, [uploadStage]);
 
   if (isLoading) {
     return (
@@ -50,6 +51,11 @@ export default function VideoUploadFile() {
             {t("Sending_files", "Sending files")}... {progress}%
           </p>
           <Progress value={progress} className="w-[200px] mb-4" />
+          <p className="text-xs text-muted-foreground">
+            {uploadStage === "processing"
+              ? t("processing_video", "Processing video metadata...")
+              : t("uploading_to_relays", "Uploading your media...")}
+          </p>
         </CardContent>
       </Card>
     );
@@ -84,6 +90,8 @@ export default function VideoUploadFile() {
       >
         {t("Or_enter_existing_video", "Or, enter existing video")}
       </Button>
+
+      {uploadError ? <p className="text-sm text-destructive">{uploadError}</p> : null}
     </div>
   );
 }

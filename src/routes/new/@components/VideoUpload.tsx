@@ -11,11 +11,13 @@ const VideoUploadFile = lazy(() => import("@/routes/new/@components/upload/Video
 export default function Player({
                                  url,
                                  title,
-                                 image
-                               }: {
+                                 image,
+                                 mimeType
+                                }: {
   url: string;
   title?: string;
   image?: string;
+  mimeType?: string;
 }) {
   if (!url) {
     return (
@@ -27,7 +29,12 @@ export default function Player({
   }
   return (
     <div className="">
-      <VideoPlayer src={url} title={title ?? t("Untitled", "Untitled")} thumbnail={image} image={image} />
+      <VideoPlayer
+        src={url}
+        sourceMimeType={mimeType}
+        title={title ?? t("Untitled", "Untitled")}
+        image={image ?? ""}
+      />
     </div>
   );
 }
@@ -41,6 +48,4 @@ export function VideoUpload() {
   }
   return <VideoUploadFile />;
 }
-
-
 

@@ -52,7 +52,7 @@ export function AddTagButton({
     setIsOpen(false);
   };
 
-  const isInputInvalid = !!error || (regex && currentInput && !regex.test(currentInput));
+  const isInputInvalid = Boolean(error || (regex && currentInput && !regex.test(currentInput)));
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -326,7 +326,7 @@ export function AddTagInput({
             <Button variant="outline" onClick={() => setIsOpen(false)}>
               {t("Cancel", "Cancel")}
             </Button>
-            <Button type="submit" onClick={handleAddTag} disabled={!currentInput || isInputInvalid}>
+            <Button type="submit" onClick={handleAddTag} disabled={Boolean(!currentInput || isInputInvalid)}>
               {t("Add", "Add")}
             </Button>
           </DialogFooter>

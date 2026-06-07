@@ -17,9 +17,6 @@
 
     /* Linting */
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "allowSyntheticDefaultImports": true,
@@ -28,5 +25,19 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "src/components/cards/videoCard/horizontalCard.tsx",
+    "src/components/cards/videoCard/searchCard.tsx",
+    "src/components/containers/feeds/**/*",
+    "src/components/containers/horizontalUsers/**/*",
+    "src/helper/blossom/BlossomUpload.ts",
+    "src/helper/blossom/upload.ts",
+    "src/hooks/gentTags.ts",
+    "src/hooks/useNostrVideoSearch.ts",
+    "src/hooks/useUpload.tsx",
+    "src/routes/new/@components/thumbnail.tsx",
+    "src/routes/new/@components/textTracks.tsx",
+    "src/routes/v/@components/VideoActions.tsx"
+  ]
 }

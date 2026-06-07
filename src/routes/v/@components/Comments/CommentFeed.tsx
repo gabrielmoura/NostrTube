@@ -1,8 +1,9 @@
-import { NDKEvent, NDKSubscriptionCacheUsage, type NDKUserProfile } from "@nostr-dev-kit/ndk";
+import { NDKEvent } from "@nostr-dev-kit/ndk";
 import { t } from "i18next";
 import { HiCheckBadge } from "react-icons/hi2";
-import { lazy, useEffect, useState } from "react";
+import { lazy } from "react";
 import { Avatar } from "@radix-ui/themes";
+import { useProfileValue } from "@nostr-dev-kit/ndk-hooks";
 
 import { RenderText } from "@/components/RenderText.tsx";
 import { getNameToShow, getTwoLetters } from "@/helper/format.ts";
@@ -94,12 +95,7 @@ type CommentItemProps = {
 
 export function CommentItem({ event, replies, depth }: CommentItemProps) {
   const npub = event.author.npub;
-  const [profile, setProfile] = useState<NDKUserProfile | undefined>();
-
-  useEffect(() => {
-    event.author.fetchProfile({ cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST }, true)
-      .then((p) => setProfile(p || undefined));
-  }, [event.author]);
+  const profile = useProfileValue(event.author.pubkey);
 
   // Define classes de indentação baseadas na profundidade
   const indentationClass = depth > 0 ? `ml-2 md:ml-4 lg:ml-6 border-l-2 border-gray-200 pl-4 py-2` : "";

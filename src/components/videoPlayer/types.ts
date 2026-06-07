@@ -18,6 +18,7 @@ export type { TrackType };
 
 export type DataVideo = {
   src: string;
+  sourceMimeType?: string;
   fallback?: string[];
   image: string;
   thumbnail?: string;

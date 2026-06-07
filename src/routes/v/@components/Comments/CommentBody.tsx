@@ -8,8 +8,8 @@ import { getNameToShow, getTwoLetters } from "@/helper/format.ts";
 import { relativeTime } from "@/helper/date.ts";
 import { Avatar } from "@radix-ui/themes";
 // import ReactionButtons from "@/routes/v/@components/Comments/ReactionButtons.tsx";
-import { NDKSubscriptionCacheUsage, type NDKUserProfile } from "@nostr-dev-kit/ndk-hooks";
-import { lazy, useEffect, useState } from "react";
+import { useProfileValue } from "@nostr-dev-kit/ndk-hooks";
+import { lazy } from "react";
 
 const ReactionButtons = lazy(() => import("@/routes/v/@components/Comments/ReactionButtons.tsx"));
 
@@ -18,11 +18,7 @@ type CommentBodyProps = {
 };
 export default function CommentBody({ event }: CommentBodyProps) {
   const npub = event.author.npub;
-  const [profile, setProfile] = useState<NDKUserProfile | undefined>();
-
-  useEffect(() => {
-    event.author.fetchProfile({ cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST }, true).then((p) => (p) ? setProfile(p) : "");
-  }, [event.author]);
+  const profile = useProfileValue(event.author.pubkey);
   return (
     <div className="flex w-full gap-x-4 overflow-hidden">
       <Avatar className="center h-[40px] w-[40px] overflow-hidden rounded-[.55rem] bg-muted   object-cover"

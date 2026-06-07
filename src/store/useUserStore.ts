@@ -2,16 +2,22 @@ import { create } from "zustand";
 import { createJSONStorage, devtools, persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import type { NDKUserProfile } from "@nostr-dev-kit/ndk-hooks";
-import { AgeEnum } from "@/store/store/sessionTypes";
+import { AgeEnum } from "@/store/store/sessionTypes"; // Ajuste o import conforme seu projeto
 
-// --- Interfaces de Estado (Apenas Dados) ---
+// --- Tipos ---
 
-interface BlossomState {
+interface BlossomConfig {
   mirrors: string[];
   default: string;
 }
 
-export interface ConfigData {
+interface BlossomAction {
+  setMirrors: (mirrors: string[]) => void;
+  setDefault: (url: string) => void;
+}
+
+export interface SessionData {
+  profile: NDKUserProfile;
   darkTheme: boolean;
   nsfw: boolean;
   age?: AgeEnum;
@@ -21,50 +27,26 @@ export interface ConfigData {
 }
 
 interface UserState {
-  profile: Partial<NDKUserProfile> | null;
-  config: ConfigData;
-  blossom: BlossomState;
+  session?: SessionData;
+  blossom: BlossomConfig & BlossomAction;
 }
 
-// --- Interfaces de Ações (Funções) ---
-
 interface UserActions {
-  // Session/Profile
-  setProfile: (profile: NDKUserProfile) => void;
   clearSession: () => void;
-
-  // Config
+  setProfile: (profile: NDKUserProfile) => void;
   toggleTheme: () => void;
   setNsfw: (enabled: boolean) => void;
-  setRelays: (relays: string[]) => void;
+  setRelays: (r: string[]) => void;
   setGeoHash: (geoHash: string) => void;
   setPushNotificationsEnabled: (enabled: boolean) => void;
   setAge: (age: AgeEnum) => void;
-
-  // Blossom
-  setBlossomMirrors: (mirrors: string[]) => void;
-  setBlossomDefault: (url: string) => void;
 }
 
 export type UserStore = UserState & UserActions;
 
-// --- Configuração Inicial ---
+// --- Configuração ---
 
 const STORE_NAME = "user-session";
-
-const initialState: UserState = {
-  profile: null,
-  config: {
-    darkTheme: false,
-    nsfw: false,
-    relays: [],
-    pushNotificationsEnabled: false,
-  },
-  blossom: {
-    mirrors: [],
-    default: "",
-  },
-};
 
 // --- Store ---
 
@@ -72,59 +54,151 @@ export const useUserStore = create<UserStore>()(
   devtools(
     persist(
       immer((set) => ({
-        ...initialState,
-
-        // Actions: Profile
-        setProfile: (profile) =>
-          set((state) => { state.profile = profile; }, false, "user/setProfile"),
-
+        session: undefined,
         clearSession: () =>
-          set((state) => {
-            state.profile = initialState.profile;
-            state.config = initialState.config;
-            state.blossom = initialState.blossom;
-          }, false, "user/clearSession"),
+          set(
+            (state) => {
+              state.session = undefined;
+            },
+            false,
+            "clearSession"
+          ),
 
-        // Actions: Config
+        setProfile: (profile) =>
+          set(
+            (state) => {
+              if (state.session) {
+                // Se já existe sessão, atualiza apenas o perfil
+                state.session.profile = profile;
+              } else {
+                // Se não existe, inicializa com padrões
+                state.session = {
+                  profile,
+                  darkTheme: false,
+                  nsfw: false,
+                  age: undefined
+
+                };
+              }
+            },
+            false,
+            "setProfile"
+          ),
+
         toggleTheme: () =>
-          set((state) => { state.config.darkTheme = !state.config.darkTheme; }, false, "config/toggleTheme"),
+          set(
+            (state) => {
+              if (state.session) {
+                state.session.darkTheme = !state.session.darkTheme;
+              }
+            },
+            false,
+            "toggleTheme"
+          ),
 
         setNsfw: (enabled) =>
-          set((state) => { state.config.nsfw = enabled; }, false, "config/setNsfw"),
-
-        setRelays: (relays) =>
-          set((state) => { state.config.relays = relays; }, false, "config/setRelays"),
-
-        setGeoHash: (geoHash) =>
-          set((state) => { state.config.geoHash = geoHash; }, false, "config/setGeoHash"),
+          set(
+            (state) => {
+              if (state.session) {
+                state.session.nsfw = enabled;
+              }
+            },
+            false,
+            "setNsfw"
+          ),
 
         setPushNotificationsEnabled: (enabled) =>
-          set((state) => { state.config.pushNotificationsEnabled = enabled; }, false, "config/setPushNotifications"),
+          set(
+            (state) => {
+              if (state.session) {
+                state.session.pushNotificationsEnabled = enabled;
+              } else {
+                state.session = {
+                  profile: {} as NDKUserProfile,
+                  darkTheme: false,
+                  nsfw: false,
+                  pushNotificationsEnabled: enabled
+                };
+              }
+            },
+            false,
+            "setPushNotificationsEnabled"
+          ),
+
+        setGeoHash: (geoHash) =>
+          set(
+            (state) => {
+              if (state.session) {
+                state.session.geoHash = geoHash;
+              } else {
+                state.session = {
+                  profile: {} as NDKUserProfile,
+                  darkTheme: false,
+                  nsfw: false,
+                  geoHash
+                };
+              }
+            },
+            false,
+            "setGeoHash"
+          ),
 
         setAge: (age) =>
-          set((state) => { state.config.age = age; }, false, "config/setAge"),
+          set(
+            (state) => {
+              if (state.session) {
+                state.session.age = age;
+              }
+            },
+            false,
+            "setGeoHash"
+          ),
 
-        // Actions: Blossom
-        setBlossomMirrors: (mirrors) =>
-          set((state) => { state.blossom.mirrors = mirrors; }, false, "blossom/setMirrors"),
+        setRelays: (relays) => set((state) => {
+          if (state.session) {
+            state.session.relays = relays;
+          } else {
+            state.session = {
+              profile: {} as NDKUserProfile,
+              darkTheme: false,
+              nsfw: false,
+              relays
+            };
+          }
+        }, false, "setRelays"),
+        blossom: {
+          mirrors: [],
+          default: "",
 
-        setBlossomDefault: (url) =>
-          set((state) => { state.blossom.default = url; }, false, "blossom/setDefault"),
+          setMirrors: (mirrors) =>
+            set(
+              (state) => {
+                state.blossom.mirrors = mirrors;
+              },
+              false,
+              "blossom/setMirrors"
+            ),
+
+          setDefault: (url) =>
+            set(
+              (state) => {
+                state.blossom.default = url;
+              },
+              false,
+              "blossom/setDefault"
+            )
+        }
       })),
       {
         name: STORE_NAME,
-        storage: createJSONStorage(() => localStorage),
-        // Partialize garante que apenas os dados (não as funções) sejam salvos
-        partialize: (state) => ({
-          profile: state.profile,
-          config: state.config,
-          blossom: state.blossom,
-        }),
+        storage: createJSONStorage(() => sessionStorage) // Use localStorage se necessário
+        // Opcional: partialize para salvar apenas dados específicos se a store crescer
+        // partialize: (state) => ({ session: state.session }),
       }
     ),
     {
       name: STORE_NAME,
-      enabled: import.meta.env.DEV,
+      enabled: import.meta.env.DEV
     }
   )
 );

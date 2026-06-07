@@ -2,6 +2,7 @@
 import "@vidstack/react/player/styles/base.css";
 
 import {
+  isDASHProvider,
   isHLSProvider,
   MediaPlayer,
   type MediaPlayerInstance,
@@ -18,35 +19,52 @@ import { cn } from "@/helper/format.ts";
 
 interface VideoPlayerParams extends DataVideo {
   onCanPlay?: () => void;
+  onPlaybackError?: () => void;
   className?: string;
 }
 
 export function VideoPlayer({
                               image,
                               src,
+                              sourceMimeType,
                               title,
                               onCanPlay,
+                              onPlaybackError,
                               className
                             }: VideoPlayerParams) {
   const playerRef = useRef<MediaPlayerInstance | null>(null);
+  const handledErrorForSourceRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    handledErrorForSourceRef.current = null;
+  }, [src]);
 
   useEffect(() => {
     const player = playerRef.current;
     if (!player) return;
 
-    return player.subscribe(({ paused, viewType, error }) => {
-      if (error) {
-        console.error("Media Player Error:", error);
-      }
+    let errorLogged = false;
 
-      if (import.meta.env.DEV) {
-        console.debug("view:", viewType, "paused:", paused);
+    return player.subscribe(({ error }) => {
+      if (error && !errorLogged) {
+        errorLogged = true;
+        if (handledErrorForSourceRef.current !== src) {
+          handledErrorForSourceRef.current = src;
+          onPlaybackError?.();
+        }
       }
     });
-  }, []);
+  }, [onPlaybackError]);
 
-  function onProviderChange(provider: MediaProviderAdapter) {
+  function onProviderChange(provider: MediaProviderAdapter | null) {
+    if (!provider) return;
     if (isHLSProvider(provider)) {
+      provider.config = {
+        backBufferLength: 0,
+        lowLatencyMode: false,
+      };
+    }
+    if (isDASHProvider(provider)) {
       provider.config = {};
     }
   }
@@ -69,9 +87,12 @@ export function VideoPlayer({
       logLevel={import.meta.env.PROD ? "warn" : "debug"}
       onProviderChange={onProviderChange}
       onCanPlay={onCanPlay}
+      onPlaying={() => {
+        handledErrorForSourceRef.current = null;
+      }}
     >
       <MediaProvider>
-        <source src={src} type="video/mp4" />
+        <source src={src} type={sourceMimeType ?? "video/mp4"} />
 
         <Poster
           className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity data-[visible]:opacity-100"

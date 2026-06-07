@@ -1,4 +1,4 @@
-import { type Dispatch, type ReactNode, type SetStateAction, useCallback, useEffect, useState } from "react";
+import { type Dispatch, type ReactNode, type SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 import { type Accept, useDropzone } from "react-dropzone";
 import { useNDK } from "@nostr-dev-kit/ndk-hooks";
 import { NDKBlossom } from "@nostr-dev-kit/ndk-blossom";
@@ -20,6 +20,8 @@ interface ButtonUploadProps {
 
 export default function ButtonUpload({ children, url, setUrl, accept }: ButtonUploadProps) {
   const { ndk } = useNDK();
+  const ndkRef = useRef(ndk);
+  ndkRef.current = ndk;
   const [files, setFiles] = useState<(File & { preview: string })[]>([]);
   const [fileToUpload, setFileToUpload] = useState<File | null>(null); // Novo estado para o arquivo a ser enviado
   const [isLoading, setIsLoading] = useState(false);
@@ -40,8 +42,9 @@ export default function ButtonUpload({ children, url, setUrl, accept }: ButtonUp
     multiple: false
   });
 
-  const handleUploadFile = useCallback(async () => { // Removido 'file' como parâmetro, agora usa 'fileToUpload'
-    if (!ndk) {
+  const handleUploadFile = useCallback(async () => {
+    const ndkInstance = ndkRef.current;
+    if (!ndkInstance) {
       console.error("NDK instance is not available.");
       return;
     }
@@ -51,8 +54,8 @@ export default function ButtonUpload({ children, url, setUrl, accept }: ButtonUp
     }
 
     setIsLoading(true);
-    setUploadProgress(0); // Resetar o progresso
-    const blossom = new NDKBlossom(ndk);
+    setUploadProgress(0);
+    const blossom = new NDKBlossom(ndkInstance);
     blossom.debug = import.meta.env.DEV;
 
     blossom.onUploadFailed = (error, serverUrl, file) => {
@@ -91,7 +94,7 @@ export default function ButtonUpload({ children, url, setUrl, accept }: ButtonUp
       setIsLoading(false);
       setUploadProgress(undefined);
     }
-  }, [ndk, setUrl, fileToUpload]); // Dependência adicionada: fileToUpload
+  }, [setUrl, fileToUpload]);
 
   useEffect(() => {
     // Cleanup function for object URLs

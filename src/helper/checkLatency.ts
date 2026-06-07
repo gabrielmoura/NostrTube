@@ -4,7 +4,7 @@ export const checkLatency = async (url: string, timeoutMs: number = 2000): Promi
   const log = LoggerAgent.create("checkLatency");
   return new Promise((resolve) => {
     const start = performance.now();
-    let socket: WebSocket = null;
+    let socket: WebSocket | null = null;
     let hasResolved = false;
 
     // Timeout de segurança

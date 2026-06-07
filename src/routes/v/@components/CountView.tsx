@@ -39,7 +39,7 @@ export default function CountView({ eventIdentifier }: CountViewProps) {
       });
     } else {
       const viewed = getTagValue("viewed", viewEvent.tags);
-      let n: number;
+      let n = 0;
       if (typeof viewed === "string") {
         n = parseInt(viewed);
       }

@@ -3,7 +3,6 @@ import NDK, {
   type NDKEvent,
   type NDKFilter,
   NDKKind,
-  NDKSubscriptionCacheUsage,
   type NDKUserProfile
 } from "@nostr-dev-kit/ndk";
 import { notFound } from "@tanstack/react-router";
@@ -11,8 +10,22 @@ import { nip19 } from "nostr-tools";
 import { makeEvent } from "@/helper/pow/pow.ts";
 import { nostrNow } from "@/helper/date.ts";
 import { LoggerAgent } from "@/lib/debug.ts";
+import { fetchEventCached, fetchEventsCached } from "@/features/nostr/services/ndk-query.service";
 
 const log = LoggerAgent.create("playlistApi");
+
+function buildAddressTag(item: VideoItem): string {
+  if (item.address && item.address.split(":").length === 3) {
+    return item.address;
+  }
+
+  if (item.dTag) {
+    return `${item.kind}:${item.author.pubkey}:${item.dTag}`;
+  }
+
+  return `${item.kind}:${item.author.pubkey}:${item.id}`;
+}
+
 export const playlistApi: IPlaylistAPI = {
   fetchPlaylist: async (ndk: NDK, id?: string): Promise<PlaylistFetch> => {
     if (!id) throw notFound();
@@ -42,10 +55,8 @@ export const playlistApi: IPlaylistAPI = {
     }
 
     // 2. Buscar o Evento da Playlist
-    const metaEvent = await ndk.fetchEvent(filter, {
-      cacheUsage: NDKSubscriptionCacheUsage.PARALLEL,
-      closeOnEose: false,
-      groupable: true
+    const metaEvent = await fetchEventCached(ndk, filter, {
+      mode: "parallel"
     });
 
     if (!metaEvent) throw notFound();
@@ -61,7 +72,7 @@ export const playlistApi: IPlaylistAPI = {
     // Map: "kind:pubkey" -> Set<dTags>
     const coordinateMap = new Map<string, Set<string>>();
 
-    metaEvent.tags.forEach(tag => {
+    metaEvent.tags.forEach((tag: string[]) => {
       if (tag[0] === "e") {
         eIds.push(tag[1]);
       } else if (tag[0] === "a") {
@@ -110,31 +121,26 @@ export const playlistApi: IPlaylistAPI = {
     }
 
     // 5. Buscar eventos dos vídeos (Paralelo)
-    const videoEvents = await ndk.fetchEvents(itemFilters, {
-      closeOnEose: true, // Importante: fechar após receber os dados para liberar conexões
-      groupable: true,
-      cacheUsage: NDKSubscriptionCacheUsage.PARALLEL
+    const videoEvents = await fetchEventsCached(ndk, itemFilters, {
+      mode: "parallel"
     });
 
     // 6. OTIMIZAÇÃO: Buscar Perfis em Massa (Batch Fetch Authors)
     // Coletamos todos os pubkeys únicos para fazer UM único request de perfis
     const uniquePubkeys = new Set<string>();
-    videoEvents.forEach(e => uniquePubkeys.add(e.pubkey));
+    videoEvents.forEach((event: NDKEvent) => uniquePubkeys.add(event.pubkey));
 
     const authorsMap = new Map<string, NDKUserProfile>();
 
     if (uniquePubkeys.size > 0) {
-      const authorEvents = await ndk.fetchEvents({
+      const authorEvents = await fetchEventsCached(ndk, {
         kinds: [0],
         authors: Array.from(uniquePubkeys)
       }, {
-        closeOnEose: true,
-        groupable: true,
-        // Tenta pegar do cache primeiro para perfis, pois mudam pouco
-        cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST
+        mode: "cache-first"
       });
 
-      authorEvents.forEach((evt) => {
+      authorEvents.forEach((evt: NDKEvent) => {
         try {
           const profile = JSON.parse(evt.content);
           authorsMap.set(evt.pubkey, profile);
@@ -145,7 +151,7 @@ export const playlistApi: IPlaylistAPI = {
     }
 
     // 7. Mapear para VideoItem (Agora síncrono e rápido)
-    const items: VideoItem[] = Array.from(videoEvents).map((event) => {
+    const items: VideoItem[] = Array.from(videoEvents).map((event: NDKEvent) => {
       const authorProfile = authorsMap.get(event.pubkey);
 
       const title = event.tagValue("title") || "Sem título";
@@ -156,12 +162,14 @@ export const playlistApi: IPlaylistAPI = {
 
       return {
         id: event.id,
+        kind: event.kind,
         title,
         description: summary,
         thumbnailUrl: thumb,
         duration,
         publishedAt: event.created_at || 0,
         dTag: event.tagId(),
+        address: event.tagId(),
         author: {
           pubkey: event.pubkey,
           name: authorProfile?.name || authorProfile?.displayName,
@@ -199,14 +207,10 @@ export const playlistApi: IPlaylistAPI = {
       ...(playlist.coverImage ? [["image", playlist.coverImage]] : [])
     ];
 
-    // Remover tags 'a' antigas
-    pEvent.tags = pEvent.tags.filter(tag => tag[0] !== "a");
+    pEvent.tags = pEvent.tags.filter(tag => tag[0] !== "a" && tag[0] !== "e");
 
-    // Adicionar tags 'a' atualizadas
     playlist.items.forEach(item => {
-      // Prioriza a dTag existente, fallback para construção manual
-      const dTagValue = item.dTag || `21:${item.author.pubkey}:${item.id}`;
-      pEvent.tags.push(["a", dTagValue, ""]); // Adiciona marker vazio se necessário
+      pEvent.tags.push(["a", buildAddressTag(item), ""]);
     });
 
     // Remove a Tag Client
@@ -223,7 +227,7 @@ export const playlistApi: IPlaylistAPI = {
 
     const nEvent = await makeEvent({
       ndk: pEvent.ndk!,
-      difficulty: 10,
+      difficulty: Number(import.meta.env.VITE_MIN_PLAYLIST_POW ?? 10),
       event: {
         ...pEvent.rawEvent(),
         created_at: nostrNow()
@@ -235,12 +239,8 @@ export const playlistApi: IPlaylistAPI = {
   },
 
   deleteItemFromPlaylist: async (playlistEvent, itemId) => {
-    // A lógica original assumia que itemId estaria no índice 2 da tag 'a' (marker) ou parte da string
-    // Ajuste para ser mais robusto na remoção
     playlistEvent.tags = playlistEvent.tags.filter(tag => {
       if (tag[0] === "a") {
-        // tag[1] é "kind:pubkey:dtag"
-        // Verifica se a d-tag ou o final da string contém o ID (caso o dtag seja o ID)
         return !tag[1].includes(itemId);
       }
       if (tag[0] === "e") {
@@ -253,7 +253,7 @@ export const playlistApi: IPlaylistAPI = {
 
     const nEvent = await makeEvent({
       ndk: playlistEvent.ndk!,
-      difficulty: 10,
+      difficulty: Number(import.meta.env.VITE_MIN_PLAYLIST_POW ?? 10),
       event: {
         ...playlistEvent.rawEvent(),
         created_at: nostrNow()
@@ -267,7 +267,7 @@ export const playlistApi: IPlaylistAPI = {
   deletePlaylist: async (playlistEvent: NDKEvent, reason?: string) => {
     const dEvent = await makeEvent({
       ndk: playlistEvent.ndk!,
-      difficulty: 10,
+      difficulty: Number(import.meta.env.VITE_MIN_PLAYLIST_POW ?? 10),
       event: {
         kind: NDKKind.EventDeletion,
         created_at: nostrNow(),

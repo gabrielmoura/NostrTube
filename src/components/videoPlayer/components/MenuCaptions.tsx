@@ -1,13 +1,14 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import * as Tooltip from "@radix-ui/react-tooltip";
+import type React from "react";
 import { useCaptionOptions, useMediaPlayer } from "@vidstack/react";
 import { RiClosedCaptioningFill as SubtitlesIcon } from "react-icons/ri";
 import { LuCheckCheck as CheckCircle, LuCircle as CircleIcon } from "react-icons/lu";
 
 export interface MenuProps {
-  side?: DropdownMenu.MenuContentProps["side"];
-  align?: DropdownMenu.MenuContentProps["align"];
-  offset?: DropdownMenu.MenuContentProps["sideOffset"];
+  side?: React.ComponentPropsWithoutRef<typeof DropdownMenu.Content>["side"];
+  align?: React.ComponentPropsWithoutRef<typeof DropdownMenu.Content>["align"];
+  offset?: React.ComponentPropsWithoutRef<typeof DropdownMenu.Content>["sideOffset"];
   tooltipSide?: Tooltip.TooltipContentProps["side"];
   tooltipAlign?: Tooltip.TooltipContentProps["align"];
   tooltipOffset?: number;
@@ -81,7 +82,7 @@ export function MenuCaptions({
   );
 }
 
-function Radio({ children, ...props }: DropdownMenu.MenuRadioItemProps) {
+function Radio({ children, ...props }: React.ComponentPropsWithoutRef<typeof DropdownMenu.RadioItem>) {
   return (
     <DropdownMenu.RadioItem
       className="group relative flex w-full cursor-pointer select-none items-center justify-start rounded-sm p-2.5 text-sm outline-none ring-media-focus data-[focus]:ring-[3px] hocus:bg-white/10"

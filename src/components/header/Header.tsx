@@ -23,6 +23,11 @@ import useUserStore from "@/store/useUserStore.ts";
 import { AuthModal } from "@/components/AuthModal.tsx";
 import { modal } from "@/components/modal_v2/modal-manager.ts";
 
+type HeaderOption = {
+  to: string;
+  label: string;
+};
+
 export default function Header() {
 
   const currentUser = useNDKCurrentUser();
@@ -38,7 +43,7 @@ export default function Header() {
     return () => clearTimeout(timeout);
   }, [theme]);
 
-  const options = [
+  const options: HeaderOption[] = [
     { to: "/", label: "Home" },
     // {to: "/new", label: "Novo"},
     { to: "/search", label: "Buscar" },
@@ -142,7 +147,12 @@ export default function Header() {
 }
 
 /* ---------- MOBILE MENU ---------- */
-function MobileMenu({ options, theme, setTheme, handleSearch }: any) {
+function MobileMenu({ options, theme, setTheme, handleSearch }: {
+  options: HeaderOption[];
+  theme: string;
+  setTheme: React.Dispatch<React.SetStateAction<string>>;
+  handleSearch: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+}) {
 
   return (
     <Sheet>

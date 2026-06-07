@@ -1,87 +1,254 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { t } from "i18next";
-import { Clock, Flame, Languages } from "lucide-react";
-import { RecentFeed } from "@/components/videoFeed/containers/RecentFeed.tsx";
-import { PopularVideos } from "@/components/videoFeed/containers/PopularVideos.tsx";
-import { LanguageFeed } from "@/components/videoFeed/containers/LanguageFeed.tsx";
-import { z } from "zod";
-import { zodValidator } from "@tanstack/zod-adapter";
-import { cn } from "@/lib/utils"; // Utilitário padrão de classes
+import { NDKEvent } from "@nostr-dev-kit/ndk";
+import { NDKSubscriptionCacheUsage, useSubscribe } from "@nostr-dev-kit/ndk-hooks";
+import { uniqBy } from "ramda";
+import { getTagValue, getTagValues } from "@welshman/util";
+import { Clock, Flame, Languages, Search } from "lucide-react"; // Ícones sugeridos
+import { sortEventsByImages } from "@/helper/format.ts";
+import { detectLanguageMain } from "@/helper/userLang.ts";
+import { Section, SectionContent, SectionHeader, SectionTitle } from "@/components/containers/pageSection";
+import VideoCard, { VideoCardLoading } from "@/components/cards/videoCard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs.tsx";
+import { VIDEO_EVENT_KINDS } from "@/features/video/services/video-kinds";
+import { useBatchProfiles } from "@/features/nostr/hooks/useBatchProfiles";
 
-// Schema de validação
-const indexSchema = z.object({
-  tab: z.enum(["recent", "popular", "language"]).optional().default("recent")
-});
-
-// Mapeamento de títulos para o Head
-const TAB_TITLES: Record<string, string> = {
-  recent: t("Trending", "Tendências"),
-  popular: t("Popular", "Populares"),
-  language: t("By Language", "Por Idioma")
-};
+// --- Constantes ---
+const VIDEO_KINDS = VIDEO_EVENT_KINDS;
+const SEARCH_RELAYS = import.meta.env.VITE_NOSTR_SEARCH_RELAYS?.length > 5
+  ? import.meta.env.VITE_NOSTR_SEARCH_RELAYS
+  : undefined;
 
 export const Route = createFileRoute("/")({
-  validateSearch: zodValidator(indexSchema),
-  head: ({ match: { search } }) => {
-    const tabLabel = TAB_TITLES[search.tab] || TAB_TITLES.recent;
-    const appName = import.meta.env.VITE_APP_NAME || "Nostr Video";
-
-    return {
-      meta: [
-        { title: `${tabLabel} | ${appName}` },
-        { name: "description", content: t("search_page_description") },
-        { property: "og:title", content: `${tabLabel} | ${appName}` }
-      ]
-    };
-  },
-  component: IndexPage
+  component: IndexPageWithHelmet
 });
 
-const TABS_CONFIG = [
-  { id: "recent", label: TAB_TITLES.recent, icon: Clock, component: RecentFeed },
-  { id: "popular", label: TAB_TITLES.popular, icon: Flame, component: PopularVideos },
-  { id: "language", label: TAB_TITLES.language, icon: Languages, component: LanguageFeed }
-] as const;
-
-export function IndexPage() {
-  const { tab } = Route.useSearch();
-
-  // Encontra a configuração da aba atual ou fallback para a primeira
-  const currentTab = TABS_CONFIG.find((t) => t.id === tab) || TABS_CONFIG[0];
-  const ActiveComponent = currentTab.component;
-
+function IndexPageWithHelmet() {
   return (
     <div className="w-full pb-10">
       <div className="w-full space-y-6">
-        {/* Navegação Estilizada como Tabs */}
-        <nav className="flex items-center justify-center p-1 bg-muted rounded-lg max-w-4xl mx-auto px-5 mb-6">
-          <div className="grid w-full grid-cols-3">
-            {TABS_CONFIG.map(({ id, label, icon: Icon }) => (
-              <Link
-                key={id}
-                to="/"
-                search={{ tab: id }}
-                // Estilização baseada no estado ativo da rota
-                className={cn(
-                  "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-                  tab === id
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-background/50"
-                )}
-              >
-                <Icon className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">{label}</span>
-                <span className="sm:hidden">{label.split(" ")[0]}</span>
-              </Link>
-            ))}
-          </div>
-        </nav>
+        <Tabs defaultValue="recent" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsTrigger value="recent" className="flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              <span>{t("Trending", "Tendências")}</span>
+            </TabsTrigger>
+            <TabsTrigger value="popular" className="flex items-center gap-2">
+              <Flame className="w-4 h-4" />
+              <span>{t("Popular", "Populares")}</span>
+            </TabsTrigger>
+            <TabsTrigger value="language" className="flex items-center gap-2">
+              <Languages className="w-4 h-4" />
+              <span>{t("By Language", "Por Idioma")}</span>
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Renderização Dinâmica do Conteúdo */}
-        <main className="outline-none animate-in fade-in duration-300">
-          <ActiveComponent />
-        </main>
+          {/* O uso de unmountOnExit no TabsContent (se suportado pelo seu UI lib) ou keepMounted depende da estratégia de cache.
+              Aqui assumimos renderização padrão. */}
+
+          <TabsContent value="recent" className="focus-visible:outline-none">
+            <RecentVideos />
+          </TabsContent>
+
+          <TabsContent value="popular" className="focus-visible:outline-none">
+            <PopularVideos />
+          </TabsContent>
+
+          <TabsContent value="language" className="focus-visible:outline-none">
+            <LanguageVideos />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
+  );
+}
+
+// --- Componente Reutilizável de Feed ---
+interface VideoFeedProps {
+  events: NDKEvent[];
+  title: string;
+  isLoading?: boolean;
+  emptyMessage?: string;
+}
+
+function VideoFeed({ events, title, isLoading, emptyMessage }: VideoFeedProps) {
+  const processedEvents = useMemo(() => {
+    if (!events.length) return [];
+    return uniqBy(
+      (e) => getTagValues("title", e.tags),
+      events
+    ).sort(sortEventsByImages);
+  }, [events]);
+
+  const profiles = useBatchProfiles(processedEvents);
+  const getProfile = (pubkey: string) => profiles[pubkey];
+  const navigate = useNavigate();
+
+  if (isLoading && processedEvents.length === 0) {
+    return (
+      <Section className="px-5">
+        <SectionHeader>
+          <SectionTitle
+            className="font-main text-2xl font-semibold sm:text-3xl animate-pulse bg-muted/20 w-1/3 h-8 rounded" />
+        </SectionHeader>
+        <SectionContent className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 relative mx-auto">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <VideoCardLoading key={i} />
+          ))}
+        </SectionContent>
+      </Section>
+    );
+  }
+
+  // Estado Vazio
+  if (!isLoading && processedEvents.length === 0) {
+    return (
+      <Section className="px-5 py-10 text-center">
+        <div className="flex flex-col items-center justify-center space-y-3 text-muted-foreground">
+          <Search className="w-10 h-10 opacity-50" />
+          <p>{emptyMessage || t("No videos found", "Nenhum vídeo encontrado.")}</p>
+        </div>
+      </Section>
+    );
+  }
+
+  // Estado com Dados
+  return (
+    <section className="relative px-5 space-y-6 sm:space-y-8 animate-in fade-in duration-500">
+      <div className="flex items-center justify-between">
+        <h2 className="font-main font-bold text-2xl sm:text-3xl tracking-tight">
+          {title}
+        </h2>
+      </div>
+
+      <div className="relative">
+        <ul className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {processedEvents.map((e) => (
+            <li key={e.id} className="flex">
+              <div
+                role="link"
+                tabIndex={0}
+                className="block w-full focus:outline-none focus:ring-2 focus:ring-primary rounded-lg transition-transform hover:scale-[1.01] cursor-pointer"
+                onClick={(event) => {
+                  if ((event.target as HTMLElement).closest("a")) return;
+                  navigate({ to: "/v/$eventId", params: { eventId: e.encode() } });
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    navigate({ to: "/v/$eventId", params: { eventId: e.encode() } });
+                  }
+                }}
+              >
+                <VideoCard event={e} profile={getProfile(e.author.pubkey)} />
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+// --- Sub-Componentes Lógicos ---
+
+function RecentVideos() {
+  const { events } = useSubscribe(
+    [{
+      kinds: VIDEO_KINDS,
+      limit: 50, // Reduzido de 100 para melhorar first paint, ajuste conforme necessidade
+      until: Math.floor(Date.now() / 1000) // Garante que pegamos até o momento atual
+    }],
+    {
+      closeOnEose: false, // Mantive false para receber updates em tempo real, mude para true se preferir estático
+      cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
+      relayUrls: SEARCH_RELAYS
+    },
+    []
+  );
+
+  return (
+    <VideoFeed
+      events={events}
+      title={t("Recent Uploads", "Envios Recentes")}
+      isLoading={events.length === 0}
+    />
+  );
+}
+
+function LanguageVideos() {
+  // Inicialização lazy para evitar useEffect desnecessário
+  const [lang] = useState<string | undefined>(() => detectLanguageMain()?.split("-")[0]);
+
+  const { events } = useSubscribe(
+    lang ? [{
+      kinds: VIDEO_KINDS,
+      "#l": [lang], // NDK geralmente espera array ou string, mas array é mais seguro para filters
+      limit: 50
+    }] : [], // Não busca se não tiver lang
+    {
+      cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST
+    },
+    [lang]
+  );
+
+  if (!lang) {
+    return <div
+      className="p-5 text-center text-muted-foreground">{t("Language not detected", "Idioma não detectado.")}</div>;
+  }
+
+  return (
+    <VideoFeed
+      events={events}
+      title={t("Videos in your language", "Vídeos no seu idioma")}
+      isLoading={events.length === 0}
+      emptyMessage={t("No videos found for language", `Nenhum vídeo encontrado para o idioma: ${lang}`)}
+    />
+  );
+}
+
+function PopularVideos() {
+  // 1. Busca eventos de View Count (Kind 34237)
+  const { events: viewEvents } = useSubscribe([{
+      kinds: [34237 as never],
+    limit: 100,
+    until: Math.floor(Date.now() / 1000)
+  }], {
+    cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST
+  });
+
+  // 2. Extrai os IDs dos vídeos mais vistos
+  const popularVideoIds = useMemo(() => {
+    return viewEvents
+      .sort((a, b) => {
+        const aViews = parseInt(getTagValues("viewed", a.tags)[0] || "0", 10);
+        const bViews = parseInt(getTagValues("viewed", b.tags)[0] || "0", 10);
+        return bViews - aViews;
+      })
+      .slice(0, 50) // Limite para não explodir a próxima query
+      .map(e => getTagValue("d", e.tags))
+      .filter((id): id is string => !!id); // Remove nulls
+  }, [viewEvents]);
+
+  // 3. Busca os vídeos baseados nos IDs encontrados
+  const { events: videoEvents } = useSubscribe(
+    popularVideoIds.length > 0 ? [{
+        kinds: VIDEO_KINDS,
+      "#d": popularVideoIds, // Correção: filtro por tag 'd' geralmente é '#d' em queries genéricas ou 'd' dependendo do relay wrapper
+      limit: 50
+    }] : [], // Evita query vazia
+    {
+      cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST
+    },
+    [popularVideoIds] // Re-executa quando a lista de IDs mudar
+  );
+
+  return (
+    <VideoFeed
+      events={videoEvents}
+      title={t("Popular Videos", "Vídeos Populares")}
+      isLoading={viewEvents.length > 0 && videoEvents.length === 0} // Loading se temos views mas ainda não temos os vídeos
+    />
   );
 }

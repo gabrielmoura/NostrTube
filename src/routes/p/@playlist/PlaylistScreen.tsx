@@ -38,6 +38,7 @@ export default function PlaylistScreen() {
   const { ndk } = useNDK();
   const navigate = useNavigate();
   const pubkey = useNDKCurrentPubkey();
+  const isOwner = Boolean(pubkey && playlist?.ownerPubkey === pubkey);
 
   // DnD Sensors
   const sensors = useSensors(
@@ -98,18 +99,24 @@ export default function PlaylistScreen() {
   };
 
   const handlePlayVideo = (id: string) => {
-    console.log(`Navegar para player com ID: ${id}`);
-    // router.push(`/watch/${id}`);
+    navigate({
+      to: "/v/$eventId",
+      params: { eventId: id }
+    });
   };
 
   const handleSaveChanges = async () => {
-    if (!playlist) return;
+    if (!playlist || !metaEvent || !isOwner) return;
     setIsSaving(true);
     try {
-      await playlistApi.savePlaylist(metaEvent!, playlist);
-      setOriginalPlaylist(JSON.parse(JSON.stringify(playlist))); // Reset dirty state
+      const nextEvent = await playlistApi.savePlaylist(metaEvent, playlist);
+      setMetaEvent(nextEvent);
+      setOriginalPlaylist(JSON.parse(JSON.stringify(playlist)));
+      toast.success("Playlist atualizada. A nova ordem ja esta refletida na interface.");
     } catch (error) {
       console.error("Erro ao salvar", error);
+      toast.error("Nao foi possivel salvar a playlist.");
+      setPlaylist(originalPlaylist ? JSON.parse(JSON.stringify(originalPlaylist)) : null);
     } finally {
       setIsSaving(false);
     }
@@ -171,16 +178,18 @@ export default function PlaylistScreen() {
                 </div>
               </div>
 
-              <div className="gap-1 flex">
-                <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)}>
-                  <Pencil className="w-4 h-4 mr-2" />
-                  Editar
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => handleDeleteEvent()}>
-                  <Trash className="w-4 h-4 mr-2" />
-                  Deletar
-                </Button>
-              </div>
+              {isOwner ? (
+                <div className="gap-1 flex">
+                  <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)}>
+                    <Pencil className="w-4 h-4 mr-2" />
+                    Editar
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleDeleteEvent()}>
+                    <Trash className="w-4 h-4 mr-2" />
+                    Deletar
+                  </Button>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
@@ -216,7 +225,7 @@ export default function PlaylistScreen() {
       </div>
 
       {/* Floating Save Button - Left Fixed */}
-      {isDirty && (
+      {isDirty && isOwner && (
         <div className="fixed bottom-6 left-6 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
           <Button
             size="lg"

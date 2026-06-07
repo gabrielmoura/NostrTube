@@ -1,10 +1,10 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn, getNameToShow, getTwoLetters } from "@/lib/utils";
+import { cn, getNameToShow, getTwoLetters } from "@/helper/format.ts";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Skeleton } from "@/components/ui/skeleton";
 import { HiCheckBadge } from "react-icons/hi2";
-import useProfile from "@/lib/hooks/useProfile";
-import { relativeTime } from "@/lib/utils/dates";
+import { useProfileValue } from "@nostr-dev-kit/ndk-hooks";
+import { relativeTime } from "@/helper/date.ts";
 import { nip19 } from "nostr-tools";
 
 type VideoCardProps = {
@@ -23,7 +23,7 @@ export default function SearchVideoCard({
                                           video: { title, summary, thumbnail, pubkey, published_at }
                                         }: VideoCardProps) {
   const npub = nip19.npubEncode(pubkey);
-  const { profile } = useProfile(pubkey);
+  const profile = useProfileValue(pubkey);
   return (
     <div className={cn("group flex space-x-3 overflow-hidden", className)}>
       <div className="relative h-full w-[70px] shrink-0 overflow-hidden rounded-md">

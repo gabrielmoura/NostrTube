@@ -29,9 +29,9 @@ export default function LoadVideoFromOthers() {
   return (
     <Card className="w-full max-w-lg mx-auto shadow-none border-none h-full flex-col ">
       <CardHeader>
-        <CardTitle className="text-lg">{t("import_video", "Import Video")}</CardTitle>
+        <CardTitle className="text-lg">{t("import_video", "Importar vídeo")}</CardTitle>
         <CardDescription>
-          {t("import_video_desc", "Use an existing Nostr event or a direct URL link.")}
+          {t("import_video_desc", "Use um evento Nostr existente ou um link direto de vídeo.")}
         </CardDescription>
       </CardHeader>
 
@@ -39,7 +39,7 @@ export default function LoadVideoFromOthers() {
         {/* Opção 1: Evento Nostr */}
         <div className="space-y-2">
           <Label htmlFor="nostr-event">
-            {t("nostr_event_id", "Nostr Event ID (nevent/naddr)")}
+            {t("nostr_event_id", "ID do evento Nostr (nevent/naddr)")}
           </Label>
           <div className="flex gap-2">
             <Input
@@ -49,10 +49,10 @@ export default function LoadVideoFromOthers() {
               placeholder="naddr1... ou nevent1..."
               onKeyDown={(e) => e.key === "Enter" && handleEventSearch()}
             />
-            <Button
-              onClick={handleEventSearch}
-              loading={isImporting}
-              disabled={!eventString || isImporting}
+              <Button
+                onClick={handleEventSearch}
+                loading={isImporting}
+                disabled={!eventString || isImporting}
               size="icon"
               variant="secondary"
             >
@@ -72,7 +72,7 @@ export default function LoadVideoFromOthers() {
         {/* Opção 2: URL Direta */}
         <div className="space-y-2">
           <Label htmlFor="video-url">
-            {t("video_url", "Direct Video URL")}
+            {t("video_url", "URL direta do vídeo")}
           </Label>
           <div className="flex gap-2">
             <Input
@@ -92,7 +92,7 @@ export default function LoadVideoFromOthers() {
             </Button>
           </div>
           <p className="text-[0.8rem] text-muted-foreground">
-            {t("youtube_warning", "Avoid YouTube links if possible.")}
+            {t("youtube_warning", "Evite links do YouTube quando possível.")}
           </p>
         </div>
 
@@ -104,7 +104,7 @@ export default function LoadVideoFromOthers() {
             className="w-full gap-2 text-muted-foreground hover:text-foreground"
           >
             <RiArrowLeftLine />
-            {t("back_to_upload", "Back to file upload")}
+            {t("back_to_upload", "Voltar para envio de arquivo")}
           </Button>
         </div>
       </CardContent>

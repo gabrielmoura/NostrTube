@@ -1,10 +1,12 @@
 import { createRootRouteWithContext, HeadContent, Outlet } from "@tanstack/react-router";
 import NDK__default from "@nostr-dev-kit/ndk";
+import type { QueryClient } from "@tanstack/react-query";
 import Header from "../components/header/Header.tsx";
 import { Devtools } from "@/Devtools.tsx";
 
 interface NdkContext {
   ndk: NDK__default;
+  queryClient: QueryClient;
 }
 
 export const Route = createRootRouteWithContext<NdkContext>()({

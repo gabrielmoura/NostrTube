@@ -25,7 +25,7 @@ export async function makeEvent({ ndk, event, difficulty }: MakeEventParams): Pr
     try {
       logger.debug("Starting POW calculation", { difficulty });
       finalEvent = await powManager.calculate(event, difficulty);
-      logger.info("POW generated", { id: finalEvent.id });
+      logger.info("POW generated", { difficulty });
     } catch (error) {
       logger.error("POW failed", error);
       throw error;

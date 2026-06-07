@@ -75,11 +75,12 @@ export const Button = ({
   );
 };
 
-export const Switch = ({ checked, onCheckedChange }: { checked: boolean, onCheckedChange: (c: boolean) => void }) => (
+export const Switch = ({ checked, onCheckedChange, disabled = false }: { checked: boolean, onCheckedChange: (c: boolean) => void, disabled?: boolean }) => (
   <button
     type="button"
     role="switch"
     aria-checked={checked}
+    disabled={disabled}
     onClick={() => onCheckedChange(!checked)}
     className={`
       relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2
