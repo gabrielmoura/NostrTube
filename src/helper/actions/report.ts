@@ -46,7 +46,6 @@ export async function reportContentAction({
     },
     ndk
   });
-  await reportEvent.sign();
   await reportEvent.publish();
   return reportEvent;
 }
@@ -87,7 +86,6 @@ export async function reportTechnicalAction({
     },
     ndk
   });
-  await reportEvent.sign();
   await reportEvent.publish();
   return reportEvent;
 }

@@ -11,6 +11,7 @@ export function useVideoCommentController(initialTags?: string[][]) {
   const [content, setContent] = useState("");
   const contentRef = useRef<HTMLTextAreaElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const attachmentPreviewRef = useRef<string | undefined>(undefined);
   const [attachmentPreview, setAttachmentPreview] = useState<string | undefined>();
   const [attachmentUrl, setAttachmentUrl] = useState<string | undefined>();
   const { ndk } = useNDK();
@@ -37,6 +38,7 @@ export function useVideoCommentController(initialTags?: string[][]) {
 
   const submit = async () => {
     if (!ndk || !currentUser) return;
+    if (!content.trim() && !attachmentUrl) return;
 
     try {
       const eventDraft = buildCommentEventDraft({
@@ -51,20 +53,26 @@ export function useVideoCommentController(initialTags?: string[][]) {
         event: eventDraft,
         difficulty: Number(import.meta.env.VITE_MIN_COMMENT_POW ?? 10)
       });
-    } catch (error) {
-      log.error("err", error);
-    } finally {
+
       setContent("");
       setAttachmentPreview(undefined);
       setAttachmentUrl(undefined);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
+    } catch (error) {
+      log.error("err", error);
     }
   };
 
   const selectAttachment = async (file: File) => {
-    setAttachmentPreview(URL.createObjectURL(file));
+    if (attachmentPreviewRef.current) {
+      URL.revokeObjectURL(attachmentPreviewRef.current);
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    attachmentPreviewRef.current = previewUrl;
+    setAttachmentPreview(previewUrl);
     const result = await upload.uploadFile(file);
     if (result?.url) {
       setAttachmentUrl(result.url);
@@ -72,6 +80,11 @@ export function useVideoCommentController(initialTags?: string[][]) {
   };
 
   const clearAttachment = () => {
+    if (attachmentPreviewRef.current) {
+      URL.revokeObjectURL(attachmentPreviewRef.current);
+      attachmentPreviewRef.current = undefined;
+    }
+
     setAttachmentPreview(undefined);
     setAttachmentUrl(undefined);
     if (fileInputRef.current) {

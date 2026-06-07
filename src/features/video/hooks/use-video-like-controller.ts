@@ -3,7 +3,7 @@ import { NDKSubscriptionCacheUsage, useNDK, useNDKCurrentPubkey, useSubscribe } 
 import { useMutation } from "@tanstack/react-query";
 import { makeEvent, type MakeEventParams } from "@/helper/pow/pow";
 import { buildLikeEventDraft } from "@/features/video/services/video-interactions.service";
-import type { likeOptions } from "@/components/LikeToggleButton";
+import { summarizeReactionEvents } from "@/features/video/services/video-engagement.service";
 
 export function useVideoLikeController(contentEvent: NDKEvent) {
   const { ndk } = useNDK();
@@ -32,9 +32,7 @@ export function useVideoLikeController(contentEvent: NDKEvent) {
     cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST
   }, [contentEvent]);
 
-  const activeReaction = Array.from(events).find((event) => event.pubkey === currentPubkey)?.content as likeOptions;
-  const upVotes = Array.from(events).filter((event) => event.content === "+").length;
-  const downVotes = events.length - upVotes;
+  const { activeReaction, upVotes, downVotes } = summarizeReactionEvents(Array.from(events), currentPubkey);
 
   const toggleLike = async (action: string) => {
     if (!ndk || !currentPubkey) return;

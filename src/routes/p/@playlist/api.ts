@@ -278,7 +278,6 @@ export const playlistApi: IPlaylistAPI = {
         ]
       }
     });
-    await dEvent.sign();
     await dEvent.publish();
     log.debug("Deletion Event", dEvent);
   }

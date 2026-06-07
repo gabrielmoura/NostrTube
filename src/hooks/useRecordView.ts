@@ -1,10 +1,11 @@
 import { useCallback } from "react";
 import NDK, { NDKEvent, NDKKind } from "@nostr-dev-kit/ndk";
-import { getTagValue, getTagValues } from "@welshman/util";
+import { getTagValue } from "@welshman/util";
 import { makeEvent } from "@/helper/pow/pow.ts";
 import { nostrNow } from "@/helper/date.ts";
 import { NostrKind } from "@/helper/type.ts";
 import { fetchEventCached, fetchEventsCached } from "@/features/nostr/services/ndk-query.service";
+import { summarizeViewEvents } from "@/features/video/services/video-engagement.service";
 
 /**
  * Interface para os parâmetros da função `markView`.
@@ -147,18 +148,12 @@ export function useRecordView(): useRecordView {
         mode: "cache-first"
       });
 
-    const evtArray = Array.from(events);
+      const { events: deduplicatedEvents, totalViews } = summarizeViewEvents(Array.from(events));
 
-    const totalViews = evtArray.reduce((acc, curr) => {
-      const val = getTagValues("viewed", curr.tags)[0];
-      const parsed = parseInt(val, 10);
-      return acc + (isNaN(parsed) ? 0 : parsed);
-    }, 0);
-
-    return {
-      events: evtArray as NDKEvent[],
-      totalViews
-    };
+      return {
+        events: deduplicatedEvents,
+        totalViews
+      };
   }, []); // As dependências estão vazias porque ndk, eventIdentifier são passados
   // como parâmetros na chamada de countView, e não são do escopo direto do hook.
 

@@ -1,15 +1,3 @@
-import {
-  catchError,
-  concatMap,
-  filter,
-  firstValueFrom,
-  fromEvent,
-  map,
-  share,
-  Subject,
-  throwError,
-  timeout
-} from "rxjs";
 import type { OwnedEvent } from "@welshman/util";
 import { LoggerAgent } from "@/lib/debug.ts";
 
@@ -29,23 +17,12 @@ interface PowResponse {
 
 class PowManager {
   private static instance: PowManager;
+  // Keep a single worker alive for the whole app lifetime so PoW jobs reuse it.
   private worker: Worker;
-  private taskSubject = new Subject<PowRequest>();
-
-  // Stream de mensagens vindo do Worker
-  private workerMessages$;
+  private queue: Promise<void> = Promise.resolve();
 
   private constructor() {
     this.worker = new Worker(new URL("./pow-worker.ts", import.meta.url), { type: "module" });
-
-    // Transformamos o evento de mensagem em um Observable compartilhado
-    this.workerMessages$ = fromEvent<MessageEvent<PowResponse>>(this.worker, "message").pipe(
-      map(ev => ev.data),
-      share()
-    );
-
-    this.initPipeline();
-
     this.worker.onerror = (err) => logger.error("Worker Critical Error:", err);
   }
 
@@ -54,44 +31,66 @@ class PowManager {
     return PowManager.instance;
   }
 
-  private initPipeline() {
-    // O concatMap garante que as tarefas sejam enviadas ao worker uma por uma
-    this.taskSubject.pipe(
-      concatMap((task) => {
-        logger.debug("Sending task to worker", task.taskId);
-        this.worker.postMessage(task);
+  private executeTask(task: PowRequest): Promise<OwnedEvent> {
+    return new Promise<OwnedEvent>((resolve, reject) => {
+      let settled = false;
 
-        // Espera o worker responder com o ID específico antes de prosseguir para a próxima tarefa da fila
-        return this.workerMessages$.pipe(
-          filter(res => res.taskId === task.taskId),
-          timeout(120_000), // 2 minutos
-          catchError(err => {
-            logger.error("Task failed or timed out", task.taskId, err);
-            return throwError(() => err);
-          })
-        );
-      })
-    ).subscribe({
-      next: (res) => logger.debug("Worker finished task", res.taskId),
-      error: (err) => logger.error("Pipeline error (restarting...)", err)
+      const cleanup = () => {
+        clearTimeout(timeoutId);
+        this.worker.removeEventListener("message", handleMessage);
+        this.worker.removeEventListener("error", handleError);
+      };
+
+      const finish = (callback: () => void) => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        callback();
+      };
+
+      const handleMessage = (event: MessageEvent<PowResponse>) => {
+        if (event.data.taskId !== task.taskId) return;
+
+        finish(() => {
+          if (event.data.error) {
+            logger.error("Task failed", task.taskId, event.data.error);
+            reject(new Error(event.data.error));
+            return;
+          }
+
+          logger.debug("Worker finished task", task.taskId);
+          resolve(event.data.event!);
+        });
+      };
+
+      const handleError = (event: ErrorEvent) => {
+        finish(() => {
+          logger.error("Worker Critical Error:", event);
+          reject(event.error instanceof Error ? event.error : new Error(event.message || "POW worker failed"));
+        });
+      };
+
+      const timeoutId = window.setTimeout(() => {
+        finish(() => {
+          logger.error("Task failed or timed out", task.taskId);
+          reject(new Error(`POW task timed out after 120000ms: ${task.taskId}`));
+        });
+      }, 120_000);
+
+      this.worker.addEventListener("message", handleMessage);
+      this.worker.addEventListener("error", handleError);
+
+      logger.debug("Sending task to worker", task.taskId);
+      this.worker.postMessage(task);
     });
   }
 
   public async calculate(event: OwnedEvent, difficulty: number): Promise<OwnedEvent> {
     const taskId = crypto.randomUUID();
+    const task = { taskId, event, difficulty };
 
-    // Criamos uma promessa que observa o stream de respostas especificamente para este taskId
-    const resultPromise = firstValueFrom(
-      this.workerMessages$.pipe(
-        filter(res => res.taskId === taskId),
-        map(res => {
-          if (res.error) throw new Error(res.error);
-          return res.event!;
-        })
-      )
-    );
-
-    this.taskSubject.next({ taskId, event, difficulty });
+    const resultPromise = this.queue.catch(() => undefined).then(() => this.executeTask(task));
+    this.queue = resultPromise.then(() => undefined, () => undefined);
 
     return resultPromise;
   }

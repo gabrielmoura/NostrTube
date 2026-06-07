@@ -14,11 +14,11 @@ export function buildCommentEventDraft({
   attachmentUrl?: string;
 }) {
   const tags = [...(initialTags ?? [])];
-  let noteContent = content;
+  let noteContent = content.trim();
 
   if (attachmentUrl) {
     tags.push(["r", attachmentUrl]);
-    noteContent += `\n${attachmentUrl}`;
+    noteContent = noteContent ? `${noteContent}\n${attachmentUrl}` : attachmentUrl;
   }
 
   return {

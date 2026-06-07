@@ -12,19 +12,28 @@ export interface MakeEventParams {
 }
 
 export async function makeEvent({ ndk, event, difficulty }: MakeEventParams): Promise<NDKEvent> {
-  // Injeta tag do cliente
-  event.tags.push([
-    "client",
-    import.meta.env.VITE_APP_NAME || "NostrTube",
-    "31990:acbf4bb4141163d7fa034b8d4fdcd5bd002916122739150fa1456511c1b4ff76"
-  ]);
+  const normalizedTags = event.tags
+    .filter(([name]) => name !== "client" && name !== "nonce")
+    .map(tag => [...tag]);
 
-  let finalEvent: OwnedEvent = event;
+  const baseEvent: OwnedEvent = {
+    ...event,
+    tags: [
+      ...normalizedTags,
+      [
+        "client",
+        import.meta.env.VITE_APP_NAME || "NostrTube",
+        "31990:acbf4bb4141163d7fa034b8d4fdcd5bd002916122739150fa1456511c1b4ff76"
+      ]
+    ]
+  };
+
+  let finalEvent: OwnedEvent = baseEvent;
 
   if (difficulty && difficulty > 0) {
     try {
       logger.debug("Starting POW calculation", { difficulty });
-      finalEvent = await powManager.calculate(event, difficulty);
+      finalEvent = await powManager.calculate(baseEvent, difficulty);
       logger.info("POW generated", { difficulty });
     } catch (error) {
       logger.error("POW failed", error);

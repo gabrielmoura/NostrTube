@@ -1,5 +1,6 @@
 import React, { Component, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
+import { AlertTriangle, Home, RefreshCw } from "lucide-react";
 
 // Definição dos tipos para Props e State
 type Props = {
@@ -62,63 +63,51 @@ export class ErrorBoundaryVideo extends Component<Props, State> {
       // Renderiza a UI de fallback padrão com Tailwind CSS.
       return (
         <div
-          className="flex flex-col items-center justify-center p-6 m-4 bg-red-50 border-l-4 border-red-500 text-red-800 rounded-lg shadow-md"
+          className="mx-4 my-6 overflow-hidden rounded-2xl border border-border/60 bg-card/95 shadow-sm"
           role="alert"
         >
-          {/* Ícone de Alerta */}
-          <div className="mb-4">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-12 w-12 text-red-500"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.21 3.03-1.742 3.03H4.42c-1.532 0-2.492-1.696-1.742-3.03l5.58-9.92zM10 13a1 1 0 110-2 1 1 0 010 2zm-1-4a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z"
-                clipRule="evenodd"
-              />
-            </svg>
+          <div className="border-b border-border/60 bg-muted/40 px-6 py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
+                <AlertTriangle className="h-5 w-5" />
+              </div>
+              <div>
+                <h1 className="text-lg font-semibold text-foreground">Não foi possível carregar esta área</h1>
+                <p className="text-sm text-muted-foreground">O vídeo pode continuar disponível, mas esta parte da interface encontrou um erro.</p>
+              </div>
+            </div>
           </div>
 
-          <h1 className="text-2xl font-bold mb-2">Ops! Algo deu errado.</h1>
-          <p className="text-center text-red-700">
-            Não foi possível carregar este conteúdo. Por favor, tente novamente ou volte ao início.
-          </p>
+          <div className="space-y-5 px-6 py-5">
+            <p className="text-sm leading-6 text-muted-foreground">
+              Tente recarregar esta seção. Se o problema continuar, volte para a página inicial e abra outro vídeo ou retente mais tarde.
+            </p>
 
-          {/* Container para os botões de ação */}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
-            {/* Botão para voltar ao início (condicional) */}
-            <Link to={"/"}>
+            <div className="flex flex-wrap items-center gap-3">
               <button
-
-                className="px-5 py-2.5 bg-transparent border border-red-600 text-red-700 font-semibold rounded-lg shadow-sm hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                onClick={this.handleReload}
+                className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
               >
-                Voltar ao Início
+                <RefreshCw className="h-4 w-4" />
+                Recarregar seção
               </button>
-            </Link>
-
-            {/* Botão primário para recarregar a página */}
-            <button
-              onClick={this.handleReload}
-              className="px-5 py-2.5 bg-red-600 text-white font-semibold rounded-lg shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
-            >
-              Recarregar Página
-            </button>
+              <Link to={"/"}>
+                <button className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted">
+                  <Home className="h-4 w-4" />
+                  Voltar ao início
+                </button>
+              </Link>
+            </div>
           </div>
 
-          {/* Opcional: Detalhes do erro em ambiente de desenvolvimento */}
-          {/*{process.env.NODE_ENV === 'development' && this.state.error && (*/}
-          <details className="mt-6 w-full max-w-lg text-left">
-            <summary className="cursor-pointer text-sm font-medium text-red-600 hover:text-red-800">
-              Detalhes do Erro
+          <details className="mx-6 mb-6 rounded-xl border border-border/60 bg-muted/30 p-4 text-left">
+            <summary className="cursor-pointer text-sm font-medium text-foreground hover:text-primary">
+              Detalhes técnicos
             </summary>
-            <pre
-              className="mt-2 p-3 bg-red-100 text-red-900 text-xs rounded-md overflow-auto whitespace-pre-wrap break-all">
-                                {this.state.error?.toString()}
-                            </pre>
+            <pre className="mt-3 overflow-auto whitespace-pre-wrap break-all rounded-lg bg-background p-3 text-xs text-muted-foreground">
+              {this.state.error?.toString()}
+            </pre>
           </details>
-          {/*)}*/}
         </div>
       );
     }

@@ -85,13 +85,13 @@ export function VideoCommentInput({
                     </>
                   )}
                   <div className="center mt-auto">
-                    <Button
-                      variant="default"
-                      size="default"
-                      disabled={controller.isUploadingImage}
-                      loading={controller.isPending}
-                      onClick={controller.submit}
-                      className="rounded-full"
+                     <Button
+                       variant="default"
+                       size="default"
+                       disabled={controller.isUploadingImage || controller.isPending || (!controller.content.trim() && !controller.attachmentPreview)}
+                       loading={controller.isPending}
+                       onClick={controller.submit}
+                       className="rounded-full"
                     >
                       {t("comment")}
                     </Button>

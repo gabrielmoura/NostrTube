@@ -12,6 +12,7 @@ import { nostrNow } from "@/helper/date.ts";
 import Spinner from "@/components/Spinner.tsx";
 import type { likeOptions } from "@/components/LikeToggleButton.tsx";
 import { useMutation } from "@tanstack/react-query";
+import { summarizeReactionEvents } from "@/features/video/services/video-engagement.service";
 
 type ReactionButtonsProps = {
   event: NDKEvent;
@@ -58,9 +59,7 @@ export default function ReactionButtons({ event }: ReactionButtonsProps) {
     });
   }
 
-  const activeReaction = Array.from(events).filter(e => e.pubkey == currentPubkey)[0]?.content as likeOptions;
-  const downVotes = Array.from(events)?.filter((e) => e.content === "-").length;
-  const upVotes = events.length - downVotes;
+  const { activeReaction, downVotes, upVotes } = summarizeReactionEvents(Array.from(events), currentPubkey);
 
 
   return (
@@ -92,6 +91,9 @@ export default function ReactionButtons({ event }: ReactionButtonsProps) {
           <HiHandThumbDown className="h-4 w-4" />
         ) : (
           <HiOutlineHandThumbDown className="h-4 w-4" />
+        )}
+        {!!downVotes && (
+          <span className="text-xs font-bold">{formatCount(downVotes)}</span>
         )}
       </Button>
     </div>

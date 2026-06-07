@@ -18,7 +18,7 @@ export default function Thumbnail({ url, onChange }: ThumbnailProps) {
     if (status === "success" && fileUrl) {
       onChange(fileUrl);
     }
-  }, [status]);
+  }, [fileUrl, onChange, status]);
 
   if (url) {
     return (

@@ -265,12 +265,11 @@ const useUpload = (props?: UploadProps) => {
     return (
       <div className={cn("relative overflow-hidden rounded-xl", className)}>
         <div className="">
-          <Image
+          <img
             alt="Image"
             height="288"
             width="288"
             src={imagePreview}
-            unoptimized
             className={cn(
               "bg-bckground h-full rounded-xl object-cover object-center max-sm:max-h-[100px]",
               status === "uploading" && "grayscale",
@@ -334,7 +333,11 @@ const useUpload = (props?: UploadProps) => {
   const clear = () => {
     setStatus("empty");
     setFileUrl(undefined);
+    setFileType(undefined);
     setFileHash(undefined);
+    setFileSize(undefined);
+    setVideoDuration(undefined);
+    setThumbnailUrl(undefined);
     setImagePreview(undefined);
   };
 

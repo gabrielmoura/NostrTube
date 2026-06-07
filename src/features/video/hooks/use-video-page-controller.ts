@@ -26,7 +26,6 @@ export function useVideoPageController() {
       return;
     }
 
-    await viewEvent.publish();
     if (video.event) {
       recordWatchHistory(video.event);
     }

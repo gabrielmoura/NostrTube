@@ -1,27 +1,27 @@
 import { formatNumber, getVideoDetails } from "@/helper/format.ts";
 import { relativeTime } from "@/helper/date.ts";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
+import type { NDKKind } from "@nostr-dev-kit/ndk";
 import { Spinner } from "@radix-ui/themes";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/videoPlayer/components/Tooltip.tsx";
-import { useRecordView } from "@/hooks/useRecordView.ts";
-import { useNDK } from "@nostr-dev-kit/ndk-hooks";
+import { NDKSubscriptionCacheUsage, useSubscribe } from "@nostr-dev-kit/ndk-hooks";
+import { NostrKind } from "@/helper/type.ts";
+import { summarizeViewEvents } from "@/features/video/services/video-engagement.service";
 
 export default function VideoMeta({ event }: { event: Parameters<typeof getVideoDetails>[0] }) {
-  const [count, setCount] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const { ndk } = useNDK();
   const { publishedAt } = getVideoDetails(event);
+  const eventIdentifier = event.dTag;
+  const filters = eventIdentifier ? [{
+    kinds: [NostrKind.VideoViewer as unknown as NDKKind],
+    "#a": [eventIdentifier]
+  }] : false;
 
-  const { countView } = useRecordView();
-  useEffect(() => {
-    countView({
-      eventIdentifier: event.dTag as string,
-      ndk: ndk!
-    }).then(({ totalViews }) => {
-      setCount(totalViews);
-    }).catch(console.error);
-    setIsLoading(false);
-  }, [countView, event.dTag, ndk]);
+  const { events, eose } = useSubscribe(filters, {
+    closeOnEose: false,
+    cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST
+  }, [eventIdentifier]);
+
+  const count = useMemo(() => summarizeViewEvents(Array.from(events)).totalViews, [events]);
 
 
   return <div className="flex items-center gap-x-1.5 text-[13px] font-semibold text-foreground">
@@ -30,7 +30,7 @@ export default function VideoMeta({ event }: { event: Parameters<typeof getVideo
         Está é apenas uma estimativa, não é um dado confiável
       </TooltipContent>
       <TooltipTrigger>
-        <p>{!isLoading ? `${formatNumber(count)} views` : <Spinner />}</p>
+        <p>{eose ? `${formatNumber(count)} views` : <Spinner />}</p>
       </TooltipTrigger>
     </Tooltip>
     {!!publishedAt && (

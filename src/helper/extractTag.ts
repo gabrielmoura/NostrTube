@@ -36,11 +36,25 @@ export interface StructuredTagData {
   zap?: Zap;
 }
 
+type SimpleStringKey = "d" | "url" | "title" | "alt" | "thumb" | "image" | "proxy" | "summary" | "fallback";
+
 // Lista de chaves que são apenas strings simples (1:1)
 const SIMPLE_STRING_KEYS = new Set([
   "d", "url", "title", "alt", "thumb",
   "image", "proxy", "summary", "fallback"
 ]);
+
+function parseNumber(value?: string): number | undefined {
+  if (!value) return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function assignSimpleString(result: StructuredTagData, key: SimpleStringKey, value?: string) {
+  if (value) {
+    result[key] = value;
+  }
+}
 
 // 2. Helper para parsear os atributos do imeta
 function parseMetaAttributes(attributes: string[]): Meta {
@@ -70,10 +84,10 @@ function parseMetaAttributes(attributes: string[]): Meta {
         meta.fallback = val;
         break;
       case "duration":
-        meta.duration = Number(val);
+        meta.duration = parseNumber(val);
         break;
       case "size":
-        meta.size = Number(val);
+        meta.size = parseNumber(val);
         break;
     }
   }
@@ -95,8 +109,7 @@ export function extractTag(data: string[][]): StructuredTagData {
 
     // Caso 1: Atributos de String Simples
     if (SIMPLE_STRING_KEYS.has(key)) {
-      // TypeScript precisa dessa asserção pois acessamos dinamicamente
-      (result as any)[key] = values[0];
+      assignSimpleString(result, key as SimpleStringKey, values[0]);
       continue;
     }
 
@@ -114,18 +127,18 @@ export function extractTag(data: string[][]): StructuredTagData {
         result.zap = {
           id: values[0],
           relays: values[1] || undefined,
-          amount: values[2] ? Number(values[2]) : undefined
+          amount: parseNumber(values[2])
         };
         break;
 
       // Números
       case "published_at":
-        result.published_at = Number(values[0]);
+        result.published_at = parseNumber(values[0]);
         break;
 
       // Duração (no root)
       case "duration":
-        result.duration = Number(values[0]);
+        result.duration = parseNumber(values[0]);
         break;
 
       // Metadados Complexos
