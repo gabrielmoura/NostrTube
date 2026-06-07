@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { t } from "i18next";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -85,12 +85,13 @@ function UploadProgressSummary({
   uploadStage: string;
   hasVideo: boolean;
 }) {
-  const statusText = useMemo(() => {
-    if (isUploading && uploadStage === "processing") return t("processing_video", "Processing video metadata...");
-    if (isUploading) return t("Sending_files", "Sending files");
-    if (hasVideo) return t("upload_complete", "Upload complete. Continue to metadata.");
-    return t("upload_ready_hint", "Upload or import a playable video source to continue.");
-  }, [hasVideo, isUploading, uploadStage]);
+  const statusText = isUploading && uploadStage === "processing"
+    ? t("processing_video", "Processing video metadata...")
+    : isUploading
+      ? t("Sending_files", "Sending files")
+      : hasVideo
+        ? t("upload_complete", "Upload complete. Continue to metadata.")
+        : t("upload_ready_hint", "Upload or import a playable video source to continue.");
 
   return (
     <div className="rounded-2xl border bg-card p-4 shadow-sm">

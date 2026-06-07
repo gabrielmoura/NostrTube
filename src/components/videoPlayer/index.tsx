@@ -2,6 +2,7 @@
 import "@vidstack/react/player/styles/base.css";
 
 import {
+  isDASHProvider,
   isHLSProvider,
   MediaPlayer,
   type MediaPlayerInstance,
@@ -42,17 +43,15 @@ export function VideoPlayer({
     const player = playerRef.current;
     if (!player) return;
 
-    return player.subscribe(({ paused, viewType, error }) => {
-      if (error) {
-        console.error("Media Player Error:", error);
+    let errorLogged = false;
+
+    return player.subscribe(({ error }) => {
+      if (error && !errorLogged) {
+        errorLogged = true;
         if (handledErrorForSourceRef.current !== src) {
           handledErrorForSourceRef.current = src;
           onPlaybackError?.();
         }
-      }
-
-      if (import.meta.env.DEV) {
-        console.debug("view:", viewType, "paused:", paused);
       }
     });
   }, [onPlaybackError]);
@@ -60,6 +59,12 @@ export function VideoPlayer({
   function onProviderChange(provider: MediaProviderAdapter | null) {
     if (!provider) return;
     if (isHLSProvider(provider)) {
+      provider.config = {
+        backBufferLength: 0,
+        lowLatencyMode: false,
+      };
+    }
+    if (isDASHProvider(provider)) {
       provider.config = {};
     }
   }

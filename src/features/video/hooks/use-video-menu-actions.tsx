@@ -15,98 +15,101 @@ import { useDownload } from "@/hooks/useDownload";
 export function useVideoMenuActions(event: NDKEvent) {
   const navigate = useNavigate();
   const currentPubkey = useNDKCurrentPubkey();
-  const rawEvent = event.rawEvent();
-  const { url, title, summary } = getVideoDetails(event);
   const naddr = event.encode();
   const dTag = event.dTag;
   const { downloadFile } = useDownload();
 
-  const handleDownload = React.useCallback(() => {
-    const promise = downloadFile(url, title);
-    toast.promise(promise, {
-      success: "Video has been downloaded",
-      error: "Video download fail"
-    });
-  }, [downloadFile, title, url]);
+  return React.useMemo(() => {
+    const rawEvent = event.rawEvent();
+    const { url, title, summary } = getVideoDetails(event);
 
-  const handleShare = React.useCallback(() => {
-    const shareUrl = `${import.meta.env.VITE_PUBLIC_ROOT_DOMAIN ?? "https://nostrtube.com"}/v/${dTag || naddr}`;
+    const handleDownload = () => {
+      const promise = downloadFile(url, title);
+      toast.promise(promise, {
+        success: "Video has been downloaded",
+        error: "Video download fail"
+      });
+    };
 
-    if ((navigator as Navigator).share) {
-      Share.share({
-        title,
-        text: title,
-        url: shareUrl
-      }).catch(console.log);
-      return;
-    }
+    const handleShare = () => {
+      const shareUrl = `${import.meta.env.VITE_PUBLIC_ROOT_DOMAIN ?? "https://nostrtube.com"}/v/${dTag || naddr}`;
 
-    copyText(shareUrl).then(() => toast.success("Link copied!"));
-  }, [dTag, naddr, title]);
-
-  return React.useMemo(() => ([
-    {
-      label: "Share video",
-      icon: <Share2 className="size-4" />,
-      action: handleShare
-    },
-    {
-      label: "Add to Playlist",
-      icon: <ListPlus className="size-4" />,
-      action: () => {
-        const dTagId = event.dTag ?? "";
-        modal.show(<AddToPlaylistModal eventIdTag={`${event.kind}:${event.pubkey}:${dTagId}`} />);
+      if ((navigator as Navigator).share) {
+        Share.share({
+          title,
+          text: title,
+          url: shareUrl
+        }).catch(console.log);
+        return;
       }
-    },
-    {
-      label: "Download video",
-      icon: <Download className="size-4" />,
-      action: handleDownload
-    },
-    {
-      label: "Copy raw event",
-      icon: <FileJson className="size-4" />,
-      action: () => copyText(JSON.stringify(rawEvent)).then(() => toast.success("Copied event"))
-    },
-    ...(currentPubkey === event.author.pubkey ? [{
-      label: "Edit Event",
-      icon: <Pencil className="size-4" />,
-      action: async () => {
-        await navigate({
-          to: "/v/$eventId/edit",
-          params: { eventId: event.encode() }
-        });
+
+      copyText(shareUrl).then(() => toast.success("Link copied!"));
+    };
+
+    return ([
+      {
+        label: "Share video",
+        icon: <Share2 className="size-4" />,
+        action: handleShare
+      },
+      {
+        label: "Add to Playlist",
+        icon: <ListPlus className="size-4" />,
+        action: () => {
+          const dTagId = event.dTag ?? "";
+          modal.show(<AddToPlaylistModal eventIdTag={`${event.kind}:${event.pubkey}:${dTagId}`} />);
+        }
+      },
+      {
+        label: "Download video",
+        icon: <Download className="size-4" />,
+        action: handleDownload
+      },
+      {
+        label: "Copy raw event",
+        icon: <FileJson className="size-4" />,
+        action: () => copyText(JSON.stringify(rawEvent)).then(() => toast.success("Copied event"))
+      },
+      ...(currentPubkey === event.author.pubkey ? [{
+        label: "Edit Event",
+        icon: <Pencil className="size-4" />,
+        action: async () => {
+          await navigate({
+            to: "/v/$eventId/edit",
+            params: { eventId: event.encode() }
+          });
+        }
+      }] : []),
+      {
+        label: "Notificar problema técnico",
+        icon: <Wrench className="size-4 text-amber-500" />,
+        action: () => modal.show(<ReportTechnicalModal data={{
+          title: title || summary[0],
+          id: event.id,
+          authorPubkey: event.pubkey,
+          relayUrls: import.meta.env.VITE_NOSTR_RELAYS
+        }} />)
+      },
+      {
+        label: "Reportar violação de conteúdo",
+        icon: <ShieldAlert className="size-4 text-red-500" />,
+        action: () => modal.show(<ReportContentModal data={{
+          title: title || summary[0],
+          id: event.id,
+          authorPubkey: event.pubkey,
+          relayUrls: import.meta.env.VITE_NOSTR_RELAYS
+        }} />)
+      },
+      {
+        label: "View on NJump",
+        icon: <ExternalLink className="size-4" />,
+        action: () => window.open(`https://njump.me/${event.id}`, "_blank")
+      },
+      {
+        label: "Open Native",
+        icon: <Send className="size-4" />,
+        action: () => window.open(`nostr://${naddr}`)
       }
-    }] : []),
-    {
-      label: "Notificar problema técnico",
-      icon: <Wrench className="size-4 text-amber-500" />,
-      action: () => modal.show(<ReportTechnicalModal data={{
-        title: title || summary[0],
-        id: event.id,
-        authorPubkey: event.pubkey,
-        relayUrls: import.meta.env.VITE_NOSTR_RELAYS
-      }} />)
-    },
-    {
-      label: "Reportar violação de conteúdo",
-      icon: <ShieldAlert className="size-4 text-red-500" />,
-      action: () => modal.show(<ReportContentModal data={{
-        title: title || summary[0],
-        id: event.id,
-        authorPubkey: event.pubkey,
-        relayUrls: import.meta.env.VITE_NOSTR_RELAYS
-      }} />)
-    },
-    {
-      label: "View on NJump",
-      icon: <ExternalLink className="size-4" />,
-      action: () => window.open(`https://njump.me/${event.id}`, "_blank")
-    },
-    {
-      label: "Open Native",
-      icon: <Send className="size-4" />,
-      action: () => window.open(`nostr://${naddr}`)
-    }
-  ]), [currentPubkey, dTag, event, handleDownload, handleShare, naddr, navigate, rawEvent, summary, title]);
+    ]);
+  }, [currentPubkey, dTag, event, naddr, navigate, downloadFile]);
 }

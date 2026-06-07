@@ -1,6 +1,7 @@
 import {
   CaptionButton,
   FullscreenButton,
+  GoogleCastButton as GoogleCastButtonPrimitive,
   isTrackCaptionKind,
   MuteButton,
   PIPButton,
@@ -9,6 +10,10 @@ import {
   type TooltipPlacement,
   useMediaState
 } from "@vidstack/react";
+
+import {
+  ChromecastIcon,
+} from "@vidstack/react/icons";
 
 import {
   RiClosedCaptioningFill as SubtitlesIcon,
@@ -160,6 +165,27 @@ export function Fullscreen({
         placement={tooltipPlacement}
       >
         {isActive ? "Exit Fullscreen" : "Enter Fullscreen"}
+      </Tooltip.Content>
+    </Tooltip.Root>
+  );
+}
+
+export function GoogleCast({
+                             tooltipOffset: _tooltipOffset = 0,
+                             tooltipPlacement
+                           }: MediaButtonProps) {
+  return (
+    <Tooltip.Root>
+      <Tooltip.Trigger asChild>
+        <GoogleCastButtonPrimitive className={buttonClass}>
+          <ChromecastIcon className="h-6 w-6" />
+        </GoogleCastButtonPrimitive>
+      </Tooltip.Trigger>
+      <Tooltip.Content
+        className={tooltipClass}
+        placement={tooltipPlacement}
+      >
+        Transmitir
       </Tooltip.Content>
     </Tooltip.Root>
   );

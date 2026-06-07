@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Activity, CheckCircle, History, Plus, RefreshCw, ServerOff, Wifi, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { NDKRelay, NDKRelayStatus } from "@nostr-dev-kit/ndk";
@@ -23,6 +23,8 @@ function saveHistory(urls: string[]) {
 
 export function LocalRelayTab() {
   const { ndk } = useNDK();
+  const ndkRef = useRef(ndk);
+  ndkRef.current = ndk;
   const [inputUrl, setInputUrl] = useState("");
   const [pinging, setPinging] = useState(false);
   const [latency, setLatency] = useState<number | null>(null);
@@ -32,9 +34,7 @@ export function LocalRelayTab() {
   const [prioritizeLocal, setPrioritizeLocal] = useState(false);
   const [offlineMode, setOfflineMode] = useState(false);
 
-  const isValidWs = useMemo(() => {
-    return inputUrl.startsWith("ws://") || inputUrl.startsWith("wss://");
-  }, [inputUrl]);
+  const isValidWs = inputUrl.startsWith("ws://") || inputUrl.startsWith("wss://");
 
   const handleTest = useCallback(async () => {
     if (!isValidWs) return;
@@ -51,10 +51,11 @@ export function LocalRelayTab() {
   }, [inputUrl, isValidWs]);
 
   const handleAddToPool = useCallback(() => {
-    if (!ndk || !isValidWs) return;
+    const ndkInstance = ndkRef.current;
+    if (!ndkInstance || !isValidWs) return;
     try {
-      const relay = new NDKRelay(inputUrl, undefined, ndk);
-      ndk.pool.addRelay(relay, true);
+      const relay = new NDKRelay(inputUrl, undefined, ndkInstance);
+      ndkInstance.pool.addRelay(relay, true);
       const nextHistory = [inputUrl, ...history.filter((u) => u !== inputUrl)].slice(0, MAX_HISTORY);
       setHistory(nextHistory);
       saveHistory(nextHistory);
@@ -62,7 +63,7 @@ export function LocalRelayTab() {
     } catch {
       toast.error("Falha ao adicionar relay");
     }
-  }, [ndk, inputUrl, isValidWs, history]);
+  }, [inputUrl, isValidWs, history]);
 
   const handleHistoryClick = (url: string) => {
     setInputUrl(url);
@@ -72,32 +73,31 @@ export function LocalRelayTab() {
   };
 
   const handlePrioritizeToggle = useCallback(() => {
-    if (!ndk) return;
+    if (!ndkRef.current) return;
     setPrioritizeLocal((p) => !p);
     toast.info("Priorizacao local alternada");
-  }, [ndk]);
+  }, []);
 
   const handleOfflineModeToggle = useCallback(() => {
-    if (!ndk) return;
+    const ndkInstance = ndkRef.current;
+    if (!ndkInstance) return;
     const next = !offlineMode;
     setOfflineMode(next);
 
     if (next) {
-      ndk.pool.relays.forEach((relay) => {
+      ndkInstance.pool.relays.forEach((relay) => {
         if (relay.url !== inputUrl) {
           relay.disconnect();
         }
       });
-      toast.info("Modo offline simulado ativado");
     } else {
-      ndk.pool.relays.forEach((relay) => {
-        if (relay.status < NDKRelayStatus.CONNECTED) {
-          relay.connect();
-        }
+      ndkInstance.pool.relays.forEach((relay) => {
+        relay.connect();
       });
-      toast.info("Modo offline simulado desativado");
     }
-  }, [ndk, offlineMode, inputUrl]);
+
+    toast.info(next ? "Modo offline ativado" : "Modo offline desativado");
+  }, [offlineMode, inputUrl]);
 
   return (
     <div className="space-y-4">

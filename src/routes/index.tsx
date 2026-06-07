@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { t } from "i18next";
 import { NDKEvent } from "@nostr-dev-kit/ndk";
 import { NDKSubscriptionCacheUsage, useSubscribe } from "@nostr-dev-kit/ndk-hooks";
@@ -83,6 +83,7 @@ function VideoFeed({ events, title, isLoading, emptyMessage }: VideoFeedProps) {
 
   const profiles = useBatchProfiles(processedEvents);
   const getProfile = (pubkey: string) => profiles[pubkey];
+  const navigate = useNavigate();
 
   if (isLoading && processedEvents.length === 0) {
     return (
@@ -125,13 +126,23 @@ function VideoFeed({ events, title, isLoading, emptyMessage }: VideoFeedProps) {
         <ul className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {processedEvents.map((e) => (
             <li key={e.id} className="flex">
-              <Link
-                to="/v/$eventId"
-                params={{ eventId: e.encode() }}
-                className="block w-full focus:outline-none focus:ring-2 focus:ring-primary rounded-lg transition-transform hover:scale-[1.01]"
+              <div
+                role="link"
+                tabIndex={0}
+                className="block w-full focus:outline-none focus:ring-2 focus:ring-primary rounded-lg transition-transform hover:scale-[1.01] cursor-pointer"
+                onClick={(event) => {
+                  if ((event.target as HTMLElement).closest("a")) return;
+                  navigate({ to: "/v/$eventId", params: { eventId: e.encode() } });
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    navigate({ to: "/v/$eventId", params: { eventId: e.encode() } });
+                  }
+                }}
               >
                 <VideoCard event={e} profile={getProfile(e.author.pubkey)} />
-              </Link>
+              </div>
             </li>
           ))}
         </ul>

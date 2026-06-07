@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { CheckCircle, Clock, Copy, Globe, Server, Shield, User, Wifi, XCircle } from "lucide-react";
 import { NDKRelayStatus } from "@nostr-dev-kit/ndk";
 import { useNDK, useNDKCurrentUser } from "@nostr-dev-kit/ndk-hooks";
@@ -15,12 +15,17 @@ interface RelayStatusEntry {
 
 export function BuildInfoTab() {
   const { ndk } = useNDK();
+  const ndkRef = useRef(ndk);
+  ndkRef.current = ndk;
   const currentUser = useNDKCurrentUser();
+  const currentUserRef = useRef(currentUser);
+  currentUserRef.current = currentUser;
 
   const relaysStatus = useMemo<RelayStatusEntry[]>(() => {
-    if (!ndk) return [];
+    const ndkInstance = ndkRef.current;
+    if (!ndkInstance) return [];
     const entries: RelayStatusEntry[] = [];
-    ndk.pool.relays.forEach((relay) => {
+    ndkInstance.pool.relays.forEach((relay) => {
       const status = relay.status;
       let label: string;
       let color: RelayStatusEntry["statusColor"];
@@ -55,7 +60,7 @@ export function BuildInfoTab() {
       });
     });
     return entries.sort((a, b) => a.url.localeCompare(b.url));
-  }, [ndk]);
+  }, []);
 
   const buildInfo = useMemo(() => {
     return {
@@ -80,30 +85,32 @@ export function BuildInfoTab() {
   }, []);
 
   const truncatedPubkey = useMemo(() => {
-    if (!currentUser?.pubkey) return null;
-    return `${currentUser.pubkey.slice(0, 8)}...${currentUser.pubkey.slice(-8)}`;
-  }, [currentUser]);
+    const user = currentUserRef.current;
+    if (!user?.pubkey) return null;
+    return `${user.pubkey.slice(0, 8)}...${user.pubkey.slice(-8)}`;
+  }, []);
 
   const copyFullDiagnostic = useCallback(() => {
     const diagnostic = {
       app: buildInfo,
       date: new Date().toISOString(),
       relays: relaysStatus.map((r) => ({ url: r.url, status: r.status })),
-      pubkey: currentUser?.pubkey ?? null,
+      pubkey: currentUserRef.current?.pubkey ?? null,
       featureFlags,
       userAgent: navigator.userAgent,
     };
     navigator.clipboard.writeText(JSON.stringify(diagnostic, null, 2)).then(() => {
       toast.success("Diagnostico completo copiado");
     }).catch(() => toast.error("Falha ao copiar"));
-  }, [buildInfo, relaysStatus, currentUser, featureFlags]);
+  }, [buildInfo, relaysStatus, featureFlags]);
 
   const copyPubkey = useCallback(() => {
-    if (!currentUser?.pubkey) return;
-    navigator.clipboard.writeText(currentUser.pubkey).then(() => {
+    const user = currentUserRef.current;
+    if (!user?.pubkey) return;
+    navigator.clipboard.writeText(user.pubkey).then(() => {
       toast.success("Pubkey copiada");
     }).catch(() => toast.error("Falha ao copiar"));
-  }, [currentUser]);
+  }, []);
 
   return (
     <div className="space-y-4">

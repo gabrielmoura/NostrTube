@@ -1,7 +1,7 @@
-import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { PageSpinner } from "@/components/PageSpinner.tsx";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { t } from "i18next";
 import { NDKEvent } from "@nostr-dev-kit/ndk";
 import { AdvancedSearch } from "./@AdvancedSearch";
@@ -117,7 +117,10 @@ function SearchResults() {
   });
 
   // 2. Batch profile fetch para todas as profiles da página
-  const allVideos = data?.pages.flatMap((page) => page) ?? [];
+  const allVideos = useMemo(
+    () => data?.pages.flatMap((page) => page) ?? [],
+    [data?.pages]
+  );
   const profiles = useBatchProfiles(allVideos);
 
   // 3. Agrupar vídeos em linhas baseadas nas colunas atuais
@@ -137,7 +140,22 @@ function SearchResults() {
     overscan: 3
   });
 
-  // 4. Trigger de busca ao chegar no fim
+  // 4. Navegação por clique no card (evita <a> dentro de <a> com VideoCard)
+  const navigate = useNavigate();
+  const handleCardClick = useCallback((eventId: string) => (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("a")) return;
+    navigate({ to: "/v/$eventId", params: { eventId } });
+  }, [navigate]);
+
+  const handleCardKeyDown = useCallback((eventId: string) => (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      navigate({ to: "/v/$eventId", params: { eventId } });
+    }
+  }, [navigate]);
+
+  // 5. Trigger de busca ao chegar no fim
   const virtualItems = rowVirtualizer.getVirtualItems();
   useEffect(() => {
     const lastItem = virtualItems[virtualItems.length - 1];
@@ -187,13 +205,15 @@ function SearchResults() {
                   <ul className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {(rowVideos ?? []).map((e) => (
                       <li key={e.id} className="flex h-full animate-in fade-in duration-300">
-                        <Link
-                          to="/v/$eventId"
-                          params={{ eventId: e.encode() }}
-                          className="block w-full focus:outline-none focus:ring-2 focus:ring-primary rounded-lg transition-transform hover:scale-[1.02]"
+                        <div
+                          role="link"
+                          tabIndex={0}
+                          className="block w-full focus:outline-none focus:ring-2 focus:ring-primary rounded-lg transition-transform hover:scale-[1.02] cursor-pointer"
+                          onClick={handleCardClick(e.encode())}
+                          onKeyDown={handleCardKeyDown(e.encode())}
                         >
                           <VideoCard event={e} profile={profiles[e.author?.pubkey]} />
-                        </Link>
+                        </div>
                       </li>
                     ))}
                   </ul>

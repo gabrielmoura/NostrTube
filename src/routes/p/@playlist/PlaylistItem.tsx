@@ -38,17 +38,11 @@ export const PlaylistItem = ({ item, onRemove, onPlay }: PlaylistItemProps) => {
     zIndex: isDragging ? 50 : "auto"
   };
 
-  const formattedDuration = React.useMemo(() => {
-    const minutes = Math.floor(item.duration / 60);
-    const seconds = String(item.duration % 60).padStart(2, "0");
-    return `${minutes}:${seconds}`;
-  }, [item.duration]);
+  const formattedDuration = `${Math.floor(item.duration / 60)}:${String(item.duration % 60).padStart(2, "0")}`;
 
-  const formattedDate = React.useMemo(() => {
-    return new Date(item.publishedAt).toLocaleDateString(undefined, {
-      day: "numeric", month: "short", year: "numeric"
-    });
-  }, [item.publishedAt]);
+  const formattedDate = new Date(item.publishedAt).toLocaleDateString(undefined, {
+    day: "numeric", month: "short", year: "numeric"
+  });
 
   return (
     <div ref={setNodeRef} style={style} className="mb-2 sm:mb-3 touch-none outline-none">

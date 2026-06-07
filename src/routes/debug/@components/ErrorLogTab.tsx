@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Bug, Clipboard, Copy, Download, FileJson, FileText, Info, Trash2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Badge, Button, Card, CardContent, CardHeader } from "@/routes/configurarion/@components/CommonComponents.tsx";
@@ -32,14 +32,17 @@ export function ErrorLogTab() {
     setSessionCount(getSessionErrorCount());
   }, []);
 
-  const filtered = logs
-    .filter((l) => levelFilter === "all" || l.level === levelFilter)
-    .filter((l) => !textFilter || l.message.toLowerCase().includes(textFilter.toLowerCase()))
-    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  const filtered = useMemo(() =>
+    logs
+      .filter((l) => levelFilter === "all" || l.level === levelFilter)
+      .filter((l) => !textFilter || l.message.toLowerCase().includes(textFilter.toLowerCase()))
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()),
+    [logs, levelFilter, textFilter]
+  );
 
-  const lastError = logs.find((l) => l.level === "error");
+  const lastError = useMemo(() => logs.find((l) => l.level === "error"), [logs]);
 
-  const handleExportJSON = useCallback(async () => {
+  const handleExportJSON = async () => {
     const content = exportJSON(filtered);
     const blob = new Blob([content], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -49,9 +52,9 @@ export function ErrorLogTab() {
     a.click();
     URL.revokeObjectURL(url);
     toast.success("Logs exportados como JSON");
-  }, [filtered]);
+  };
 
-  const handleExportTXT = useCallback(async () => {
+  const handleExportTXT = async () => {
     const content = exportTXT(filtered);
     const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -61,22 +64,22 @@ export function ErrorLogTab() {
     a.click();
     URL.revokeObjectURL(url);
     toast.success("Logs exportados como TXT");
-  }, [filtered]);
+  };
 
-  const handleCopyLastError = useCallback(() => {
+  const handleCopyLastError = () => {
     if (!lastError) return;
     const text = `[${lastError.timestamp}] ${lastError.message}\n\n${lastError.stack ?? "sem stack trace"}`;
     navigator.clipboard.writeText(text).then(() => {
       toast.success("Ultimo erro copiado");
     }).catch(() => toast.error("Falha ao copiar"));
-  }, [lastError]);
+  };
 
-  const handleClear = useCallback(async () => {
+  const handleClear = async () => {
     await clearLogs();
     setLogs([]);
     setShowConfirmClear(false);
     toast.success("Logs limpos");
-  }, []);
+  };
 
   return (
     <div className="space-y-4">

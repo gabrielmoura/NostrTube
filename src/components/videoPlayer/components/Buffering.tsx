@@ -2,7 +2,7 @@ import { Spinner } from "@vidstack/react";
 
 export function BufferingIndicator() {
   return (
-    <div className="pointer-events-none absolute inset-0 z-50 flex h-full w-full items-center justify-center">
+    <div className="pointer-events-none absolute inset-0 z-50 flex h-full w-full items-center justify-center media-buffering:bg-black/20 media-buffering:backdrop-blur-[2px]">
       <Spinner.Root
         className="text-white opacity-0 transition-opacity duration-200 ease-linear media-buffering:animate-spin media-buffering:opacity-100"
         size={84}

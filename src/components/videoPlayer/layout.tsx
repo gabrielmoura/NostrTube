@@ -5,7 +5,7 @@ import { Captions, Controls, Gesture } from "@vidstack/react";
 import { TimeGroup } from "./components/time-group";
 import { TitleChapter } from "./components/title";
 
-import { Fullscreen, Mute, PIP, Play } from "./components/buttons.tsx";
+import { Fullscreen, GoogleCast, Mute, PIP, Play } from "./components/buttons.tsx";
 import * as Sliders from "./components/sliders.tsx";
 
 import { BufferingIndicator } from "./components/Buffering.tsx";
@@ -40,8 +40,8 @@ export function VideoLayout({
       )}
       <Controls.Root className={cn(
         "absolute inset-0 z-10 flex h-full w-full flex-col",
-        "data-[visible]:opacity-90 opacity-0 transition-opacity bg-gradient-to-t from-background/80 via-transparent to-transparent",
-        "data-[visible]:duration-300 data-[visible]:ease-in"
+        "opacity-0 transition-opacity duration-300 bg-gradient-to-t from-background/80 via-background/10 to-transparent",
+        "data-[visible]:opacity-100"
       )}>
 
         <div className="flex-1" />
@@ -68,6 +68,7 @@ export function VideoLayout({
               offset={popupOffset}
               tooltipOffset={popupOffset}
             />
+            <GoogleCast tooltipOffset={popupOffset} />
             <PIP tooltipOffset={popupOffset} />
             <Fullscreen
               tooltipOffset={popupOffset}
