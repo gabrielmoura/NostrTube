@@ -207,7 +207,7 @@ export function AddTagInputControlled({
             <Button variant="outline" onClick={() => setIsOpen(false)}>
               {t("Cancel", "Cancel")}
             </Button>
-            <Button type="submit" onClick={handleAddTag} disabled={!currentInput || isInputInvalid}>
+            <Button type="submit" onClick={handleAddTag} disabled={Boolean(!currentInput || isInputInvalid)}>
               {t("Add", "Add")}
             </Button>
           </DialogFooter>

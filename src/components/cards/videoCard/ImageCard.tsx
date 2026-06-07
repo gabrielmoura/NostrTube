@@ -13,7 +13,7 @@ interface ImageCardProps {
 
 export function ImageCard({ event, className }: ImageCardProps) {
   const { optimized, title, isNSFW, loading, error, handlers } = useNostrImage(event);
-  const nsfwEnabled = useUserStore((state) => state.config?.nsfw) ?? false;
+  const nsfwEnabled = useUserStore((state) => state.session?.nsfw) ?? false;
 
   const shouldBlockNSFW = isNSFW && !nsfwEnabled;
 

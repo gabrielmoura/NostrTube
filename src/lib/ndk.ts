@@ -1,4 +1,4 @@
-import NDK, { NDKPool, NDKRelay } from "@nostr-dev-kit/ndk";
+import NDK, { type NDKCacheAdapter, NDKPool, NDKRelay } from "@nostr-dev-kit/ndk";
 import NDKCacheAdapterDexie from "@nostr-dev-kit/ndk-cache-dexie";
 import { NDKSessionLocalStorage } from "@nostr-dev-kit/ndk-hooks";
 
@@ -26,14 +26,14 @@ export function normalizeRelayUrls(relayUrls: string[] = []): string[] {
 // 4. NDK Instance
 export const ndkInstance = new NDK({
   clientName: import.meta.env.VITE_APP_NAME,
-  cacheAdapter: cacheAdapter,
+  cacheAdapter: cacheAdapter as unknown as NDKCacheAdapter,
   signatureVerificationWorker: sigWorker,
   autoConnectUserRelays: import.meta.env.PROD,
   clientNip89: import.meta.env.VITE_APP_NAME
 });
 
 // 5. Pool Setup
-const pool = new NDKPool(normalizeRelayUrls(relays), [], ndkInstance);
+const pool = new NDKPool(normalizeRelayUrls(relays), ndkInstance);
 ndkInstance.pool = pool;
 
 // 6. Connect (Client-side only)

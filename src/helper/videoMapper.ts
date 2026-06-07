@@ -17,7 +17,7 @@ export function mapEventToVideoMeta(event: NDKEvent): Partial<VideoMetaTypes> {
     imetaTags.forEach((tag) => {
       const imeta = mapImetaTag(tag);
       if (imeta.url) url = imeta.url;
-      if (imeta.image) image = imeta.image;
+      if (imeta.image) image = Array.isArray(imeta.image) ? imeta.image[0] : imeta.image;
       if (imeta.fallback) fallbacks = imeta.fallback;
     });
   }

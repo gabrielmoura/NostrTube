@@ -19,7 +19,7 @@ export function VideoCard({ event }: VideoCardProps) {
 
   // 2. Lógica de Negócio Adicional
   const tagData = extractTag(event.tags);
-  const nsfwEnabled = useUserStore((state) => state.config?.nsfw) ?? false;
+  const nsfwEnabled = useUserStore((state) => state.session?.nsfw) ?? false;
   const title = tagData.title || imgTitle || "Vídeo sem título";
   const duration = formatDuration(tagData?.duration);
   const shouldBlur = isNSFW && !nsfwEnabled;

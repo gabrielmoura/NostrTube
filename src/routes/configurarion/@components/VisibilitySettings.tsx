@@ -49,7 +49,7 @@ export const VisibilitySettings = () => {
 
 function NsfwSwitch({ onError }: { onError: (m: string | null) => void }) {
   const { t } = useTranslation();
-  const nsfw = useUserStore((state) => state.config?.nsfw) ?? false;
+  const nsfw = useUserStore((state) => state.session?.nsfw) ?? false;
   const setNsfw = useUserStore((state) => state.setNsfw);
 
   const handleToggle = async () => {
@@ -87,7 +87,7 @@ function NsfwSwitch({ onError }: { onError: (m: string | null) => void }) {
 function AgeFilterSelect({ onError }: { onError: (m: string | null) => void }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const age = useUserStore((state) => state.config?.age) as string;
+  const age = useUserStore((state) => state.session?.age) as string;
   const setAge = useUserStore((state) => state.setAge);
 
   const ageOptions = [
