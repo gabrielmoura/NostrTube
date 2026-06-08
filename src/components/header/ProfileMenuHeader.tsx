@@ -43,7 +43,7 @@ function ProfileMenuHeader() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem>
-          <Link to="/configurarion">
+          <Link to="/configuration">
             Settings
           </Link>
         </DropdownMenuItem>

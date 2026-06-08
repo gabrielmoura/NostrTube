@@ -1,4 +1,5 @@
 import { lazy } from "react";
+import type { NDKEvent } from "@nostr-dev-kit/ndk-hooks";
 import { HiOutlinePaperClip, HiX } from "react-icons/hi";
 import { Avatar } from "@radix-ui/themes";
 import { t } from "i18next";
@@ -10,12 +11,14 @@ const Textarea = lazy(() => import("@/components/textarea"));
 
 export function VideoCommentInput({
   autoFocus,
-  initialTags
+  initialTags,
+  onSubmitted
 }: {
   autoFocus?: boolean;
   initialTags?: string[][];
+  onSubmitted?: (event: NDKEvent) => void;
 }) {
-  const controller = useVideoCommentController(initialTags);
+  const controller = useVideoCommentController({ initialTags, onSubmitted });
 
   if (!controller.currentUser) {
     return <div>É necessário estar logado para comentar...</div>;
@@ -49,15 +52,23 @@ export function VideoCommentInput({
               <div className="mt-1 w-full">
                 <div className="flex w-full items-center justify-between text-muted-foreground">
                   {controller.attachmentPreview ? (
-                    <div className="relative overflow-hidden rounded-xl">
+                    <div className="relative overflow-hidden rounded-xl border border-border/60 bg-muted/30 p-2">
                       <img src={controller.attachmentPreview} alt="Attachment preview" className="max-h-[140px] rounded-xl object-cover" />
                       <button
                         type="button"
                         onClick={controller.clearAttachment}
                         className="center absolute left-1 top-1 rounded-full bg-foreground bg-opacity-70 p-1 hover:bg-opacity-100"
                       >
-                        <HiX className="block h-4 w-4 text-background" aria-hidden="true" />
+                          <HiX className="block h-4 w-4 text-background" aria-hidden="true" />
                       </button>
+                      <div className="mt-2 flex items-center justify-between gap-3 text-xs text-muted-foreground">
+                        <span>
+                          {controller.isUploadingImage
+                            ? `${t("uploading", "Uploading")}... ${controller.upload.progress}%`
+                            : t("attachment_ready", "Attachment ready")}
+                        </span>
+                        {!controller.isUploadingImage ? <span>{t("attachment_will_be_sent", "Will be sent with the comment")}</span> : null}
+                      </div>
                     </div>
                   ) : (
                     <>
@@ -77,11 +88,14 @@ export function VideoCommentInput({
                         type="button"
                         size="icon"
                         variant="outline"
-                        className="rounded-full"
-                        onClick={() => controller.fileInputRef.current?.click()}
+                       className="rounded-full"
+                       onClick={() => controller.fileInputRef.current?.click()}
                       >
                         <HiOutlinePaperClip className="h-4 w-4" />
                       </Button>
+                      {controller.upload.error ? (
+                        <p className="ml-3 text-xs text-destructive">{controller.upload.error}</p>
+                      ) : null}
                     </>
                   )}
                   <div className="center mt-auto">

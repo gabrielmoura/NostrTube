@@ -12,10 +12,12 @@ import { type eventSearchType } from "@/helper/loaders/getVideosFromSearchData";
 import { Switch } from "@/components/ui/switch";
 import { COMBOBOX_LANGUAGES } from "@/default";
 import { buildInputFromSearchState, buildSearchStateFromInput, type SearchChipToken } from "@/features/search/services/search-query-parser.service";
+import useUserStore from "@/store/useUserStore";
 
 export function AdvancedSearch() {
   const navigate = useNavigate();
   const searchParams = useSearch({ from: "/search/" }) as eventSearchType;
+  const storedGeoHash = useUserStore((state) => state.session?.geoHash);
 
   const [isOpen, setIsOpen] = useState(false);
   const [searchInput, setSearchInput] = useState("");
@@ -25,6 +27,7 @@ export function AdvancedSearch() {
     defaultValues: {
       search: searchParams.search || "",
       author: searchParams.author || "",
+      geohash: searchParams.geohash || storedGeoHash || "",
       lang: searchParams.lang || "",
       timeRange: searchParams.timeRange || "all",
       nsfw: searchParams.nsfw || false
@@ -34,12 +37,13 @@ export function AdvancedSearch() {
   useEffect(() => {
     setValue("search", searchParams.search);
     setValue("author", searchParams.author);
+    setValue("geohash", searchParams.geohash || storedGeoHash || "");
     setValue("lang", searchParams.lang);
     setValue("timeRange", searchParams.timeRange || "all");
     setValue("nsfw", searchParams.nsfw || false);
     setSearchInput(buildInputFromSearchState(searchParams));
     setChips(buildSearchStateFromInput(buildInputFromSearchState(searchParams), searchParams).chips);
-  }, [searchParams, setValue]);
+  }, [searchParams, setValue, storedGeoHash]);
 
   const selectedLanguage = watch("lang");
 
@@ -75,7 +79,8 @@ export function AdvancedSearch() {
         search: parsed.search || undefined,
         tag: parsed.tag.length ? parsed.tag : undefined,
         lang: parsed.lang || undefined,
-        author: parsed.author || undefined
+        author: parsed.author || undefined,
+        geohash: data.geohash?.trim().toLowerCase() || undefined
       }).filter(([_, value]) => value != null && value !== "" && value !== "all")
     );
 
@@ -152,6 +157,11 @@ export function AdvancedSearch() {
               <div className="space-y-2">
                 <Label htmlFor="author">Autor (Npub)</Label>
                 <Input id="author" {...register("author")} placeholder="npub1..." />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="geohash">Geohash</Label>
+                <Input id="geohash" {...register("geohash")} placeholder={storedGeoHash || "abc"} maxLength={12} />
               </div>
 
               <div className="space-y-2">

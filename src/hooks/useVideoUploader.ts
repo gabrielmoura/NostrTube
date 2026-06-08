@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useNDK } from "@nostr-dev-kit/ndk-hooks";
-import { NDKBlossom } from "@nostr-dev-kit/ndk-blossom";
 import { toast } from "sonner";
 import { t } from "i18next";
 import { LoggerAgent } from "@/lib/debug.ts";
 import { useVideoUploadStore } from "@/store/videoUpload/useVideoUploadStore.ts";
 import { generateBlurhashFromImageFile, generateVideoThumbnailLocally } from "@/features/upload/services/local-media-processing.service";
 import { requestDvmThumbnails } from "@/features/upload/services/dvm-thumbnail.service";
+import { uploadToConfiguredBlossomServers } from "@/features/upload/services/blossom-server.service";
 
 const logger = LoggerAgent.create("useVideoUploader");
 
@@ -37,26 +37,19 @@ export function useVideoUploader() {
     setUploadStage("validating");
     setError(undefined);
 
-    const blossom = new NDKBlossom(ndkInstance);
-    blossom.debug = import.meta.env.DEV;
-
-    blossom.onUploadProgress = (p) => {
+    const handleProgress = (p: { loaded: number; total: number }) => {
       const percentage = Math.round((p.loaded / p.total) * 100);
       setUploadStage("uploading");
       setUploadProgress(percentage);
-      return "continue";
-    };
-
-    blossom.onUploadFailed = (err) => {
-      logger.error("Upload failed", err);
-      setUploadStage("error");
-      setError(String(err));
-      toast.error(`${t("Upload_failed")}: ${String(err)}`);
     };
 
     try {
-      const imeta = await blossom.upload(file, {
-        fallbackServer: import.meta.env.VITE_NOSTR_BLOSSOM_FALLBACK || undefined
+      const imeta = await uploadToConfiguredBlossomServers({
+        ndk: ndkInstance,
+        file,
+        onProgress: handleProgress,
+        onMirroringStart: () => setUploadStage("mirroring"),
+        label: "video-upload"
       });
 
       let thumbnailUrl: string | undefined;
@@ -68,8 +61,11 @@ export function useVideoUploader() {
         try {
           setUploadStage("processing");
           const generated = await generateVideoThumbnailLocally(file);
-          const thumbnailUpload = await blossom.upload(generated.file, {
-            fallbackServer: import.meta.env.VITE_NOSTR_BLOSSOM_FALLBACK || undefined
+          const thumbnailUpload = await uploadToConfiguredBlossomServers({
+            ndk: ndkInstance,
+            file: generated.file,
+            onMirroringStart: () => setUploadStage("mirroring"),
+            label: "thumbnail-upload"
           });
           thumbnailUrl = thumbnailUpload.url;
           blurhash = await generateBlurhashFromImageFile(generated.file);
@@ -96,9 +92,10 @@ export function useVideoUploader() {
 
       setVideoUpload({
         url: imeta.url,
+        fallback: fallbackUrls,
         title: file.name,
         fileType: file.type,
-        fileHash: imeta.sha256 as string,
+        fileHash: (imeta.sha256 || imeta.x) as string,
         fileSize: imeta.size ? parseInt(imeta.size) : undefined,
         blurhash,
         dim,

@@ -9,11 +9,14 @@ import { AgeEnum } from "@/store/store/sessionTypes"; // Ajuste o import conform
 interface BlossomConfig {
   mirrors: string[];
   default: string;
+  custom: string[];
 }
 
 interface BlossomAction {
   setMirrors: (mirrors: string[]) => void;
   setDefault: (url: string) => void;
+  addCustom: (url: string) => void;
+  removeCustom: (url: string) => void;
 }
 
 export interface SessionData {
@@ -24,6 +27,7 @@ export interface SessionData {
   relays?: string[];
   geoHash?: string;
   pushNotificationsEnabled?: boolean;
+  videoMuted?: boolean;
 }
 
 interface UserState {
@@ -40,6 +44,7 @@ interface UserActions {
   setGeoHash: (geoHash: string) => void;
   setPushNotificationsEnabled: (enabled: boolean) => void;
   setAge: (age: AgeEnum) => void;
+  setVideoMuted: (muted: boolean) => void;
 }
 
 export type UserStore = UserState & UserActions;
@@ -125,6 +130,24 @@ export const useUserStore = create<UserStore>()(
             "setPushNotificationsEnabled"
           ),
 
+        setVideoMuted: (muted) =>
+          set(
+            (state) => {
+              if (state.session) {
+                state.session.videoMuted = muted;
+              } else {
+                state.session = {
+                  profile: {} as NDKUserProfile,
+                  darkTheme: false,
+                  nsfw: false,
+                  videoMuted: muted
+                };
+              }
+            },
+            false,
+            "setVideoMuted"
+          ),
+
         setGeoHash: (geoHash) =>
           set(
             (state) => {
@@ -169,6 +192,7 @@ export const useUserStore = create<UserStore>()(
         blossom: {
           mirrors: [],
           default: "",
+          custom: [],
 
           setMirrors: (mirrors) =>
             set(
@@ -186,6 +210,30 @@ export const useUserStore = create<UserStore>()(
               },
               false,
               "blossom/setDefault"
+            ),
+
+          addCustom: (url) =>
+            set(
+              (state) => {
+                if (!state.blossom.custom.includes(url)) {
+                  state.blossom.custom.push(url);
+                }
+              },
+              false,
+              "blossom/addCustom"
+            ),
+
+          removeCustom: (url) =>
+            set(
+              (state) => {
+                state.blossom.custom = state.blossom.custom.filter((entry) => entry !== url);
+                state.blossom.mirrors = state.blossom.mirrors.filter((entry) => entry !== url);
+                if (state.blossom.default === url) {
+                  state.blossom.default = "";
+                }
+              },
+              false,
+              "blossom/removeCustom"
             )
         }
       })),

@@ -11,7 +11,7 @@ import useUserStore from "@/store/useUserStore.ts";
 import { publishDmRelayList } from "@/lib/ndk-messages";
 import { Mail, Settings2 } from "lucide-react";
 
-export const Route = createFileRoute("/configurarion/")({
+export const Route = createFileRoute("/configuration/")({
   component: RouteComponent
 });
 

@@ -6,7 +6,12 @@ import { LoggerAgent } from "@/lib/debug";
 import { buildCommentEventDraft } from "@/features/video/services/video-interactions.service";
 import { useBlossomUpload } from "@/hooks/useBlossomUpload";
 
-export function useVideoCommentController(initialTags?: string[][]) {
+interface UseVideoCommentControllerOptions {
+  initialTags?: string[][];
+  onSubmitted?: (event: NDKEvent) => void;
+}
+
+export function useVideoCommentController({ initialTags, onSubmitted }: UseVideoCommentControllerOptions = {}) {
   const log = LoggerAgent.create("CommentInput");
   const [content, setContent] = useState("");
   const contentRef = useRef<HTMLTextAreaElement | null>(null);
@@ -48,11 +53,13 @@ export function useVideoCommentController(initialTags?: string[][]) {
         attachmentUrl
       });
 
-      await mutation.mutateAsync({
+      const publishedEvent = await mutation.mutateAsync({
         ndk,
         event: eventDraft,
         difficulty: Number(import.meta.env.VITE_MIN_COMMENT_POW ?? 10)
       });
+
+      onSubmitted?.(publishedEvent);
 
       setContent("");
       setAttachmentPreview(undefined);

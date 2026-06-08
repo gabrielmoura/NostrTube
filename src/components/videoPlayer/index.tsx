@@ -16,6 +16,7 @@ import type { DataVideo } from "./types.ts";
 import { VideoLayout } from "./layout.tsx";
 import { getOptimizedImageSrc } from "@/helper/http.ts";
 import { cn } from "@/helper/format.ts";
+import useUserStore from "@/store/useUserStore.ts";
 
 interface VideoPlayerParams extends DataVideo {
   onCanPlay?: () => void;
@@ -31,9 +32,11 @@ export function VideoPlayer({
                               onCanPlay,
                               onPlaybackError,
                               className
-                            }: VideoPlayerParams) {
+                             }: VideoPlayerParams) {
   const playerRef = useRef<MediaPlayerInstance | null>(null);
   const handledErrorForSourceRef = useRef<string | null>(null);
+  const persistedMuted = useUserStore((state) => state.session?.videoMuted ?? true);
+  const setVideoMuted = useUserStore((state) => state.setVideoMuted);
 
   useEffect(() => {
     handledErrorForSourceRef.current = null;
@@ -55,6 +58,24 @@ export function VideoPlayer({
       }
     });
   }, [onPlaybackError]);
+
+  useEffect(() => {
+    const player = playerRef.current;
+    if (!player) return;
+
+    player.muted = persistedMuted;
+  }, [persistedMuted, src]);
+
+  useEffect(() => {
+    const player = playerRef.current;
+    if (!player) return;
+
+    return player.subscribe(({ muted }) => {
+      if (typeof muted === "boolean" && muted !== persistedMuted) {
+        setVideoMuted(muted);
+      }
+    });
+  }, [persistedMuted, setVideoMuted]);
 
   function onProviderChange(provider: MediaProviderAdapter | null) {
     if (!provider) return;
@@ -84,6 +105,7 @@ export function VideoPlayer({
       playsInline
       crossOrigin="anonymous"
       autoplay
+      muted={persistedMuted}
       logLevel={import.meta.env.PROD ? "warn" : "debug"}
       onProviderChange={onProviderChange}
       onCanPlay={onCanPlay}

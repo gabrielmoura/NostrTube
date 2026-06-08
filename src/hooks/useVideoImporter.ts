@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNDK } from "@nostr-dev-kit/ndk-hooks";
-import { NDKBlossom } from "@nostr-dev-kit/ndk-blossom";
 import { nip19 } from "nostr-tools";
 import { getTagValue, getTagValues } from "@welshman/util";
 import { toast } from "sonner";
@@ -8,6 +7,7 @@ import { useVideoUploadStore } from "@/store/videoUpload/useVideoUploadStore.ts"
 import { normalizeVideoEventAssets } from "@/features/video/services/video-imeta.service";
 import { generateVideoThumbnailFromUrl } from "@/features/upload/services/local-media-processing.service";
 import { fetchVideoEventByReference } from "@/features/nostr/services/ndk-query.service";
+import { uploadToConfiguredBlossomServers } from "@/features/upload/services/blossom-server.service";
 
 export function useVideoImporter() {
   const { ndk } = useNDK();
@@ -137,10 +137,11 @@ export function useVideoImporter() {
 
     if (ndk && mimeType?.startsWith("video/")) {
       try {
-        const blossom = new NDKBlossom(ndk);
         const generated = await generateVideoThumbnailFromUrl(url, url.split("/").pop()?.split("?")[0] || "external-video");
-        const thumbnailUpload = await blossom.upload(generated.file, {
-          fallbackServer: import.meta.env.VITE_NOSTR_BLOSSOM_FALLBACK || undefined
+        const thumbnailUpload = await uploadToConfiguredBlossomServers({
+          ndk,
+          file: generated.file,
+          label: "external-video-thumbnail"
         });
         generatedThumbnail = thumbnailUpload.url;
         if (generatedThumbnail) {

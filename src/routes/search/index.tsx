@@ -15,14 +15,15 @@ export const Route = createFileRoute("/search/")({
   component: RouteComponent,
   validateSearch: zodValidator(eventSearchSchema),
   loader: async ({ context: { ndk }, deps }) => {
-    const searchDeps = deps as {
-      search?: string;
-      nsfw?: boolean;
-      tag?: string | string[];
-      lang?: string;
-      author?: string;
-      timeRange?: "all" | "today" | "week" | "month" | "year";
-    };
+      const searchDeps = deps as {
+        search?: string;
+        nsfw?: boolean;
+        tag?: string | string[];
+        lang?: string;
+        author?: string;
+        geohash?: string;
+        timeRange?: "all" | "today" | "week" | "month" | "year";
+      };
     // Passamos o objeto consolidado para a função performática
     return getVideosFromSearchData({
       ndk,
@@ -31,8 +32,8 @@ export const Route = createFileRoute("/search/")({
     });
   },
   // Atualizar loaderDeps para incluir novos campos
-  loaderDeps: ({ search: { search, nsfw, tag, lang, author, timeRange } }) => ({
-    search, nsfw, tag, lang, author, timeRange
+  loaderDeps: ({ search: { search, nsfw, tag, lang, author, geohash, timeRange } }) => ({
+    search, nsfw, tag, lang, author, geohash, timeRange
   }),
   head: () => ({
     meta: [

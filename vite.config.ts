@@ -1,5 +1,5 @@
 import { defineConfig, loadEnv } from "vite";
-import react from "@vitejs/plugin-react-swc";
+import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 import legacy from "@vitejs/plugin-legacy";
@@ -28,6 +28,8 @@ export default defineConfig(({ mode }) => {
     }, options);
     return value;
   }
+
+  const sentryEnabled = Boolean(process.env.SENTRY_AUTH_TOKEN && process.env.SENTRY_ORG && process.env.SENTRY_PROJECT);
 
   return {
     resolve: {
@@ -102,14 +104,14 @@ export default defineConfig(({ mode }) => {
       wasm(),
       sri(),
       envSchemaValidate(),
-      sentryVitePlugin({
+      ...(sentryEnabled ? [sentryVitePlugin({
         authToken: process.env.SENTRY_AUTH_TOKEN,
         org: process.env.SENTRY_ORG,
         project: process.env.SENTRY_PROJECT
-      })
+      })] : [])
     ],
     build: {
-      sourcemap: true, //True to generate sourcemaps for debugging
+      sourcemap: sentryEnabled ? "hidden" : true,
       cssMinify: true,
       minify: true,
       cssCodeSplit: true,

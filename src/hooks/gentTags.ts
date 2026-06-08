@@ -3,6 +3,7 @@ import { nip19 } from "nostr-tools";
 import { imetaTagToTag, NDKKind } from "@nostr-dev-kit/ndk";
 import { ulid } from "ulid";
 import type { VideoMetadata } from "@/store/videoUpload/useVideoUploadStore.ts";
+import useUserStore from "@/store/useUserStore.ts";
 
 
 // --- Tipos ---
@@ -117,6 +118,11 @@ function generateCategoryTags(props: GenTagsProps): string[][] {
   // Aviso de Conteúdo (content-warning)
   if (props.contentWarning) {
     tags.push(["content-warning", props.contentWarning]);
+  }
+
+  const geoHash = useUserStore.getState().session?.geoHash?.slice(0, 3).toLowerCase();
+  if (geoHash) {
+    tags.push(["g", geoHash]);
   }
 
   return tags;

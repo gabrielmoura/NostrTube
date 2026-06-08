@@ -2,6 +2,7 @@ import { imetaTagToTag } from "@nostr-dev-kit/ndk";
 import { ulid } from "ulid";
 import { nostrNow } from "@/helper/date";
 import type { VideoMetadata } from "@/store/videoUpload/useVideoUploadStore";
+import useUserStore from "@/store/useUserStore";
 
 export interface BuildAddressableVideoEventParams {
   draft: Partial<VideoMetadata>;
@@ -113,6 +114,11 @@ export function buildAddressableVideoEvent({
   normalizeTagValues(draft.indexers).forEach((indexer) => {
     tags.push(["i", indexer]);
   });
+
+  const geoHash = draft.geohash?.toLowerCase() || useUserStore.getState().session?.geoHash?.slice(0, 3).toLowerCase();
+  if (geoHash) {
+    tags.push(["g", geoHash]);
+  }
 
   if (draft.origin) {
     tags.push([

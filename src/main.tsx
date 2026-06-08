@@ -13,12 +13,14 @@ import { printConsoleWarning } from "@/helper/consoleWarning.ts";
 // Sentry
 import * as Sentry from "@sentry/react";
 
-Sentry.init({
-  dsn: import.meta.env.VITE_SENTRY_DSN,
-  // Setting this option to true will send default PII data to Sentry.
-  // For example, automatic IP address collection on events
-  sendDefaultPii: true
-});
+if (import.meta.env.PROD && import.meta.env.VITE_SENTRY_DSN) {
+  Sentry.init({
+    dsn: import.meta.env.VITE_SENTRY_DSN,
+    // Setting this option to true will send default PII data to Sentry.
+    // For example, automatic IP address collection on events
+    sendDefaultPii: true
+  });
+}
 
 // --- Definições de Tipos (Pode mover para src/types.d.ts se preferir) ---
 export type RouteAlertType = "success" | "error" | "warning";

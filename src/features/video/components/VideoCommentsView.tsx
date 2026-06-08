@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import type { NDKEvent } from "@nostr-dev-kit/ndk-hooks";
 import { formatCount } from "@/helper/format";
 import { t } from "i18next";
@@ -22,6 +23,22 @@ export function VideoCommentsView({
   eventId,
   pubkey
 }: VideoCommentsViewProps) {
+  const [optimisticComments, setOptimisticComments] = useState<NDKEvent[]>([]);
+
+  const mergedComments = useMemo(() => {
+    const merged = new Map<string, NDKEvent>();
+
+    for (const comment of [...comments, ...optimisticComments]) {
+      merged.set(comment.id, comment);
+    }
+
+    return Array.from(merged.values()).sort((a, b) => (a.created_at ?? 0) - (b.created_at ?? 0));
+  }, [comments, optimisticComments]);
+
+  const handleCommentSubmitted = (event: NDKEvent) => {
+    setOptimisticComments((current) => current.some((comment) => comment.id === event.id) ? current : [...current, event]);
+  };
+
   if (!eose) {
     return <Spinner />;
   }
@@ -31,7 +48,7 @@ export function VideoCommentsView({
       <div>
         <div className="flex items-center">
           <h2 className="text-base font-semibold text-foreground">
-            {comments.length === 1 ? "1 Comment" : `${formatCount(comments.length || 0)} ${t("comments")}`}
+            {mergedComments.length === 1 ? "1 Comment" : `${formatCount(mergedComments.length || 0)} ${t("comments")}`}
           </h2>
         </div>
       </div>
@@ -42,10 +59,17 @@ export function VideoCommentsView({
             ["e", eventId, "", "reply"],
             ["p", pubkey || ""]
           ]}
+          onSubmitted={handleCommentSubmitted}
         />
       </ErrorBoundaryVideo>
       <ErrorBoundaryVideo>
-        <CommentFeed comments={comments} />
+        <CommentFeed
+          comments={mergedComments}
+          rootEventId={eventId}
+          rootEventReference={eventReference}
+          rootPubkey={pubkey}
+          onReplySubmitted={handleCommentSubmitted}
+        />
       </ErrorBoundaryVideo>
     </ScrollArea>
   );

@@ -158,6 +158,9 @@ importers:
       '@vitejs/plugin-legacy':
         specifier: ^8.0.2
         version: 8.0.2(terser@5.48.0)(vite@8.0.16(@types/node@24.13.1)(jiti@2.7.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.20.5))
+      '@vitejs/plugin-react':
+        specifier: ^6.0.2
+        version: 6.0.2(vite@8.0.16(@types/node@24.13.1)(jiti@2.7.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.20.5))
       '@welshman/util':
         specifier: ^0.4.7
         version: 0.4.7(typescript@5.8.3)
@@ -420,9 +423,6 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.17)
-      '@vitejs/plugin-react-swc':
-        specifier: ^4.3.1
-        version: 4.3.1(@swc/helpers@0.5.23)(vite@8.0.16(@types/node@24.13.1)(jiti@2.7.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.20.5))
       autoprefixer:
         specifier: ^10.5.0
         version: 10.5.0(postcss@8.5.15)
@@ -3619,11 +3619,18 @@ packages:
       terser: ^5.16.0
       vite: ^8.0.0
 
-  '@vitejs/plugin-react-swc@4.3.1':
-    resolution: {integrity: sha512-PaeokKjAGraNN+s5SIApgsktnJprIyt3zgEIu7awnEdfn29QiB2crTcCzyi2XGpX9rUnTc0cKU07Wm0N0g7H2w==}
+  '@vitejs/plugin-react@6.0.2':
+    resolution: {integrity: sha512-DlSMqo4WhThw4vB8Mpn0Woe9J+Jfq1geJ61AKW0QEgLzGMNwtIMdxbDUzLxcun8W7NbJO0e2Jg/Nxm3cCSVzzg==}
     engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
-      vite: ^4 || ^5 || ^6 || ^7 || ^8
+      '@rolldown/plugin-babel': ^0.1.7 || ^0.2.0
+      babel-plugin-react-compiler: ^1.0.0
+      vite: ^8.0.0
+    peerDependenciesMeta:
+      '@rolldown/plugin-babel':
+        optional: true
+      babel-plugin-react-compiler:
+        optional: true
 
   '@webtorrent/http-node@1.3.0':
     resolution: {integrity: sha512-GWZQKroPES4z91Ijx6zsOsb7+USOxjy66s8AoTWg0HiBBdfnbtf9aeh3Uav0MgYn4BL8Q7tVSUpd0gGpngKGEQ==}
@@ -10892,8 +10899,10 @@ snapshots:
       '@swc/core-win32-ia32-msvc': 1.15.40
       '@swc/core-win32-x64-msvc': 1.15.40
       '@swc/helpers': 0.5.23
+    optional: true
 
-  '@swc/counter@0.1.3': {}
+  '@swc/counter@0.1.3':
+    optional: true
 
   '@swc/helpers@0.5.23':
     dependencies:
@@ -10902,6 +10911,7 @@ snapshots:
   '@swc/types@0.1.26':
     dependencies:
       '@swc/counter': 0.1.3
+    optional: true
 
   '@tailwindcss/node@4.3.0':
     dependencies:
@@ -11447,13 +11457,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitejs/plugin-react-swc@4.3.1(@swc/helpers@0.5.23)(vite@8.0.16(@types/node@24.13.1)(jiti@2.7.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.20.5))':
+  '@vitejs/plugin-react@6.0.2(vite@8.0.16(@types/node@24.13.1)(jiti@2.7.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.20.5))':
     dependencies:
       '@rolldown/pluginutils': 1.0.1
-      '@swc/core': 1.15.40(@swc/helpers@0.5.23)
       vite: 8.0.16(@types/node@24.13.1)(jiti@2.7.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.20.5)
-    transitivePeerDependencies:
-      - '@swc/helpers'
 
   '@webtorrent/http-node@1.3.0':
     dependencies:

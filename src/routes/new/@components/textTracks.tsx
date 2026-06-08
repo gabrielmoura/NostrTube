@@ -6,17 +6,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from "@/components/videoPlayer/components/Tooltip.tsx";
-
-
-// type TextTracksProps = {
-//   url?: string;
-//   onChange?: (video: string) => void;
-// };
 export default function TextTracks() {
-  //   const { UploadButton, fileUrl, status } = useUpload({
-  //     folderName: "text-tracks",
-  //   });
-
   return (
     <TooltipProvider>
       <Tooltip delayDuration={100}>
@@ -29,12 +19,4 @@ export default function TextTracks() {
       </Tooltip>
     </TooltipProvider>
   );
-
-  //   return (
-  //     <UploadButton>
-  //       <Button loading={status === "uploading"} variant={"secondary"}>
-  //         Upload
-  //       </Button>
-  //     </UploadButton>
-  //   );
 }

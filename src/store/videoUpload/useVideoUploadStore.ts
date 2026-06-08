@@ -27,6 +27,7 @@ export interface VideoMetadata {
   imetaImage: NDKImetaTag;
   age: AgeEnum;
   language?: string;
+  geohash?: string;
   origin?: {
     platform: string;
     externalId: string;
@@ -50,6 +51,7 @@ export interface VideoUploadState {
   setIndexers: (indexers: string[]) => void;
   setHashtags: (hashtags: string[]) => void;
   setLanguage: (language?: string) => void;
+  setGeohash: (geohash?: string) => void;
   setUploadingState: (isUploading: boolean) => void;
   setUploadProgress: (progress: number) => void;
   setUploadStage: (stage: VideoUploadState["uploadStage"]) => void;
@@ -107,6 +109,11 @@ export const useVideoUploadStore = create<VideoUploadState>()(
           state.videoData.language = language;
         }, false, "video/setLanguage"),
 
+      setGeohash: (geohash) =>
+        set((state) => {
+          state.videoData.geohash = geohash;
+        }, false, "video/setGeohash"),
+
       setShowEventInput: (show) =>
         set((state) => {
           state.showEventInput = show;
@@ -155,6 +162,7 @@ export const useVideoUploadStore = create<VideoUploadState>()(
           state.videoData.imetaVideo = undefined;
           state.videoData.imetaVariants = undefined;
           state.videoData.imetaAudioTracks = undefined;
+          state.videoData.geohash = undefined;
           state.videoData.origin = undefined;
           state.videoData.thumbnail = undefined;
           state.isUploading = false;

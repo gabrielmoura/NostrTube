@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AlertCircle, Bell, Loader2, MapPin, Shield } from "lucide-react";
+import { AlertCircle, Bell, Eye, EyeOff, Loader2, MapPin, Shield } from "lucide-react";
 import ngeohash from "ngeohash";
 import { Card, CardHeader, Switch } from "./CommonComponents";
 import { LoggerAgent } from "@/lib/debug.ts";
@@ -13,6 +13,7 @@ export const PermissionSettings = () => {
   const setPushNotificationsEnabled = useUserStore((state) => state.setPushNotificationsEnabled);
   const [pushEnabled, setPushEnabled] = useState(false);
   const [locationEnabled, setLocationEnabled] = useState(false);
+  const [showGeoHash, setShowGeoHash] = useState(false);
 
   // Estados para dados e feedback
   const [currentGeohash, setCurrentGeohash] = useState<string | null>(null);
@@ -24,6 +25,7 @@ export const PermissionSettings = () => {
     setPushEnabled(storedPushEnabled || ("Notification" in window && Notification.permission === "granted"));
     setLocationEnabled(Boolean(storedGeoHash));
     setCurrentGeohash(storedGeoHash ?? null);
+    setShowGeoHash(false);
   }, [storedGeoHash, storedPushEnabled]);
 
   /**
@@ -73,6 +75,7 @@ export const PermissionSettings = () => {
     if (!checked) {
       setLocationEnabled(false);
       setCurrentGeohash(null);
+      setShowGeoHash(false);
       setGeoHash("");
       return;
     }
@@ -89,12 +92,12 @@ export const PermissionSettings = () => {
       (position) => {
         const { latitude, longitude } = position.coords;
 
-        // Gera o Geohash com precisão de 7 caracteres (aprox. 150m de margem)
-        const hash = ngeohash.encode(latitude, longitude, 7);
+        const hash = ngeohash.encode(latitude, longitude, 3).toLowerCase();
 
         setCurrentGeohash(hash);
         setGeoHash(hash);
         setLocationEnabled(true);
+        setShowGeoHash(false);
         setLoading(null);
       },
       (err) => {
@@ -162,14 +165,29 @@ export const PermissionSettings = () => {
             <div>
               <p className="font-medium text-zinc-900 dark:text-zinc-100">Geohash Local</p>
               <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                Melhore a descoberta de conteúdo regional.
+                Salva apenas o prefixo estadual do geohash, com três caracteres.
               </p>
 
-              {/* Exibe o Geohash gerado se disponível */}
               {currentGeohash && locationEnabled && (
-                <div
-                  className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
-                  Hash: {currentGeohash}
+                <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50/70 px-3 py-2 dark:border-emerald-900/50 dark:bg-emerald-900/20">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs font-medium text-emerald-800 dark:text-emerald-200">
+                      Geohash salvo
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowGeoHash((current) => !current)}
+                      className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 transition-colors hover:text-emerald-900 dark:text-emerald-300 dark:hover:text-emerald-100"
+                    >
+                      {showGeoHash ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      {showGeoHash ? "Ocultar" : "Exibir"}
+                    </button>
+                  </div>
+                  {showGeoHash ? (
+                    <div className="mt-2 inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
+                      Hash: {currentGeohash}
+                    </div>
+                  ) : null}
                 </div>
               )}
             </div>

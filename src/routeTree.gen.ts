@@ -55,8 +55,8 @@ const FaqIndexRoute = FaqIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConfigurarionIndexRoute = ConfigurarionIndexRouteImport.update({
-  id: '/configurarion/',
-  path: '/configurarion/',
+  id: '/configuration/',
+  path: '/configuration/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const vEventIdRoute = vEventIdRouteImport.update({
@@ -96,7 +96,7 @@ export interface FileRoutesByFullPath {
   '/p/new': typeof PNewRoute
   '/u/$userId': typeof UUserIdRoute
   '/v/$eventId': typeof vEventIdRoute
-  '/configurarion': typeof ConfigurarionIndexRoute
+  '/configuration': typeof ConfigurarionIndexRoute
   '/faq': typeof FaqIndexRoute
   '/debug': typeof DebugIndexRoute
   '/new': typeof NewIndexRoute
@@ -111,7 +111,7 @@ export interface FileRoutesByTo {
   '/p/new': typeof PNewRoute
   '/u/$userId': typeof UUserIdRoute
   '/v/$eventId': typeof vEventIdRoute
-  '/configurarion': typeof ConfigurarionIndexRoute
+  '/configuration': typeof ConfigurarionIndexRoute
   '/faq': typeof FaqIndexRoute
   '/debug': typeof DebugIndexRoute
   '/new': typeof NewIndexRoute
@@ -127,7 +127,7 @@ export interface FileRoutesById {
   '/p/new': typeof PNewRoute
   '/u/$userId': typeof UUserIdRoute
   '/v/$eventId': typeof vEventIdRoute
-  '/configurarion/': typeof ConfigurarionIndexRoute
+  '/configuration/': typeof ConfigurarionIndexRoute
   '/debug/': typeof DebugIndexRoute
   '/faq/': typeof FaqIndexRoute
   '/new/': typeof NewIndexRoute
@@ -144,7 +144,7 @@ export interface FileRouteTypes {
     | '/p/new'
     | '/u/$userId'
     | '/v/$eventId'
-    | '/configurarion'
+    | '/configuration'
     | '/debug'
     | '/faq'
     | '/new'
@@ -159,7 +159,7 @@ export interface FileRouteTypes {
     | '/p/new'
     | '/u/$userId'
     | '/v/$eventId'
-    | '/configurarion'
+    | '/configuration'
     | '/debug'
     | '/faq'
     | '/new'
@@ -174,7 +174,7 @@ export interface FileRouteTypes {
     | '/p/new'
     | '/u/$userId'
     | '/v/$eventId'
-    | '/configurarion/'
+    | '/configuration/'
     | '/debug/'
     | '/faq/'
     | '/new/'
@@ -244,10 +244,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FaqIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/configurarion/': {
-      id: '/configurarion/'
-      path: '/configurarion'
-      fullPath: '/configurarion'
+    '/configuration/': {
+      id: '/configuration/'
+      path: '/configuration'
+      fullPath: '/configuration'
       preLoaderRoute: typeof ConfigurarionIndexRouteImport
       parentRoute: typeof rootRouteImport
     }

@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { zodValidator } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import { t } from "i18next";
 import { NDKEvent } from "@nostr-dev-kit/ndk";
 import { NDKSubscriptionCacheUsage, useSubscribe } from "@nostr-dev-kit/ndk-hooks";
@@ -21,16 +23,22 @@ const SEARCH_RELAYS = import.meta.env.VITE_NOSTR_SEARCH_RELAYS?.length > 5
   : undefined;
 
 export const Route = createFileRoute("/")({
+  validateSearch: zodValidator(z.object({
+    tab: z.enum(["trending", "popular", "language"]).optional().default("trending")
+  })),
   component: IndexPageWithHelmet
 });
 
 function IndexPageWithHelmet() {
+  const navigate = useNavigate();
+  const { tab } = Route.useSearch();
+
   return (
     <div className="w-full pb-10">
       <div className="w-full space-y-6">
-        <Tabs defaultValue="recent" className="w-full">
+        <Tabs value={tab} onValueChange={(nextTab) => navigate({ to: "/", search: { tab: nextTab as "trending" | "popular" | "language" } })} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="recent" className="flex items-center gap-2">
+            <TabsTrigger value="trending" className="flex items-center gap-2">
               <Clock className="w-4 h-4" />
               <span>{t("Trending", "Tendências")}</span>
             </TabsTrigger>
@@ -47,7 +55,7 @@ function IndexPageWithHelmet() {
           {/* O uso de unmountOnExit no TabsContent (se suportado pelo seu UI lib) ou keepMounted depende da estratégia de cache.
               Aqui assumimos renderização padrão. */}
 
-          <TabsContent value="recent" className="focus-visible:outline-none">
+          <TabsContent value="trending" className="focus-visible:outline-none">
             <RecentVideos />
           </TabsContent>
 
@@ -237,7 +245,7 @@ function PopularVideos() {
         kinds: VIDEO_KINDS,
       "#d": popularVideoIds, // Correção: filtro por tag 'd' geralmente é '#d' em queries genéricas ou 'd' dependendo do relay wrapper
       limit: 50
-    }] : [], // Evita query vazia
+    }] : false, // Evita query vazia
     {
       cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST
     },

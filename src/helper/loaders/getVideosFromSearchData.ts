@@ -21,6 +21,7 @@ export const eventSearchSchema = z.object({
   nsfw: z.boolean().optional(),
   lang: z.string().optional(),
   author: z.string().optional(),
+  geohash: z.string().optional(),
   timeRange: z.enum(["all", "today", "week", "month", "year"]).optional().default("all")
 });
 
@@ -73,8 +74,8 @@ function calculateSince(timeRange: eventSearchType["timeRange"]): number | undef
 }
 
 export async function getVideosFromSearchData({
-                                                ndk, search, nsfw, tag, lang, author, timeRange, until
-                                              }: eventSearchType & {
+                                                 ndk, search, nsfw, tag, lang, author, geohash, timeRange, until
+                                               }: eventSearchType & {
   ndk: NDK__default,
   until?: number
 }): Promise<NDKEvent[]> {
@@ -90,6 +91,7 @@ export async function getVideosFromSearchData({
   if (nsfw) filter["#content-warning"] = [""];
   if (tag) filter["#t"] = Array.isArray(tag) ? tag : [tag];
   if (lang && lang !== "all") filter["#l"] = [lang];
+  if (geohash) filter["#g"] = [geohash.toLowerCase()];
 
   filter.authors = resolveAuthorPubkey(author);
   filter.since = calculateSince(timeRange);

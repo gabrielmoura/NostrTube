@@ -245,6 +245,7 @@ export function UploadPageContainer() {
   const setHashtags = useVideoUploadStore((state) => state.setHashtags);
   const setIndexers = useVideoUploadStore((state) => state.setIndexers);
   const setLanguage = useVideoUploadStore((state) => state.setLanguage);
+  const setGeohash = useVideoUploadStore((state) => state.setGeohash);
   const setThumbnail = useVideoUploadStore((state) => state.setThumbnail);
   const saveDraft = useVideoUploadStore((state) => state.saveDraft);
   const clearUploadedMedia = useVideoUploadStore((state) => state.clearUploadedMedia);
@@ -385,12 +386,14 @@ export function UploadPageContainer() {
                 hashtags={videoData.hashtags}
                 indexers={videoData.indexers}
                 language={videoData.language}
+                geohash={videoData.geohash}
                 onTitleChange={setTitle}
                 onSummaryChange={setSummary}
                 onContentWarningChange={setContentWarning}
                 onHashtagsChange={setHashtags}
                 onIndexersChange={setIndexers}
                 onLanguageChange={setLanguage}
+                onGeohashChange={setGeohash}
               />
             </div>
           ) : null}
