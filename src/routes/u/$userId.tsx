@@ -9,6 +9,9 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Grid, Info, List, PlaySquare, Wrench } from "lucide-react";
+import { useMemo } from "react";
+import useUserStore from "@/store/useUserStore";
+import { filterEventsByAge } from "@/features/video/services/age-filter.service";
 
 import CreateProfile from "./@components/EditProfile.tsx";
 import { Card } from "@/components/ui/card.tsx";
@@ -71,7 +74,9 @@ function ProfilePage() {
   const userProfile = metaEvent ? JSON.parse(metaEvent.content) as NDKUserProfile : null;
 
   // Separação de eventos por tipo
-  const videos = [...events].filter(e => VIDEO_EVENT_KINDS.includes(e.kind as number));
+  const rawVideos = [...events].filter(e => VIDEO_EVENT_KINDS.includes(e.kind as number));
+  const agePref = useUserStore((state) => state.session?.age);
+  const videos = useMemo(() => filterEventsByAge(rawVideos, agePref), [rawVideos, agePref]);
   // Mock de playlists (assumindo que o loader traria Kind 30001 também)
   const playlists = [...events].filter(e => e.kind === NDKKind.VideoCurationSet);
   const isOwner = Boolean(currentUser && (currentUser.npub === userId || currentUser.pubkey === userId));

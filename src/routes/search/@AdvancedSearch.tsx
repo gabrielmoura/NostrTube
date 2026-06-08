@@ -22,12 +22,13 @@ export function AdvancedSearch() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [chips, setChips] = useState<SearchChipToken[]>([]);
+  const [geohashEnabled, setGeohashEnabled] = useState(false);
 
   const { register, handleSubmit, setValue, watch, control } = useForm<eventSearchType>({
     defaultValues: {
       search: searchParams.search || "",
       author: searchParams.author || "",
-      geohash: searchParams.geohash || storedGeoHash || "",
+      geohash: searchParams.geohash || "",
       lang: searchParams.lang || "",
       timeRange: searchParams.timeRange || "all",
       nsfw: searchParams.nsfw || false
@@ -37,12 +38,13 @@ export function AdvancedSearch() {
   useEffect(() => {
     setValue("search", searchParams.search);
     setValue("author", searchParams.author);
-    setValue("geohash", searchParams.geohash || storedGeoHash || "");
+    setValue("geohash", searchParams.geohash || "");
     setValue("lang", searchParams.lang);
     setValue("timeRange", searchParams.timeRange || "all");
     setValue("nsfw", searchParams.nsfw || false);
     setSearchInput(buildInputFromSearchState(searchParams));
     setChips(buildSearchStateFromInput(buildInputFromSearchState(searchParams), searchParams).chips);
+    if (searchParams.geohash) setGeohashEnabled(true);
   }, [searchParams, setValue, storedGeoHash]);
 
   const selectedLanguage = watch("lang");
@@ -80,7 +82,7 @@ export function AdvancedSearch() {
         tag: parsed.tag.length ? parsed.tag : undefined,
         lang: parsed.lang || undefined,
         author: parsed.author || undefined,
-        geohash: data.geohash?.trim().toLowerCase() || undefined
+        geohash: geohashEnabled ? (data.geohash?.trim().toLowerCase() || undefined) : undefined
       }).filter(([_, value]) => value != null && value !== "" && value !== "all")
     );
 
@@ -161,7 +163,18 @@ export function AdvancedSearch() {
 
               <div className="space-y-2">
                 <Label htmlFor="geohash">Geohash</Label>
-                <Input id="geohash" {...register("geohash")} placeholder={storedGeoHash || "abc"} maxLength={12} />
+                <div className="flex gap-2">
+                  <Input id="geohash" {...register("geohash")} placeholder={storedGeoHash || "abc"} maxLength={12} className="flex-1" />
+                  <Button
+                    type="button"
+                    variant={geohashEnabled ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setGeohashEnabled((prev) => !prev)}
+                    className="shrink-0"
+                  >
+                    {geohashEnabled ? "Ativo" : "Inativo"}
+                  </Button>
+                </div>
               </div>
 
               <div className="space-y-2">

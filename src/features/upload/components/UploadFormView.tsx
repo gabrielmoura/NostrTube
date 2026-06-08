@@ -82,6 +82,27 @@ export function UploadFormView({
     onGeohashChange(includeGeohash && effectiveGeohash ? effectiveGeohash : undefined);
   }, [effectiveGeohash, includeGeohash, onGeohashChange]);
 
+  const PRECISION_PRESETS = [
+    { label: "Estado", value: 3, description: "Ampla — nível estadual" },
+    { label: "Região", value: 4, description: "Intermediária — nível regional" },
+    { label: "Cidade", value: 5, description: "Local — nível municipal" },
+  ] as const;
+
+  function getScopeLabel(p: number): string {
+    if (p <= 2) return "Muito amplo";
+    if (p === 3) return "Estado";
+    if (p === 4) return "Região";
+    return "Cidade";
+  }
+
+  function getScopeDescription(p: number): string {
+    if (p <= 2) return "Descoberta muito ampla";
+    if (p === 3) return "Descoberta ampla — nível estadual";
+    if (p === 4) return "Descoberta intermediária — nível regional";
+    if (p === 5) return "Descoberta local — nível municipal";
+    return "Descoberta muito local — alta precisão";
+  }
+
   return (
     <div className="space-y-4">
       <Textarea
@@ -178,6 +199,31 @@ export function UploadFormView({
                     <Plus className="size-4" />
                   </Button>
                 </div>
+              </div>
+
+              <div className="flex flex-wrap gap-1.5">
+                {PRECISION_PRESETS.map((preset) => (
+                  <Button
+                    key={preset.value}
+                    type="button"
+                    variant={precision === preset.value ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setPrecision(preset.value)}
+                    className="h-7 px-3 text-xs"
+                  >
+                    {preset.label}
+                  </Button>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/20 px-3 py-2.5">
+                <MapPin className="size-3.5 shrink-0 text-emerald-500" />
+                <span className="text-xs text-muted-foreground">
+                  Escopo atual:{" "}
+                  <span className="font-semibold text-foreground">{getScopeLabel(precision)}</span>
+                  {" — "}
+                  {getScopeDescription(precision)}
+                </span>
               </div>
             </div>
           ) : null}

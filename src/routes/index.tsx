@@ -15,6 +15,8 @@ import VideoCard, { VideoCardLoading } from "@/components/cards/videoCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs.tsx";
 import { VIDEO_EVENT_KINDS } from "@/features/video/services/video-kinds";
 import { useBatchProfiles } from "@/features/nostr/hooks/useBatchProfiles";
+import useUserStore from "@/store/useUserStore";
+import { filterEventsByAge } from "@/features/video/services/age-filter.service";
 
 // --- Constantes ---
 const VIDEO_KINDS = VIDEO_EVENT_KINDS;
@@ -176,9 +178,12 @@ function RecentVideos() {
     []
   );
 
+  const agePref = useUserStore((state) => state.session?.age);
+  const filtered = useMemo(() => filterEventsByAge(events, agePref), [events, agePref]);
+
   return (
     <VideoFeed
-      events={events}
+      events={filtered}
       title={t("Recent Uploads", "Envios Recentes")}
       isLoading={events.length === 0}
     />
@@ -188,6 +193,7 @@ function RecentVideos() {
 function LanguageVideos() {
   // Inicialização lazy para evitar useEffect desnecessário
   const [lang] = useState<string | undefined>(() => detectLanguageMain()?.split("-")[0]);
+  const agePref = useUserStore((state) => state.session?.age);
 
   const { events } = useSubscribe(
     lang ? [{
@@ -201,6 +207,8 @@ function LanguageVideos() {
     [lang]
   );
 
+  const filtered = useMemo(() => filterEventsByAge(events, agePref), [events, agePref]);
+
   if (!lang) {
     return <div
       className="p-5 text-center text-muted-foreground">{t("Language not detected", "Idioma não detectado.")}</div>;
@@ -208,7 +216,7 @@ function LanguageVideos() {
 
   return (
     <VideoFeed
-      events={events}
+      events={filtered}
       title={t("Videos in your language", "Vídeos no seu idioma")}
       isLoading={events.length === 0}
       emptyMessage={t("No videos found for language", `Nenhum vídeo encontrado para o idioma: ${lang}`)}
@@ -252,9 +260,12 @@ function PopularVideos() {
     [popularVideoIds] // Re-executa quando a lista de IDs mudar
   );
 
+  const agePref = useUserStore((state) => state.session?.age);
+  const filtered = useMemo(() => filterEventsByAge(videoEvents, agePref), [videoEvents, agePref]);
+
   return (
     <VideoFeed
-      events={videoEvents}
+      events={filtered}
       title={t("Popular Videos", "Vídeos Populares")}
       isLoading={viewEvents.length > 0 && videoEvents.length === 0} // Loading se temos views mas ainda não temos os vídeos
     />

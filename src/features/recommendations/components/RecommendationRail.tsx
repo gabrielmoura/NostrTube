@@ -5,6 +5,8 @@ import { Sparkles } from "lucide-react";
 import type React from "react";
 import VideoCard, { VideoCardLoading } from "@/components/cards/videoCard";
 import { getVideosFromSearchData } from "@/helper/loaders/getVideosFromSearchData";
+import { filterEventsByAge } from "@/features/video/services/age-filter.service";
+import useUserStore from "@/store/useUserStore";
 
 interface RecommendationRailProps {
   title: string;
@@ -18,12 +20,14 @@ export function RecommendationRail({ title, subtitle, tags, excludeEventId }: Re
   const navigate = useNavigate();
   const activeTags = tags.filter(Boolean).slice(0, 3);
 
+  const agePref = useUserStore((state) => state.session?.age);
+
   const query = useQuery({
-    queryKey: ["recommendations", activeTags, excludeEventId],
+    queryKey: ["recommendations", activeTags, excludeEventId, agePref],
     enabled: Boolean(ndk && activeTags.length > 0),
     queryFn: async () => {
       const events = await getVideosFromSearchData({ ndk: ndk!, tag: activeTags, timeRange: "all" });
-      return events.filter((event) => event.id !== excludeEventId).slice(0, 8);
+      return filterEventsByAge(events, agePref).filter((event) => event.id !== excludeEventId).slice(0, 8);
     }
   });
 

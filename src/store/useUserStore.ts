@@ -43,7 +43,7 @@ interface UserActions {
   setRelays: (r: string[]) => void;
   setGeoHash: (geoHash: string) => void;
   setPushNotificationsEnabled: (enabled: boolean) => void;
-  setAge: (age: AgeEnum) => void;
+  setAge: (age?: AgeEnum) => void;
   setVideoMuted: (muted: boolean) => void;
 }
 
@@ -174,7 +174,7 @@ export const useUserStore = create<UserStore>()(
               }
             },
             false,
-            "setGeoHash"
+            "setAge"
           ),
 
         setRelays: (relays) => set((state) => {

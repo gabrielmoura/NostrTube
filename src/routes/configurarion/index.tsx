@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { BlossomSettings } from "@/routes/configurarion/@components/BlossomSettings.tsx";
 import { PermissionSettings } from "@/routes/configurarion/@components/PermissionSettings.tsx";
+import { VisibilitySettings } from "@/routes/configurarion/@components/VisibilitySettings.tsx";
 import { Button, Card, CardContent, CardHeader } from "@/routes/configurarion/@components/CommonComponents.tsx";
 import { RelaySettings } from "@/routes/configurarion/@components/RelaySettings.tsx";
 import { AuthModal } from "@/components/AuthModal.tsx";
@@ -64,6 +65,7 @@ function RouteComponent() {
         <BlossomSettings />
         <PermissionSettings />
         <RelaySettings />
+        <VisibilitySettings />
       </div>
 
       <Card>

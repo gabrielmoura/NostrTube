@@ -6,6 +6,8 @@ import { sortEventsByImages } from "@/helper/format.ts";
 import { notFound } from "@tanstack/react-router";
 import { VIDEO_EVENT_KINDS } from "@/features/video/services/video-kinds";
 import { fetchEventsCached, getSearchRelayUrls } from "@/features/nostr/services/ndk-query.service";
+import { filterEventsByAge } from "@/features/video/services/age-filter.service";
+import useUserStore from "@/store/useUserStore";
 
 // --- Erros Personalizados ---
 export class VideoSearchError extends Error {
@@ -113,8 +115,12 @@ export async function getVideosFromSearchData({
       throw notFound();
     }
 
-    // 3. Processamento Final (Ordenação)
-    return uniqueEvents.sort(sortEventsByImages);
+    // 3. Filtro por idade do usuário
+    const agePref = useUserStore.getState().session?.age;
+    const ageFiltered = filterEventsByAge(uniqueEvents, agePref);
+
+    // 4. Processamento Final (Ordenação)
+    return ageFiltered.sort(sortEventsByImages);
 
   } catch (error) {
     if (error instanceof Error && error.name === "NotFoundError") throw error;

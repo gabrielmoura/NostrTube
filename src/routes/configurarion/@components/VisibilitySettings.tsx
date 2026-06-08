@@ -91,17 +91,29 @@ function AgeFilterSelect({ onError }: { onError: (m: string | null) => void }) {
   const setAge = useUserStore((state) => state.setAge);
 
   const ageOptions = [
-    { value: "KID", label: t("visibility.ages.KID") },
-    { value: "TEEN", label: t("visibility.ages.TEEN") },
-    { value: "ADULT", label: t("visibility.ages.ADULT") },
+    { value: AgeEnum.kids, label: t("visibility.ages.KID") },
+    { value: AgeEnum.teen, label: t("visibility.ages.TEEN") },
+    { value: AgeEnum.adult, label: t("visibility.ages.ADULT") },
+    { value: AgeEnum.porn, label: "Porn" },
   ];
 
-  const selectedOption = ageOptions.find((opt) => opt.value === age) || ageOptions[1];
+  const selectedOption = ageOptions.find((opt) => opt.value === age) ?? null;
 
-  const handleSelect = useCallback(async (newValue: string) => {
+  const handleSelect = useCallback(async (newValue: AgeEnum) => {
     try {
       onError(null);
-      await setAge(newValue as AgeEnum);
+      await setAge(newValue);
+      setOpen(false);
+    } catch (err) {
+      log.error("Error updating age:", err);
+      onError(t("visibility.error_age"));
+    }
+  }, [setAge, onError, t]);
+
+  const handleClear = useCallback(async () => {
+    try {
+      onError(null);
+      await setAge(undefined);
       setOpen(false);
     } catch (err) {
       log.error("Error updating age:", err);
@@ -127,7 +139,7 @@ function AgeFilterSelect({ onError }: { onError: (m: string | null) => void }) {
             variant="outline"
             className="w-full sm:w-[220px] justify-between bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800"
           >
-            {selectedOption.label}
+            {selectedOption ? selectedOption.label : "Selecionar..."}
             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -137,6 +149,10 @@ function AgeFilterSelect({ onError }: { onError: (m: string | null) => void }) {
             <CommandList>
               <CommandEmpty>{t("visibility.no_results")}</CommandEmpty>
               <CommandGroup>
+                <CommandItem onSelect={handleClear} className="cursor-pointer text-muted-foreground">
+                  <Check className={cn("mr-2 h-4 w-4", !age ? "opacity-100" : "opacity-0")} />
+                  Nenhum (mostrar tudo)
+                </CommandItem>
                 {ageOptions.map((option) => (
                   <CommandItem
                     key={option.value}
