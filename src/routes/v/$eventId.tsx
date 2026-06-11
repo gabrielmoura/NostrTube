@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createRoute } from "@tanstack/react-router";
 import { VideoPage } from "@/routes/v/@components/Video.tsx";
 import { NotFoundVideo } from "@/routes/v/@components/NotFoundVideo.tsx";
 import { PageSpinner } from "@/components/PageSpinner.tsx";
@@ -6,11 +6,14 @@ import type NDK__default from "@nostr-dev-kit/ndk";
 import { geVideoByEventIdData, type GeVideoByEventIdDataParams } from "@/helper/loaders/geVideoByEventIdData.ts";
 import { getTagValue } from "@welshman/util";
 import { VideoRouteError } from "@/features/video/components/VideoRouteError";
+import { Route as rootRoute } from "@/routes/__root";
 
 /*
  * @route /v/$eventId
  */
-export const Route = createFileRoute("/v/$eventId")({
+export const Route = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/v/$eventId",
   component: VideoPage,
   loader: ({ params: { eventId }, context: { ndk } }: {
     context: {

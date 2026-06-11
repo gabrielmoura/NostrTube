@@ -131,7 +131,7 @@ function VideoTags({ event }: VideoActionsProps) {
   return (
     <div className="mt-2 flex flex-wrap gap-2">
       {tags.map((value, index) => (
-        <Link to="/search/" search={{ tag: value as string }} key={index}>
+        <Link to="/search" search={{ tag: value as string }} key={index}>
           <Badge>{value}</Badge>
         </Link>
       ))}

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createRoute, useNavigate } from "@tanstack/react-router";
 import { useNDK, useNDKCurrentUser } from "@nostr-dev-kit/ndk-hooks";
 import { type NDKEvent, NDKKind } from "@nostr-dev-kit/ndk";
 import { toast } from "sonner";
@@ -16,8 +16,11 @@ import { buildAddressableVideoEvent } from "@/features/upload/services/video-eve
 import { applyDraftToImeta, extractEditableVideoDraft } from "@/features/upload/services/editable-video-draft.service";
 import { makeEvent } from "@/helper/pow/pow";
 import { nostrNow } from "@/helper/date";
+import { Route as rootRoute } from "@/routes/__root";
 
-export const Route = createFileRoute("/v_/$eventId/edit")({
+export const Route = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/v/$eventId/edit",
   loader: ({ params: { eventId }, context: { ndk } }) => geVideoByEventIdData({ eventId, ndk }),
   component: VideoEditRoute
 });

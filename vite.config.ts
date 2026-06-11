@@ -1,6 +1,5 @@
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import tailwindcss from '@tailwindcss/vite'
-import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import legacy from '@vitejs/plugin-legacy'
 import react from '@vitejs/plugin-react'
 import path from 'path'
@@ -54,14 +53,42 @@ export default defineConfig(({ mode }) => {
 
     if (
       includesAny(id, [
-        'node_modules/@nostr-dev-kit/',
-        'node_modules/nostr-tools/',
-        'node_modules/@welshman/',
-        'node_modules/dexie/',
-        'node_modules/idb/',
+        'node_modules/@nostr-dev-kit/ndk/',
+        'node_modules/@nostr-dev-kit/ndk-hooks/',
+        'node_modules/@nostr-dev-kit/react/',
       ])
     ) {
-      return 'nostr-core'
+      return 'ndk-core'
+    }
+
+    if (includesAny(id, ['node_modules/@nostr-dev-kit/messages/', 'node_modules/@nostr-dev-kit/ndk-blossom/'])) {
+      return 'ndk-extensions'
+    }
+
+    if (
+      includesAny(id, [
+        'node_modules/nostr-tools/nip19',
+        'node_modules/nostr-tools/',
+        'node_modules/@welshman/',
+        'node_modules/@noble/',
+      ])
+    ) {
+      return 'nostr-utils'
+    }
+
+    if (
+      includesAny(id, [
+        'node_modules/dexie/',
+        'node_modules/idb/',
+        'node_modules/@nostr-dev-kit/ndk-cache-dexie/',
+        'node_modules/@nostr-dev-kit/ndk-cache-sqlite-wasm/',
+      ])
+    ) {
+      return 'nostr-storage'
+    }
+
+    if (id.includes('node_modules/nostr-wasm/')) {
+      return 'nostr-wasm'
     }
 
     if (includesAny(id, ['node_modules/@radix-ui/', 'node_modules/cmdk/', 'node_modules/vaul/'])) {
@@ -104,11 +131,6 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       tailwindcss(),
-      tanstackRouter({
-        target: 'react',
-        autoCodeSplitting: true,
-        routeFileIgnorePrefix: '@',
-      }),
       react(),
       VitePWA({
         strategies: 'injectManifest',
@@ -183,6 +205,7 @@ export default defineConfig(({ mode }) => {
       cssMinify: true,
       minify: true,
       cssCodeSplit: true,
+      chunkSizeWarningLimit: 1300,
       rolldownOptions: {
         output: {
           chunkFileNames: 'assets/[name]-[hash].js',

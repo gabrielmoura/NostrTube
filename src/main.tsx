@@ -11,7 +11,7 @@ import * as Sentry from '@sentry/react'
 import { AppProviders, queryClient } from '@/components/AppProviders'
 import { printConsoleWarning } from '@/helper/consoleWarning.ts'
 import { ndkInstance } from '@/lib/ndk'
-import { routeTree } from './routeTree.gen'
+import { routeTree } from './router'
 
 if (import.meta.env.PROD && import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({

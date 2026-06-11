@@ -1,44 +1,48 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion.tsx";
-import { useEffect, useMemo, useState } from "react";
-import { faqData } from "@/default.ts";
-import { detectLanguageMain } from "@/helper/userLang.ts";
-import { t } from "i18next";
-import { Input } from "@/components/ui/input.tsx";
-import { Search, HelpCircle } from "lucide-react";
+import { createRoute } from '@tanstack/react-router'
+import { t } from 'i18next'
+import { HelpCircle, Search } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx'
+import { Input } from '@/components/ui/input.tsx'
+import { faqData } from '@/default.ts'
+import { detectLanguageMain } from '@/helper/userLang.ts'
+import { Route as rootRoute } from '@/routes/__root'
 
-export const Route = createFileRoute("/faq/")({
+export const Route = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/faq',
   component: RouteComponent,
   head: () => ({
     meta: [
-      { title: t("FAQ_Title", "FAQ") },
+      { title: t('FAQ_Title', 'FAQ') },
       {
-        name: "description",
-        content: t("FAQ_Description", "Frequently Asked Questions about NostrTube. Find answers to common questions and learn more about our platform.")
+        name: 'description',
+        content: t(
+          'FAQ_Description',
+          'Frequently Asked Questions about NostrTube. Find answers to common questions and learn more about our platform.',
+        ),
       },
-      { property: "og:title", content: t("FAQ_Title", "FAQ") }
-    ]
-  })
-});
+      { property: 'og:title', content: t('FAQ_Title', 'FAQ') },
+    ],
+  }),
+})
 
 export interface FaqEntry {
-  id: string;
-  question: string;
-  answer: string;
+  id: string
+  question: string
+  answer: string
 }
 
 function FaqPage({ faqData }: { faqData: FaqEntry[] }) {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('')
 
   const filteredFaqs = useMemo(() => {
-    if (!searchTerm) return faqData;
-    const lower = searchTerm.toLowerCase();
+    if (!searchTerm) return faqData
+    const lower = searchTerm.toLowerCase()
     return faqData.filter(
-      (faq) =>
-        faq.question.toLowerCase().includes(lower) ||
-        faq.answer.toLowerCase().includes(lower)
-    );
-  }, [searchTerm, faqData]);
+      (faq) => faq.question.toLowerCase().includes(lower) || faq.answer.toLowerCase().includes(lower),
+    )
+  }, [searchTerm, faqData])
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:py-12">
@@ -46,9 +50,7 @@ function FaqPage({ faqData }: { faqData: FaqEntry[] }) {
         <div className="mx-auto mb-4 inline-flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
           <HelpCircle className="size-6" />
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Perguntas Frequentes
-        </h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Perguntas Frequentes</h1>
         <p className="mt-2 text-muted-foreground">
           Encontre respostas para as dúvidas mais comuns sobre o {import.meta.env.VITE_APP_NAME}.
         </p>
@@ -82,7 +84,7 @@ function FaqPage({ faqData }: { faqData: FaqEntry[] }) {
           <p className="text-muted-foreground">Nenhum resultado encontrado para "{searchTerm}".</p>
           <button
             type="button"
-            onClick={() => setSearchTerm("")}
+            onClick={() => setSearchTerm('')}
             className="mt-2 text-sm font-medium text-primary underline-offset-2 hover:underline"
           >
             Limpar busca
@@ -90,13 +92,11 @@ function FaqPage({ faqData }: { faqData: FaqEntry[] }) {
         </div>
       )}
     </div>
-  );
+  )
 }
 
 function RouteComponent() {
-  const lang = detectLanguageMain() || "en";
-  const faqDataL = faqData[lang?.split("-")[0] as keyof typeof faqData] || faqData["en"];
-  return (
-    <FaqPage faqData={faqDataL} />
-  );
+  const lang = detectLanguageMain() || 'en'
+  const faqDataL = faqData[lang?.split('-')[0] as keyof typeof faqData] || faqData['en']
+  return <FaqPage faqData={faqDataL} />
 }

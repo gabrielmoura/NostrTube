@@ -1,7 +1,7 @@
 import { NDKKind } from '@nostr-dev-kit/ndk'
 import { NDKEvent, type NDKUserProfile, useNDK, useNDKCurrentUser } from '@nostr-dev-kit/ndk-hooks'
 import { useQuery } from '@tanstack/react-query'
-import { createFileRoute, Link, useLoaderData, useParams } from '@tanstack/react-router'
+import { createRoute, Link, useLoaderData, useParams } from '@tanstack/react-router'
 import {
   AlertTriangle,
   AtSign,
@@ -36,13 +36,16 @@ import { DropdownMenuProfile } from '@/routes/u/@components/DropdownMenuProfile.
 import { FollowButton } from '@/routes/u/@components/FollowButton.tsx'
 import { PlaylistCard } from '@/routes/u/@components/PlaylistCard.tsx'
 import { VideoCard } from '@/routes/u/@components/VideoCard.tsx'
+import { Route as rootRoute } from '@/routes/__root'
 import useUserStore from '@/store/useUserStore'
 import CreateProfile from './@components/EditProfile.tsx'
 
 export const ProfilePageSchema = z.object({
   tab: z.enum(['videos', 'playlists', 'about', 'alerts']).optional(),
 })
-export const Route = createFileRoute('/u/$userId')({
+export const Route = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/u/$userId',
   component: ProfilePage,
   loader: ({ params: { userId }, context: { ndk } }) =>
     getVideosFromUserData({
@@ -233,7 +236,7 @@ function ProfilePage() {
             <TabsTrigger
               onClick={() => {
                 navigate({
-                  search: (old) => ({ ...old, tab: undefined }),
+                  search: (old: { tab?: 'videos' | 'playlists' | 'about' | 'alerts' }) => ({ ...old, tab: undefined }),
                 })
               }}
               value="videos"
@@ -246,7 +249,7 @@ function ProfilePage() {
               value="playlists"
               onClick={() => {
                 navigate({
-                  search: (old) => ({ ...old, tab: 'playlists' }),
+                  search: (old: { tab?: 'videos' | 'playlists' | 'about' | 'alerts' }) => ({ ...old, tab: 'playlists' }),
                 })
               }}
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all"
@@ -258,7 +261,7 @@ function ProfilePage() {
               value="about"
               onClick={() => {
                 navigate({
-                  search: (old) => ({ ...old, tab: 'about' }),
+                  search: (old: { tab?: 'videos' | 'playlists' | 'about' | 'alerts' }) => ({ ...old, tab: 'about' }),
                 })
               }}
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all"
@@ -271,7 +274,7 @@ function ProfilePage() {
                 value="alerts"
                 onClick={() => {
                   navigate({
-                    search: (old) => ({ ...old, tab: 'alerts' }),
+                    search: (old: { tab?: 'videos' | 'playlists' | 'about' | 'alerts' }) => ({ ...old, tab: 'alerts' }),
                   })
                 }}
                 className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all"

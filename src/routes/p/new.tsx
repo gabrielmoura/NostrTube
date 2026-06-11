@@ -1,23 +1,25 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
-import { PlaylistForm } from "./@playlist/playlist-form.tsx";
-import { toast } from "sonner";
+import { createRoute, useNavigate } from '@tanstack/react-router'
+import { ArrowLeft } from 'lucide-react'
+import { toast } from 'sonner'
+import { Route as rootRoute } from '@/routes/__root'
+import { PlaylistForm } from './@playlist/playlist-form.tsx'
 
-export const Route = createFileRoute("/p/new")({
-  component: RouteComponent
-});
+export const Route = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/p/new',
+  component: RouteComponent,
+})
 
 function RouteComponent() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const handleSuccess = (listId: string) => {
-    toast.success("Playlist criada com sucesso! (Redirecionando...)");
+    toast.success('Playlist criada com sucesso! (Redirecionando...)')
     navigate({
-      to: "/p/$listId",
-      params: { listId }
-    });
-
-  };
+      to: '/p/$listId',
+      params: { listId },
+    })
+  }
 
   return (
     <div className="container max-w-5xl mx-auto py-10 px-4">
@@ -33,5 +35,5 @@ function RouteComponent() {
       {/* Componente encapsulado */}
       <PlaylistForm onSuccess={handleSuccess} />
     </div>
-  );
+  )
 }
