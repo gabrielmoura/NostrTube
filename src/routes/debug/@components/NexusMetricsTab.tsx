@@ -22,7 +22,7 @@ import {
   recordNexusSnapshot,
 } from '@/features/debug/services/nexus-metrics.service'
 import { type NexusDebugSnapshot, ndkNexusBridge } from '@/lib/nexus-p2p'
-import { Badge, Card, CardContent, CardHeader } from '@/routes/configurarion/@components/CommonComponents.tsx'
+import { Badge, Card, CardContent, CardHeader } from '@/routes/configuration/@components/CommonComponents.tsx'
 
 interface NexusChartPoint extends NexusHistoryPoint {
   time: string

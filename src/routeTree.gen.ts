@@ -14,20 +14,14 @@ import { Route as TermsIndexRouteImport } from './routes/terms/index'
 import { Route as SearchIndexRouteImport } from './routes/search/index'
 import { Route as NewIndexRouteImport } from './routes/new/index'
 import { Route as FaqIndexRouteImport } from './routes/faq/index'
-import { Route as ConfigurarionIndexRouteImport } from './routes/configurarion/index'
-import { Route as vEventIdRouteImport } from './routes/v/$eventId'
+import { Route as DebugIndexRouteImport } from './routes/debug/index'
+import { Route as ConfigurationIndexRouteImport } from './routes/configuration/index'
+import { Route as VEventIdRouteImport } from './routes/v/$eventId'
 import { Route as UUserIdRouteImport } from './routes/u/$userId'
 import { Route as PNewRouteImport } from './routes/p/new'
 import { Route as PListIdRouteImport } from './routes/p/$listId'
-import { Route as UUserIdEditRouteImport } from './routes/u_/$userId/edit'
 import { Route as VEventIdEditRouteImport } from './routes/v_/$eventId/edit'
-import { Route as DebugIndexRouteImport } from './routes/debug/index'
-
-const DebugIndexRoute = DebugIndexRouteImport.update({
-  id: '/debug/',
-  path: '/debug/',
-  getParentRoute: () => rootRouteImport,
-} as any)
+import { Route as UUserIdEditRouteImport } from './routes/u_/$userId/edit'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -54,12 +48,17 @@ const FaqIndexRoute = FaqIndexRouteImport.update({
   path: '/faq/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ConfigurarionIndexRoute = ConfigurarionIndexRouteImport.update({
+const DebugIndexRoute = DebugIndexRouteImport.update({
+  id: '/debug/',
+  path: '/debug/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfigurationIndexRoute = ConfigurationIndexRouteImport.update({
   id: '/configuration/',
   path: '/configuration/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const vEventIdRoute = vEventIdRouteImport.update({
+const VEventIdRoute = VEventIdRouteImport.update({
   id: '/v/$eventId',
   path: '/v/$eventId',
   getParentRoute: () => rootRouteImport,
@@ -79,14 +78,14 @@ const PListIdRoute = PListIdRouteImport.update({
   path: '/p/$listId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UUserIdEditRoute = UUserIdEditRouteImport.update({
-  id: '/u_/$userId/edit',
-  path: '/u/$userId/edit',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const VEventIdEditRoute = VEventIdEditRouteImport.update({
   id: '/v_/$eventId/edit',
   path: '/v/$eventId/edit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UUserIdEditRoute = UUserIdEditRouteImport.update({
+  id: '/u_/$userId/edit',
+  path: '/u/$userId/edit',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -95,13 +94,13 @@ export interface FileRoutesByFullPath {
   '/p/$listId': typeof PListIdRoute
   '/p/new': typeof PNewRoute
   '/u/$userId': typeof UUserIdRoute
-  '/v/$eventId': typeof vEventIdRoute
-  '/configuration': typeof ConfigurarionIndexRoute
-  '/faq': typeof FaqIndexRoute
-  '/debug': typeof DebugIndexRoute
-  '/new': typeof NewIndexRoute
-  '/search': typeof SearchIndexRoute
-  '/terms': typeof TermsIndexRoute
+  '/v/$eventId': typeof VEventIdRoute
+  '/configuration/': typeof ConfigurationIndexRoute
+  '/debug/': typeof DebugIndexRoute
+  '/faq/': typeof FaqIndexRoute
+  '/new/': typeof NewIndexRoute
+  '/search/': typeof SearchIndexRoute
+  '/terms/': typeof TermsIndexRoute
   '/u/$userId/edit': typeof UUserIdEditRoute
   '/v/$eventId/edit': typeof VEventIdEditRoute
 }
@@ -110,10 +109,10 @@ export interface FileRoutesByTo {
   '/p/$listId': typeof PListIdRoute
   '/p/new': typeof PNewRoute
   '/u/$userId': typeof UUserIdRoute
-  '/v/$eventId': typeof vEventIdRoute
-  '/configuration': typeof ConfigurarionIndexRoute
-  '/faq': typeof FaqIndexRoute
+  '/v/$eventId': typeof VEventIdRoute
+  '/configuration': typeof ConfigurationIndexRoute
   '/debug': typeof DebugIndexRoute
+  '/faq': typeof FaqIndexRoute
   '/new': typeof NewIndexRoute
   '/search': typeof SearchIndexRoute
   '/terms': typeof TermsIndexRoute
@@ -126,8 +125,8 @@ export interface FileRoutesById {
   '/p/$listId': typeof PListIdRoute
   '/p/new': typeof PNewRoute
   '/u/$userId': typeof UUserIdRoute
-  '/v/$eventId': typeof vEventIdRoute
-  '/configuration/': typeof ConfigurarionIndexRoute
+  '/v/$eventId': typeof VEventIdRoute
+  '/configuration/': typeof ConfigurationIndexRoute
   '/debug/': typeof DebugIndexRoute
   '/faq/': typeof FaqIndexRoute
   '/new/': typeof NewIndexRoute
@@ -144,12 +143,12 @@ export interface FileRouteTypes {
     | '/p/new'
     | '/u/$userId'
     | '/v/$eventId'
-    | '/configuration'
-    | '/debug'
-    | '/faq'
-    | '/new'
-    | '/search'
-    | '/terms'
+    | '/configuration/'
+    | '/debug/'
+    | '/faq/'
+    | '/new/'
+    | '/search/'
+    | '/terms/'
     | '/u/$userId/edit'
     | '/v/$eventId/edit'
   fileRoutesByTo: FileRoutesByTo
@@ -186,12 +185,12 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DebugIndexRoute: typeof DebugIndexRoute
   PListIdRoute: typeof PListIdRoute
   PNewRoute: typeof PNewRoute
   UUserIdRoute: typeof UUserIdRoute
-  vEventIdRoute: typeof vEventIdRoute
-  ConfigurarionIndexRoute: typeof ConfigurarionIndexRoute
+  VEventIdRoute: typeof VEventIdRoute
+  ConfigurationIndexRoute: typeof ConfigurationIndexRoute
+  DebugIndexRoute: typeof DebugIndexRoute
   FaqIndexRoute: typeof FaqIndexRoute
   NewIndexRoute: typeof NewIndexRoute
   SearchIndexRoute: typeof SearchIndexRoute
@@ -209,53 +208,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/v_/$eventId/edit': {
-      id: '/v_/$eventId/edit'
-      path: '/v/$eventId/edit'
-      fullPath: '/v/$eventId/edit'
-      preLoaderRoute: typeof VEventIdEditRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/terms/': {
       id: '/terms/'
       path: '/terms'
-      fullPath: '/terms'
+      fullPath: '/terms/'
       preLoaderRoute: typeof TermsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search/': {
       id: '/search/'
       path: '/search'
-      fullPath: '/search'
+      fullPath: '/search/'
       preLoaderRoute: typeof SearchIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/new/': {
       id: '/new/'
       path: '/new'
-      fullPath: '/new'
+      fullPath: '/new/'
       preLoaderRoute: typeof NewIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/faq/': {
       id: '/faq/'
       path: '/faq'
-      fullPath: '/faq'
+      fullPath: '/faq/'
       preLoaderRoute: typeof FaqIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/debug/': {
+      id: '/debug/'
+      path: '/debug'
+      fullPath: '/debug/'
+      preLoaderRoute: typeof DebugIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/configuration/': {
       id: '/configuration/'
       path: '/configuration'
-      fullPath: '/configuration'
-      preLoaderRoute: typeof ConfigurarionIndexRouteImport
+      fullPath: '/configuration/'
+      preLoaderRoute: typeof ConfigurationIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/v/$eventId': {
       id: '/v/$eventId'
       path: '/v/$eventId'
       fullPath: '/v/$eventId'
-      preLoaderRoute: typeof vEventIdRouteImport
+      preLoaderRoute: typeof VEventIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/u/$userId': {
@@ -263,13 +262,6 @@ declare module '@tanstack/react-router' {
       path: '/u/$userId'
       fullPath: '/u/$userId'
       preLoaderRoute: typeof UUserIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/debug/': {
-      id: '/debug/'
-      path: '/debug'
-      fullPath: '/debug'
-      preLoaderRoute: typeof DebugIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/p/new': {
@@ -286,6 +278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PListIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/v_/$eventId/edit': {
+      id: '/v_/$eventId/edit'
+      path: '/v/$eventId/edit'
+      fullPath: '/v/$eventId/edit'
+      preLoaderRoute: typeof VEventIdEditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/u_/$userId/edit': {
       id: '/u_/$userId/edit'
       path: '/u/$userId/edit'
@@ -298,17 +297,18 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DebugIndexRoute: DebugIndexRoute,
   PListIdRoute: PListIdRoute,
   PNewRoute: PNewRoute,
   UUserIdRoute: UUserIdRoute,
-  vEventIdRoute: vEventIdRoute,
-  ConfigurarionIndexRoute: ConfigurarionIndexRoute,
+  VEventIdRoute: VEventIdRoute,
+  ConfigurationIndexRoute: ConfigurationIndexRoute,
+  DebugIndexRoute: DebugIndexRoute,
   FaqIndexRoute: FaqIndexRoute,
   NewIndexRoute: NewIndexRoute,
   SearchIndexRoute: SearchIndexRoute,
   TermsIndexRoute: TermsIndexRoute,
   UUserIdEditRoute: UUserIdEditRoute,
+  VEventIdEditRoute: VEventIdEditRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

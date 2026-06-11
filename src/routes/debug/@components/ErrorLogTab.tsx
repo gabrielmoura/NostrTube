@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Bug, Clipboard, Copy, Download, FileJson, FileText, Info, Trash2, XCircle } from "lucide-react";
 import { toast } from "sonner";
-import { Badge, Button, Card, CardContent, CardHeader } from "@/routes/configurarion/@components/CommonComponents.tsx";
+import { Badge, Button, Card, CardContent, CardHeader } from "@/routes/configuration/@components/CommonComponents.tsx";
 import {
   clearLogs,
   exportJSON,

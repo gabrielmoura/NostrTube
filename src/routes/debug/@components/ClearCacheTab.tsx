@@ -11,7 +11,7 @@ import {
   deleteAllEvents,
   deleteEventsByKind,
 } from '@/features/debug/services/cache.service.ts'
-import { Badge, Button, Card, CardContent, CardHeader } from '@/routes/configurarion/@components/CommonComponents.tsx'
+import { Badge, Button, Card, CardContent, CardHeader } from '@/routes/configuration/@components/CommonComponents.tsx'
 
 interface ClearOption {
   id: string

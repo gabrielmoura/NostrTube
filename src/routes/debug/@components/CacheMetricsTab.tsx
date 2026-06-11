@@ -10,7 +10,7 @@ import {
   getStorageQuota,
   getWriteRate,
 } from '@/features/debug/services/metrics.service.ts'
-import { Badge, Card, CardContent, CardHeader } from '@/routes/configurarion/@components/CommonComponents.tsx'
+import { Badge, Card, CardContent, CardHeader } from '@/routes/configuration/@components/CommonComponents.tsx'
 
 interface MetricsDisplay {
   label: string

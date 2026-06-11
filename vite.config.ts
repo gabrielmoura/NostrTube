@@ -1,5 +1,6 @@
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import tailwindcss from '@tailwindcss/vite'
+import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import legacy from '@vitejs/plugin-legacy'
 import react from '@vitejs/plugin-react'
 import path from 'path'
@@ -7,25 +8,86 @@ import { defineConfig, loadEnv } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 // @ts-expect-error vite-plugin-sri does not publish types.
 import sri from 'vite-plugin-sri'
-// import { tanstackRouter } from "@tanstack/router-plugin/vite";
-import wasm from 'vite-plugin-wasm'
 import envSchemaValidate from './envSchema.ts'
 
 export default defineConfig(({ mode }) => {
   // Load environment variables based on the current mode
   const env = loadEnv(mode, process.cwd(), '') // The third argument is the prefix for client-side variables (e.g., 'VITE_')
-  const chunkVideo = ['node_modules/@vidstack/react', 'hls.js', 'dashjs']
-  // const chunkI18next = ['i18next', 'i18next-browser-languagedetector', 'i18next-http-backend']
-  // const chunckCore = ['src', '@nostr-dev-kit', '@radix-ui', '@tanstack', 'react', 'zustand']
+  function includesAny(id: string, patterns: string[]): boolean {
+    return patterns.some((pattern) => id.includes(pattern))
+  }
 
-  function checkDependency(id: string, options: string[]): boolean {
-    let value: boolean = false
-    options.forEach((item) => {
-      if (id.includes(item)) {
-        value = id.includes(item)
-      }
-    }, options)
-    return value
+  function getManualChunk(id: string) {
+    if (id.includes('node_modules/@vidstack/react') || id.includes('hls.js') || id.includes('dashjs')) {
+      return 'video'
+    }
+
+    if (
+      includesAny(id, [
+        '/src/routes/debug/',
+        '/src/features/debug/',
+        'node_modules/recharts/',
+        'node_modules/@nostr-dev-kit/ndk-cache-dexie/',
+      ])
+    ) {
+      return 'route-debug'
+    }
+
+    if (
+      includesAny(id, [
+        '/src/routes/new/',
+        '/src/features/upload/',
+        '/src/store/videoUpload/',
+        '/src/components/VideoUpload/',
+        '/src/hooks/useVideoUploader',
+        '/src/hooks/useBlossomUpload',
+        'node_modules/blossom-client-sdk/',
+        'node_modules/react-dropzone/',
+      ])
+    ) {
+      return 'route-new'
+    }
+
+    if (includesAny(id, ['/src/routes/configuration/', 'node_modules/ngeohash/'])) {
+      return 'route-configuration'
+    }
+
+    if (
+      includesAny(id, [
+        'node_modules/@nostr-dev-kit/',
+        'node_modules/nostr-tools/',
+        'node_modules/@welshman/',
+        'node_modules/dexie/',
+        'node_modules/idb/',
+      ])
+    ) {
+      return 'nostr-core'
+    }
+
+    if (includesAny(id, ['node_modules/@radix-ui/', 'node_modules/cmdk/', 'node_modules/vaul/'])) {
+      return 'ui-kit'
+    }
+
+    if (
+      includesAny(id, [
+        'node_modules/@tanstack/',
+        'node_modules/zod/',
+        'node_modules/@hookform/resolvers/',
+        'node_modules/react-hook-form/',
+      ])
+    ) {
+      return 'app-core'
+    }
+
+    if (includesAny(id, ['node_modules/react/', 'node_modules/react-dom/', 'node_modules/scheduler/'])) {
+      return 'react-core'
+    }
+
+    if (id.includes('node_modules/')) {
+      return 'vendor-misc'
+    }
+
+    return undefined
   }
 
   const sentryEnabled = Boolean(process.env.SENTRY_AUTH_TOKEN && process.env.SENTRY_ORG && process.env.SENTRY_PROJECT)
@@ -40,15 +102,13 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, './src'),
       },
     },
-    optimizeDeps: {
-      esbuildOptions: {
-        define: {
-          global: 'globalThis',
-        },
-      },
-    },
     plugins: [
       tailwindcss(),
+      tanstackRouter({
+        target: 'react',
+        autoCodeSplitting: true,
+        routeFileIgnorePrefix: '@',
+      }),
       react(),
       VitePWA({
         strategies: 'injectManifest',
@@ -62,6 +122,7 @@ export default defineConfig(({ mode }) => {
           sourcemap: true,
           // This increase the cache limit to 8mB
           maximumFileSizeToCacheInBytes: 1024 * 1024 * 8,
+          globIgnores: ['**/route-debug*.js', '**/route-debug*.js.map'],
           // Ensure index.html is included in the manifest
           // globPatterns: ["**/*.{js,css,html,ico,png,svg,json,woff,woff2}"],
         },
@@ -69,6 +130,7 @@ export default defineConfig(({ mode }) => {
           maximumFileSizeToCacheInBytes: 1024 * 1024 * 8,
           // gerados no diretório de build (dist).
           globPatterns: ['**/*.{js,css,html,ico,png,svg,json,woff,woff2,wasm}'],
+          globIgnores: ['**/route-debug*.js', '**/route-debug*.js.map'],
 
           // Garante que o novo service worker assuma o controle imediatamente
           clientsClaim: true,
@@ -104,12 +166,6 @@ export default defineConfig(({ mode }) => {
         modernPolyfills: ['es.promise.finally'],
         targets: ['defaults', 'not IE 11'],
       }),
-      // tanstackRouter({
-      //   target: "react",
-      //   autoCodeSplitting: true,
-      //   routeFileIgnorePrefix: "@"
-      // }),
-      wasm(),
       sri(),
       envSchemaValidate(),
       ...(sentryEnabled
@@ -127,16 +183,17 @@ export default defineConfig(({ mode }) => {
       cssMinify: true,
       minify: true,
       cssCodeSplit: true,
-      rollupOptions: {
+      rolldownOptions: {
         output: {
-          manualChunks(id) {
-            if (checkDependency(id, chunkVideo)) {
-              return 'video'
-            }
-
-            if (id.includes('node_modules') && !checkDependency(id, [...chunkVideo])) {
-              return 'vendor'
-            }
+          chunkFileNames: 'assets/[name]-[hash].js',
+          codeSplitting: {
+            groups: [
+              {
+                name(id) {
+                  return getManualChunk(id) ?? null
+                },
+              },
+            ],
           },
         },
         cache: true,

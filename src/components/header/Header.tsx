@@ -1,84 +1,72 @@
-import * as React from "react";
-import { Link } from "@tanstack/react-router";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bell, LogOut, Menu, Moon, Search, Settings, Sun, User } from "lucide-react";
-import { cn } from "@/helper/format";
-import { LogoNovo, LogoNovoMono } from "@/components/logo/LogoNovo";
-import { FeedbackButton } from "@/features/feedback/components/FeedbackButton";
 import {
   useCurrentUserProfile,
   useNDKCurrentPubkey,
   useNDKCurrentUser,
-  useNDKSessionLogout
-} from "@nostr-dev-kit/ndk-hooks";
-import useUserStore from "@/store/useUserStore.ts";
-import { AuthModal } from "@/components/AuthModal.tsx";
-import { modal } from "@/components/modal_v2/modal-manager.ts";
+  useNDKSessionLogout,
+} from '@nostr-dev-kit/ndk-hooks'
+import { Link } from '@tanstack/react-router'
+import { Bell, LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react'
+import * as React from 'react'
+import { AuthModal } from '@/components/AuthModal.tsx'
+import { LogoNovo, LogoNovoMono } from '@/components/logo/LogoNovo'
+import { modal } from '@/components/modal_v2/modal-manager.ts'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Input } from '@/components/ui/input'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { FeedbackButton } from '@/features/feedback/components/FeedbackButton'
+import { cn } from '@/helper/format'
+import useUserStore from '@/store/useUserStore.ts'
 
 type HeaderOption = {
-  to: string;
-  label: string;
-};
+  to: string
+  label: string
+}
 
 export default function Header() {
-
-  const currentUser = useNDKCurrentUser();
-  const [theme, setTheme] = React.useState(localStorage.getItem("theme") || "light");
-
+  const currentUser = useNDKCurrentUser()
+  const [theme, setTheme] = React.useState(localStorage.getItem('theme') || 'light')
 
   React.useEffect(() => {
-    const root = document.documentElement;
-    root.classList.add("theme-transition");
-    root.classList.toggle("dark", theme === "dark");
-    localStorage.setItem("theme", theme);
-    const timeout = setTimeout(() => root.classList.remove("theme-transition"), 400);
-    return () => clearTimeout(timeout);
-  }, [theme]);
+    const root = document.documentElement
+    root.classList.add('theme-transition')
+    root.classList.toggle('dark', theme === 'dark')
+    localStorage.setItem('theme', theme)
+    const timeout = setTimeout(() => root.classList.remove('theme-transition'), 400)
+    return () => clearTimeout(timeout)
+  }, [theme])
 
   const options: HeaderOption[] = [
-    { to: "/", label: "Home" },
+    { to: '/', label: 'Home' },
     // {to: "/new", label: "Novo"},
-    { to: "/search", label: "Buscar" },
-    { to: "/terms", label: "Termos de Uso" },
-    { to: "/faq/", label: "FAQ" }
-  ];
+    { to: '/search', label: 'Buscar' },
+    { to: '/terms', label: 'Termos de Uso' },
+    { to: '/faq/', label: 'FAQ' },
+  ]
   if (currentUser) {
-    options.push({ to: `/new`, label: "Novo" });
+    options.push({ to: `/new`, label: 'Novo' })
   }
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      const query = (e.target as HTMLInputElement).value;
-      window.location.href = `/search?search=${encodeURIComponent(query)}`;
+    if (e.key === 'Enter') {
+      const query = (e.target as HTMLInputElement).value
+      window.location.href = `/search?search=${encodeURIComponent(query)}`
     }
-  };
+  }
 
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 w-full bg-background/80 backdrop-blur",
-        "border-b border-border shadow-sm transition-colors duration-300"
+        'sticky top-0 z-40 w-full bg-background/80 backdrop-blur',
+        'border-b border-border shadow-sm transition-colors duration-300',
       )}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
         {/* Left Section */}
         <div className="flex items-center gap-4">
           {/* Mobile Menu */}
-          <MobileMenu
-            options={options}
-            theme={theme}
-            setTheme={setTheme}
-            handleSearch={handleSearch}
-          />
+          <MobileMenu options={options} theme={theme} setTheme={setTheme} handleSearch={handleSearch} />
 
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
@@ -94,7 +82,7 @@ export default function Header() {
                 to={opt.to}
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                 activeProps={{
-                  className: "text-primary border-b-2 border-primary"
+                  className: 'text-primary border-b-2 border-primary',
                 }}
               >
                 {opt.label}
@@ -107,12 +95,7 @@ export default function Header() {
         <div className="hidden sm:flex flex-1 justify-center max-w-md">
           <div className="relative w-full">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Pressione Enter para buscar"
-              className="pl-9"
-              onKeyDown={handleSearch}
-            />
+            <Input type="search" placeholder="Pressione Enter para buscar" className="pl-9" onKeyDown={handleSearch} />
           </div>
         </div>
 
@@ -121,16 +104,8 @@ export default function Header() {
           <FeedbackButton />
 
           {/* Theme toggle */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          >
-            {theme === "dark" ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
-            )}
+          <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             <span className="sr-only">Alternar tema</span>
           </Button>
 
@@ -141,22 +116,29 @@ export default function Header() {
           </Button>
 
           {/* Profile */}
-          {currentUser ? <UserMenu /> :
-            <Button onClick={() => modal.show(<AuthModal />, { id: "auth" })}>Login</Button>}
+          {currentUser ? (
+            <UserMenu />
+          ) : (
+            <Button onClick={() => modal.show(<AuthModal />, { id: 'auth' })}>Login</Button>
+          )}
         </div>
       </div>
     </header>
-  );
+  )
 }
 
 /* ---------- MOBILE MENU ---------- */
-function MobileMenu({ options, theme, setTheme, handleSearch }: {
-  options: HeaderOption[];
-  theme: string;
-  setTheme: React.Dispatch<React.SetStateAction<string>>;
-  handleSearch: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+function MobileMenu({
+  options,
+  theme,
+  setTheme,
+  handleSearch,
+}: {
+  options: HeaderOption[]
+  theme: string
+  setTheme: React.Dispatch<React.SetStateAction<string>>
+  handleSearch: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }) {
-
   return (
     <Sheet>
       <SheetTrigger asChild className="lg:hidden">
@@ -178,12 +160,7 @@ function MobileMenu({ options, theme, setTheme, handleSearch }: {
           {/* Search input */}
           <div className="relative block sm:hidden">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Buscar..."
-              className="pl-9"
-              onKeyDown={handleSearch}
-            />
+            <Input type="search" placeholder="Buscar..." className="pl-9" onKeyDown={handleSearch} />
           </div>
 
           {/* Links */}
@@ -194,7 +171,7 @@ function MobileMenu({ options, theme, setTheme, handleSearch }: {
                 to={opt.to}
                 className="text-base font-medium hover:text-primary transition"
                 activeProps={{
-                  className: "text-primary font-semibold"
+                  className: 'text-primary font-semibold',
                 }}
               >
                 {opt.label}
@@ -234,13 +211,9 @@ function MobileMenu({ options, theme, setTheme, handleSearch }: {
             <Button
               variant="outline"
               className="w-full flex items-center justify-start gap-2"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             >
-              {theme === "dark" ? (
-                <Sun className="h-4 w-4" />
-              ) : (
-                <Moon className="h-4 w-4" />
-              )}
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               Alternar tema
             </Button>
 
@@ -258,28 +231,27 @@ function MobileMenu({ options, theme, setTheme, handleSearch }: {
         </div>
       </SheetContent>
     </Sheet>
-  );
+  )
 }
 
 /* ---------- USER MENU DESKTOP ---------- */
 function UserMenu() {
-
-  const logout = useNDKSessionLogout();
-  const clearSession = useUserStore((s) => s.clearSession);
-  const SetProfile = useUserStore((s) => s.setProfile);
-  const currentPubkey = useNDKCurrentPubkey();
-  const currentProfile = useCurrentUserProfile();
+  const logout = useNDKSessionLogout()
+  const clearSession = useUserStore((s) => s.clearSession)
+  const SetProfile = useUserStore((s) => s.setProfile)
+  const currentPubkey = useNDKCurrentPubkey()
+  const currentProfile = useCurrentUserProfile()
 
   React.useEffect(() => {
     if (currentProfile) {
-      SetProfile(currentProfile);
+      SetProfile(currentProfile)
     }
-  }, [currentProfile, SetProfile]);
+  }, [currentProfile, SetProfile])
 
   const handleLogout = () => {
-    logout();
-    clearSession();
-  };
+    logout()
+    clearSession()
+  }
 
   return (
     <DropdownMenu>
@@ -287,13 +259,9 @@ function UserMenu() {
         <Button variant="ghost" className="flex items-center gap-2 px-2">
           <Avatar className="h-8 w-8">
             <AvatarImage src={currentProfile?.picture} />
-            <AvatarFallback>
-              {currentProfile?.name?.[0] ?? "U"}
-            </AvatarFallback>
+            <AvatarFallback>{currentProfile?.name?.[0] ?? 'U'}</AvatarFallback>
           </Avatar>
-          <span className="hidden md:inline text-sm font-medium">
-            {currentProfile?.name || "Usuário"}
-          </span>
+          <span className="hidden md:inline text-sm font-medium">{currentProfile?.name || 'Usuário'}</span>
         </Button>
       </DropdownMenuTrigger>
 
@@ -312,5 +280,5 @@ function UserMenu() {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  );
+  )
 }

@@ -3,7 +3,7 @@ import { Activity, CheckCircle, History, Plus, RefreshCw, ServerOff, Wifi, XCirc
 import { toast } from "sonner";
 import { NDKRelay, NDKRelayStatus } from "@nostr-dev-kit/ndk";
 import { useNDK } from "@nostr-dev-kit/ndk-hooks";
-import { Badge, Button, Card, CardContent, CardHeader } from "@/routes/configurarion/@components/CommonComponents.tsx";
+import { Badge, Button, Card, CardContent, CardHeader } from "@/routes/configuration/@components/CommonComponents.tsx";
 import { fetchNip11, pingRelay, type Nip11Info } from "@/features/debug/services/error-log.service.ts";
 
 const HISTORY_KEY = "nostrtube:debug:localRelays";

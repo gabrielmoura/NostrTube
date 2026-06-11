@@ -4,7 +4,7 @@ import { CheckCircle, Clock, Copy, Globe, Network, Server, Shield, User, Wifi, X
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { ndkNexusBridge } from '@/lib/nexus-p2p'
-import { Badge, Button, Card, CardContent, CardHeader } from '@/routes/configurarion/@components/CommonComponents.tsx'
+import { Badge, Button, Card, CardContent, CardHeader } from '@/routes/configuration/@components/CommonComponents.tsx'
 
 interface RelayStatusEntry {
   url: string
