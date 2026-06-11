@@ -1,94 +1,103 @@
-import { useCallback, useMemo, useRef } from "react";
-import { CheckCircle, Clock, Copy, Globe, Server, Shield, User, Wifi, XCircle } from "lucide-react";
-import { NDKRelayStatus } from "@nostr-dev-kit/ndk";
-import { useNDK, useNDKCurrentUser } from "@nostr-dev-kit/ndk-hooks";
-import { toast } from "sonner";
-import { Badge, Button, Card, CardContent, CardHeader } from "@/routes/configurarion/@components/CommonComponents.tsx";
+import { NDKRelayStatus } from '@nostr-dev-kit/ndk'
+import { useNDK, useNDKCurrentUser } from '@nostr-dev-kit/ndk-hooks'
+import { CheckCircle, Clock, Copy, Globe, Network, Server, Shield, User, Wifi, XCircle } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
+import { ndkNexusBridge } from '@/lib/nexus-p2p'
+import { Badge, Button, Card, CardContent, CardHeader } from '@/routes/configurarion/@components/CommonComponents.tsx'
 
 interface RelayStatusEntry {
-  url: string;
-  status: string;
-  statusColor: "success" | "destructive" | "warning" | "default";
-  attempts: number;
-  successCount: number;
+  url: string
+  status: string
+  statusColor: 'success' | 'destructive' | 'warning' | 'default'
+  attempts: number
+  successCount: number
 }
 
 export function BuildInfoTab() {
-  const { ndk } = useNDK();
-  const ndkRef = useRef(ndk);
-  ndkRef.current = ndk;
-  const currentUser = useNDKCurrentUser();
-  const currentUserRef = useRef(currentUser);
-  currentUserRef.current = currentUser;
+  const { ndk } = useNDK()
+  const ndkRef = useRef(ndk)
+  ndkRef.current = ndk
+  const currentUser = useNDKCurrentUser()
+  const currentUserRef = useRef(currentUser)
+  currentUserRef.current = currentUser
+  const [nexusSnapshot, setNexusSnapshot] = useState(() => ndkNexusBridge.getDebugSnapshot())
+
+  useEffect(() => {
+    const syncSnapshot = () => setNexusSnapshot(ndkNexusBridge.getDebugSnapshot())
+    syncSnapshot()
+    const timer = window.setInterval(syncSnapshot, 1000)
+    return () => window.clearInterval(timer)
+  }, [])
 
   const relaysStatus = useMemo<RelayStatusEntry[]>(() => {
-    const ndkInstance = ndkRef.current;
-    if (!ndkInstance) return [];
-    const entries: RelayStatusEntry[] = [];
+    const ndkInstance = ndkRef.current
+    if (!ndkInstance) return []
+    const entries: RelayStatusEntry[] = []
     ndkInstance.pool.relays.forEach((relay) => {
-      const status = relay.status;
-      let label: string;
-      let color: RelayStatusEntry["statusColor"];
+      const status = relay.status
+      let label: string
+      let color: RelayStatusEntry['statusColor']
 
       if (status >= NDKRelayStatus.AUTHENTICATED) {
-        label = "Autenticado";
-        color = "success";
+        label = 'Autenticado'
+        color = 'success'
       } else if (status >= NDKRelayStatus.CONNECTED) {
-        label = "Conectado";
-        color = "success";
+        label = 'Conectado'
+        color = 'success'
       } else if (status >= NDKRelayStatus.CONNECTING) {
-        label = "Conectando";
-        color = "warning";
+        label = 'Conectando'
+        color = 'warning'
       } else if (status >= NDKRelayStatus.RECONNECTING) {
-        label = "Reconectando";
-        color = "warning";
+        label = 'Reconectando'
+        color = 'warning'
       } else if (status === NDKRelayStatus.FLAPPING) {
-        label = "Instavel";
-        color = "destructive";
+        label = 'Instavel'
+        color = 'destructive'
       } else {
-        label = "Desconectado";
-        color = "default";
+        label = 'Desconectado'
+        color = 'default'
       }
 
-      const stats = relay.connectionStats;
+      const stats = relay.connectionStats
       entries.push({
         url: relay.url,
         status: label,
         statusColor: color,
         attempts: stats?.attempts ?? 0,
         successCount: stats?.success ?? 0,
-      });
-    });
-    return entries.sort((a, b) => a.url.localeCompare(b.url));
-  }, []);
+      })
+    })
+    return entries.sort((a, b) => a.url.localeCompare(b.url))
+  }, [])
 
   const buildInfo = useMemo(() => {
     return {
-      appName: import.meta.env.VITE_APP_NAME ?? "NostrTube",
-      environment: import.meta.env.DEV ? "development" : import.meta.env.PROD ? "production" : "unknown",
+      appName: import.meta.env.VITE_APP_NAME ?? 'NostrTube',
+      environment: import.meta.env.DEV ? 'development' : import.meta.env.PROD ? 'production' : 'unknown',
       nodeEnv: import.meta.env.MODE,
-      viteVersion: import.meta.env.VITE_APP_VERSION ?? "0.0.0",
+      viteVersion: import.meta.env.VITE_APP_VERSION ?? '0.0.0',
       supportedNips: [1, 2, 4, 11, 20, 22, 23, 25, 26, 28, 33, 40, 56, 71, 92, 94, 98],
-    };
-  }, []);
+    }
+  }, [])
 
   const featureFlags = useMemo(() => {
-    const flags: Record<string, boolean> = {};
-    const keys = Object.keys(import.meta.env);
+    const flags: Record<string, boolean> = {}
+    const keys = Object.keys(import.meta.env)
     for (const key of keys) {
-      if (key.startsWith("VITE_FEATURE_") || key.startsWith("VITE_ENABLE_")) {
-        flags[key.replace("VITE_FEATURE_", "").replace("VITE_ENABLE_", "").toLowerCase()] =
-          import.meta.env[key] === "true" || import.meta.env[key] === "1";
+      if (key.startsWith('VITE_FEATURE_') || key.startsWith('VITE_ENABLE_')) {
+        flags[key.replace('VITE_FEATURE_', '').replace('VITE_ENABLE_', '').toLowerCase()] =
+          import.meta.env[key] === 'true' || import.meta.env[key] === '1'
       }
     }
-    return flags;
-  }, []);
+    return flags
+  }, [])
 
   const truncatedPubkey = useMemo(() => {
-    const user = currentUserRef.current;
-    if (!user?.pubkey) return null;
-    return `${user.pubkey.slice(0, 8)}...${user.pubkey.slice(-8)}`;
-  }, []);
+    const user = currentUserRef.current
+    if (!user?.pubkey) return null
+    return `${user.pubkey.slice(0, 8)}...${user.pubkey.slice(-8)}`
+  }, [])
 
   const copyFullDiagnostic = useCallback(() => {
     const diagnostic = {
@@ -98,19 +107,26 @@ export function BuildInfoTab() {
       pubkey: currentUserRef.current?.pubkey ?? null,
       featureFlags,
       userAgent: navigator.userAgent,
-    };
-    navigator.clipboard.writeText(JSON.stringify(diagnostic, null, 2)).then(() => {
-      toast.success("Diagnostico completo copiado");
-    }).catch(() => toast.error("Falha ao copiar"));
-  }, [buildInfo, relaysStatus, featureFlags]);
+      nexusP2P: nexusSnapshot,
+    }
+    navigator.clipboard
+      .writeText(JSON.stringify(diagnostic, null, 2))
+      .then(() => {
+        toast.success('Diagnostico completo copiado')
+      })
+      .catch(() => toast.error('Falha ao copiar'))
+  }, [buildInfo, featureFlags, nexusSnapshot, relaysStatus])
 
   const copyPubkey = useCallback(() => {
-    const user = currentUserRef.current;
-    if (!user?.pubkey) return;
-    navigator.clipboard.writeText(user.pubkey).then(() => {
-      toast.success("Pubkey copiada");
-    }).catch(() => toast.error("Falha ao copiar"));
-  }, []);
+    const user = currentUserRef.current
+    if (!user?.pubkey) return
+    navigator.clipboard
+      .writeText(user.pubkey)
+      .then(() => {
+        toast.success('Pubkey copiada')
+      })
+      .catch(() => toast.error('Falha ao copiar'))
+  }, [])
 
   return (
     <div className="space-y-4">
@@ -124,11 +140,13 @@ export function BuildInfoTab() {
             </div>
             <div className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
               <p className="text-xs text-zinc-500 mb-1">Versao</p>
-              <p className="text-sm font-semibold font-mono text-zinc-900 dark:text-zinc-100">{buildInfo.viteVersion}</p>
+              <p className="text-sm font-semibold font-mono text-zinc-900 dark:text-zinc-100">
+                {buildInfo.viteVersion}
+              </p>
             </div>
             <div className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
               <p className="text-xs text-zinc-500 mb-1">Ambiente</p>
-              <Badge variant={buildInfo.environment === "production" ? "success" : "warning"}>
+              <Badge variant={buildInfo.environment === 'production' ? 'success' : 'warning'}>
                 {buildInfo.environment}
               </Badge>
               <span className="text-xs text-zinc-400 ml-2">({buildInfo.nodeEnv})</span>
@@ -142,14 +160,16 @@ export function BuildInfoTab() {
               <div className="flex flex-wrap gap-1 mt-1">
                 {buildInfo.supportedNips.map((nip) => (
                   <Badge key={nip} variant="outline" className="text-xs">
-                    NIP-{nip.toString().padStart(2, "0")}
+                    NIP-{nip.toString().padStart(2, '0')}
                   </Badge>
                 ))}
               </div>
             </div>
             <div className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
               <p className="text-xs text-zinc-500 mb-1">User Agent</p>
-              <p className="text-xs font-mono text-zinc-600 dark:text-zinc-400 break-all">{navigator.userAgent.slice(0, 80)}...</p>
+              <p className="text-xs font-mono text-zinc-600 dark:text-zinc-400 break-all">
+                {navigator.userAgent.slice(0, 80)}...
+              </p>
             </div>
           </div>
         </CardContent>
@@ -166,7 +186,7 @@ export function BuildInfoTab() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                    {currentUser.profile?.displayName ?? currentUser.profile?.name ?? "Usuario"}
+                    {currentUser.profile?.displayName ?? currentUser.profile?.name ?? 'Usuario'}
                   </p>
                   <p className="text-xs font-mono text-zinc-500">{truncatedPubkey}</p>
                 </div>
@@ -202,15 +222,18 @@ export function BuildInfoTab() {
                 </thead>
                 <tbody>
                   {relaysStatus.map((r) => (
-                    <tr key={r.url} className="border-b border-zinc-100 dark:border-zinc-800/50 hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
+                    <tr
+                      key={r.url}
+                      className="border-b border-zinc-100 dark:border-zinc-800/50 hover:bg-zinc-50 dark:hover:bg-zinc-900/50"
+                    >
                       <td className="py-1.5 px-2 font-mono text-zinc-700 dark:text-zinc-300 max-w-[200px] truncate">
-                        {r.url.replace("wss://", "").replace("ws://", "")}
+                        {r.url.replace('wss://', '').replace('ws://', '')}
                       </td>
                       <td className="py-1.5 px-2 text-center">
                         <div className="flex items-center justify-center gap-1">
-                          {r.statusColor === "success" ? (
+                          {r.statusColor === 'success' ? (
                             <CheckCircle className="w-3 h-3 text-emerald-500" />
-                          ) : r.statusColor === "destructive" ? (
+                          ) : r.statusColor === 'destructive' ? (
                             <XCircle className="w-3 h-3 text-red-500" />
                           ) : (
                             <Clock className="w-3 h-3 text-amber-500" />
@@ -218,8 +241,12 @@ export function BuildInfoTab() {
                           <Badge variant={r.statusColor}>{r.status}</Badge>
                         </div>
                       </td>
-                      <td className="py-1.5 px-2 text-right font-mono text-zinc-600 dark:text-zinc-400">{r.attempts}</td>
-                      <td className="py-1.5 px-2 text-right font-mono text-zinc-600 dark:text-zinc-400">{r.successCount}</td>
+                      <td className="py-1.5 px-2 text-right font-mono text-zinc-600 dark:text-zinc-400">
+                        {r.attempts}
+                      </td>
+                      <td className="py-1.5 px-2 text-right font-mono text-zinc-600 dark:text-zinc-400">
+                        {r.successCount}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -229,14 +256,83 @@ export function BuildInfoTab() {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader title="Nexus P2P" icon={Network} />
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
+              <p className="text-xs text-zinc-500 mb-1">Status efetivo</p>
+              <Badge variant={nexusSnapshot.enabled ? 'success' : 'destructive'}>
+                {nexusSnapshot.enabled ? 'habilitado' : 'desabilitado'}
+              </Badge>
+            </div>
+            <div className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
+              <p className="text-xs text-zinc-500 mb-1">Relay Nexus</p>
+              <p className="text-xs font-mono text-zinc-700 dark:text-zinc-300 break-all">{nexusSnapshot.relayUrl}</p>
+            </div>
+            <div className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
+              <p className="text-xs text-zinc-500 mb-1">Backend de cache</p>
+              <p className="text-xs font-mono text-zinc-700 dark:text-zinc-300">{nexusSnapshot.storageBackend}</p>
+              <div className="mt-2">
+                <Badge variant={nexusSnapshot.unifiedWithNdkCache ? 'success' : 'warning'}>
+                  {nexusSnapshot.unifiedWithNdkCache ? 'unificado com NDK' : 'fallback isolado'}
+                </Badge>
+              </div>
+            </div>
+            <div className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
+              <p className="text-xs text-zinc-500 mb-1">WebSocket sidecar</p>
+              <Badge variant={nexusSnapshot.signalingOpen ? 'success' : 'outline'}>
+                {nexusSnapshot.signalingOpen ? 'conectado' : 'desconectado'}
+              </Badge>
+            </div>
+            <div className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
+              <p className="text-xs text-zinc-500 mb-1">Peers conectados</p>
+              <p className="text-sm font-semibold font-mono text-zinc-900 dark:text-zinc-100">
+                {nexusSnapshot.peerCount}
+              </p>
+            </div>
+            <div className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
+              <p className="text-xs text-zinc-500 mb-1">Requests pendentes</p>
+              <p className="text-sm font-semibold font-mono text-zinc-900 dark:text-zinc-100">
+                {nexusSnapshot.pendingRequestCount}
+              </p>
+            </div>
+            <div className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
+              <p className="text-xs text-zinc-500 mb-1">Anuncios em fila</p>
+              <p className="text-sm font-semibold font-mono text-zinc-900 dark:text-zinc-100">
+                {nexusSnapshot.queuedAnnouncementCount}
+              </p>
+            </div>
+            <div className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
+              <p className="text-xs text-zinc-500 mb-1">Eventos servidos via P2P</p>
+              <p className="text-sm font-semibold font-mono text-zinc-900 dark:text-zinc-100">
+                {nexusSnapshot.cacheStats.served}
+              </p>
+            </div>
+            <div className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
+              <p className="text-xs text-zinc-500 mb-1">Eventos recebidos via P2P</p>
+              <p className="text-sm font-semibold font-mono text-zinc-900 dark:text-zinc-100">
+                {nexusSnapshot.cacheStats.received}
+              </p>
+            </div>
+            <div className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
+              <p className="text-xs text-zinc-500 mb-1">Eventos cacheados</p>
+              <p className="text-sm font-semibold font-mono text-zinc-900 dark:text-zinc-100">
+                {nexusSnapshot.cacheStats.cached}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {Object.keys(featureFlags).length > 0 && (
         <Card>
           <CardHeader title="Feature Flags" icon={Shield} />
           <CardContent>
             <div className="flex flex-wrap gap-2">
               {Object.entries(featureFlags).map(([key, value]) => (
-                <Badge key={key} variant={value ? "success" : "outline"}>
-                  {key}: {value ? "on" : "off"}
+                <Badge key={key} variant={value ? 'success' : 'outline'}>
+                  {key}: {value ? 'on' : 'off'}
                 </Badge>
               ))}
             </div>
@@ -251,5 +347,5 @@ export function BuildInfoTab() {
         </Button>
       </div>
     </div>
-  );
+  )
 }

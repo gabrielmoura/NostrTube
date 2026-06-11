@@ -1,57 +1,59 @@
-import { create } from "zustand";
-import { createJSONStorage, devtools, persist } from "zustand/middleware";
-import { immer } from "zustand/middleware/immer";
-import type { NDKUserProfile } from "@nostr-dev-kit/ndk-hooks";
-import { AgeEnum } from "@/store/store/sessionTypes"; // Ajuste o import conforme seu projeto
+import type { NDKUserProfile } from '@nostr-dev-kit/ndk-hooks'
+import { create } from 'zustand'
+import { createJSONStorage, devtools, persist } from 'zustand/middleware'
+import { immer } from 'zustand/middleware/immer'
+import { AgeEnum } from '@/store/store/sessionTypes' // Ajuste o import conforme seu projeto
 
 // --- Tipos ---
 
 interface BlossomConfig {
-  mirrors: string[];
-  default: string;
-  custom: string[];
+  mirrors: string[]
+  default: string
+  custom: string[]
 }
 
 interface BlossomAction {
-  setMirrors: (mirrors: string[]) => void;
-  setDefault: (url: string) => void;
-  addCustom: (url: string) => void;
-  removeCustom: (url: string) => void;
+  setMirrors: (mirrors: string[]) => void
+  setDefault: (url: string) => void
+  addCustom: (url: string) => void
+  removeCustom: (url: string) => void
 }
 
 export interface SessionData {
-  profile: NDKUserProfile;
-  darkTheme: boolean;
-  nsfw: boolean;
-  age?: AgeEnum;
-  relays?: string[];
-  geoHash?: string;
-  pushNotificationsEnabled?: boolean;
-  videoMuted?: boolean;
+  profile: NDKUserProfile
+  darkTheme: boolean
+  nsfw: boolean
+  age?: AgeEnum
+  relays?: string[]
+  geoHash?: string
+  pushNotificationsEnabled?: boolean
+  videoMuted?: boolean
+  nexusP2PEnabled?: boolean
 }
 
 interface UserState {
-  session?: SessionData;
-  blossom: BlossomConfig & BlossomAction;
+  session?: SessionData
+  blossom: BlossomConfig & BlossomAction
 }
 
 interface UserActions {
-  clearSession: () => void;
-  setProfile: (profile: NDKUserProfile) => void;
-  toggleTheme: () => void;
-  setNsfw: (enabled: boolean) => void;
-  setRelays: (r: string[]) => void;
-  setGeoHash: (geoHash: string) => void;
-  setPushNotificationsEnabled: (enabled: boolean) => void;
-  setAge: (age?: AgeEnum) => void;
-  setVideoMuted: (muted: boolean) => void;
+  clearSession: () => void
+  setProfile: (profile: NDKUserProfile) => void
+  toggleTheme: () => void
+  setNsfw: (enabled: boolean) => void
+  setRelays: (r: string[]) => void
+  setGeoHash: (geoHash: string) => void
+  setPushNotificationsEnabled: (enabled: boolean) => void
+  setAge: (age?: AgeEnum) => void
+  setVideoMuted: (muted: boolean) => void
+  setNexusP2PEnabled: (enabled: boolean) => void
 }
 
-export type UserStore = UserState & UserActions;
+export type UserStore = UserState & UserActions
 
 // --- Configuração ---
 
-const STORE_NAME = "user-session";
+const STORE_NAME = 'user-session'
 
 // --- Store ---
 
@@ -63,10 +65,10 @@ export const useUserStore = create<UserStore>()(
         clearSession: () =>
           set(
             (state) => {
-              state.session = undefined;
+              state.session = undefined
             },
             false,
-            "clearSession"
+            'clearSession',
           ),
 
         setProfile: (profile) =>
@@ -74,181 +76,203 @@ export const useUserStore = create<UserStore>()(
             (state) => {
               if (state.session) {
                 // Se já existe sessão, atualiza apenas o perfil
-                state.session.profile = profile;
+                state.session.profile = profile
               } else {
                 // Se não existe, inicializa com padrões
                 state.session = {
                   profile,
                   darkTheme: false,
                   nsfw: false,
-                  age: undefined
-
-                };
+                  age: undefined,
+                }
               }
             },
             false,
-            "setProfile"
+            'setProfile',
           ),
 
         toggleTheme: () =>
           set(
             (state) => {
               if (state.session) {
-                state.session.darkTheme = !state.session.darkTheme;
+                state.session.darkTheme = !state.session.darkTheme
               }
             },
             false,
-            "toggleTheme"
+            'toggleTheme',
           ),
 
         setNsfw: (enabled) =>
           set(
             (state) => {
               if (state.session) {
-                state.session.nsfw = enabled;
+                state.session.nsfw = enabled
               }
             },
             false,
-            "setNsfw"
+            'setNsfw',
           ),
 
         setPushNotificationsEnabled: (enabled) =>
           set(
             (state) => {
               if (state.session) {
-                state.session.pushNotificationsEnabled = enabled;
+                state.session.pushNotificationsEnabled = enabled
               } else {
                 state.session = {
                   profile: {} as NDKUserProfile,
                   darkTheme: false,
                   nsfw: false,
-                  pushNotificationsEnabled: enabled
-                };
+                  pushNotificationsEnabled: enabled,
+                }
               }
             },
             false,
-            "setPushNotificationsEnabled"
+            'setPushNotificationsEnabled',
           ),
 
         setVideoMuted: (muted) =>
           set(
             (state) => {
               if (state.session) {
-                state.session.videoMuted = muted;
+                state.session.videoMuted = muted
               } else {
                 state.session = {
                   profile: {} as NDKUserProfile,
                   darkTheme: false,
                   nsfw: false,
-                  videoMuted: muted
-                };
+                  videoMuted: muted,
+                }
               }
             },
             false,
-            "setVideoMuted"
+            'setVideoMuted',
+          ),
+
+        setNexusP2PEnabled: (enabled) =>
+          set(
+            (state) => {
+              if (state.session) {
+                state.session.nexusP2PEnabled = enabled
+              } else {
+                state.session = {
+                  profile: {} as NDKUserProfile,
+                  darkTheme: false,
+                  nsfw: false,
+                  nexusP2PEnabled: enabled,
+                }
+              }
+            },
+            false,
+            'setNexusP2PEnabled',
           ),
 
         setGeoHash: (geoHash) =>
           set(
             (state) => {
               if (state.session) {
-                state.session.geoHash = geoHash;
+                state.session.geoHash = geoHash
               } else {
                 state.session = {
                   profile: {} as NDKUserProfile,
                   darkTheme: false,
                   nsfw: false,
-                  geoHash
-                };
+                  geoHash,
+                }
               }
             },
             false,
-            "setGeoHash"
+            'setGeoHash',
           ),
 
         setAge: (age) =>
           set(
             (state) => {
               if (state.session) {
-                state.session.age = age;
+                state.session.age = age
               }
             },
             false,
-            "setAge"
+            'setAge',
           ),
 
-        setRelays: (relays) => set((state) => {
-          if (state.session) {
-            state.session.relays = relays;
-          } else {
-            state.session = {
-              profile: {} as NDKUserProfile,
-              darkTheme: false,
-              nsfw: false,
-              relays
-            };
-          }
-        }, false, "setRelays"),
+        setRelays: (relays) =>
+          set(
+            (state) => {
+              if (state.session) {
+                state.session.relays = relays
+              } else {
+                state.session = {
+                  profile: {} as NDKUserProfile,
+                  darkTheme: false,
+                  nsfw: false,
+                  relays,
+                }
+              }
+            },
+            false,
+            'setRelays',
+          ),
         blossom: {
           mirrors: [],
-          default: "",
+          default: '',
           custom: [],
 
           setMirrors: (mirrors) =>
             set(
               (state) => {
-                state.blossom.mirrors = mirrors;
+                state.blossom.mirrors = mirrors
               },
               false,
-              "blossom/setMirrors"
+              'blossom/setMirrors',
             ),
 
           setDefault: (url) =>
             set(
               (state) => {
-                state.blossom.default = url;
+                state.blossom.default = url
               },
               false,
-              "blossom/setDefault"
+              'blossom/setDefault',
             ),
 
           addCustom: (url) =>
             set(
               (state) => {
                 if (!state.blossom.custom.includes(url)) {
-                  state.blossom.custom.push(url);
+                  state.blossom.custom.push(url)
                 }
               },
               false,
-              "blossom/addCustom"
+              'blossom/addCustom',
             ),
 
           removeCustom: (url) =>
             set(
               (state) => {
-                state.blossom.custom = state.blossom.custom.filter((entry) => entry !== url);
-                state.blossom.mirrors = state.blossom.mirrors.filter((entry) => entry !== url);
+                state.blossom.custom = state.blossom.custom.filter((entry) => entry !== url)
+                state.blossom.mirrors = state.blossom.mirrors.filter((entry) => entry !== url)
                 if (state.blossom.default === url) {
-                  state.blossom.default = "";
+                  state.blossom.default = ''
                 }
               },
               false,
-              "blossom/removeCustom"
-            )
-        }
+              'blossom/removeCustom',
+            ),
+        },
       })),
       {
         name: STORE_NAME,
-        storage: createJSONStorage(() => sessionStorage) // Use localStorage se necessário
+        storage: createJSONStorage(() => sessionStorage), // Use localStorage se necessário
         // Opcional: partialize para salvar apenas dados específicos se a store crescer
         // partialize: (state) => ({ session: state.session }),
-      }
+      },
     ),
     {
       name: STORE_NAME,
-      enabled: import.meta.env.DEV
-    }
-  )
-);
+      enabled: import.meta.env.DEV,
+    },
+  ),
+)
 
-export default useUserStore;
+export default useUserStore
