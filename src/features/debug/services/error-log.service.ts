@@ -1,6 +1,8 @@
 import { type DBSchema, type IDBPDatabase, openDB } from "idb";
+import { ulid } from "ulid";
 
 export interface ErrorLogEntry {
+  errorId: string;
   timestamp: string;
   level: "error" | "warn" | "info";
   message: string;
@@ -43,19 +45,47 @@ function getAppVersion(): string {
   return import.meta.env.VITE_APP_NAME ?? "NostrTube";
 }
 
-export async function addLog(entry: Omit<ErrorLogEntry, "userAgent" | "appVersion">): Promise<void> {
+export async function addLog(entry: Omit<ErrorLogEntry, "errorId" | "userAgent" | "appVersion"> & { errorId?: string }): Promise<string> {
   try {
     const database = await initDB();
     const log: ErrorLogEntry = {
+      errorId: entry.errorId ?? ulid(),
       ...entry,
       userAgent: navigator.userAgent,
       appVersion: getAppVersion(),
     };
     await database.add("logs", log);
     if (entry.level === "error") sessionErrorCount++;
+    return log.errorId;
   } catch {
     console.warn("Could not save error log to IndexedDB");
+    return "";
   }
+}
+
+export function logErrorBoundaryError(
+  componentName: string,
+  error: Error,
+  errorInfo?: { componentStack?: string | null },
+  extra?: Record<string, unknown>,
+): Promise<string> {
+  const context: Record<string, unknown> = {
+    componentName,
+    route: window.location.pathname + window.location.search,
+  };
+  if (errorInfo?.componentStack) {
+    context.componentStack = errorInfo.componentStack;
+  }
+  if (extra) {
+    Object.assign(context, extra);
+  }
+  return addLog({
+    timestamp: new Date().toISOString(),
+    level: "error",
+    message: error.message,
+    stack: error.stack,
+    context: JSON.stringify(context),
+  });
 }
 
 export function getSessionErrorCount(): number {
@@ -102,7 +132,7 @@ export function initErrorLogging(): () => void {
       level: "error",
       message: event.message,
       stack: event.error?.stack,
-      context: JSON.stringify({ filename: event.filename, lineno: event.lineno, colno: event.colno }),
+      context: JSON.stringify({ source: "window.onerror", filename: event.filename, lineno: event.lineno, colno: event.colno }),
     });
   };
 
@@ -113,7 +143,7 @@ export function initErrorLogging(): () => void {
       level: "error",
       message: reason?.message ?? String(reason),
       stack: reason?.stack,
-      context: "unhandledrejection",
+      context: JSON.stringify({ source: "unhandledrejection" }),
     });
   };
 

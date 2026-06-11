@@ -9,6 +9,7 @@ import OfflineDetector from "@/components/OfflineDetector.tsx";
 import { useNDK, useNDKCurrentUser, useNDKInit, useNDKSessionMonitor } from "@nostr-dev-kit/ndk-hooks";
 import { ndkInstance, sessionStorage } from "@/lib/ndk"; // Importe do arquivo criado acima
 import { startNdkMessenger } from "@/lib/ndk-messages";
+import { initErrorLogging } from "@/features/debug/services/error-log.service.ts";
 
 // Configuração do QueryClient
 export const queryClient = new QueryClient({
@@ -50,6 +51,11 @@ function NDKMessagingInitializer() {
 }
 
 export function AppProviders({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    const cleanup = initErrorLogging();
+    return cleanup;
+  }, []);
+
   // Protocol Handler Registration
   useEffect(() => {
     if (import.meta.env.PROD && navigator.registerProtocolHandler) {

@@ -1,6 +1,7 @@
 import { createRoute } from '@tanstack/react-router'
 import { lazy, Suspense } from 'react'
 import { PageSpinner } from '@/components/PageSpinner'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { Route as rootRoute } from '@/routes/__root'
 
 const DebugPageContent = lazy(() => import('@/routes/debug/DebugPageContent'))
@@ -13,8 +14,10 @@ export const Route = createRoute({
 
 function DebugPage() {
   return (
-    <Suspense fallback={<PageSpinner />}>
-      <DebugPageContent />
-    </Suspense>
+    <ErrorBoundary title="Não foi possível carregar a página de debug">
+      <Suspense fallback={<PageSpinner />}>
+        <DebugPageContent />
+      </Suspense>
+    </ErrorBoundary>
   )
 }

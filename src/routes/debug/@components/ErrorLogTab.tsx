@@ -8,7 +8,6 @@ import {
   exportTXT,
   getAllLogs,
   getSessionErrorCount,
-  initErrorLogging,
   type ErrorLogEntry,
 } from "@/features/debug/services/error-log.service.ts";
 
@@ -16,20 +15,15 @@ export function ErrorLogTab() {
   const [logs, setLogs] = useState<ErrorLogEntry[]>([]);
   const [levelFilter, setLevelFilter] = useState<string>("all");
   const [textFilter, setTextFilter] = useState("");
-  const [sessionCount, setSessionCount] = useState(0);
   const [showConfirmClear, setShowConfirmClear] = useState(false);
 
   useEffect(() => {
-    const cleanup = initErrorLogging();
-    getAllLogs().then(setLogs).catch(() => void 0);
-    setSessionCount(getSessionErrorCount());
-    return cleanup;
+    getAllLogs().then(setLogs).catch(undefined);
   }, []);
 
   const refresh = useCallback(async () => {
     const allLogs = await getAllLogs().catch(() => []);
     setLogs(allLogs);
-    setSessionCount(getSessionErrorCount());
   }, []);
 
   const filtered = useMemo(() =>
@@ -66,11 +60,30 @@ export function ErrorLogTab() {
     toast.success("Logs exportados como TXT");
   };
 
-  const handleCopyLastError = () => {
+  const handleCopyReport = () => {
     if (!lastError) return;
-    const text = `[${lastError.timestamp}] ${lastError.message}\n\n${lastError.stack ?? "sem stack trace"}`;
+    let contextStr = "";
+    try {
+      if (lastError.context) {
+        const parsed = JSON.parse(lastError.context);
+        contextStr = Object.entries(parsed)
+          .map(([k, v]) => `${k}: ${typeof v === "string" ? v : JSON.stringify(v)}`)
+          .join("\n");
+      }
+    } catch {
+      contextStr = lastError.context ?? "";
+    }
+    const text = [
+      `Error ID: ${lastError.errorId}`,
+      `Timestamp: ${lastError.timestamp}`,
+      `Message: ${lastError.message}`,
+      `Version: ${lastError.appVersion}`,
+      `User Agent: ${lastError.userAgent}`,
+      contextStr ? `\nContext:\n${contextStr}` : "",
+      lastError.stack ? `\nStack:\n${lastError.stack}` : "",
+    ].join("\n");
     navigator.clipboard.writeText(text).then(() => {
-      toast.success("Ultimo erro copiado");
+      toast.success("Relatório de erro copiado");
     }).catch(() => toast.error("Falha ao copiar"));
   };
 
@@ -81,23 +94,35 @@ export function ErrorLogTab() {
     toast.success("Logs limpos");
   };
 
+  const levelCounts = useMemo(() => ({
+    error: logs.filter((l) => l.level === "error").length,
+    warn: logs.filter((l) => l.level === "warn").length,
+    info: logs.filter((l) => l.level === "info").length,
+  }), [logs]);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Badge variant="default">{filtered.length} logs</Badge>
-          {sessionCount > 0 && (
+          {levelCounts.error > 0 && (
             <Badge variant="destructive" className="flex items-center gap-1">
               <AlertTriangle className="w-3 h-3" />
-              {sessionCount} erros nesta sessao
+              {levelCounts.error} erros
+            </Badge>
+          )}
+          {levelCounts.warn > 0 && (
+            <Badge variant="warning" className="flex items-center gap-1">
+              <AlertTriangle className="w-3 h-3" />
+              {levelCounts.warn} avisos
             </Badge>
           )}
         </div>
         <div className="flex gap-2">
           {lastError && (
-            <Button size="sm" variant="ghost" onClick={handleCopyLastError}>
+            <Button size="sm" variant="ghost" onClick={handleCopyReport}>
               <Copy className="w-4 h-4 mr-1" />
-              Copiar ultimo erro
+              Copiar relatório
             </Button>
           )}
           <Button size="sm" variant="ghost" onClick={refresh}>
@@ -143,45 +168,74 @@ export function ErrorLogTab() {
             <div className="p-8 text-center text-zinc-400 text-sm">Nenhum log capturado</div>
           ) : (
             <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-              {filtered.map((log) => (
-                <div key={log.timestamp} className="p-3 hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
-                  <div className="flex items-start gap-2">
-                    <div className="mt-0.5">
-                      {log.level === "error" ? (
-                        <XCircle className="w-4 h-4 text-red-500" />
-                      ) : log.level === "warn" ? (
-                        <AlertTriangle className="w-4 h-4 text-amber-500" />
-                      ) : (
-                        <Info className="w-4 h-4 text-blue-500" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 text-xs text-zinc-400 mb-1">
-                        <span>{new Date(log.timestamp).toLocaleString("pt-BR")}</span>
-                        <Badge
-                          variant={
-                            log.level === "error" ? "destructive" : log.level === "warn" ? "warning" : "default"
-                          }
-                          className="uppercase"
-                        >
-                          {log.level}
-                        </Badge>
+              {filtered.map((log) => {
+                let parsedContext: Record<string, unknown> | null = null;
+                try {
+                  if (log.context?.startsWith("{")) {
+                    parsedContext = JSON.parse(log.context);
+                  }
+                } catch {
+                  void 0;
+                }
+
+                return (
+                  <div key={log.timestamp} className="p-3 hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
+                    <div className="flex items-start gap-2">
+                      <div className="mt-0.5">
+                        {log.level === "error" ? (
+                          <XCircle className="w-4 h-4 text-red-500" />
+                        ) : log.level === "warn" ? (
+                          <AlertTriangle className="w-4 h-4 text-amber-500" />
+                        ) : (
+                          <Info className="w-4 h-4 text-blue-500" />
+                        )}
                       </div>
-                      <p className="text-sm font-mono text-zinc-800 dark:text-zinc-200 break-words">
-                        {log.message}
-                      </p>
-                      {log.stack && (
-                        <pre className="mt-1 text-xs text-zinc-500 dark:text-zinc-400 whitespace-pre-wrap overflow-x-auto max-h-24">
-                          {log.stack}
-                        </pre>
-                      )}
-                      {log.context && (
-                        <p className="mt-1 text-xs text-zinc-400 italic">Contexto: {log.context}</p>
-                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 text-xs text-zinc-400 mb-1">
+                          <span className="font-mono text-zinc-500">{log.errorId}</span>
+                          <span>•</span>
+                          <span>{new Date(log.timestamp).toLocaleString("pt-BR")}</span>
+                          <Badge
+                            variant={
+                              log.level === "error" ? "destructive" : log.level === "warn" ? "warning" : "default"
+                            }
+                            className="uppercase"
+                          >
+                            {log.level}
+                          </Badge>
+                        </div>
+                        <p className="text-sm font-mono text-zinc-800 dark:text-zinc-200 break-words">
+                          {log.message}
+                        </p>
+                        {log.stack && (
+                          <pre className="mt-1 text-xs text-zinc-500 dark:text-zinc-400 whitespace-pre-wrap overflow-x-auto max-h-24">
+                            {log.stack}
+                          </pre>
+                        )}
+                        {parsedContext && (
+                          <div className="mt-1 space-y-0.5">
+                            {parsedContext.componentName ? (
+                              <p className="text-xs text-zinc-400">
+                                Componente: <span className="font-mono">{String(parsedContext.componentName)}</span>
+                              </p>
+                            ) : null}
+                            {parsedContext.route ? (
+                              <p className="text-xs text-zinc-400">
+                                Rota: <span className="font-mono">{String(parsedContext.route)}</span>
+                              </p>
+                            ) : null}
+                            {parsedContext.source ? (
+                              <p className="text-xs text-zinc-400">
+                                Origem: <span className="font-mono">{String(parsedContext.source)}</span>
+                              </p>
+                            ) : null}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>
