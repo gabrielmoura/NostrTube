@@ -34,7 +34,6 @@ export const QRCode = async ({
   return (
     <div
       className={cn("size-full", "[&_svg]:size-full", className)}
-      // biome-ignore lint/security/noDangerouslySetInnerHtml: "Required for SVG"
       dangerouslySetInnerHTML={{ __html: svg }}
       {...props}
     />

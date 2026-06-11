@@ -115,13 +115,19 @@
       "title": "Título",
       "title_placeholder": "Ex: Melhorar busca de vídeos por hashtag",
       "category": "Categoria",
+      "name": "Nome opcional",
+      "name_placeholder": "Como você gostaria de ser identificado",
+      "email": "E-mail opcional",
+      "email_placeholder": "voce@exemplo.com",
       "message": "Mensagem",
       "message_help": "Sua mensagem será publicada na rede Nostr e poderá ser visível publicamente.",
       "message_help_private": "Sua mensagem será enviada como mensagem privada NIP-17 ao destinatário configurado.",
       "include_technical": "Incluir informações técnicas básicas",
       "include_technical_help": "Inclui URL atual, user agent resumido, versão da aplicação, timestamp e idioma.",
       "zap": "ZAP opcional",
-      "zap_help": "O ZAP será tentado depois que o feedback for publicado."
+      "zap_help": "O ZAP será tentado depois que o feedback for publicado.",
+      "zap_note": "Nota opcional para o ZAP",
+      "zap_note_placeholder": "Ex: Obrigado por priorizar esta melhoria"
     },
     "auth_required": {
       "title": "Login necessário para publicar",
@@ -184,7 +190,11 @@
     "event": {
       "title_label": "Título",
       "category_label": "Categoria",
+      "name_label": "Nome",
+      "email_label": "Email",
       "browser_language_label": "Idioma do navegador",
+      "zap_label": "ZAP",
+      "zap_note_label": "Nota do ZAP",
       "technical_details_label": "Informações técnicas básicas",
       "locale_label": "Idioma",
       "app_version_label": "Versão do app",
@@ -217,6 +227,68 @@
       "i18n": { "label": "Tradução / i18n", "description": "Idiomas, textos e localização.", "placeholder": "Informe o idioma, o texto com problema e a melhoria desejada." },
       "documentation": { "label": "Documentação", "description": "Guias, FAQ e clareza do produto.", "placeholder": "Descreva a dúvida, a lacuna de documentação ou o que poderia ficar mais claro." },
       "other": { "label": "Outro", "description": "Qualquer tema fora das categorias anteriores.", "placeholder": "Descreva sua sugestão, problema encontrado ou agradecimento. Inclua passos para reproduzir se for um bug." }
+    }
+  },
+  "zap": {
+    "modal_title": "Enviar ZAP",
+    "modal_description": "Apoie um criador ou vídeo usando Lightning via Nostr ZAP.",
+    "target": {
+      "user": "Destino: perfil do usuário",
+      "video": "Destino: vídeo atual"
+    },
+    "auth_required": {
+      "title": "Login necessário para enviar ZAP",
+      "description": "Entre com sua identidade Nostr para iniciar o pagamento Lightning.",
+      "action": "Entrar com Nostr"
+    },
+    "fields": {
+      "destination": "Destino",
+      "amount": "Valor em sats",
+      "custom_amount": "Valor customizado",
+      "custom_amount_placeholder": "Ex: 2100",
+      "sats_unit": "sats",
+      "note": "Nota opcional",
+      "note_placeholder": "Adicione uma mensagem curta ao seu ZAP"
+    },
+    "actions": {
+      "open": "Zap",
+      "submit": "Enviar ZAP",
+      "close": "Fechar"
+    },
+    "success": {
+      "paid": "ZAP enviado com sucesso.",
+      "invoice_ready": "Invoice Lightning gerada. Abra sua carteira para concluir o ZAP.",
+      "invoice_description": "Não encontramos WebLN disponível. Abra sua carteira para concluir o pagamento manualmente.",
+      "open_wallet": "Abrir carteira Lightning",
+      "webln_preimage_fallback": "pago-via-webln"
+    },
+    "errors": {
+      "unauthenticated": "Faça login com sua identidade Nostr antes de enviar um ZAP.",
+      "invalid_amount": "Informe um valor válido em sats.",
+      "recipient_metadata_failed": "Não foi possível carregar os metadados do destinatário para o ZAP.",
+      "zap_unavailable": "Este destino não possui um endereço Lightning válido para receber ZAP.",
+      "zap_invoice_failed": "Não foi possível gerar a invoice Lightning do ZAP.",
+      "zap_payment_cancelled": "O pagamento Lightning foi cancelado.",
+      "zap_payment_failed": "O pagamento Lightning falhou.",
+      "unknown": "Ocorreu um erro inesperado ao enviar o ZAP."
+    }
+  },
+  "video_metrics": {
+    "open_button": "Zap / Métricas",
+    "modal_title": "Métricas e apoio do vídeo",
+    "modal_description": "Veja o desempenho do vídeo e envie um ZAP sem sair da página.",
+    "partial_error": "Algumas métricas não estão disponíveis agora. Você ainda pode apoiar o vídeo com ZAP.",
+    "cards": {
+      "views": "Visualizações",
+      "comments": "Comentários",
+      "zap_count": "ZAPs recebidos",
+      "zap_total": "Total recebido"
+    },
+    "support": {
+      "title": "Apoiar este vídeo",
+      "submit": "Enviar ZAP para o vídeo",
+      "refresh": "Atualizar",
+      "refreshing": "Atualizando..."
     }
   }
 }

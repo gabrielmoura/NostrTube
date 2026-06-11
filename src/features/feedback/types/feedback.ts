@@ -12,9 +12,12 @@ const feedbackCategoryValues = FEEDBACK_CATEGORIES.map((category) => category.va
 export const feedbackFormSchema = z.object({
   title: z.string().trim().min(5, "Informe um titulo com pelo menos 5 caracteres.").max(120, "Use no maximo 120 caracteres no titulo."),
   category: z.enum(feedbackCategoryValues, { message: "Selecione uma categoria." }),
+  name: z.string().trim().max(80, "Use no maximo 80 caracteres no nome.").optional().or(z.literal("")),
+  email: z.email("Informe um e-mail valido.").max(160, "Use no maximo 160 caracteres no e-mail.").optional().or(z.literal("")),
   message: z.string().trim().min(20, "Descreva sua mensagem com pelo menos 20 caracteres.").max(3000, "Use no maximo 3000 caracteres na mensagem."),
   zapPreset: z.enum(FEEDBACK_ZAP_PRESETS),
   customZapAmount: z.string().trim(),
+  zapNote: z.string().trim().max(240, "Use no maximo 240 caracteres na nota do ZAP.").optional().or(z.literal("")),
   includeTechnicalDetails: z.boolean().default(false)
 }).superRefine((data, ctx) => {
   if (data.zapPreset !== "custom") return;

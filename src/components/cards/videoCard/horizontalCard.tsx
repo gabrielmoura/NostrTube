@@ -5,7 +5,7 @@ import useElementOnScreen from "@/hooks/useElements.ts";
 import { cn, formatCount, getNameToShow, getTwoLetters } from "@/helper/format.ts";
 import { relativeTime } from "@/helper/date.ts";
 import { extractTag } from "@/helper/extractTag.ts";
-import { AspectRatio, Avatar, Badge } from "@radix-ui/themes";
+import { AspectRatio, Avatar, Skeleton } from "@radix-ui/themes";
 import { HiCheckBadge } from "react-icons/hi2";
 
 
@@ -15,11 +15,11 @@ type VideoCardProps = {
 };
 
 export default function HorizontalVideoCard({
-                                              className,
-                                              event
-                                            }: VideoCardProps) {
+                                               className,
+                                               event
+                                             }: VideoCardProps) {
   const { navigate } = useRouter();
-  const { containerRef, isVisible } = useElementOnScreen();
+  const { containerRef } = useElementOnScreen();
   const viewCount = 0;
   //
   // const { viewCount, video } = useVideo({
@@ -27,11 +27,11 @@ export default function HorizontalVideoCard({
   //   event: event,
   //   getViewCount: isVisible,
   // });
-
+  
 
   const npub = event.author.npub;
   const profile = useProfileValue(event.author.pubkey);
-  const { url, author, publishedAt, thumbnail, title } = extractTag(event.tags);
+  const { publishedAt, thumbnail, title } = extractTag(event.tags);
 
   return (
     <div ref={containerRef} className={cn("group flex space-x-3", className)}>
@@ -50,11 +50,6 @@ export default function HorizontalVideoCard({
             />
           )}
         </AspectRatio>
-        {false && (
-          <div className="pointer-events-none absolute bottom-0 right-0 p-2">
-            <Badge variant={"red"}>LIVE</Badge>
-          </div>
-        )}
       </div>
       <div className="flex-1 space-y-1 pt-0.5 text-base">
         <h3 className="mt-0 line-clamp-2 text-[15px] font-medium leading-4">
@@ -122,11 +117,6 @@ export function HorizontalVideoCardLoading({
     <div className={cn("group flex space-x-3", className)}>
       <div className="relative h-full w-[120px]  overflow-hidden rounded-md">
         <AspectRatio ratio={21 / 14} className="bg-muted"></AspectRatio>
-        {false && (
-          <div className="pointer-events-none absolute bottom-0 right-0 p-2">
-            <Badge variant={"red"}>LIVE</Badge>
-          </div>
-        )}
       </div>
       <div className="flex-1 space-y-1 pt-0.5 text-base">
         <Skeleton className="mb-2 h-4 w-2/3 bg-muted" />
@@ -139,9 +129,7 @@ export function HorizontalVideoCardLoading({
         <div className="flex">
           <div
             className="center group gap-x-2 rounded-sm rounded-r-full pr-1 text-muted-foreground hover:shadow">
-            <Avatar className="center h-[20px] w-[20px] overflow-hidden rounded-[.35rem] bg-muted">
-              <AvatarFallback className="text-[9px]"></AvatarFallback>
-            </Avatar>
+            <Avatar className="center h-[20px] w-[20px] overflow-hidden rounded-[.35rem] bg-muted" fallback="" />
             <div className="flex items-center gap-1">
               <Skeleton className="h-[12px] w-[100px] bg-muted" />
             </div>

@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { AuthModal } from "@/components/AuthModal";
 import { modal } from "@/components/modal_v2/modal-manager";
 import { useMediaQuery } from "@/components/modal_v2/use-media-query";
-import { launchLightningInvoice } from "@/features/feedback/services/feedbackZapService";
+import { launchLightningInvoice } from "@/features/zap/services/zap.service";
 import { FeedbackCategorySelect } from "@/features/feedback/components/FeedbackCategorySelect";
 import { FeedbackZapAmountSelect } from "@/features/feedback/components/FeedbackZapAmountSelect";
 import { useFeedbackForm } from "@/features/feedback/hooks/useFeedbackForm";
@@ -184,6 +184,37 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
             />
           </div>
 
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="feedback-name">{t("feedback.fields.name")}</Label>
+              <Input
+                id="feedback-name"
+                maxLength={80}
+                placeholder={t("feedback.fields.name_placeholder")}
+                aria-invalid={Boolean(form.formState.errors.name)}
+                aria-describedby={form.formState.errors.name ? "feedback-name-error" : undefined}
+                disabled={isBusy}
+                {...form.register("name")}
+              />
+              {form.formState.errors.name ? <p id="feedback-name-error" className="text-sm text-destructive">{form.formState.errors.name.message}</p> : null}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="feedback-email">{t("feedback.fields.email")}</Label>
+              <Input
+                id="feedback-email"
+                type="email"
+                maxLength={160}
+                placeholder={t("feedback.fields.email_placeholder")}
+                aria-invalid={Boolean(form.formState.errors.email)}
+                aria-describedby={form.formState.errors.email ? "feedback-email-error" : undefined}
+                disabled={isBusy}
+                {...form.register("email")}
+              />
+              {form.formState.errors.email ? <p id="feedback-email-error" className="text-sm text-destructive">{form.formState.errors.email.message}</p> : null}
+            </div>
+          </div>
+
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-3">
               <Label htmlFor="feedback-message">{t("feedback.fields.message")}</Label>
@@ -221,6 +252,22 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
             />
             {zapAmount ? <p className="text-xs text-muted-foreground">{t("feedback.fields.zap_help")}</p> : null}
           </div>
+
+          {zapAmount ? (
+            <div className="space-y-2">
+              <Label htmlFor="feedback-zap-note">{t("feedback.fields.zap_note")}</Label>
+              <Input
+                id="feedback-zap-note"
+                maxLength={240}
+                placeholder={t("feedback.fields.zap_note_placeholder")}
+                aria-invalid={Boolean(form.formState.errors.zapNote)}
+                aria-describedby={form.formState.errors.zapNote ? "feedback-zap-note-error" : undefined}
+                disabled={isBusy}
+                {...form.register("zapNote")}
+              />
+              {form.formState.errors.zapNote ? <p id="feedback-zap-note-error" className="text-sm text-destructive">{form.formState.errors.zapNote.message}</p> : null}
+            </div>
+          ) : null}
 
           <div className="rounded-2xl border bg-secondary/30 p-4 text-sm text-muted-foreground">
             <div className="flex items-start gap-3">

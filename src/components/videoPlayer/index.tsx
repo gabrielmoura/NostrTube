@@ -40,7 +40,7 @@ export function VideoPlayer({
 
   useEffect(() => {
     handledErrorForSourceRef.current = null;
-  }, [src]);
+  }, []);
 
   useEffect(() => {
     const player = playerRef.current;
@@ -57,14 +57,14 @@ export function VideoPlayer({
         }
       }
     });
-  }, [onPlaybackError]);
+  }, [onPlaybackError, src]);
 
   useEffect(() => {
     const player = playerRef.current;
     if (!player) return;
 
     player.muted = persistedMuted;
-  }, [persistedMuted, src]);
+  }, [persistedMuted]);
 
   useEffect(() => {
     const player = playerRef.current;

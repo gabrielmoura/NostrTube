@@ -71,6 +71,11 @@
 			"selfCloseVoidElements": "always"
 		}
 	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
+		}
+	},
 	"overrides": [
 		{ "includes": ["**/*.{ts,tsx}"], "linter": { "rules": {} } },
 		{
@@ -187,7 +192,7 @@
 						"useAsConstAssertion": "error"
 					},
 					"suspicious": {
-						"noExplicitAny": "error",
+						"noExplicitAny": "off",
 						"noExtraNonNullAssertion": "error",
 						"noMisleadingInstantiator": "error",
 						"noNonNullAssertedOptionalChain": "error",

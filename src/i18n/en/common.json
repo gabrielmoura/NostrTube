@@ -115,13 +115,19 @@
       "title": "Title",
       "title_placeholder": "Ex: Improve video search by hashtag",
       "category": "Category",
+      "name": "Optional name",
+      "name_placeholder": "How should we identify you",
+      "email": "Optional email",
+      "email_placeholder": "you@example.com",
       "message": "Message",
       "message_help": "Your message will be published to the Nostr network and may be publicly visible.",
       "message_help_private": "Your message will be sent as a private NIP-17 message to the configured recipient.",
       "include_technical": "Include basic technical details",
       "include_technical_help": "Includes current URL, shortened user agent, app version, timestamp and locale.",
       "zap": "Optional ZAP",
-      "zap_help": "The ZAP will be attempted after the feedback is published."
+      "zap_help": "The ZAP will be attempted after the feedback is published.",
+      "zap_note": "Optional ZAP note",
+      "zap_note_placeholder": "Ex: Thanks for prioritizing this feature"
     },
     "auth_required": {
       "title": "Login required to publish",
@@ -184,7 +190,11 @@
     "event": {
       "title_label": "Title",
       "category_label": "Category",
+      "name_label": "Name",
+      "email_label": "Email",
       "browser_language_label": "Browser language",
+      "zap_label": "ZAP",
+      "zap_note_label": "ZAP note",
       "technical_details_label": "Basic technical details",
       "locale_label": "Locale",
       "app_version_label": "App version",
@@ -217,6 +227,68 @@
       "i18n": { "label": "Translation / i18n", "description": "Languages, texts and localization.", "placeholder": "Provide the language, the problematic text and the desired improvement." },
       "documentation": { "label": "Documentation", "description": "Guides, FAQ and product clarity.", "placeholder": "Describe the question, documentation gap or what could be clearer." },
       "other": { "label": "Other", "description": "Anything outside the categories above.", "placeholder": "Describe your suggestion, issue or appreciation. Include reproduction steps if this is a bug." }
+    }
+  },
+  "zap": {
+    "modal_title": "Send ZAP",
+    "modal_description": "Support a creator or video using Lightning through a Nostr ZAP.",
+    "target": {
+      "user": "Target: user profile",
+      "video": "Target: current video"
+    },
+    "auth_required": {
+      "title": "Login required to send a ZAP",
+      "description": "Log in with your Nostr identity to start the Lightning payment.",
+      "action": "Login with Nostr"
+    },
+    "fields": {
+      "destination": "Target",
+      "amount": "Amount in sats",
+      "custom_amount": "Custom amount",
+      "custom_amount_placeholder": "Ex: 2100",
+      "sats_unit": "sats",
+      "note": "Optional note",
+      "note_placeholder": "Add a short message to your ZAP"
+    },
+    "actions": {
+      "open": "ZAP",
+      "submit": "Send ZAP",
+      "close": "Close"
+    },
+    "success": {
+      "paid": "ZAP sent successfully.",
+      "invoice_ready": "Lightning invoice generated. Open your wallet to complete the ZAP.",
+      "invoice_description": "No WebLN wallet was available. Open your wallet to complete the payment manually.",
+      "open_wallet": "Open Lightning wallet",
+      "webln_preimage_fallback": "paid-via-webln"
+    },
+    "errors": {
+      "unauthenticated": "Log in with your Nostr identity before sending a ZAP.",
+      "invalid_amount": "Enter a valid amount in sats.",
+      "recipient_metadata_failed": "Recipient metadata could not be loaded for the ZAP.",
+      "zap_unavailable": "This target does not have a valid Lightning address to receive ZAP.",
+      "zap_invoice_failed": "The Lightning invoice for the ZAP could not be generated.",
+      "zap_payment_cancelled": "The Lightning payment was cancelled.",
+      "zap_payment_failed": "The Lightning payment failed.",
+      "unknown": "An unexpected error occurred while sending the ZAP."
+    }
+  },
+  "video_metrics": {
+    "open_button": "ZAP / Metrics",
+    "modal_title": "Video metrics and support",
+    "modal_description": "See how the video is performing and send a ZAP without leaving the page.",
+    "partial_error": "Some metrics are unavailable right now. You can still support the video with a ZAP.",
+    "cards": {
+      "views": "Views",
+      "comments": "Comments",
+      "zap_count": "Received ZAPs",
+      "zap_total": "Total received"
+    },
+    "support": {
+      "title": "Support this video",
+      "submit": "Send ZAP to video",
+      "refresh": "Refresh",
+      "refreshing": "Refreshing..."
     }
   }
 }

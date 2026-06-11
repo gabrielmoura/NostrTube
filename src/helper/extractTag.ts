@@ -142,13 +142,14 @@ export function extractTag(data: string[][]): StructuredTagData {
         break;
 
       // Metadados Complexos
-      case "imeta":
+      case "imeta": {
         const metaObj = parseMetaAttributes(values);
         // Só adiciona se tiver pelo menos a URL (ou conforme sua regra de negócio)
         if (metaObj.url) {
           result.imeta.push(metaObj);
         }
         break;
+      }
     }
   }
 

@@ -17,7 +17,8 @@ type VideoCardProps = {
 
 export default function VideoCard({ className, event, profile: propProfile }: VideoCardProps) {
   const npub = event.author.npub;
-  const profile = propProfile ?? useProfileValue(event.author.pubkey);
+  const fetchedProfile = useProfileValue(event.author.pubkey);
+  const profile = propProfile ?? fetchedProfile;
 
   const { title, published_at: publishedAt } = extractTag(event.tags);
   return (

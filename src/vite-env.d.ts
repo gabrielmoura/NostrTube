@@ -14,6 +14,7 @@ interface ImportMetaEnv {
   readonly VITE_MIN_COMMENT_POW?: number;
   readonly VITE_MIN_PLAYLIST_POW?: number;
   readonly VITE_NOSTR_FEEDBACK_RECIPIENT_NPUB?: string;
+  readonly VITE_NOSTR_DEVELOPER_PUBKEY?: string;
   readonly VITE_APP_VERSION?: string;
 }
 

@@ -59,7 +59,7 @@ export default function LanguagesCombo({
         onChange?.(lang);
       }
     }
-  }, [controlledValue, onChange, setValue]);
+  }, [controlledValue, onChange]);
 
   return (
     <Card className="w-full max-w-sm">

@@ -24,7 +24,7 @@ export default function OfflineDetector() {
       window.removeEventListener("offline", handleOffline);
       window.removeEventListener("online", handleOnline);
     };
-  }, []);
+  }, [msg]);
 
   if (!isOffline) return null;
 

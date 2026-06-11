@@ -1,10 +1,10 @@
-/** @type {import('tailwindcss').Config} */
+import type { Config } from 'tailwindcss'
 import generated from "@vidstack/react/tailwind.cjs";
 import prose from '@tailwindcss/typography'
 import twA from 'tailwindcss-animate';
 
-module.exports = {
-    darkMode: ["class"],
+const config: Config = {
+    darkMode: 'class',
     content: [
         "./pages/**/*.{ts,tsx}",
         "./components/**/*.{ts,tsx}",
@@ -179,3 +179,5 @@ function customVariants({
     addVariant("hocus", ["&:hover", "&:focus-visible"]);
     addVariant("group-hocus", [".group:hover &", ".group:focus-visible &"]);
 }
+
+export default config

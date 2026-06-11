@@ -1,118 +1,132 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Copy, Download, FileJson, FileSpreadsheet, FileText, Loader2, Search } from "lucide-react";
-import { toast } from "sonner";
-import { Button, Card, CardContent, CardHeader } from "@/routes/configurarion/@components/CommonComponents.tsx";
-import { Badge } from "@/routes/configurarion/@components/CommonComponents.tsx";
-import type { CacheEventRow, CacheFilters } from "@/features/debug/services/cache.service.ts";
-import { estimateExportSize, exportCSV, exportJSON, exportJSONL, getDistinctKinds, getDistinctRelays, getEvents } from "@/features/debug/services/cache.service.ts";
+import { Copy, Download, FileJson, FileSpreadsheet, FileText, Loader2, Search } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
+import type { CacheEventRow, CacheFilters } from '@/features/debug/services/cache.service.ts'
+import {
+  estimateExportSize,
+  exportCSV,
+  exportJSON,
+  exportJSONL,
+  getDistinctKinds,
+  getDistinctRelays,
+  getEvents,
+} from '@/features/debug/services/cache.service.ts'
+import { Badge, Button, Card, CardContent, CardHeader } from '@/routes/configurarion/@components/CommonComponents.tsx'
 
-const EXPORT_TIMEOUT = 30000;
+const EXPORT_TIMEOUT = 30000
 
 export function ExportEventsTab() {
-  const [events, setEvents] = useState<CacheEventRow[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [exporting, setExporting] = useState(false);
-  const [filters, setFilters] = useState<CacheFilters>({});
-  const [availableKinds, setAvailableKinds] = useState<number[]>([]);
-  const [availableRelays, setAvailableRelays] = useState<string[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const abortRef = useRef<AbortController | null>(null);
+  const [events, setEvents] = useState<CacheEventRow[]>([])
+  const [loading, setLoading] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  const [filters, setFilters] = useState<CacheFilters>({})
+  const [availableKinds, setAvailableKinds] = useState<number[]>([])
+  const [availableRelays, setAvailableRelays] = useState<string[]>([])
+  const [totalCount, setTotalCount] = useState(0)
+  const abortRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
-    getDistinctKinds().then(setAvailableKinds).catch(() => {});
-    getDistinctRelays().then(setAvailableRelays).catch(() => {});
-  }, []);
+    getDistinctKinds()
+      .then(setAvailableKinds)
+      .catch(() => void 0)
+    getDistinctRelays()
+      .then(setAvailableRelays)
+      .catch(() => void 0)
+  }, [])
 
   const loadEvents = useCallback(async () => {
-    if (abortRef.current) abortRef.current.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
-    setLoading(true);
+    if (abortRef.current) abortRef.current.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+    setLoading(true)
 
     try {
-      const timeout = setTimeout(() => controller.abort(), EXPORT_TIMEOUT);
-      const result = await getEvents(filters);
-      clearTimeout(timeout);
+      const timeout = setTimeout(() => controller.abort(), EXPORT_TIMEOUT)
+      const result = await getEvents(filters)
+      clearTimeout(timeout)
 
       if (!controller.signal.aborted) {
-        setEvents(result);
-        setTotalCount(result.length);
+        setEvents(result)
+        setTotalCount(result.length)
       }
-    } catch (err) {
+    } catch (_err) {
       if (!controller.signal.aborted) {
-        toast.error("Timeout ao carregar eventos. Tente filtros mais restritivos.");
+        toast.error('Timeout ao carregar eventos. Tente filtros mais restritivos.')
       }
     } finally {
-      if (!controller.signal.aborted) setLoading(false);
+      if (!controller.signal.aborted) setLoading(false)
     }
-  }, [filters]);
+  }, [filters])
 
   const estimatedSize = useMemo(() => {
-    if (events.length === 0) return { json: 0, jsonl: 0, csv: 0 };
-    const sample = events.slice(0, Math.min(events.length, 100));
-    const avgJson = estimateExportSize(sample, "json") / sample.length;
-    const avgJsonl = estimateExportSize(sample, "jsonl") / sample.length;
-    const avgCsv = estimateExportSize(sample, "csv") / sample.length;
+    if (events.length === 0) return { json: 0, jsonl: 0, csv: 0 }
+    const sample = events.slice(0, Math.min(events.length, 100))
+    const avgJson = estimateExportSize(sample, 'json') / sample.length
+    const avgJsonl = estimateExportSize(sample, 'jsonl') / sample.length
+    const avgCsv = estimateExportSize(sample, 'csv') / sample.length
     return {
       json: Math.round((avgJson * events.length) / 1024),
       jsonl: Math.round((avgJsonl * events.length) / 1024),
       csv: Math.round((avgCsv * events.length) / 1024),
-    };
-  }, [events]);
+    }
+  }, [events])
 
-  const previewEvents = useMemo(() => events.slice(0, 10), [events]);
+  const previewEvents = useMemo(() => events.slice(0, 10), [events])
 
   const handleExport = useCallback(
-    async (format: "json" | "jsonl" | "csv") => {
-      setExporting(true);
+    async (format: 'json' | 'jsonl' | 'csv') => {
+      setExporting(true)
       try {
-        let content: string;
-        let mime: string;
-        let ext: string;
+        let content: string
+        let mime: string
+        let ext: string
 
-        if (format === "json") {
-          content = exportJSON(events);
-          mime = "application/json";
-          ext = "json";
-        } else if (format === "jsonl") {
-          content = exportJSONL(events);
-          mime = "application/jsonl";
-          ext = "jsonl";
+        if (format === 'json') {
+          content = exportJSON(events)
+          mime = 'application/json'
+          ext = 'json'
+        } else if (format === 'jsonl') {
+          content = exportJSONL(events)
+          mime = 'application/jsonl'
+          ext = 'jsonl'
         } else {
-          content = exportCSV(events);
-          mime = "text/csv";
-          ext = "csv";
+          content = exportCSV(events)
+          mime = 'text/csv'
+          ext = 'csv'
         }
 
-        const blob = new Blob([content], { type: mime });
-        const file = new File([blob], `nostr-cache-export.${ext}`, { type: mime });
+        const blob = new Blob([content], { type: mime })
+        const file = new File([blob], `nostr-cache-export.${ext}`, { type: mime })
 
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: "Eventos do Cache Nostr" });
+          await navigator.share({ files: [file], title: 'Eventos do Cache Nostr' })
         } else {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = file.name;
-          a.click();
-          URL.revokeObjectURL(url);
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = file.name
+          a.click()
+          URL.revokeObjectURL(url)
         }
-        toast.success(`Exportado como ${format.toUpperCase()}`);
-      } catch (err) {
-        toast.error("Falha ao exportar.");
+        toast.success(`Exportado como ${format.toUpperCase()}`)
+      } catch (_err) {
+        toast.error('Falha ao exportar.')
       } finally {
-        setExporting(false);
+        setExporting(false)
       }
     },
     [events],
-  );
+  )
 
   const copyEventIds = useCallback(() => {
-    const ids = events.map((e) => e.id).join("\n");
-    navigator.clipboard.writeText(ids).then(() => {
-      toast.success(`${events.length} IDs copiados`);
-    }).catch(() => toast.error("Falha ao copiar"));
-  }, [events]);
+    const ids = events.map((e) => e.id).join('\n')
+    navigator.clipboard
+      .writeText(ids)
+      .then(() => {
+        toast.success(`${events.length} IDs copiados`)
+      })
+      .catch(() => toast.error('Falha ao copiar'))
+  }, [events])
 
   return (
     <div className="space-y-4">
@@ -124,12 +138,14 @@ export function ExportEventsTab() {
               <label className="block text-xs font-medium text-zinc-500 mb-1">Kind</label>
               <select
                 className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-2 text-sm"
-                value={filters.kind ?? ""}
+                value={filters.kind ?? ''}
                 onChange={(e) => setFilters((f) => ({ ...f, kind: e.target.value ? Number(e.target.value) : null }))}
               >
                 <option value="">Todos</option>
                 {availableKinds.map((k) => (
-                  <option key={k} value={k}>{k}</option>
+                  <option key={k} value={k}>
+                    {k}
+                  </option>
                 ))}
               </select>
             </div>
@@ -138,7 +154,7 @@ export function ExportEventsTab() {
               <input
                 className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-2 text-sm"
                 placeholder="hex pubkey"
-                value={filters.pubkey ?? ""}
+                value={filters.pubkey ?? ''}
                 onChange={(e) => setFilters((f) => ({ ...f, pubkey: e.target.value || undefined }))}
               />
             </div>
@@ -146,12 +162,14 @@ export function ExportEventsTab() {
               <label className="block text-xs font-medium text-zinc-500 mb-1">Relay</label>
               <select
                 className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-2 text-sm"
-                value={filters.relay ?? ""}
+                value={filters.relay ?? ''}
                 onChange={(e) => setFilters((f) => ({ ...f, relay: e.target.value || undefined }))}
               >
                 <option value="">Todos</option>
                 {availableRelays.map((r) => (
-                  <option key={r} value={r}>{r.replace("wss://", "").replace("ws://", "")}</option>
+                  <option key={r} value={r}>
+                    {r.replace('wss://', '').replace('ws://', '')}
+                  </option>
                 ))}
               </select>
             </div>
@@ -161,7 +179,7 @@ export function ExportEventsTab() {
                 <input
                   type="date"
                   className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-2 text-sm"
-                  value={filters.since ? new Date(filters.since * 1000).toISOString().split("T")[0] : ""}
+                  value={filters.since ? new Date(filters.since * 1000).toISOString().split('T')[0] : ''}
                   onChange={(e) =>
                     setFilters((f) => ({
                       ...f,
@@ -175,7 +193,7 @@ export function ExportEventsTab() {
                 <input
                   type="date"
                   className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-2 text-sm"
-                  value={filters.until ? new Date(filters.until * 1000).toISOString().split("T")[0] : ""}
+                  value={filters.until ? new Date(filters.until * 1000).toISOString().split('T')[0] : ''}
                   onChange={(e) =>
                     setFilters((f) => ({
                       ...f,
@@ -188,7 +206,7 @@ export function ExportEventsTab() {
           </div>
           <Button onClick={loadEvents} disabled={loading} className="mt-3">
             {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Search className="w-4 h-4 mr-2" />}
-            {loading ? "Buscando..." : "Buscar"}
+            {loading ? 'Buscando...' : 'Buscar'}
           </Button>
         </CardContent>
       </Card>
@@ -200,15 +218,9 @@ export function ExportEventsTab() {
               <span className="text-sm text-zinc-500">
                 <strong className="text-zinc-900 dark:text-zinc-100">{totalCount}</strong> eventos encontrados
               </span>
-              <Badge variant="outline">
-                JSON ~{estimatedSize.json}KB
-              </Badge>
-              <Badge variant="outline">
-                JSONL ~{estimatedSize.jsonl}KB
-              </Badge>
-              <Badge variant="outline">
-                CSV ~{estimatedSize.csv}KB
-              </Badge>
+              <Badge variant="outline">JSON ~{estimatedSize.json}KB</Badge>
+              <Badge variant="outline">JSONL ~{estimatedSize.jsonl}KB</Badge>
+              <Badge variant="outline">CSV ~{estimatedSize.csv}KB</Badge>
             </div>
             <Button variant="ghost" size="sm" onClick={copyEventIds}>
               <Copy className="w-4 h-4 mr-1" />
@@ -220,27 +232,31 @@ export function ExportEventsTab() {
             <CardHeader title="Preview (primeiros 10)" icon={FileText} />
             <CardContent className="max-h-80 overflow-auto">
               <pre className="text-xs font-mono text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">
-                {JSON.stringify(previewEvents.map((e) => ({
-                  id: e.id.slice(0, 16) + "...",
-                  kind: e.kind,
-                  pubkey: e.pubkey.slice(0, 16) + "...",
-                  created_at: new Date(e.createdAt * 1000).toISOString(),
-                  relay: e.relay,
-                })), null, 2)}
+                {JSON.stringify(
+                  previewEvents.map((e) => ({
+                    id: e.id.slice(0, 16) + '...',
+                    kind: e.kind,
+                    pubkey: e.pubkey.slice(0, 16) + '...',
+                    created_at: new Date(e.createdAt * 1000).toISOString(),
+                    relay: e.relay,
+                  })),
+                  null,
+                  2,
+                )}
               </pre>
             </CardContent>
           </Card>
 
           <div className="flex flex-wrap gap-3">
-            <Button onClick={() => handleExport("json")} disabled={exporting}>
+            <Button onClick={() => handleExport('json')} disabled={exporting}>
               <FileJson className="w-4 h-4 mr-2" />
               Exportar JSON
             </Button>
-            <Button onClick={() => handleExport("jsonl")} disabled={exporting} variant="secondary">
+            <Button onClick={() => handleExport('jsonl')} disabled={exporting} variant="secondary">
               <FileText className="w-4 h-4 mr-2" />
               Exportar JSONL
             </Button>
-            <Button onClick={() => handleExport("csv")} disabled={exporting} variant="outline">
+            <Button onClick={() => handleExport('csv')} disabled={exporting} variant="outline">
               <FileSpreadsheet className="w-4 h-4 mr-2" />
               Exportar CSV
             </Button>
@@ -256,5 +272,5 @@ export function ExportEventsTab() {
         </Card>
       )}
     </div>
-  );
+  )
 }

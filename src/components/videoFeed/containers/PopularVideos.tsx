@@ -26,8 +26,7 @@ export function PopularVideos() {
       isLoading={isLoading}
       isFetchingNextPage={false}
       hasNextPage={false}
-      fetchNextPage={() => {
-      }}
+      fetchNextPage={() => undefined}
     />
   );
 }

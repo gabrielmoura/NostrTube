@@ -21,7 +21,7 @@ export function ErrorLogTab() {
 
   useEffect(() => {
     const cleanup = initErrorLogging();
-    getAllLogs().then(setLogs).catch(() => {});
+    getAllLogs().then(setLogs).catch(() => void 0);
     setSessionCount(getSessionErrorCount());
     return cleanup;
   }, []);

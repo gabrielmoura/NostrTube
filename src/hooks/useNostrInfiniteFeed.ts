@@ -64,7 +64,7 @@ export function useNostrInfiniteFeed(baseFilter: Partial<NDKFilter>, enabled = t
       setIsFetching(true);
       setUntil(lastTimestamp - 1);
     }
-  }, [allEvents.length, isFetching]); // Use .length para estabilizar a dependência
+  }, [allEvents, isFetching]);
 
   return {
     events: allEvents,

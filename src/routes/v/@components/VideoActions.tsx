@@ -200,8 +200,7 @@ export function VideoActionsLoading() {
         </div>
         {/* Video actions */}
         <div className="ml-auto flex items-center gap-3 text-muted-foreground">
-          <LikeToggleButton likeCount={0} onClick={() => {
-          }} />
+          <LikeToggleButton likeCount={0} onClick={() => undefined} />
           {/*<DropDownOptions options={[]}/>*/}
         </div>
       </div>

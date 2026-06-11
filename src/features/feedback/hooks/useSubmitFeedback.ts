@@ -125,16 +125,19 @@ export function useSubmitFeedback() {
       const technicalDetails = collectFeedbackTechnicalDetails();
       const zapAmount = resolveFeedbackZapAmount(values);
 
-      const content = buildFeedbackContent({
-        feedbackId,
-        recipientPubkey: recipientConfig.pubkey,
-        title: values.title,
-        message: values.message,
-        category,
-        browserLanguage,
-        zapAmount,
-        technicalDetails
-      });
+        const content = buildFeedbackContent({
+          feedbackId,
+          recipientPubkey: recipientConfig.pubkey,
+          title: values.title,
+          name: values.name,
+          email: values.email,
+          message: values.message,
+          category,
+          browserLanguage,
+          zapAmount,
+          zapNote: values.zapNote,
+          technicalDetails
+        });
 
       const tags = buildFeedbackRumorTags({
         feedbackId,
@@ -170,7 +173,7 @@ export function useSubmitFeedback() {
 
       try {
         const { wrappedEvent } = await sendMessageWithTimeout(
-          sendPrivateMessageEvent(ndk, recipientConfig.npub, rumorEvent, recipientConfig.pubkey),
+          sendPrivateMessageEvent(ndk, recipientConfig.lookup, rumorEvent, recipientConfig.pubkey),
           FEEDBACK_PUBLISH_TIMEOUT_MS
         );
         messageId = wrappedEvent.id;
@@ -197,10 +200,9 @@ export function useSubmitFeedback() {
       try {
         const zapOutcome = await startFeedbackZap({
           ndk,
-          recipientNpub: recipientConfig.npub,
           recipientPubkey: recipientConfig.pubkey,
           amountSats: zapAmount,
-          comment: values.title.trim()
+          comment: values.zapNote?.trim() || values.title.trim()
         });
 
         const success: FeedbackSuccessState = {

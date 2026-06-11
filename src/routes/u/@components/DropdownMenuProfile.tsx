@@ -22,8 +22,8 @@ interface Option {
 export function DropdownMenuProfile({ currentUser, events }: DropdownMenuProfileProps) {
   const navigate = useNavigate();
   const { userId } = useParams({ strict: false });
-  const npub = currentUser?.npub!;
-  const pubkey = currentUser?.pubkey!;
+  const npub = currentUser?.npub;
+  const pubkey = currentUser?.pubkey;
 
   const options: Option[] = [
     {
@@ -65,7 +65,7 @@ export function DropdownMenuProfile({ currentUser, events }: DropdownMenuProfile
     }
   ];
 
-  if (currentUser && npub == userId || pubkey == userId) {
+  if (currentUser && npub && (npub === userId || pubkey === userId)) {
     options.push({
       label: "Edit Profile",
       icon: <MoreVertical className="size-4" />,

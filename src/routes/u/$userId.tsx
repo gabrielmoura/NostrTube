@@ -24,6 +24,7 @@ import { z } from "zod"; // Extraído para arquivo separado
 import { VIDEO_EVENT_KINDS } from "@/features/video/services/video-kinds";
 import { useQuery } from "@tanstack/react-query";
 import { TECHNICAL_REPORT_KIND } from "@/helper/actions/report";
+import { ZapButton } from "@/features/zap/components/ZapButton";
 
 export const ProfilePageSchema = z.object({
   tab: z.enum(["videos", "playlists", "about", "alerts"]).optional()
@@ -44,10 +45,10 @@ export const Route = createFileRoute("/u/$userId")({
 function NotFoundPage() {
   const { userId } = useParams({ strict: false });
   const currentUser = useNDKCurrentUser();
-  const npub = currentUser?.npub!;
-  const pubkey = currentUser?.pubkey!;
+  const npub = currentUser?.npub;
+  const pubkey = currentUser?.pubkey;
 
-  if (currentUser && npub == userId || pubkey == userId) {
+  if (currentUser && (npub === userId || pubkey === userId)) {
     return <CreateProfile />;
   }
 
@@ -140,8 +141,9 @@ function ProfilePage() {
 
             {/* Actions */}
             <div className="flex items-center gap-3 mb-4 w-full md:w-auto">
-              <FollowButton pubkey={metaEvent?.pubkey!} currentUser={currentUser!} />
-              <DropdownMenuProfile currentUser={currentUser!} events={Array.from(events)} />
+              <FollowButton pubkey={metaEvent?.pubkey} currentUser={currentUser ?? undefined} />
+              {metaEvent?.pubkey ? <ZapButton zapType="user" pubkey={metaEvent.pubkey} variant="secondary">Zap</ZapButton> : null}
+              <DropdownMenuProfile currentUser={currentUser ?? undefined} events={Array.from(events)} />
             </div>
           </div>
 
@@ -266,7 +268,7 @@ function ProfilePage() {
                   <div>
                     <span className="text-muted-foreground block">Entrou em</span>
                     {/* Assumindo que o metadados tenha created_at, se não usar profile event created_at */}
-                    <span>{new Date(metaEvent?.created_at! * 1000)?.toLocaleDateString()}</span>
+                    <span>{metaEvent?.created_at ? new Date(metaEvent.created_at * 1000).toLocaleDateString() : "--"}</span>
                   </div>
                   <div>
                     <span className="text-muted-foreground block">Chave Pública (Hex)</span>

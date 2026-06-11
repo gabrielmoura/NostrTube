@@ -118,7 +118,7 @@ export const RelaySettings = () => {
       if (leftSelected !== rightSelected) return leftSelected - rightSelected;
       return left.localeCompare(right);
     });
-  }, [data?.relays, defaultRelays, selectedRelays]);
+  }, [data?.relays, selectedRelays]);
 
   const pingAllRelays = useCallback(async () => {
     if (!validRelays.length) return;

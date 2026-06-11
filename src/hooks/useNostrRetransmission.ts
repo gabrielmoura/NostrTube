@@ -12,7 +12,7 @@ export function useNostrRetransmission() {
    * Tenta conectar a uma lista de relays e retorna apenas os que tiveram sucesso.
    * @private
    */
-  const getOnlineRelays = async (relayUrls: string[], event: NDKEvent): Promise<Set<NDKRelay>> => {
+  const getOnlineRelays = useCallback(async (relayUrls: string[], event: NDKEvent): Promise<Set<NDKRelay>> => {
     const onlineRelays = new Set<NDKRelay>();
 
     // Criamos instâncias individuais para testar a conexão
@@ -32,7 +32,7 @@ export function useNostrRetransmission() {
 
     await Promise.allSettled(connectionPromises);
     return onlineRelays;
-  };
+  }, []);
 
   /**
    * Retransmite um evento existente apenas para relays que responderem ao handshake.
@@ -70,7 +70,7 @@ export function useNostrRetransmission() {
         // throw error;
       }
     },
-    []
+    [getOnlineRelays]
   );
 
   /**

@@ -7,20 +7,26 @@ interface BuildFeedbackEventParams {
   feedbackId: string;
   recipientPubkey: string;
   title: string;
+  name?: string;
+  email?: string;
   message: string;
   category: FeedbackCategoryDefinition;
   browserLanguage?: string;
   zapAmount?: number;
+  zapNote?: string;
   technicalDetails?: FeedbackTechnicalDetails;
 }
 
-export function buildFeedbackContent({ feedbackId, title, message, category, browserLanguage, zapAmount, technicalDetails }: BuildFeedbackEventParams) {
+export function buildFeedbackContent({ feedbackId, title, name, email, message, category, browserLanguage, zapAmount, zapNote, technicalDetails }: BuildFeedbackEventParams) {
   const lines = [
     `${t("feedback.event.feedback_id_label")}: ${feedbackId}`,
     `${t("feedback.event.title_label")}: ${title.trim()}`,
     `${t("feedback.event.category_label")}: ${t(category.labelKey)}`,
+    name?.trim() ? `${t("feedback.event.name_label")}: ${name.trim()}` : "",
+    email?.trim() ? `${t("feedback.event.email_label")}: ${email.trim()}` : "",
     browserLanguage ? `${t("feedback.event.browser_language_label")}: ${browserLanguage}` : "",
     zapAmount ? `${t("feedback.event.zap_label")}: ${zapAmount} sats` : "",
+    zapNote?.trim() ? `${t("feedback.event.zap_note_label")}: ${zapNote.trim()}` : "",
     "",
     message.trim()
   ].filter(Boolean);

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { NDKEvent, useNDK, useNDKCurrentPubkey } from "@nostr-dev-kit/ndk-hooks";
 import { NostrKind } from "@/helper/type.ts";
 import type { NDKKind } from "@nostr-dev-kit/ndk";
@@ -15,7 +15,7 @@ export default function CountView({ eventIdentifier }: CountViewProps) {
   const currentPubkey = useNDKCurrentPubkey();
 
 
-  const handleView = async () => {
+  const handleView = useCallback(async () => {
     if (!ndk || !currentPubkey) return;
     let viewEvent: NDKEvent | null = await ndk.fetchEvent({
       authors: [currentPubkey],
@@ -62,7 +62,7 @@ export default function CountView({ eventIdentifier }: CountViewProps) {
       });
     }
     await viewEvent.publish();
-  };
+  }, [currentPubkey, eventIdentifier, ndk]);
 
 
   useEffect(() => {

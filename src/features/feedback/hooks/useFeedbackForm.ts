@@ -9,9 +9,12 @@ import { type FeedbackFormValues, feedbackFormSchema, resolveFeedbackZapAmount }
 const defaultValues: FeedbackFormValues = {
   title: "",
   category: "feature-request",
+  name: "",
+  email: "",
   message: "",
   zapPreset: "none",
   customZapAmount: "",
+  zapNote: "",
   includeTechnicalDetails: false
 };
 

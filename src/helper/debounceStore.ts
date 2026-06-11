@@ -1,6 +1,6 @@
-import { Subject } from "rxjs";
-import { debounceTime } from "rxjs/operators";
-import type { ChangeEvent } from "react";
+import type { ChangeEvent } from 'react'
+import { Subject } from 'rxjs'
+import { debounceTime } from 'rxjs/operators'
 
 /**
  * Payload interno utilizado pelo Subject de debounce.
@@ -9,26 +9,24 @@ import type { ChangeEvent } from "react";
  * @property {string} value - Valor a ser aplicado após o debounce.
  * @property {(value: string) => void} setter - Função responsável por aplicar o valor no store.
  */
-type DebouncePayload<T = unknown> = {
-  value: string;
-  setter: (value: string) => void;
-};
+type DebouncePayload<_T = unknown> = {
+  value: string
+  setter: (value: string) => void
+}
 
 /**
  * Stream RxJS responsável por enfileirar atualizações
  * e aplicá-las após o tempo de debounce configurado.
  */
-const debounce$ = new Subject<DebouncePayload>();
+const debounce$ = new Subject<DebouncePayload>()
 
 /**
  * Assinatura da stream com debounce.
  * Após o tempo configurado, executa o setter com o último valor emitido.
  */
-debounce$
-  .pipe(debounceTime(250))
-  .subscribe(({ value, setter }) => {
-    setter(value);
-  });
+debounce$.pipe(debounceTime(250)).subscribe(({ value, setter }) => {
+  setter(value)
+})
 
 /**
  * Enfileira uma atualização de estado com debounce.
@@ -57,16 +55,13 @@ debounce$
  *
  * @returns {void}
  */
-export function debounceStoreUpdate(
-  value: string,
-  setter: (value: string) => void
-): void {
-  debounce$.next({ value, setter });
+export function debounceStoreUpdate(value: string, setter: (value: string) => void): void {
+  debounce$.next({ value, setter })
 }
 
 export function debounceHandleChange(
   e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-  setter: (value: string) => void
+  setter: (value: string) => void,
 ) {
-  debounceStoreUpdate(e.target.value, setter);
+  debounceStoreUpdate(e.target.value, setter)
 }

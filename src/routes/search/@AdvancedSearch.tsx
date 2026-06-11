@@ -45,7 +45,7 @@ export function AdvancedSearch() {
     setSearchInput(buildInputFromSearchState(searchParams));
     setChips(buildSearchStateFromInput(buildInputFromSearchState(searchParams), searchParams).chips);
     if (searchParams.geohash) setGeohashEnabled(true);
-  }, [searchParams, setValue, storedGeoHash]);
+  }, [searchParams, setValue]);
 
   const selectedLanguage = watch("lang");
 

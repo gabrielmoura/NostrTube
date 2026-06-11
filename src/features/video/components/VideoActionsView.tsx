@@ -8,6 +8,7 @@ import { Link } from "@tanstack/react-router";
 import { DropdownMenuVideo } from "@/routes/v/@components/DropdownMenuVideo";
 import FollowButton from "@/components/FollowButton";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { VideoMetricsZapButton } from "@/features/video/components/VideoMetricsZapButton";
 import { lazy } from "react";
 
 const VideoMeta = lazy(() => import("@/routes/v/@components/VideoMeta"));
@@ -70,6 +71,7 @@ export function VideoActionsView({
           </div>
         </div>
         <div className="ml-auto flex items-center gap-3 text-muted-foreground">
+          <VideoMetricsZapButton event={event} />
           <ErrorBoundaryVideo>
             <LikeButton contentEvent={event} />
           </ErrorBoundaryVideo>
