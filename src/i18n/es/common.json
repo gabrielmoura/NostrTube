@@ -155,6 +155,8 @@
       "sent_with_zap": "Feedback y ZAP enviados con éxito.",
       "invoice_ready": "Feedback enviado. Abre tu billetera Lightning para completar el ZAP.",
       "zap_failed_after_feedback": "El feedback se envió correctamente, pero no fue posible completar el ZAP.",
+      "feedback_id": "ID del feedback",
+      "feedback_published": "El feedback público fue publicado y puede rastrearse con este identificador.",
       "message_id": "ID del mensaje",
       "private_delivery_notice": "Entregado como mensaje privado NIP-17.",
       "event_id": "ID del evento",
@@ -200,21 +202,81 @@
       "unit": "sats"
     },
     "categories": {
-      "feature-request": { "label": "Nueva funcionalidad", "description": "Una idea nueva que agregaría valor al producto.", "placeholder": "Describe la funcionalidad deseada, por qué sería útil y cómo imaginas su funcionamiento." },
-      "bug-report": { "label": "Corrección de error", "description": "Algo no funciona como se espera.", "placeholder": "Describe el error, lo que esperabas que ocurriera, lo que ocurrió y los pasos para reproducirlo." },
-      "thanks": { "label": "Agradecimiento", "description": "Un mensaje de apoyo o reconocimiento.", "placeholder": "Cuenta qué te gustó, por qué fue útil y si te gustaría apoyarlo con un ZAP." },
-      "ui-ux": { "label": "Mejora de UI/UX", "description": "Ajustes en la experiencia visual o de uso.", "placeholder": "Explica qué parte de la interfaz puede mejorar y cómo impacta la experiencia." },
-      "performance": { "label": "Rendimiento", "description": "Lentitud, bloqueos o uso excesivo de recursos.", "placeholder": "Describe dónde la aplicación se volvió lenta, se congeló o consumió demasiados recursos." },
-      "video-player": { "label": "Reproductor de video", "description": "Problemas o mejoras en el reproductor.", "placeholder": "Explica el comportamiento del reproductor, incluyendo carga, audio, subtítulos o controles." },
-      "upload-blossom": { "label": "Subida / Blossom", "description": "Envío de medios, Blossom y publicación.", "placeholder": "Describe la dificultad en la subida, el procesamiento o el uso de Blossom." },
-      "search-discovery": { "label": "Búsqueda y descubrimiento", "description": "Búsqueda, filtros, navegación y descubrimiento de videos.", "placeholder": "Explica qué falta o qué podría mejorar en la búsqueda y descubrimiento de contenido." },
-      "feeds-recommendations": { "label": "Feeds y recomendaciones", "description": "Sugerencias, ranking y página inicial.", "placeholder": "Describe cómo los feeds o recomendaciones podrían ser más útiles." },
-      "login-nostr": { "label": "Login / Nostr", "description": "Autenticación, extensiones, claves y sesión.", "placeholder": "Explica el problema o la mejora deseada en el flujo de inicio de sesión Nostr." },
-      "moderation-content": { "label": "Moderación / contenido", "description": "Reglas, reportes o control de contenido.", "placeholder": "Describe la necesidad relacionada con la moderación o la visualización del contenido." },
-      "privacy-security": { "label": "Privacidad / seguridad", "description": "Protección de datos, permisos y seguridad.", "placeholder": "Explica la preocupación de privacidad o seguridad y el contexto en el que aparece." },
-      "i18n": { "label": "Traducción / i18n", "description": "Idiomas, textos y localización.", "placeholder": "Indica el idioma, el texto con problema y la mejora deseada." },
-      "documentation": { "label": "Documentación", "description": "Guías, FAQ y claridad del producto.", "placeholder": "Describe la duda, la falta de documentación o qué podría ser más claro." },
-      "other": { "label": "Otro", "description": "Cualquier tema fuera de las categorías anteriores.", "placeholder": "Describe tu sugerencia, problema o agradecimiento. Incluye pasos para reproducirlo si es un error." }
+      "feature-request": {
+        "label": "Nueva funcionalidad",
+        "description": "Una idea nueva que agregaría valor al producto.",
+        "placeholder": "Describe la funcionalidad deseada, por qué sería útil y cómo imaginas su funcionamiento."
+      },
+      "bug-report": {
+        "label": "Corrección de error",
+        "description": "Algo no funciona como se espera.",
+        "placeholder": "Describe el error, lo que esperabas que ocurriera, lo que ocurrió y los pasos para reproducirlo."
+      },
+      "thanks": {
+        "label": "Agradecimiento",
+        "description": "Un mensaje de apoyo o reconocimiento.",
+        "placeholder": "Cuenta qué te gustó, por qué fue útil y si te gustaría apoyarlo con un ZAP."
+      },
+      "ui-ux": {
+        "label": "Mejora de UI/UX",
+        "description": "Ajustes en la experiencia visual o de uso.",
+        "placeholder": "Explica qué parte de la interfaz puede mejorar y cómo impacta la experiencia."
+      },
+      "performance": {
+        "label": "Rendimiento",
+        "description": "Lentitud, bloqueos o uso excesivo de recursos.",
+        "placeholder": "Describe dónde la aplicación se volvió lenta, se congeló o consumió demasiados recursos."
+      },
+      "video-player": {
+        "label": "Reproductor de video",
+        "description": "Problemas o mejoras en el reproductor.",
+        "placeholder": "Explica el comportamiento del reproductor, incluyendo carga, audio, subtítulos o controles."
+      },
+      "upload-blossom": {
+        "label": "Subida / Blossom",
+        "description": "Envío de medios, Blossom y publicación.",
+        "placeholder": "Describe la dificultad en la subida, el procesamiento o el uso de Blossom."
+      },
+      "search-discovery": {
+        "label": "Búsqueda y descubrimiento",
+        "description": "Búsqueda, filtros, navegación y descubrimiento de videos.",
+        "placeholder": "Explica qué falta o qué podría mejorar en la búsqueda y descubrimiento de contenido."
+      },
+      "feeds-recommendations": {
+        "label": "Feeds y recomendaciones",
+        "description": "Sugerencias, ranking y página inicial.",
+        "placeholder": "Describe cómo los feeds o recomendaciones podrían ser más útiles."
+      },
+      "login-nostr": {
+        "label": "Login / Nostr",
+        "description": "Autenticación, extensiones, claves y sesión.",
+        "placeholder": "Explica el problema o la mejora deseada en el flujo de inicio de sesión Nostr."
+      },
+      "moderation-content": {
+        "label": "Moderación / contenido",
+        "description": "Reglas, reportes o control de contenido.",
+        "placeholder": "Describe la necesidad relacionada con la moderación o la visualización del contenido."
+      },
+      "privacy-security": {
+        "label": "Privacidad / seguridad",
+        "description": "Protección de datos, permisos y seguridad.",
+        "placeholder": "Explica la preocupación de privacidad o seguridad y el contexto en el que aparece."
+      },
+      "i18n": {
+        "label": "Traducción / i18n",
+        "description": "Idiomas, textos y localización.",
+        "placeholder": "Indica el idioma, el texto con problema y la mejora deseada."
+      },
+      "documentation": {
+        "label": "Documentación",
+        "description": "Guías, FAQ y claridad del producto.",
+        "placeholder": "Describe la duda, la falta de documentación o qué podría ser más claro."
+      },
+      "other": {
+        "label": "Otro",
+        "description": "Cualquier tema fuera de las categorías anteriores.",
+        "placeholder": "Describe tu sugerencia, problema o agradecimiento. Incluye pasos para reproducirlo si es un error."
+      }
     }
   }
 }

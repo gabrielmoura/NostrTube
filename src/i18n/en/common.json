@@ -163,6 +163,8 @@
       "sent_with_zap": "Feedback and ZAP sent successfully.",
       "invoice_ready": "Feedback sent. Open your Lightning wallet to complete the ZAP.",
       "zap_failed_after_feedback": "Feedback was sent successfully, but the ZAP could not be completed.",
+      "feedback_id": "Feedback ID",
+      "feedback_published": "The public feedback event was published and can be tracked with this identifier.",
       "message_id": "Message ID",
       "private_delivery_notice": "Delivered as a private NIP-17 message.",
       "event_id": "Event ID",
@@ -212,21 +214,81 @@
       "unit": "sats"
     },
     "categories": {
-      "feature-request": { "label": "New feature", "description": "A new idea that would add value to the product.", "placeholder": "Describe the desired feature, why it would be useful and how you imagine it working." },
-      "bug-report": { "label": "Bug report", "description": "Something is not working as expected.", "placeholder": "Describe the bug, what you expected to happen, what happened and the steps to reproduce it." },
-      "thanks": { "label": "Thanks", "description": "A message of support or appreciation.", "placeholder": "Share what you liked, why it was useful and whether you want to support it with a ZAP." },
-      "ui-ux": { "label": "UI/UX improvement", "description": "Adjustments to the visual or usage experience.", "placeholder": "Explain what part of the interface can improve and how it impacts the experience." },
-      "performance": { "label": "Performance", "description": "Slowness, freezing or excessive resource usage.", "placeholder": "Describe where the application became slow, froze or used too many resources." },
-      "video-player": { "label": "Video player", "description": "Problems or improvements in the player.", "placeholder": "Explain the player behavior, including loading, audio, captions or controls." },
-      "upload-blossom": { "label": "Upload / Blossom", "description": "Media sending, Blossom and publishing.", "placeholder": "Describe the difficulty with upload, processing or Blossom usage." },
-      "search-discovery": { "label": "Search and discovery", "description": "Search, filters, navigation and content discovery.", "placeholder": "Explain what is missing or what could be improved in search and content discovery." },
-      "feeds-recommendations": { "label": "Feeds and recommendations", "description": "Suggestions, ranking and home feed.", "placeholder": "Describe how feeds or recommendations could become more useful." },
-      "login-nostr": { "label": "Login / Nostr", "description": "Authentication, extensions, keys and session.", "placeholder": "Explain the issue or desired improvement in the Nostr login flow." },
-      "moderation-content": { "label": "Moderation / content", "description": "Rules, reporting or content control.", "placeholder": "Describe the need related to moderation or content display." },
-      "privacy-security": { "label": "Privacy / security", "description": "Data protection, permissions and security.", "placeholder": "Explain the privacy or security concern and the context where it appears." },
-      "i18n": { "label": "Translation / i18n", "description": "Languages, texts and localization.", "placeholder": "Provide the language, the problematic text and the desired improvement." },
-      "documentation": { "label": "Documentation", "description": "Guides, FAQ and product clarity.", "placeholder": "Describe the question, documentation gap or what could be clearer." },
-      "other": { "label": "Other", "description": "Anything outside the categories above.", "placeholder": "Describe your suggestion, issue or appreciation. Include reproduction steps if this is a bug." }
+      "feature-request": {
+        "label": "New feature",
+        "description": "A new idea that would add value to the product.",
+        "placeholder": "Describe the desired feature, why it would be useful and how you imagine it working."
+      },
+      "bug-report": {
+        "label": "Bug report",
+        "description": "Something is not working as expected.",
+        "placeholder": "Describe the bug, what you expected to happen, what happened and the steps to reproduce it."
+      },
+      "thanks": {
+        "label": "Thanks",
+        "description": "A message of support or appreciation.",
+        "placeholder": "Share what you liked, why it was useful and whether you want to support it with a ZAP."
+      },
+      "ui-ux": {
+        "label": "UI/UX improvement",
+        "description": "Adjustments to the visual or usage experience.",
+        "placeholder": "Explain what part of the interface can improve and how it impacts the experience."
+      },
+      "performance": {
+        "label": "Performance",
+        "description": "Slowness, freezing or excessive resource usage.",
+        "placeholder": "Describe where the application became slow, froze or used too many resources."
+      },
+      "video-player": {
+        "label": "Video player",
+        "description": "Problems or improvements in the player.",
+        "placeholder": "Explain the player behavior, including loading, audio, captions or controls."
+      },
+      "upload-blossom": {
+        "label": "Upload / Blossom",
+        "description": "Media sending, Blossom and publishing.",
+        "placeholder": "Describe the difficulty with upload, processing or Blossom usage."
+      },
+      "search-discovery": {
+        "label": "Search and discovery",
+        "description": "Search, filters, navigation and content discovery.",
+        "placeholder": "Explain what is missing or what could be improved in search and content discovery."
+      },
+      "feeds-recommendations": {
+        "label": "Feeds and recommendations",
+        "description": "Suggestions, ranking and home feed.",
+        "placeholder": "Describe how feeds or recommendations could become more useful."
+      },
+      "login-nostr": {
+        "label": "Login / Nostr",
+        "description": "Authentication, extensions, keys and session.",
+        "placeholder": "Explain the issue or desired improvement in the Nostr login flow."
+      },
+      "moderation-content": {
+        "label": "Moderation / content",
+        "description": "Rules, reporting or content control.",
+        "placeholder": "Describe the need related to moderation or content display."
+      },
+      "privacy-security": {
+        "label": "Privacy / security",
+        "description": "Data protection, permissions and security.",
+        "placeholder": "Explain the privacy or security concern and the context where it appears."
+      },
+      "i18n": {
+        "label": "Translation / i18n",
+        "description": "Languages, texts and localization.",
+        "placeholder": "Provide the language, the problematic text and the desired improvement."
+      },
+      "documentation": {
+        "label": "Documentation",
+        "description": "Guides, FAQ and product clarity.",
+        "placeholder": "Describe the question, documentation gap or what could be clearer."
+      },
+      "other": {
+        "label": "Other",
+        "description": "Anything outside the categories above.",
+        "placeholder": "Describe your suggestion, issue or appreciation. Include reproduction steps if this is a bug."
+      }
     }
   },
   "zap": {

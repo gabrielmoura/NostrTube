@@ -1,36 +1,36 @@
-import type { NDKEvent, NDKUserProfile } from "@nostr-dev-kit/ndk-hooks";
-import { Avatar, Badge } from "@radix-ui/themes";
-import { HiCheckBadge } from "react-icons/hi2";
-import { cn, formatCount, getLettersPlain, getNameToShow } from "@/helper/format";
-import { RenderText } from "@/components/RenderText";
-import { ErrorBoundaryVideo } from "@/routes/v/@components/error";
-import { Link } from "@tanstack/react-router";
-import { DropdownMenuVideo } from "@/routes/v/@components/DropdownMenuVideo";
-import FollowButton from "@/components/FollowButton";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { VideoMetricsZapButton } from "@/features/video/components/VideoMetricsZapButton";
-import { lazy } from "react";
+import type { NDKEvent, NDKUserProfile } from '@nostr-dev-kit/ndk-hooks'
+import { Avatar, Badge } from '@radix-ui/themes'
+import { Link } from '@tanstack/react-router'
+import { Zap } from 'lucide-react'
+import { lazy, useState } from 'react'
+import { HiCheckBadge } from 'react-icons/hi2'
+import FollowButton from '@/components/FollowButton'
+import { RenderText } from '@/components/RenderText'
+import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { ZapModal } from '@/features/zap/components/ZapModal'
+import { cn, formatCount, getLettersPlain, getNameToShow } from '@/helper/format'
+import { DropdownMenuVideo } from '@/routes/v/@components/DropdownMenuVideo'
+import { ErrorBoundaryVideo } from '@/routes/v/@components/error'
 
-const VideoMeta = lazy(() => import("@/routes/v/@components/VideoMeta"));
-const LikeButton = lazy(() => import("@/routes/v/@components/LikeButton"));
+const VideoMeta = lazy(() => import('@/routes/v/@components/VideoMeta'))
+const LikeButton = lazy(() => import('@/routes/v/@components/LikeButton'))
 
 interface VideoActionsViewProps {
-  event: NDKEvent;
-  profile?: NDKUserProfile;
-  summary: string;
-  title: string;
-  followerCount: number;
+  event: NDKEvent
+  profile?: NDKUserProfile
+  summary: string
+  title: string
+  followerCount: number
 }
 
-export function VideoActionsView({
-  event,
-  profile,
-  summary,
-  title,
-  followerCount
-}: VideoActionsViewProps) {
-  const npub = event.author.npub;
-  const tags = event.tags.filter((tag) => tag[0] === "t").map((tag) => tag[1]).filter(Boolean);
+export function VideoActionsView({ event, profile, summary, title, followerCount }: VideoActionsViewProps) {
+  const npub = event.author.npub
+  const tags = event.tags
+    .filter((tag) => tag[0] === 't')
+    .map((tag) => tag[1])
+    .filter(Boolean)
+  const [zapOpen, setZapOpen] = useState(false)
 
   return (
     <div className="space-y-2.5 py-2">
@@ -61,7 +61,7 @@ export function VideoActionsView({
                   )}
                 </div>
                 <p className="text-[11px] text-muted-foreground sm:text-xs">
-                  {followerCount > 0 ? `${formatCount(followerCount)} followers` : ""}
+                  {followerCount > 0 ? `${formatCount(followerCount)} followers` : ''}
                 </p>
               </div>
             </Link>
@@ -71,7 +71,16 @@ export function VideoActionsView({
           </div>
         </div>
         <div className="ml-auto flex items-center gap-3 text-muted-foreground">
-          <VideoMetricsZapButton event={event} />
+          <Button
+            type="button"
+            variant="secondary"
+            size="icon"
+            className="rounded-full"
+            aria-label="Enviar zap"
+            onClick={() => setZapOpen(true)}
+          >
+            <Zap className="size-4" />
+          </Button>
           <ErrorBoundaryVideo>
             <LikeButton contentEvent={event} />
           </ErrorBoundaryVideo>
@@ -80,8 +89,14 @@ export function VideoActionsView({
           </ErrorBoundaryVideo>
         </div>
       </div>
+      <ZapModal open={zapOpen} onOpenChange={setZapOpen} target={{ type: 'event', event }} />
       <ScrollArea>
-        <div className={cn("relative rounded-xl bg-muted p-3", "cursor-pointer transition-all hover:bg-muted-foreground/30")}>
+        <div
+          className={cn(
+            'relative rounded-xl bg-muted p-3',
+            'cursor-pointer transition-all hover:bg-muted-foreground/30',
+          )}
+        >
           <ErrorBoundaryVideo>
             <VideoMeta event={event} />
           </ErrorBoundaryVideo>
@@ -100,5 +115,5 @@ export function VideoActionsView({
         </div>
       </ScrollArea>
     </div>
-  );
+  )
 }
