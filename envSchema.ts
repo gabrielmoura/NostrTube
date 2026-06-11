@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ValidateEnv } from "@julr/vite-plugin-validate-env";
+import { DEFAULT_FEEDBACK_RECIPIENT_NPUB } from "./src/config/feedback.constants";
 
 // Helper para validar e transformar strings separadas por vírgula em Array
 const csvToArray = z.string()
@@ -29,7 +30,8 @@ export default function envSchemaValidate() {
       // Coerção para número com valor padrão (Proof of Work)
       VITE_MIN_VIDEO_POW: z.coerce.number().optional().default(16),
       VITE_MIN_COMMENT_POW: z.coerce.number().optional().default(10),
-      VITE_MIN_PLAYLIST_POW: z.coerce.number().optional().default(10)
+      VITE_MIN_PLAYLIST_POW: z.coerce.number().optional().default(10),
+      VITE_NOSTR_FEEDBACK_RECIPIENT_NPUB: z.string().optional().default(DEFAULT_FEEDBACK_RECIPIENT_NPUB)
     }
   });
 }

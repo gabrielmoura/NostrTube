@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bell, LogOut, Menu, Moon, Search, Settings, Sun, User } from "lucide-react";
 import { cn } from "@/helper/format";
 import { LogoNovo, LogoNovoMono } from "@/components/logo/LogoNovo";
+import { FeedbackButton } from "@/features/feedback/components/FeedbackButton";
 import {
   useCurrentUserProfile,
   useNDKCurrentPubkey,
@@ -117,6 +118,8 @@ export default function Header() {
 
         {/* Right Section */}
         <div className="flex items-center gap-3">
+          <FeedbackButton />
+
           {/* Theme toggle */}
           <Button
             variant="ghost"

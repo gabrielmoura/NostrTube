@@ -16,6 +16,7 @@ NostrTube é uma aplicação de compartilhamento de vídeos descentralizada que 
 - 📹 Upload e compartilhamento de vídeos
 - 🔍 Busca de conteúdo
 - 👤 Perfis de usuário
+- 💬 Feedback direto via Nostr com POW e ZAP opcional
 - 🎬 Player de vídeo com suporte a HLS e DASH
 - 📱 Aplicativo móvel (Android/iOS) via Capacitor
 - 🌐 Progressive Web App (PWA)
@@ -64,6 +65,17 @@ cd NostrTube
 ```bash
 pnpm install
 ```
+
+3. Configure o ambiente:
+```bash
+cp .env.example .env
+```
+
+### Variáveis importantes
+
+- `VITE_NOSTR_FEEDBACK_RECIPIENT_NPUB`: destinatário das mensagens de feedback.
+  - Se não for definido, a aplicação usa `npub1733g4vyyqjkan972u90zfysguc09vvcvkwhmesacpd73ljf4jqlsrz0sq8`.
+  - O valor é validado como `npub` NIP-19 e convertido internamente para pubkey hex.
 
 ## 💻 Desenvolvimento
 
@@ -128,16 +140,37 @@ docker run -p 3000:80 nostrtube
 NostrTube/
 ├── src/
 │   ├── components/     # Componentes React
+│   ├── config/         # Configuração centralizada de ambiente e features
+│   ├── features/       # Features de domínio isoladas
 │   ├── routes/         # Rotas da aplicação
 │   ├── hooks/          # Hooks customizados
 │   ├── lib/            # Bibliotecas e utilitários
 │   ├── store/          # Gerenciamento de estado
 │   └── context/        # Context providers
+├── docs/               # Documentação técnica de arquitetura frontend
 ├── public/             # Arquivos estáticos
 ├── android/            # Projeto Android (Capacitor)
 ├── ios/                # Projeto iOS (Capacitor)
 └── _doc/              # Documentação
 ```
+
+## 💬 Fluxo de Feedback
+
+- O botão `Feedback` fica no header da aplicação.
+- O modal envia uma mensagem privada NIP-17 para o destinatário configurado.
+- O conteúdo inclui título, categoria e idioma do navegador quando disponível.
+- Se um valor de ZAP for selecionado, a aplicação:
+  - envia primeiro a mensagem privada
+  - resolve o usuário com `ndk.fetchUser(...)`
+  - tenta o pagamento com `NDKZapper`
+  - usa WebLN quando disponível ou abre a invoice Lightning real quando necessário
+
+### Referência rápida
+
+- Arquitetura: `docs/frontend-architecture.md`
+- Componentes: `docs/components-tree.md`
+- Estado: `docs/state-management.md`
+- Decisões: `docs/decisions-frontend.md`
 
 ## 🤝 Contribuindo
 

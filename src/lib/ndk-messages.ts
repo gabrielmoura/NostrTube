@@ -1,5 +1,5 @@
-import NDK, { NDKUser } from "@nostr-dev-kit/ndk";
-import { CacheModuleStorage, NDKMessenger } from "@nostr-dev-kit/messages";
+import NDK, { giftWrap, NDKKind, NDKRelaySet, NDKUser, type NDKEvent } from "@nostr-dev-kit/ndk";
+import { CacheModuleStorage, NDKMessenger, type NDKMessage } from "@nostr-dev-kit/messages";
 
 const messengers = new Map<string, NDKMessenger>();
 
@@ -43,12 +43,92 @@ export async function publishDmRelayList(ndk: NDK, relays: string[]): Promise<vo
   await messenger.publishDMRelays(relays);
 }
 
-export async function sendTechnicalIssueMessage(ndk: NDK, authorPubkey: string, content: string) {
+export async function resolveMessageRecipient(ndk: NDK, lookup: string, pubkeyFallback?: string): Promise<NDKUser> {
+  const fetchedUser = await ndk.fetchUser(lookup).catch(() => undefined);
+  if (fetchedUser) return fetchedUser;
+
+  if (pubkeyFallback) {
+    return ndk.getUser({ pubkey: pubkeyFallback }) || new NDKUser({ pubkey: pubkeyFallback });
+  }
+
+  throw new Error("Could not resolve Nostr recipient for private message.");
+}
+
+export async function sendPrivateMessage(
+  ndk: NDK,
+  recipientLookup: string,
+  content: string,
+  pubkeyFallback?: string
+): Promise<NDKMessage> {
   const messenger = await getNdkMessenger(ndk);
   if (!messenger) {
     throw new Error("Messenger is not ready for the current user session");
   }
 
-  const recipient = ndk.getUser({ pubkey: authorPubkey }) || new NDKUser({ pubkey: authorPubkey });
+  const recipient = await resolveMessageRecipient(ndk, recipientLookup, pubkeyFallback);
   return messenger.sendMessage(recipient, content);
+}
+
+async function getPreferredDmRelays(ndk: NDK, pubkey: string): Promise<string[]> {
+  try {
+    const dmRelayList = await ndk.fetchEvent({
+      kinds: [NDKKind.DirectMessageReceiveRelayList],
+      authors: [pubkey]
+    });
+
+    if (dmRelayList) {
+      const relays = dmRelayList.getMatchingTags("relay").map((tag) => tag[1]).filter(Boolean);
+      if (relays.length > 0) return relays;
+    }
+
+    const relayList = await ndk.fetchEvent({
+      kinds: [10002],
+      authors: [pubkey]
+    });
+
+    if (relayList) {
+      const relays = relayList.getMatchingTags("r").map((tag) => tag[1]).filter(Boolean);
+      if (relays.length > 0) return relays.slice(0, 3);
+    }
+
+    return [];
+  } catch {
+    return [];
+  }
+}
+
+export async function sendPrivateMessageEvent(
+  ndk: NDK,
+  recipientLookup: string,
+  event: NDKEvent,
+  pubkeyFallback?: string
+): Promise<{ wrappedEvent: NDKEvent; rumorEvent: NDKEvent; recipient: NDKUser }> {
+  if (!ndk.signer) {
+    throw new Error("No signer available for private message delivery.");
+  }
+
+  const recipient = await resolveMessageRecipient(ndk, recipientLookup, pubkeyFallback);
+  const wrappedEvent = await giftWrap(event, recipient, ndk.signer);
+  const sender = await ndk.signer.user();
+
+  const recipientRelays = await getPreferredDmRelays(ndk, recipient.pubkey);
+  const senderRelays = await getPreferredDmRelays(ndk, sender.pubkey);
+  const allRelays = [...new Set([...recipientRelays, ...senderRelays])];
+
+  if (allRelays.length > 0) {
+    const relaySet = NDKRelaySet.fromRelayUrls(allRelays, ndk);
+    await wrappedEvent.publish(relaySet);
+  } else {
+    await wrappedEvent.publish();
+  }
+
+  return {
+    wrappedEvent,
+    rumorEvent: event,
+    recipient
+  };
+}
+
+export async function sendTechnicalIssueMessage(ndk: NDK, authorPubkey: string, content: string) {
+  return sendPrivateMessage(ndk, authorPubkey, content, authorPubkey);
 }

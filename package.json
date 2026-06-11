@@ -8,10 +8,11 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "pre-build": "tsc  && vite build",
-    "lint": "eslint .",
+    "lint": "biome lint .",
+    "lint:fix": "biome check --write .",
     "preview": "vite preview",
     "analyze": "pnpm dlx vite-bundle-visualizer -o ./stats.html",
-    "format": "prettier --ignore-path .prettierignore -w .",
+    "format": "biome format --write .",
     "start": "serve -s -C dist"
   },
   "dependencies": {
@@ -124,6 +125,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.4.16",
     "@capacitor/android": "^7.6.6",
     "@capacitor/app": "^7.1.2",
     "@capacitor/assets": "^3.0.5",
@@ -156,7 +158,6 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.5.0",
-    "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.26",
     "globals": "^16.5.0",

@@ -101,5 +101,120 @@
         "duplicate": "Esta etiqueta ya existe."
       }
     }
+  },
+  "feedback": {
+    "header_button": "Feedback",
+    "header_button_aria": "Abrir feedback",
+    "modal_title": "Feedback directo",
+    "modal_description": "Envía sugerencias, errores, agradecimientos y apoyo mediante un mensaje privado NIP-17 con ZAP opcional.",
+    "confirm_discard": "¿Descartar el borrador actual de feedback?",
+    "message_placeholder_default": "Describe tu sugerencia, problema o agradecimiento. Incluye pasos para reproducirlo si es un error.",
+    "fields": {
+      "title": "Título",
+      "title_placeholder": "Ej: Mejorar búsqueda de videos por hashtag",
+      "category": "Categoría",
+      "message": "Mensaje",
+      "message_help": "Tu mensaje se publicará en la red Nostr y puede ser visible públicamente.",
+      "message_help_private": "Tu mensaje se enviará como mensaje privado NIP-17 al destinatario configurado.",
+      "include_technical": "Incluir información técnica básica",
+      "include_technical_help": "Incluye URL actual, user agent resumido, versión de la aplicación, marca de tiempo e idioma.",
+      "zap": "ZAP opcional",
+      "zap_help": "El ZAP se intentará después de publicar el feedback."
+    },
+    "auth_required": {
+      "title": "Inicio de sesión requerido para publicar",
+      "description": "Puedes completar el formulario ahora, pero tendrás que iniciar sesión con tu identidad Nostr antes de enviarlo.",
+      "action": "Entrar con Nostr"
+    },
+    "privacy": {
+      "pow_notice": "Usamos una pequeña prueba de trabajo para reducir spam. Esto puede tardar unos segundos.",
+      "private_message_notice": "Tu feedback se enviará como mensaje privado NIP-17, pero aun así evita compartir contraseñas, claves privadas, tokens o datos sensibles.",
+      "security_notice": "No envíes contraseñas, claves privadas, tokens ni datos sensibles."
+    },
+    "progress": {
+      "pow_title": "Calculando POW 16",
+      "pow_attempts": "Intentos actuales: {{count}}"
+    },
+    "actions": {
+      "submit": "Enviar feedback",
+      "preparing": "Preparando...",
+      "calculating_pow": "Calculando POW...",
+      "signing": "Firmando...",
+      "publishing": "Publicando...",
+      "starting_zap": "Iniciando ZAP...",
+      "sent": "Enviado",
+      "cancel": "Cancelar",
+      "cancel_sending": "Cancelar envío",
+      "close": "Cerrar",
+      "send_another": "Enviar otro feedback"
+    },
+    "success": {
+      "title": "Feedback enviado",
+      "description": "Tu feedback fue publicado en la red Nostr.",
+      "sent": "Feedback enviado con éxito.",
+      "sent_with_zap": "Feedback y ZAP enviados con éxito.",
+      "invoice_ready": "Feedback enviado. Abre tu billetera Lightning para completar el ZAP.",
+      "zap_failed_after_feedback": "El feedback se envió correctamente, pero no fue posible completar el ZAP.",
+      "message_id": "ID del mensaje",
+      "private_delivery_notice": "Entregado como mensaje privado NIP-17.",
+      "event_id": "ID del evento",
+      "open_in_njump": "Abrir en njump",
+      "complete_zap": "Completar ZAP",
+      "invoice_description": "Se generó una factura Lightning real. Abre tu billetera para completar el pago.",
+      "open_wallet": "Abrir billetera Lightning",
+      "webln_preimage_fallback": "pagado-via-webln"
+    },
+    "errors": {
+      "unauthenticated": "Inicia sesión con tu identidad Nostr antes de enviar feedback.",
+      "invalid_recipient": "El destinatario de feedback configurado es inválido.",
+      "pow_cancelled": "El envío se canceló durante el cálculo del POW.",
+      "pow_failed": "No fue posible calcular el POW del feedback.",
+      "sign_failed": "No fue posible firmar el evento Nostr.",
+      "publish_timeout": "El envío expiró antes de confirmar la publicación en los relays.",
+      "publish_failed": "No fue posible publicar el feedback en los relays.",
+      "relay_unavailable": "No hay relays disponibles para publicar el feedback.",
+      "recipient_metadata_failed": "No fue posible cargar los metadatos del destinatario para ZAP.",
+      "zap_unavailable": "El destinatario no tiene una dirección Lightning configurada para recibir ZAP.",
+      "zap_invoice_failed": "No fue posible generar la factura Lightning para el ZAP.",
+      "zap_payment_failed": "El feedback fue enviado, pero el pago Lightning no se completó.",
+      "unknown": "Ocurrió un error inesperado al enviar el feedback."
+    },
+    "event": {
+      "title_label": "Título",
+      "category_label": "Categoría",
+      "browser_language_label": "Idioma del navegador",
+      "technical_details_label": "Información técnica básica",
+      "locale_label": "Idioma",
+      "app_version_label": "Versión de la app",
+      "timestamp_label": "Marca de tiempo"
+    },
+    "zap": {
+      "none": "Sin ZAP",
+      "21": "21 sats",
+      "100": "100 sats",
+      "500": "500 sats",
+      "1000": "1000 sats",
+      "5000": "5000 sats",
+      "custom": "Valor personalizado",
+      "custom_placeholder": "Ej: 2100",
+      "unit": "sats"
+    },
+    "categories": {
+      "feature-request": { "label": "Nueva funcionalidad", "description": "Una idea nueva que agregaría valor al producto.", "placeholder": "Describe la funcionalidad deseada, por qué sería útil y cómo imaginas su funcionamiento." },
+      "bug-report": { "label": "Corrección de error", "description": "Algo no funciona como se espera.", "placeholder": "Describe el error, lo que esperabas que ocurriera, lo que ocurrió y los pasos para reproducirlo." },
+      "thanks": { "label": "Agradecimiento", "description": "Un mensaje de apoyo o reconocimiento.", "placeholder": "Cuenta qué te gustó, por qué fue útil y si te gustaría apoyarlo con un ZAP." },
+      "ui-ux": { "label": "Mejora de UI/UX", "description": "Ajustes en la experiencia visual o de uso.", "placeholder": "Explica qué parte de la interfaz puede mejorar y cómo impacta la experiencia." },
+      "performance": { "label": "Rendimiento", "description": "Lentitud, bloqueos o uso excesivo de recursos.", "placeholder": "Describe dónde la aplicación se volvió lenta, se congeló o consumió demasiados recursos." },
+      "video-player": { "label": "Reproductor de video", "description": "Problemas o mejoras en el reproductor.", "placeholder": "Explica el comportamiento del reproductor, incluyendo carga, audio, subtítulos o controles." },
+      "upload-blossom": { "label": "Subida / Blossom", "description": "Envío de medios, Blossom y publicación.", "placeholder": "Describe la dificultad en la subida, el procesamiento o el uso de Blossom." },
+      "search-discovery": { "label": "Búsqueda y descubrimiento", "description": "Búsqueda, filtros, navegación y descubrimiento de videos.", "placeholder": "Explica qué falta o qué podría mejorar en la búsqueda y descubrimiento de contenido." },
+      "feeds-recommendations": { "label": "Feeds y recomendaciones", "description": "Sugerencias, ranking y página inicial.", "placeholder": "Describe cómo los feeds o recomendaciones podrían ser más útiles." },
+      "login-nostr": { "label": "Login / Nostr", "description": "Autenticación, extensiones, claves y sesión.", "placeholder": "Explica el problema o la mejora deseada en el flujo de inicio de sesión Nostr." },
+      "moderation-content": { "label": "Moderación / contenido", "description": "Reglas, reportes o control de contenido.", "placeholder": "Describe la necesidad relacionada con la moderación o la visualización del contenido." },
+      "privacy-security": { "label": "Privacidad / seguridad", "description": "Protección de datos, permisos y seguridad.", "placeholder": "Explica la preocupación de privacidad o seguridad y el contexto en el que aparece." },
+      "i18n": { "label": "Traducción / i18n", "description": "Idiomas, textos y localización.", "placeholder": "Indica el idioma, el texto con problema y la mejora deseada." },
+      "documentation": { "label": "Documentación", "description": "Guías, FAQ y claridad del producto.", "placeholder": "Describe la duda, la falta de documentación o qué podría ser más claro." },
+      "other": { "label": "Otro", "description": "Cualquier tema fuera de las categorías anteriores.", "placeholder": "Describe tu sugerencia, problema o agradecimiento. Incluye pasos para reproducirlo si es un error." }
+    }
   }
 }
