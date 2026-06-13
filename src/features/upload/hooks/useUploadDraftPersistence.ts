@@ -18,14 +18,12 @@ export function useUploadDraftPersistence() {
   const clearLocalDraft = useVideoUploadStore((state) => state.clearLocalDraft)
   const getDraftSnapshot = useVideoUploadStore((state) => state.getDraftSnapshot)
   const applyDraftSnapshot = useVideoUploadStore((state) => state.applyDraftSnapshot)
-  const preferCompression = useVideoUploadStore((state) => state.preferCompression)
   const thumbnailPreviewUrl = useVideoUploadStore((state) => state.thumbnailPreviewUrl)
 
   const saveDraft = useCallback(async () => {
     const base = getDraftSnapshot()
     const snapshot: UploadDraftSnapshot = {
       ...base,
-      preferCompression,
       thumbnailPreviewUrl,
     }
 
@@ -44,7 +42,7 @@ export function useUploadDraftPersistence() {
     }
 
     return snapshot
-  }, [currentUser, getDraftSnapshot, ndk, preferCompression, saveDraftLocal, thumbnailPreviewUrl])
+  }, [currentUser, getDraftSnapshot, ndk, saveDraftLocal, thumbnailPreviewUrl])
 
   const restoreDraft = useCallback(async () => {
     let localSnapshot: UploadDraftSnapshot | null = null

@@ -1,17 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { t } from 'i18next'
-import { CheckCircle2, ChevronLeft, ChevronRight, CircleHelp, Copy, ExternalLink, Film, Rocket, ShieldCheck, Sparkles, Wand2 } from 'lucide-react'
+import { CheckCircle2, ChevronLeft, ChevronRight, CircleHelp, Copy, ExternalLink, Film, Rocket, ShieldCheck, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import { ButtonWithLoader } from '@/components/ButtonWithLoader'
 import { Image } from '@/components/Image'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { Switch } from '@/components/ui/switch'
 import { UploadFormView } from '@/features/upload/components/UploadFormView'
 import { useUploadDraftPersistence } from '@/features/upload/hooks/useUploadDraftPersistence'
 import { usePublishVideo } from '@/hooks/usePublishVideo'
 import { copyText } from '@/helper/format'
+import { useUploadPreferencesStore } from '@/store/useUploadPreferencesStore'
 import { useVideoUploadStore } from '@/store/videoUpload/useVideoUploadStore'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/videoPlayer/components/Tooltip'
 import { ButtonUploadThumb } from '@/routes/new/@components/ButtonUploadThumb'
@@ -190,7 +190,7 @@ function UploadReviewCard({ title, summary, thumbnail, language, hashtags, index
   )
 }
 
-function UploadSidebarPanel({ thumbnail, onThumbnailChange, onSaveDraft, preferCompression, onCompressionChange, uploadStage }: { thumbnail?: string, onThumbnailChange: (value: string) => void, onSaveDraft: () => void, preferCompression: boolean, onCompressionChange: (value: boolean) => void, uploadStage: string }) {
+function UploadSidebarPanel({ thumbnail, onThumbnailChange, onSaveDraft, thumbnailMode, uploadStage }: { thumbnail?: string, onThumbnailChange: (value: string) => void, onSaveDraft: () => void, thumbnailMode: 'local' | 'remote', uploadStage: string }) {
   return (
     <aside className="space-y-5 lg:sticky lg:top-24 lg:h-fit">
       <div className="rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur">
@@ -214,28 +214,25 @@ function UploadSidebarPanel({ thumbnail, onThumbnailChange, onSaveDraft, preferC
 
       <div className="rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur">
         <div className="mb-4 flex items-center gap-2">
-          <Wand2 className="size-4 text-primary" />
-          <p className="text-sm font-medium">Processamento local</p>
+          <ShieldCheck className="size-4 text-primary" />
+          <p className="text-sm font-medium">Geração de thumbnail</p>
         </div>
-        <div className="flex items-start justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 p-3">
-          <div className="space-y-1">
-            <p className="text-sm font-medium">Usar ffmpeg.wasm quando disponível</p>
-            <p className="text-xs text-muted-foreground">
-              Extrai metadados, pode gerar thumbnail e otimizar o vídeo localmente. O upload continua funcionando sem ffmpeg ou DVM.
-            </p>
-          </div>
-          <Switch checked={preferCompression} onCheckedChange={onCompressionChange} />
+        <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+          <p className="text-sm font-medium">{thumbnailMode === 'local' ? 'Modo local' : 'Modo remoto'}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {thumbnailMode === 'local'
+              ? 'O app tenta gerar a thumbnail no navegador e usa ffmpeg.wasm como fallback quando disponível.'
+              : 'O app solicita thumbnails a um DVM após enviar ou importar a fonte de vídeo.'}
+          </p>
         </div>
-        <p className="mt-3 text-xs text-muted-foreground">
-          {preferCompression
-            ? 'Otimização local ativada. Se o processamento falhar, enviaremos o arquivo original.'
-            : 'Modo seguro ativo: prioriza o arquivo original e usa processamento opcional só para enriquecer a mídia.'}
-        </p>
         {uploadStage === 'processing' ? (
           <div className="mt-3 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-primary">
-            Processando mídia localmente… isso pode levar alguns segundos em arquivos grandes.
+            {thumbnailMode === 'local'
+              ? 'Tentando gerar thumbnail localmente...'
+              : 'Preparando mídia para envio e solicitação remota de thumbnail...'}
           </div>
         ) : null}
+        <p className="mt-3 text-xs text-muted-foreground">Altere essa preferência em Configurações → Player e upload.</p>
       </div>
 
       <div className="rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur">
@@ -260,7 +257,7 @@ export function UploadPageContainer() {
   const navigate = useNavigate()
   const videoData = useVideoUploadStore((state) => state.videoData)
   const thumbnailPreviewUrl = useVideoUploadStore((state) => state.thumbnailPreviewUrl)
-  const preferCompression = useVideoUploadStore((state) => state.preferCompression)
+  const thumbnailGenerationMode = useUploadPreferencesStore((state) => state.thumbnailGenerationMode)
   const currentStep = useVideoUploadStore((state) => state.currentStep)
   const setCurrentStep = useVideoUploadStore((state) => state.setCurrentStep)
   const setTitle = useVideoUploadStore((state) => state.setTitle)
@@ -271,7 +268,6 @@ export function UploadPageContainer() {
   const setLanguage = useVideoUploadStore((state) => state.setLanguage)
   const setGeohash = useVideoUploadStore((state) => state.setGeohash)
   const setThumbnail = useVideoUploadStore((state) => state.setThumbnail)
-  const setPreferCompression = useVideoUploadStore((state) => state.setPreferCompression)
   const clearUploadedMedia = useVideoUploadStore((state) => state.clearUploadedMedia)
   const resetForm = useVideoUploadStore((state) => state.resetForm)
   const isUploading = useVideoUploadStore((state) => state.isUploading)
@@ -462,8 +458,7 @@ export function UploadPageContainer() {
           thumbnail={displayThumbnail}
           onThumbnailChange={setThumbnail}
           onSaveDraft={handleSaveDraft}
-          preferCompression={preferCompression}
-          onCompressionChange={setPreferCompression}
+          thumbnailMode={thumbnailGenerationMode}
           uploadStage={uploadStage}
         />
       </div>

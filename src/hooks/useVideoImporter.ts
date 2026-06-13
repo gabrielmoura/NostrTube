@@ -5,8 +5,10 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { fetchVideoEventByReference } from '@/features/nostr/services/ndk-query.service'
 import { uploadToConfiguredBlossomServers } from '@/features/upload/services/blossom-server.service'
+import { requestDvmThumbnails } from '@/features/upload/services/dvm-thumbnail.service'
 import { generateVideoThumbnailFromUrl } from '@/features/upload/services/local-media-processing.service'
 import { normalizeVideoEventAssets } from '@/features/video/services/video-imeta.service'
+import { useUploadPreferencesStore } from '@/store/useUploadPreferencesStore'
 import { useVideoUploadStore } from '@/store/videoUpload/useVideoUploadStore.ts'
 
 export function useVideoImporter() {
@@ -17,6 +19,7 @@ export function useVideoImporter() {
   const setUrl = useVideoUploadStore((s) => s.setUrl)
   const setThumbnail = useVideoUploadStore((s) => s.setThumbnail)
   const setVideoData = useVideoUploadStore((s) => s.setVideoData)
+  const thumbnailGenerationMode = useUploadPreferencesStore((s) => s.thumbnailGenerationMode)
 
   // Lógica 1: Importar de Evento Nostr
   const importFromEvent = async (eventString: string) => {
@@ -143,7 +146,7 @@ export function useVideoImporter() {
     let generatedThumbnail: string | undefined
     const mimeType = inferMimeTypeFromUrl(url)
 
-    if (ndk && mimeType?.startsWith('video/')) {
+    if (ndk && mimeType?.startsWith('video/') && thumbnailGenerationMode === 'local') {
       try {
         const generated = await generateVideoThumbnailFromUrl(
           url,
@@ -161,6 +164,23 @@ export function useVideoImporter() {
         toast.success('Thumbnail gerada a partir do vídeo externo.')
       } catch (error) {
         console.warn('External thumbnail generation failed', error)
+      }
+    }
+
+    if (ndk && mimeType?.startsWith('video/') && thumbnailGenerationMode === 'remote' && ndk.activeUser?.pubkey) {
+      try {
+        const dvmResult = await requestDvmThumbnails({
+          ndk,
+          videoUrl: url,
+          requesterPubkey: ndk.activeUser.pubkey,
+        })
+        generatedThumbnail = dvmResult?.thumbnails[0]
+        if (generatedThumbnail) {
+          setThumbnail(generatedThumbnail)
+          toast.success('Thumbnail gerada via DVM.')
+        }
+      } catch (error) {
+        console.warn('External DVM thumbnail generation failed', error)
       }
     }
 

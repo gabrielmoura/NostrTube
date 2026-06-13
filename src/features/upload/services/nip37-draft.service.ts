@@ -10,6 +10,7 @@ export interface UploadDraftSnapshot {
   videoData: Partial<VideoMetadata>
   currentStep: 1 | 2 | 3
   updatedAt: number
+  /** @deprecated Thumbnail processing is now a global upload preference. */
   preferCompression?: boolean
   thumbnailPreviewUrl?: string
 }

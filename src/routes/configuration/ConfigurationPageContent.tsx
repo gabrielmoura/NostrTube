@@ -5,6 +5,7 @@ import { Link } from '@tanstack/react-router'
 import {
   Bell,
   Cloud,
+  Cpu,
   Eye,
   EyeOff,
   HandCoins,
@@ -14,6 +15,7 @@ import {
   Moon,
   Palette,
   Play,
+  RadioTower,
   Settings2,
   ShieldCheck,
   Sun,
@@ -43,6 +45,7 @@ import { BlossomSettings } from '@/routes/configuration/@components/BlossomSetti
 import { PermissionSettings } from '@/routes/configuration/@components/PermissionSettings.tsx'
 import { RelaySettings } from '@/routes/configuration/@components/RelaySettings.tsx'
 import { VisibilitySettings } from '@/routes/configuration/@components/VisibilitySettings.tsx'
+import { useUploadPreferencesStore, type ThumbnailGenerationMode } from '@/store/useUploadPreferencesStore'
 import useUserStore from '@/store/useUserStore.ts'
 
 type SettingsTab = 'profile' | 'account' | 'appearance' | 'notifications' | 'privacy' | 'player' | 'relays-blossom'
@@ -317,6 +320,28 @@ function NotificationRow({ label, description, checked, onChange }: { label: str
 }
 
 function PlayerSection() {
+  const thumbnailGenerationMode = useUploadPreferencesStore((state) => state.thumbnailGenerationMode)
+  const setThumbnailGenerationMode = useUploadPreferencesStore((state) => state.setThumbnailGenerationMode)
+  const thumbnailModeOptions: Array<{
+    value: ThumbnailGenerationMode
+    title: string
+    description: string
+    icon: typeof Cpu
+  }> = [
+    {
+      value: 'local',
+      title: 'Local',
+      description: 'Tenta gerar no navegador primeiro. Se falhar, usa ffmpeg.wasm quando disponível.',
+      icon: Cpu,
+    },
+    {
+      value: 'remote',
+      title: 'Remoto',
+      description: 'Usa um DVM para gerar thumbnails a partir da fonte de vídeo publicada/importada.',
+      icon: RadioTower,
+    },
+  ]
+
   return (
     <Card>
       <CardHeader>
@@ -327,6 +352,39 @@ function PlayerSection() {
         <CardDescription>Preferências de reprodução e envio de vídeos.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
+        <div className="space-y-3 rounded-2xl border border-border/70 bg-card/60 p-4">
+          <div>
+            <Label className="text-sm font-medium">Geração de thumbnail</Label>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Preferência global usada na tela de upload e importação por URL.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {thumbnailModeOptions.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setThumbnailGenerationMode(option.value)}
+                className={cn(
+                  'flex items-start gap-3 rounded-2xl border p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60',
+                  thumbnailGenerationMode === option.value
+                    ? 'border-primary/60 bg-primary/10 text-foreground shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_20%,transparent)]'
+                    : 'border-border/70 bg-background/35 text-muted-foreground hover:border-primary/35 hover:bg-secondary/55',
+                )}
+                aria-pressed={thumbnailGenerationMode === option.value}
+              >
+                <span className="rounded-2xl bg-secondary p-2 text-primary">
+                  <option.icon className="size-4" />
+                </span>
+                <span>
+                  <span className="block text-sm font-medium text-foreground">{option.title}</span>
+                  <span className="mt-1 block text-xs leading-5 text-muted-foreground">{option.description}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="quality">Qualidade padrão</Label>

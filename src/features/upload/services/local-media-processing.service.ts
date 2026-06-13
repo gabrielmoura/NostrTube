@@ -1,5 +1,6 @@
 import { encode } from 'blurhash'
 import { processVideoWithFFmpeg } from '@/features/upload/services/ffmpeg-media-processing.service'
+import type { ThumbnailGenerationMode } from '@/store/useUploadPreferencesStore'
 
 export interface GeneratedThumbnail {
   file: File;
@@ -163,13 +164,13 @@ export async function generateVideoThumbnailLocally(file: File, seekToSeconds = 
 export async function prepareVideoUploadAsset(
   file: File,
   {
-    preferCompression = false,
     enableFFmpeg = true,
     generateThumbnail = true,
+    thumbnailGenerationMode = 'local',
   }: {
-    preferCompression?: boolean
     enableFFmpeg?: boolean
     generateThumbnail?: boolean
+    thumbnailGenerationMode?: ThumbnailGenerationMode
   } = {},
 ): Promise<PreparedVideoUploadAsset> {
   if (!file.type.startsWith('video/')) {
@@ -180,25 +181,9 @@ export async function prepareVideoUploadAsset(
     }
   }
 
-  if (enableFFmpeg) {
-    const ffmpegResult = await processVideoWithFFmpeg(file, { preferCompression })
-    if (ffmpegResult) {
-      return {
-        uploadFile: ffmpegResult.file ?? file,
-        thumbnailFile: generateThumbnail ? ffmpegResult.thumbnailFile : undefined,
-        thumbnailPreviewUrl: generateThumbnail ? ffmpegResult.thumbnailPreviewUrl : undefined,
-        width: ffmpegResult.width,
-        height: ffmpegResult.height,
-        duration: ffmpegResult.duration,
-        mimeType: ffmpegResult.mimeType ?? file.type,
-        strategy: 'ffmpeg',
-      }
-    }
-  }
-
   const metadata = await extractVideoMetadataLocally(file).catch(() => undefined)
 
-  if (!generateThumbnail) {
+  if (!generateThumbnail || thumbnailGenerationMode === 'remote') {
     return {
       uploadFile: file,
       width: metadata?.width,
@@ -222,14 +207,32 @@ export async function prepareVideoUploadAsset(
       strategy: 'html-video',
     }
   } catch {
-    return {
-      uploadFile: file,
-      width: metadata?.width,
-      height: metadata?.height,
-      duration: metadata?.duration,
-      mimeType: file.type,
-      strategy: 'original',
+    // Fallback below: ffmpeg can still extract a thumbnail when canvas/video APIs fail.
+  }
+
+  if (enableFFmpeg) {
+    const ffmpegResult = await processVideoWithFFmpeg(file).catch(() => null)
+    if (ffmpegResult) {
+      return {
+        uploadFile: ffmpegResult.file ?? file,
+        thumbnailFile: generateThumbnail ? ffmpegResult.thumbnailFile : undefined,
+        thumbnailPreviewUrl: generateThumbnail ? ffmpegResult.thumbnailPreviewUrl : undefined,
+        width: ffmpegResult.width || metadata?.width,
+        height: ffmpegResult.height || metadata?.height,
+        duration: ffmpegResult.duration || metadata?.duration,
+        mimeType: ffmpegResult.mimeType ?? file.type,
+        strategy: 'ffmpeg',
+      }
     }
+  }
+
+  return {
+    uploadFile: file,
+    width: metadata?.width,
+    height: metadata?.height,
+    duration: metadata?.duration,
+    mimeType: file.type,
+    strategy: 'original',
   }
 }
 

@@ -6,6 +6,7 @@ import { uploadToConfiguredBlossomServers } from '@/features/upload/services/blo
 import { requestDvmThumbnails } from '@/features/upload/services/dvm-thumbnail.service'
 import { generateBlurhashFromImageFile, prepareVideoUploadAsset } from '@/features/upload/services/local-media-processing.service'
 import { LoggerAgent } from '@/lib/debug.ts'
+import { useUploadPreferencesStore } from '@/store/useUploadPreferencesStore'
 import { useVideoUploadStore } from '@/store/videoUpload/useVideoUploadStore.ts'
 
 const logger = LoggerAgent.create('useVideoUploader')
@@ -21,7 +22,7 @@ export function useVideoUploader() {
   const setUploadStage = useVideoUploadStore((s) => s.setUploadStage)
   const setThumbnailPreviewUrl = useVideoUploadStore((s) => s.setThumbnailPreviewUrl)
   const setError = useVideoUploadStore((s) => s.setError)
-  const preferCompression = useVideoUploadStore((s) => s.preferCompression)
+  const thumbnailGenerationMode = useUploadPreferencesStore((s) => s.thumbnailGenerationMode)
   const isLoading = useVideoUploadStore((s) => s.isUploading)
   const progress = useVideoUploadStore((s) => s.uploadProgress)
   const uploadStage = useVideoUploadStore((s) => s.uploadStage)
@@ -57,9 +58,9 @@ export function useVideoUploader() {
       if (file.type.startsWith('video/')) {
         setUploadStage('processing')
         const prepared = await prepareVideoUploadAsset(file, {
-          preferCompression,
-          enableFFmpeg: true,
-          generateThumbnail: true,
+          enableFFmpeg: thumbnailGenerationMode === 'local',
+          generateThumbnail: thumbnailGenerationMode === 'local',
+          thumbnailGenerationMode,
         })
         uploadFile = prepared.uploadFile
         generatedThumbnailFile = prepared.thumbnailFile
@@ -97,7 +98,7 @@ export function useVideoUploader() {
         blurhash = await generateBlurhashFromImageFile(generatedThumbnailFile)
       }
 
-      if (!thumbnailUrl && file.type.startsWith('video/')) {
+      if (!thumbnailUrl && file.type.startsWith('video/') && thumbnailGenerationMode === 'remote') {
         try {
           const dvmResult = await requestDvmThumbnails({
             ndk: ndkInstance,
@@ -160,7 +161,7 @@ export function useVideoUploader() {
     } finally {
       setUploadingState(false)
     }
-  }, [preferCompression, setError, setShowEventInput, setThumbnailPreviewUrl, setUploadProgress, setUploadStage, setUploadingState, setVideoUpload])
+  }, [setError, setShowEventInput, setThumbnailPreviewUrl, setUploadProgress, setUploadStage, setUploadingState, setVideoUpload, thumbnailGenerationMode])
 
   return { upload, isLoading, progress, uploadStage }
 }
