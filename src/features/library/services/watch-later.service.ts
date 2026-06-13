@@ -3,6 +3,10 @@ import { getTagValue } from '@welshman/util'
 
 const WATCH_LATER_KEY = 'nostrtube:watch-later'
 const WATCH_LATER_EVENT = 'nostrtube:watch-later-changed'
+const EMPTY_WATCH_LATER_ITEMS: WatchLaterItem[] = []
+
+let cachedRaw: string | null | undefined
+let cachedItems: WatchLaterItem[] = EMPTY_WATCH_LATER_ITEMS
 
 export interface WatchLaterItem {
   eventId: string
@@ -23,19 +27,31 @@ function emitChange() {
 }
 
 function readItems(): WatchLaterItem[] {
-  if (!isBrowser()) return []
+  if (!isBrowser()) return EMPTY_WATCH_LATER_ITEMS
 
   const raw = window.localStorage.getItem(WATCH_LATER_KEY)
-  if (!raw) return []
+  if (raw === cachedRaw) return cachedItems
+
+  cachedRaw = raw
+  if (!raw) {
+    cachedItems = EMPTY_WATCH_LATER_ITEMS
+    return cachedItems
+  }
 
   try {
     const parsed = JSON.parse(raw) as WatchLaterItem[]
-    if (!Array.isArray(parsed)) return []
-    return parsed
+    if (!Array.isArray(parsed)) {
+      cachedItems = EMPTY_WATCH_LATER_ITEMS
+      return cachedItems
+    }
+
+    cachedItems = parsed
       .filter((item) => item?.eventId && item?.eventRef)
       .sort((a, b) => b.savedAt - a.savedAt)
+    return cachedItems
   } catch {
-    return []
+    cachedItems = EMPTY_WATCH_LATER_ITEMS
+    return cachedItems
   }
 }
 

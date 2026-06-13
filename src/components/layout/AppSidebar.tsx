@@ -2,12 +2,17 @@ import { useNDKCurrentUser } from '@nostr-dev-kit/ndk-hooks'
 import { Link } from '@tanstack/react-router'
 import {
   BellRing,
+  Bookmark,
   Cloud,
   Compass,
   Flame,
   FolderOpen,
+  Heart,
+  History,
   LayoutGrid,
+  ListVideo,
   MonitorUp,
+  PlaySquare,
   Radio,
   Settings2,
   ShieldCheck,
@@ -20,7 +25,24 @@ import { StatusBadge } from '@/components/ui/status-badge'
 import { cn } from '@/lib/utils'
 import useUserStore from '@/store/useUserStore'
 
-type SidebarKey = 'home' | 'explore' | 'trending' | 'upload' | 'relays' | 'blossom' | 'zaps' | 'subscriptions' | 'live' | 'library' | 'settings' | 'debug'
+type SidebarKey =
+  | 'home'
+  | 'explore'
+  | 'trending'
+  | 'upload'
+  | 'relays'
+  | 'blossom'
+  | 'zaps'
+  | 'subscriptions'
+  | 'live'
+  | 'library'
+  | 'history'
+  | 'watchlater'
+  | 'liked'
+  | 'myvideos'
+  | 'playlists'
+  | 'settings'
+  | 'debug'
 
 interface SidebarItem {
   key: SidebarKey
@@ -33,15 +55,23 @@ interface SidebarItem {
 
 const primaryItems: SidebarItem[] = [
   { key: 'home', label: 'Início', icon: LayoutGrid, to: '/' },
-  { key: 'explore', label: 'Explorar', icon: Compass, to: '/search' },
   { key: 'trending', label: 'Trending', icon: Flame, to: '/trending' },
+  { key: 'subscriptions', label: 'Inscrições', icon: BellRing, to: '/subscriptions' },
+  { key: 'live', label: 'Ao vivo', icon: Radio, to: '/live' },
+  { key: 'zaps', label: 'Zaps', icon: WalletCards, to: '/zaps' },
+  { key: 'explore', label: 'Explorar', icon: Compass, to: '/explore' },
   { key: 'upload', label: 'Enviar vídeo', icon: MonitorUp, to: '/new' },
   { key: 'relays', label: 'Relays', icon: Wifi, to: '/relays', badge: 'hot' },
   { key: 'blossom', label: 'Blossom', icon: Cloud, to: '/blossom' },
-  { key: 'zaps', label: 'Zaps', icon: WalletCards, to: '/zaps' },
-  { key: 'subscriptions', label: 'Inscrições', icon: BellRing, to: '/subscriptions' },
-  { key: 'live', label: 'Ao vivo', icon: Radio, to: '/live' },
+]
+
+const libraryItems: SidebarItem[] = [
   { key: 'library', label: 'Biblioteca', icon: FolderOpen, to: '/library' },
+  { key: 'history', label: 'Histórico', icon: History, to: '/library' },
+  { key: 'watchlater', label: 'Assistir mais tarde', icon: Bookmark, to: '/library' },
+  { key: 'liked', label: 'Vídeos curtidos', icon: Heart, to: '/library' },
+  { key: 'myvideos', label: 'Seus vídeos', icon: PlaySquare, to: '/library' },
+  { key: 'playlists', label: 'Playlists', icon: ListVideo, to: '/library' },
 ]
 
 const secondaryItems: SidebarItem[] = [
@@ -51,9 +81,9 @@ const secondaryItems: SidebarItem[] = [
 function SidebarRow({ item, activeKey }: { item: SidebarItem; activeKey?: SidebarKey }) {
   const active = item.key === activeKey
   const rowClass = cn(
-    'group flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm transition-colors',
+    'group flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60',
     active
-      ? 'bg-primary/14 text-foreground shadow-[inset_0_0_0_1px_rgba(139,92,246,0.24)]'
+      ? 'bg-primary/14 text-foreground shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_26%,transparent)]'
       : 'text-muted-foreground hover:bg-secondary/70 hover:text-foreground',
     item.disabled && 'cursor-not-allowed opacity-55 hover:bg-transparent hover:text-muted-foreground',
   )
@@ -95,26 +125,39 @@ export function AppSidebar({ activeKey, className }: AppSidebarProps) {
 
   return (
     <aside className={cn('flex h-full w-full max-w-[248px] flex-col border-r border-sidebar-border bg-sidebar/90 px-3 py-4 backdrop-blur-xl', className)}>
-      <div className="mb-6 px-3">
-        <p className="font-display text-lg font-semibold tracking-tight text-sidebar-foreground">NostrTube</p>
-        <p className="mt-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">Relay Cinema</p>
+      <div className="mb-5 flex items-center gap-3 px-3">
+        <div className="flex size-10 items-center justify-center rounded-2xl brand-gradient text-sm font-bold text-white shadow-lg">NT</div>
+        <div className="min-w-0">
+          <p className="font-display text-lg font-semibold leading-tight tracking-tight text-sidebar-foreground">NostrTube</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Relay Cinema</p>
+        </div>
       </div>
 
-      <nav className="space-y-1">
+      <nav className="space-y-1" aria-label="Navegação principal">
         {primaryItems.map((item) => (
           <SidebarRow key={item.key} item={item} activeKey={activeKey} />
         ))}
       </nav>
 
-      <div className="my-5 border-t border-sidebar-border" />
+      <div className="my-4 border-t border-sidebar-border" />
 
-      <div className="space-y-1">
+      <div className="mb-2 px-3 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Biblioteca</div>
+
+      <nav className="space-y-1" aria-label="Biblioteca">
+        {libraryItems.map((item) => (
+          <SidebarRow key={item.key} item={item} activeKey={activeKey} />
+        ))}
+      </nav>
+
+      <div className="my-4 border-t border-sidebar-border" />
+
+      <div className="space-y-1" aria-label="Preferências">
         {secondaryItems.map((item) => (
           <SidebarRow key={item.key} item={item} activeKey={activeKey} />
         ))}
       </div>
 
-      <div className="mt-auto rounded-2xl border border-sidebar-border bg-sidebar-accent/40 p-4 text-sidebar-foreground">
+      <div className="mt-auto rounded-2xl border border-sidebar-border bg-sidebar-accent/45 p-4 text-sidebar-foreground shadow-[inset_0_1px_0_color-mix(in_oklab,var(--foreground)_8%,transparent)]">
         <div className="flex items-center gap-3">
           <div className="rounded-2xl bg-primary/14 p-2 text-primary">
             <ShieldCheck className="size-4" />

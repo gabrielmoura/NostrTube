@@ -1,6 +1,7 @@
 import type { NDKEvent } from '@nostr-dev-kit/ndk'
 import { useCallback, useSyncExternalStore } from 'react'
 import {
+  type WatchLaterItem,
   getWatchLaterItems,
   isInWatchLater,
   removeFromWatchLater,
@@ -9,8 +10,10 @@ import {
   toggleWatchLater,
 } from '@/features/library/services/watch-later.service'
 
+const EMPTY_WATCH_LATER_ITEMS: WatchLaterItem[] = []
+
 export function useWatchLater() {
-  const items = useSyncExternalStore(subscribeWatchLater, getWatchLaterItems, () => [])
+  const items = useSyncExternalStore(subscribeWatchLater, getWatchLaterItems, () => EMPTY_WATCH_LATER_ITEMS)
 
   const has = useCallback((eventId: string) => items.some((item) => item.eventId === eventId), [items])
 
