@@ -1,5 +1,6 @@
 import { createRoute } from '@tanstack/react-router'
 import { t } from 'i18next'
+import { MonitorUp } from 'lucide-react'
 import { lazy, Suspense } from 'react'
 import { withAuth } from '@/components/AuthGuard.tsx'
 import { PageSpinner } from '@/components/PageSpinner'
@@ -30,7 +31,14 @@ export const Route = createRoute({
 
 function NewVideoPage() {
   return (
-    <AppShell activeKey="upload" title={t('upload_new_video', 'Upload New Video')}>
+    <AppShell
+      activeKey="upload"
+      title={t('upload_new_video', 'Upload New Video')}
+      description={t('upload_desc', 'Upload a new video to NostrTube.')}
+      eyebrow="Creator Studio"
+      badge="Nostr event"
+      icon={MonitorUp}
+    >
       <UploadErrorBoundary>
         <Suspense fallback={<PageSpinner />}>
           <UploadPageContainer />

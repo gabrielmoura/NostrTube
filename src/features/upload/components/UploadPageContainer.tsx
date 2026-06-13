@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { t } from 'i18next'
-import { CheckCircle2, ChevronLeft, ChevronRight, CircleHelp, Copy, ExternalLink, Sparkles, Wand2 } from 'lucide-react'
+import { CheckCircle2, ChevronLeft, ChevronRight, CircleHelp, Copy, ExternalLink, Film, Rocket, ShieldCheck, Sparkles, Wand2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ButtonWithLoader } from '@/components/ButtonWithLoader'
 import { Image } from '@/components/Image'
@@ -29,34 +29,48 @@ function StepDot({ current, step, label }: { current: number, step: 1 | 2 | 3, l
   return (
     <div className="flex min-w-0 flex-1 items-center gap-3">
       <div
-        className={`flex size-10 items-center justify-center rounded-full border text-sm font-semibold ${
+        className={`flex size-10 shrink-0 items-center justify-center rounded-2xl border text-sm font-semibold transition-colors ${
           completed
-            ? 'border-primary bg-primary text-primary-foreground'
+            ? 'border-primary bg-primary text-primary-foreground shadow-[0_0_24px_color-mix(in_oklab,var(--primary)_24%,transparent)]'
             : active
-              ? 'border-primary bg-primary/10 text-primary'
-              : 'border-border bg-background text-muted-foreground'
+              ? 'border-primary/70 bg-primary/14 text-primary'
+              : 'border-border bg-secondary/45 text-muted-foreground'
         }`}
       >
         {completed ? <CheckCircle2 className="size-4" /> : step}
       </div>
-      <p className="min-w-0 text-sm font-medium">{label}</p>
+      <div className="min-w-0">
+        <p className="truncate text-sm font-medium">{label}</p>
+        <p className="hidden text-xs text-muted-foreground sm:block">
+          {completed ? t('complete', 'Complete') : active ? t('current_step', 'Current step') : t('next_step', 'Next step')}
+        </p>
+      </div>
     </div>
   )
 }
 
 function UploadWizardHeader({ currentStep }: { currentStep: 1 | 2 | 3 }) {
   return (
-    <div className="rounded-2xl border bg-card p-5 shadow-sm">
-      <div className="mb-2 flex items-center justify-between gap-3">
+    <div className="overflow-hidden rounded-3xl border border-border/70 bg-card/80 shadow-[0_20px_80px_color-mix(in_oklab,var(--background)_55%,black_20%)] backdrop-blur-xl">
+      <div className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-center">
         <div>
           <p className="text-xs uppercase tracking-[0.24em] text-primary/80">Relay Cinema Upload</p>
-          <h2 className="text-lg font-semibold">{t('upload_new_video', 'Upload New Video')}</h2>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight">{t('creator_ready_title', 'Prepare a video event for the Nostr network')}</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+            {t('creator_ready_description', 'Import media, enrich metadata, review the event and publish without leaving the current workflow.')}
+          </p>
         </div>
-        <div className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-          {currentStep}/3
+        <div className="rounded-2xl border border-primary/20 bg-primary/10 p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs text-muted-foreground">{t('wizard_progress', 'Wizard progress')}</p>
+              <p className="text-2xl font-semibold tabular-nums">{currentStep}/3</p>
+            </div>
+            <Rocket className="size-8 text-primary" />
+          </div>
         </div>
       </div>
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-center">
+      <div className="grid gap-4 border-t border-border/70 bg-secondary/20 p-4 sm:grid-cols-3 sm:px-6">
         <StepDot current={currentStep} step={1} label={t('Select_file', 'Select file')} />
         <StepDot current={currentStep} step={2} label={t('Metadata', 'Metadata')} />
         <StepDot current={currentStep} step={3} label={t('Review_publish', 'Review and publish')} />
@@ -102,13 +116,13 @@ function UploadProgressSummary({ isUploading, uploadProgress, uploadStage, hasVi
   }, [hasVideo, isUploading, uploadStage])
 
   return (
-    <div className="rounded-2xl border bg-card p-4 shadow-sm">
+    <div className="rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur">
       <div className="flex items-center justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <p className="text-sm font-medium">{t('Upload_status', 'Upload status')}</p>
           <p className="text-sm text-muted-foreground">{statusText}</p>
         </div>
-        <p className="text-2xl font-semibold tabular-nums">{isUploading ? `${uploadProgress}%` : hasVideo ? '100%' : '0%'}</p>
+        <p className="shrink-0 text-2xl font-semibold tabular-nums">{isUploading ? `${uploadProgress}%` : hasVideo ? '100%' : '0%'}</p>
       </div>
       <Progress value={isUploading ? uploadProgress : hasVideo ? 100 : 0} className="mt-4 h-2.5" />
     </div>
@@ -117,7 +131,7 @@ function UploadProgressSummary({ isUploading, uploadProgress, uploadStage, hasVi
 
 function UploadReviewCard({ title, summary, thumbnail, language, hashtags, indexers }: { title?: string, summary?: string, thumbnail?: string, language?: string, hashtags?: string[], indexers?: string[] }) {
   return (
-    <div className="rounded-2xl border bg-card p-5 shadow-sm">
+    <div className="rounded-2xl border border-border/70 bg-card/80 p-5 shadow-sm backdrop-blur">
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-4">
           <div>
@@ -160,7 +174,7 @@ function UploadReviewCard({ title, summary, thumbnail, language, hashtags, index
           </div>
         </div>
         <div className="space-y-3">
-          <div className="rounded-xl border bg-background p-3">
+          <div className="rounded-xl border border-border/70 bg-background/60 p-3">
             <p className="mb-3 text-sm font-medium">Thumbnail</p>
             {thumbnail
               ? <Image src={thumbnail} alt="Thumbnail" width={288} className="aspect-video w-full rounded-lg border object-cover" />
@@ -178,8 +192,8 @@ function UploadReviewCard({ title, summary, thumbnail, language, hashtags, index
 
 function UploadSidebarPanel({ thumbnail, onThumbnailChange, onSaveDraft, preferCompression, onCompressionChange, uploadStage }: { thumbnail?: string, onThumbnailChange: (value: string) => void, onSaveDraft: () => void, preferCompression: boolean, onCompressionChange: (value: boolean) => void, uploadStage: string }) {
   return (
-    <aside className="space-y-5 lg:sticky lg:top-24">
-      <div className="rounded-2xl border bg-card p-4 shadow-sm">
+    <aside className="space-y-5 lg:sticky lg:top-24 lg:h-fit">
+      <div className="rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur">
         <div className="mb-3 flex items-center gap-2">
           <p className="text-sm font-medium">Thumbnail</p>
           <InfoHint text={t('thumbnail_tooltip', 'Choose a clearer cover if the automatic frame is not ideal. This keeps the video card visually strong in feeds.')} />
@@ -198,7 +212,7 @@ function UploadSidebarPanel({ thumbnail, onThumbnailChange, onSaveDraft, preferC
             )}
       </div>
 
-      <div className="rounded-2xl border bg-card p-4 shadow-sm">
+      <div className="rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur">
         <div className="mb-4 flex items-center gap-2">
           <Wand2 className="size-4 text-primary" />
           <p className="text-sm font-medium">Processamento local</p>
@@ -224,7 +238,7 @@ function UploadSidebarPanel({ thumbnail, onThumbnailChange, onSaveDraft, preferC
         ) : null}
       </div>
 
-      <div className="rounded-2xl border bg-card p-4 shadow-sm">
+      <div className="rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur">
         <div className="mb-4 flex items-center gap-2">
           <Sparkles className="size-4 text-primary" />
           <p className="text-sm font-medium">{t('publish_tips', 'Publishing tips')}</p>
@@ -318,13 +332,13 @@ export function UploadPageContainer() {
   }
 
   return (
-    <div className="mx-auto flex max-w-7xl max-h-[calc(100svh-10rem)] flex-col gap-6 overflow-hidden px-4 py-4 sm:px-6 lg:px-8">
+    <div className="mx-auto flex max-w-7xl flex-col gap-6">
       <UploadWizardHeader currentStep={currentStep} />
 
-      <div className="grid min-h-0 gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="min-h-0 space-y-6 overflow-y-auto pr-1">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="min-w-0 space-y-6">
           {publishedState ? (
-            <div className="rounded-2xl border bg-card p-6 shadow-sm">
+            <div className="rounded-3xl border border-primary/30 bg-primary/10 p-6 shadow-sm">
               <div className="mb-4 flex items-center gap-3 text-primary">
                 <CheckCircle2 className="size-6" />
                 <h2 className="text-xl font-semibold">{t('publish_success_title', 'Video ready to share')}</h2>
@@ -344,7 +358,7 @@ export function UploadPageContainer() {
 
           {currentStep === 1 ? (
             <>
-              <div className="overflow-hidden rounded-2xl border bg-background shadow-sm">
+              <div className="overflow-hidden rounded-3xl border border-border/70 bg-background/70 shadow-sm">
                 {videoData.url
                   ? <Player url={videoData.url} title={videoData.title} image={displayThumbnail} mimeType={videoData.mime_type} />
                   : <VideoUpload />}
@@ -358,12 +372,29 @@ export function UploadPageContainer() {
                   <Button onClick={handleNext} disabled={!canContinueFromStepOne}>{t('continue_to_metadata', 'Continue to metadata')}<ChevronRight className="size-4" /></Button>
                 </div>
               ) : null}
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl border border-border/70 bg-card/70 p-4">
+                  <Film className="mb-3 size-5 text-primary" />
+                  <p className="text-sm font-medium">{t('video_first_upload', 'Video-first')}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{t('video_first_upload_desc', 'Preview the exact playback source before metadata work.')}</p>
+                </div>
+                <div className="rounded-2xl border border-border/70 bg-card/70 p-4">
+                  <ShieldCheck className="mb-3 size-5 text-relay-green" />
+                  <p className="text-sm font-medium">{t('local_safe_upload', 'Local-safe')}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{t('local_safe_upload_desc', 'Drafts and processing stay recoverable during the flow.')}</p>
+                </div>
+                <div className="rounded-2xl border border-border/70 bg-card/70 p-4">
+                  <Sparkles className="mb-3 size-5 text-lightning" />
+                  <p className="text-sm font-medium">{t('discoverable_upload', 'Discoverable')}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{t('discoverable_upload_desc', 'Tags, language and thumbnail improve feed quality.')}</p>
+                </div>
+              </div>
             </>
           ) : null}
 
           {currentStep === 2 ? (
             <div className="space-y-6">
-              <div className="overflow-hidden rounded-2xl border bg-background shadow-sm">
+              <div className="overflow-hidden rounded-3xl border border-border/70 bg-background/70 shadow-sm">
                 {videoData.url
                   ? <Player url={videoData.url} title={videoData.title} image={displayThumbnail} mimeType={videoData.mime_type} />
                   : <VideoUpload />}
@@ -389,7 +420,7 @@ export function UploadPageContainer() {
 
           {currentStep === 3 ? (
             <div className="space-y-6">
-              <div className="overflow-hidden rounded-2xl border bg-background shadow-sm">
+              <div className="overflow-hidden rounded-3xl border border-border/70 bg-background/70 shadow-sm">
                 {videoData.url
                   ? <Player url={videoData.url} title={videoData.title} image={displayThumbnail} mimeType={videoData.mime_type} />
                   : <VideoUpload />}
@@ -406,13 +437,13 @@ export function UploadPageContainer() {
           ) : null}
 
           {!publishedState ? (
-            <div className="flex flex-wrap items-center gap-3 rounded-2xl border bg-card p-4 shadow-sm">
+            <div className="sticky bottom-4 z-20 flex flex-wrap items-center gap-3 rounded-2xl border border-border/70 bg-card/90 p-3 shadow-[0_18px_60px_color-mix(in_oklab,var(--background)_45%,black_28%)] backdrop-blur-xl">
               <Button variant="ghost" onClick={handleBack} disabled={currentStep === 1}><ChevronLeft className="size-4" />{t('Back', 'Back')}</Button>
-              <div className="ml-auto flex flex-wrap gap-3">
-                <Button variant="outline" onClick={handleSaveDraft}>{t('save_as_draft')}</Button>
+              <div className="ml-auto flex flex-wrap gap-2 sm:gap-3">
+                <Button variant="glass" onClick={handleSaveDraft}>{t('save_as_draft')}</Button>
                 {currentStep < 3
                   ? (
-                      <Button onClick={handleNext} disabled={currentStep === 1 ? !canContinueFromStepOne : !canContinueFromStepTwo}>
+                      <Button variant="gradient" onClick={handleNext} disabled={currentStep === 1 ? !canContinueFromStepOne : !canContinueFromStepTwo}>
                         {currentStep === 1 ? t('continue_to_metadata', 'Continue to metadata') : t('continue_to_review', 'Continue to review')}
                         <ChevronRight className="size-4" />
                       </Button>
