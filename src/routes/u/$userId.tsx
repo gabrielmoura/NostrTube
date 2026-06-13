@@ -21,9 +21,10 @@ import { nip19 } from 'nostr-tools'
 import { useMemo } from 'react'
 import { z } from 'zod' // Extraído para arquivo separado
 import { PageSpinner } from '@/components/PageSpinner'
+import { AppShell } from '@/components/layout/AppShell'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Card } from '@/components/ui/card.tsx'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -150,7 +151,7 @@ function ProfilePage() {
   const getInitials = (name: string) => name?.slice(0, 2).toUpperCase() || 'U'
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-20">
+    <AppShell>
       {/* --- Header Section --- */}
       <div className="relative">
         {/* Banner */}
@@ -378,7 +379,7 @@ function ProfilePage() {
           ) : null}
         </Tabs>
       </div>
-    </div>
+    </AppShell>
   )
 }
 
@@ -456,11 +457,9 @@ function AuthorAlertsPanel({
                       'other'}
                   </p>
                 </div>
-                <Button asChild>
-                  <Link to="/v/$eventId/edit" params={{ eventId: targetVideo?.encode() || targetId }}>
-                    Ajustar metadados
-                  </Link>
-                </Button>
+                <Link to="/v/$eventId/edit" params={{ eventId: targetVideo?.encode() || targetId }} className={buttonVariants({})}>
+                  Ajustar metadados
+                </Link>
               </div>
             </Card>
           )
@@ -479,11 +478,9 @@ function AuthorAlertsPanel({
                     Tipo: {alert.tags.find((tag) => tag[0] === 'type')?.[1] || 'other'}
                   </p>
                 </div>
-                <Button asChild>
-                  <Link to="/v/$eventId/edit" params={{ eventId: targetVideo?.encode() || targetId }}>
-                    Corrigir link / URL
-                  </Link>
-                </Button>
+                <Link to="/v/$eventId/edit" params={{ eventId: targetVideo?.encode() || targetId }} className={buttonVariants({})}>
+                  Corrigir link / URL
+                </Link>
               </div>
             </Card>
           )

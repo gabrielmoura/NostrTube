@@ -4,9 +4,15 @@ import { createRoute, useNavigate, useSearch } from '@tanstack/react-router'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { zodValidator } from '@tanstack/zod-adapter'
 import { t } from 'i18next'
+import { Compass, Sparkles } from 'lucide-react'
 import { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import VideoCard, { VideoCardLoading } from '@/components/cards/videoCard'
 import { PageSpinner } from '@/components/PageSpinner.tsx'
+import { AppShell } from '@/components/layout/AppShell'
+import { Badge } from '@/components/ui/badge'
+import { buttonVariants } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { MetricCard } from '@/components/ui/metric-card'
 import { useBatchProfiles } from '@/features/nostr/hooks/useBatchProfiles'
 import { eventSearchSchema, getVideosFromSearchData } from '@/helper/loaders/getVideosFromSearchData.ts'
 import { Route as rootRoute } from '@/routes/__root'
@@ -66,12 +72,10 @@ function HasError({ error }: { error: Error }) {
 
 function RouteComponent() {
   return (
-    <div className="relative space-y-6 pt-5 sm:pt-7 max-w-7xl mx-auto px-4 sm:px-6">
-      {/* O componente de busca permanece aqui para que o usuário possa filtrar novamente */}
+    <AppShell activeKey="explore" title="Pesquisar" description="Busque vídeos, criadores e conteúdos no ecossistema Nostr." eyebrow="Discovery" badge="Search & Filters" icon={Compass}>
       <AdvancedSearch />
-
       <SearchResults />
-    </div>
+    </AppShell>
   )
 }
 
@@ -127,6 +131,11 @@ function SearchResults() {
   // 2. Batch profile fetch para todas as profiles da página
   const allVideos = useMemo(() => data?.pages.flatMap((page) => page) ?? [], [data?.pages])
   const profiles = useBatchProfiles(allVideos)
+  const activeFilters = useMemo(() => {
+    const tagCount = Array.isArray(searchParams.tag) ? searchParams.tag.length : searchParams.tag ? 1 : 0
+    return [searchParams.search, searchParams.author, searchParams.lang, searchParams.geohash, searchParams.nsfw ? 'nsfw' : undefined, searchParams.timeRange && searchParams.timeRange !== 'all' ? searchParams.timeRange : undefined]
+      .filter(Boolean).length + tagCount
+  }, [searchParams])
 
   // 3. Agrupar vídeos em linhas baseadas nas colunas atuais
   const rows = useMemo(() => {
@@ -176,13 +185,47 @@ function SearchResults() {
   }, [virtualItems, rows.length, hasNextPage, isFetchingNextPage, fetchNextPage])
 
   return (
-    <section className="relative px-5">
-      <div className="flex items-center justify-between border-b pb-4 mb-6">
-        <h2 className="font-main font-bold text-xl sm:text-2xl tracking-tight">Resultados ({allVideos.length})</h2>
+    <section className="relative space-y-6 px-1">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_240px_240px]">
+        <Card className="overflow-hidden border-border/60 bg-card/80">
+          <CardContent className="flex items-center justify-between gap-4 p-5">
+            <div>
+              <p className="text-xs uppercase tracking-[0.24em] text-primary/80">Resultados ativos</p>
+              <h2 className="mt-2 text-xl font-semibold tracking-tight sm:text-2xl">{allVideos.length} vídeos encontrados</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {activeFilters > 0 ? `Busca refinada com ${activeFilters} filtro${activeFilters > 1 ? 's' : ''}.` : 'Navegue pelos resultados mais recentes da busca.'}
+              </p>
+            </div>
+            <div className="hidden rounded-3xl border border-primary/15 bg-primary/10 p-3 text-primary sm:block">
+              <Sparkles className="size-6" />
+            </div>
+          </CardContent>
+        </Card>
+        <MetricCard title="Filtros ativos" value={activeFilters} description="Texto, idioma, tags e recortes avançados." />
+        <MetricCard title="Páginas carregadas" value={data?.pages.length ?? 1} description="Scroll infinito otimizado para discovery." tone="relay" />
       </div>
 
-      {/* Container de Scroll */}
-      <div ref={parentRef} className="h-[800px] overflow-auto pr-2 scrollbar-thin">
+      <div className="flex items-center justify-between gap-3 border-b pb-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="font-main text-lg font-bold tracking-tight sm:text-xl">Grade de resultados</h3>
+          {searchParams.timeRange && searchParams.timeRange !== 'all' ? <Badge variant="secondary">Período: {searchParams.timeRange}</Badge> : null}
+        </div>
+        <a href="/explore" className={buttonVariants({ variant: 'glass' })}>Explorar agora</a>
+      </div>
+
+      {allVideos.length === 0 ? (
+        <div className="flex min-h-[320px] flex-col items-center justify-center rounded-3xl border border-dashed border-border/60 bg-card/40 px-6 py-12 text-center">
+          <div className="mb-4 rounded-full border border-primary/15 bg-primary/10 p-4 text-primary">
+            <Compass className="size-6" />
+          </div>
+          <h3 className="text-lg font-semibold">Nenhum vídeo encontrado</h3>
+          <p className="mt-2 max-w-lg text-sm text-muted-foreground">
+            Tente ampliar o período, remover filtros muito específicos ou usar termos mais curtos para aumentar a cobertura da busca.
+          </p>
+        </div>
+      ) : null}
+
+      <div ref={parentRef} className="max-h-[calc(100svh-21rem)] min-h-[480px] overflow-auto pr-2 scrollbar-thin">
         <div className="relative w-full" style={{ height: `${rowVirtualizer.getTotalSize()}px` }}>
           {virtualItems.map((virtualRow) => {
             const isLoaderRow = virtualRow.index > rows.length - 1

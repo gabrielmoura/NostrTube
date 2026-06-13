@@ -1,9 +1,12 @@
 import { createRoute } from '@tanstack/react-router'
 import { t } from 'i18next'
-import { HelpCircle, Search } from 'lucide-react'
+import { HelpCircle, Search, ShieldCheck, Sparkles } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { buttonVariants } from '@/components/ui/button'
 import { useEffect, useMemo, useState } from 'react'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx'
 import { Input } from '@/components/ui/input.tsx'
+import { AppShell } from '@/components/layout/AppShell'
 import { faqData } from '@/default.ts'
 import { detectLanguageMain } from '@/helper/userLang.ts'
 import { Route as rootRoute } from '@/routes/__root'
@@ -45,29 +48,39 @@ function FaqPage({ faqData }: { faqData: FaqEntry[] }) {
   }, [searchTerm, faqData])
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:py-12">
-      <div className="mb-8 text-center">
+    <div className="mx-auto max-w-4xl px-4 py-8 sm:py-12">
+      <div className="mb-8 rounded-3xl border border-border/70 bg-gradient-to-br from-card/90 via-card/70 to-primary/5 px-6 py-8 text-center shadow-sm">
         <div className="mx-auto mb-4 inline-flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
           <HelpCircle className="size-6" />
+        </div>
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs text-primary">
+          <Sparkles className="size-3.5" />
+          Knowledge Base
         </div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Perguntas Frequentes</h1>
         <p className="mt-2 text-muted-foreground">
           Encontre respostas para as dúvidas mais comuns sobre o {import.meta.env.VITE_APP_NAME}.
         </p>
+        <div className="mt-5 flex flex-wrap justify-center gap-3">
+          <Link to="/terms" className={buttonVariants({ variant: 'glass' })}>
+            <ShieldCheck className="mr-2 size-4" />
+            Ler termos
+          </Link>
+        </div>
       </div>
 
-      <div className="relative mb-8">
+      <div className="relative mb-8 rounded-2xl border border-border/60 bg-card/70 p-3 shadow-sm">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           placeholder="Buscar perguntas..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-9"
+          className="h-11 rounded-xl border-border/60 bg-background/70 pl-9"
         />
       </div>
 
       {filteredFaqs.length > 0 ? (
-        <Accordion type="single" collapsible className="w-full rounded-lg border bg-card">
+        <Accordion type="single" collapsible className="w-full rounded-3xl border border-border/70 bg-card/80 shadow-sm">
           {filteredFaqs.map((faq) => (
             <AccordionItem key={faq.id} value={faq.id} className="border-b border-border last:border-b-0">
               <AccordionTrigger className="flex w-full items-center justify-between px-5 py-4 text-left text-base font-medium text-foreground transition-colors hover:bg-muted/50 hover:no-underline data-[state=open]:bg-muted/30">
@@ -80,7 +93,7 @@ function FaqPage({ faqData }: { faqData: FaqEntry[] }) {
           ))}
         </Accordion>
       ) : (
-        <div className="rounded-lg border bg-card p-8 text-center">
+        <div className="rounded-3xl border border-border/70 bg-card/80 p-8 text-center shadow-sm">
           <p className="text-muted-foreground">Nenhum resultado encontrado para "{searchTerm}".</p>
           <button
             type="button"
@@ -98,5 +111,9 @@ function FaqPage({ faqData }: { faqData: FaqEntry[] }) {
 function RouteComponent() {
   const lang = detectLanguageMain() || 'en'
   const faqDataL = faqData[lang?.split('-')[0] as keyof typeof faqData] || faqData['en']
-  return <FaqPage faqData={faqDataL} />
+  return (
+    <AppShell title="Perguntas Frequentes" description="Encontre respostas para as dúvidas mais comuns." icon={HelpCircle}>
+      <FaqPage faqData={faqDataL} />
+    </AppShell>
+  )
 }

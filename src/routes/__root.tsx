@@ -1,7 +1,6 @@
 import { createRootRouteWithContext, HeadContent, Outlet } from "@tanstack/react-router";
 import NDK__default from "@nostr-dev-kit/ndk";
 import type { QueryClient } from "@tanstack/react-query";
-import Header from "../components/header/Header.tsx";
 import { Devtools } from "@/Devtools.tsx";
 
 interface NdkContext {
@@ -34,12 +33,7 @@ function RootComponent() {
 
   return <> <HeadContent />
 
-    <main className="min-h-[100svh]  bg-background sm:absolute sm:inset-0">
-      <div className="f1">
-        {/* Header */}
-        <Header />
-      </div>
-
+    <main className="min-h-[100svh] bg-background sm:absolute sm:inset-0">
       <Outlet />
       {import.meta.env.DEV && <Devtools />}
     </main>

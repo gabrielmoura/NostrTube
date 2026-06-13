@@ -1,6 +1,8 @@
 import { createRoute } from '@tanstack/react-router'
 import { t } from 'i18next'
+import { AlertTriangle, ShieldCheck, Sparkles } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area.tsx'
+import { AppShell } from '@/components/layout/AppShell'
 import { Route as rootRoute } from '@/routes/__root'
 
 export const Route = createRoute({
@@ -30,28 +32,32 @@ const sections = [
 
 function RouteComponent() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:py-12">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Termos de Uso</h1>
-        <p className="mt-2 text-muted-foreground">Última atualização: Janeiro de 2026</p>
-      </div>
+    <AppShell title="Termos de Uso" description="Última atualização: Janeiro de 2026" icon={ShieldCheck} eyebrow="Policies" badge="Legal & Trust">
+      <div className="mx-auto max-w-3xl">
 
-      <div className="mb-10 rounded-lg border bg-card p-4">
-        <p className="text-sm leading-relaxed text-card-foreground">
-          <strong>Atenção:</strong> Este documento é um modelo informativo e não substitui a revisão por um advogado.
-          Plataformas descentralizadas levantam questões legais e de responsabilidade específicas.
-        </p>
+      <div className="mb-10 rounded-3xl border border-border/70 bg-gradient-to-br from-card/90 via-card/70 to-primary/5 p-6 shadow-sm">
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs text-primary">
+          <Sparkles className="size-3.5" />
+          Legal context for decentralized media
+        </div>
+        <div className="flex items-start gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4 text-sm leading-relaxed text-card-foreground">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-400" />
+          <p>
+            <strong>Atenção:</strong> Este documento é um modelo informativo e não substitui a revisão por um advogado.
+            Plataformas descentralizadas levantam questões legais e de responsabilidade específicas.
+          </p>
+        </div>
       </div>
 
       <div className="lg:grid lg:grid-cols-[220px_1fr] lg:gap-8">
-        <nav className="sticky top-24 mb-8 hidden h-fit max-h-[calc(100vh-8rem)] overflow-y-auto lg:block">
+        <nav className="sticky top-24 mb-8 hidden h-fit max-h-[calc(100vh-8rem)] overflow-y-auto rounded-2xl border border-border/60 bg-card/60 p-4 lg:block">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">Nesta página</h2>
           <ul className="space-y-1.5">
             {sections.map((section) => (
               <li key={section.id}>
                 <a
                   href={`#${section.id}`}
-                  className="block text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  className="block rounded-lg px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground"
                 >
                   {section.title}
                 </a>
@@ -184,6 +190,7 @@ function RouteComponent() {
           </section>
         </div>
       </div>
-    </div>
+      </div>
+    </AppShell>
   )
 }

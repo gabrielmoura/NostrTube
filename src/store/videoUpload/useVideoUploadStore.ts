@@ -40,12 +40,14 @@ const DRAFT_KEY = "video-upload-draft";
 
 export interface VideoUploadState {
   videoData: Partial<VideoMetadata>;
+  thumbnailPreviewUrl?: string;
   currentStep: 1 | 2 | 3;
   isUploading: boolean;
   uploadProgress: number;
   uploadStage: "idle" | "validating" | "uploading" | "processing" | "mirroring" | "complete" | "error";
   error?: string;
   showEventInput: boolean;
+  preferCompression: boolean;
   setVideoData: (data: Partial<VideoMetadata>) => void;
   setCurrentStep: (step: 1 | 2 | 3) => void;
   setIndexers: (indexers: string[]) => void;
@@ -61,12 +63,17 @@ export interface VideoUploadState {
   setShowEventInput: (show: boolean) => void;
   setUrl: (url: string) => void;
   setThumbnail: (thumbnail: string) => void;
+  setThumbnailPreviewUrl: (thumbnailPreviewUrl?: string) => void;
   setSummary: (summary: string) => void;
   setContentWarning: (contentWarning: string) => void;
+  setPreferCompression: (preferCompression: boolean) => void;
   setVideoUpload: (data: Partial<VideoMetadata>) => void;
   clearUploadedMedia: () => void;
   saveDraft: () => void;
   loadDraft: () => void;
+  clearLocalDraft: () => void;
+  getDraftSnapshot: () => { videoData: Partial<VideoMetadata>; currentStep: 1 | 2 | 3; updatedAt: number };
+  applyDraftSnapshot: (snapshot: { videoData: Partial<VideoMetadata>; currentStep?: 1 | 2 | 3; updatedAt?: number; thumbnailPreviewUrl?: string; preferCompression?: boolean }) => void;
 }
 
 const initialState = {
@@ -76,7 +83,9 @@ const initialState = {
   uploadProgress: 0,
   uploadStage: "idle" as const,
   error: undefined,
-  showEventInput: false
+  showEventInput: false,
+  thumbnailPreviewUrl: undefined,
+  preferCompression: false
 };
 
 export const useVideoUploadStore = create<VideoUploadState>()(
@@ -119,6 +128,11 @@ export const useVideoUploadStore = create<VideoUploadState>()(
           state.showEventInput = show;
         }, false, "video/setShowEventInput"),
 
+      setPreferCompression: (preferCompression) =>
+        set((state) => {
+          state.preferCompression = preferCompression;
+        }, false, "video/setPreferCompression"),
+
       setTitle: (title) =>
         set((state) => {
           state.videoData.title = title;
@@ -133,6 +147,11 @@ export const useVideoUploadStore = create<VideoUploadState>()(
         set((state) => {
           state.videoData.thumbnail = thumbnail;
         }, false, "video/setThumbnail"),
+
+      setThumbnailPreviewUrl: (thumbnailPreviewUrl) =>
+        set((state) => {
+          state.thumbnailPreviewUrl = thumbnailPreviewUrl;
+        }, false, "video/setThumbnailPreviewUrl"),
 
       setSummary: (summary) =>
         set((state) => {
@@ -165,6 +184,7 @@ export const useVideoUploadStore = create<VideoUploadState>()(
           state.videoData.geohash = undefined;
           state.videoData.origin = undefined;
           state.videoData.thumbnail = undefined;
+          state.thumbnailPreviewUrl = undefined;
           state.isUploading = false;
           state.uploadProgress = 0;
           state.uploadStage = "idle";
@@ -202,9 +222,30 @@ export const useVideoUploadStore = create<VideoUploadState>()(
         }, false, "video/resetForm");
       },
 
-      saveDraft: () => {
+      clearLocalDraft: () => {
+        localStorage.removeItem(DRAFT_KEY);
+      },
+
+      getDraftSnapshot: () => {
         const { videoData, currentStep } = get();
-        const draft = JSON.stringify({ videoData, currentStep });
+        return {
+          videoData,
+          currentStep,
+          updatedAt: Date.now()
+        };
+      },
+
+      applyDraftSnapshot: (snapshot) =>
+        set((state) => {
+          state.videoData = snapshot.videoData || {};
+          state.currentStep = snapshot.currentStep || 1;
+          state.thumbnailPreviewUrl = snapshot.thumbnailPreviewUrl ?? snapshot.videoData?.thumbnail;
+          state.preferCompression = snapshot.preferCompression ?? false;
+        }, false, "video/applyDraftSnapshot"),
+
+      saveDraft: () => {
+        const { videoData, currentStep, preferCompression, thumbnailPreviewUrl } = get();
+        const draft = JSON.stringify({ videoData, currentStep, preferCompression, thumbnailPreviewUrl, updatedAt: Date.now() });
         localStorage.setItem(DRAFT_KEY, draft);
         console.log("Rascunho salvo com sucesso!");
       },
@@ -217,6 +258,8 @@ export const useVideoUploadStore = create<VideoUploadState>()(
             set((state) => {
               state.videoData = parsed.videoData || {};
               state.currentStep = parsed.currentStep || 1;
+              state.thumbnailPreviewUrl = parsed.thumbnailPreviewUrl ?? parsed.videoData?.thumbnail;
+              state.preferCompression = parsed.preferCompression ?? false;
             }, false, "video/loadDraft");
           } catch (e) {
             console.error("Falha ao carregar rascunho:", e);

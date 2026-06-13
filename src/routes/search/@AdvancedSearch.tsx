@@ -1,5 +1,5 @@
 import { useNavigate, useSearch } from '@tanstack/react-router'
-import { Search as SearchIcon, SlidersHorizontal, X } from 'lucide-react'
+import { Search as SearchIcon, SlidersHorizontal, Sparkles, X } from 'lucide-react'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Badge } from '@/components/ui/badge'
@@ -103,9 +103,26 @@ export function AdvancedSearch() {
     })
   }
 
+  const clearFilters = () => {
+    setSearchInput('')
+    setChips([])
+    setGeohashEnabled(false)
+    navigate({ to: '/search', search: {} as never })
+  }
+
   return (
-    <div className="w-full max-w-5xl mx-auto rounded-xl border bg-background p-4 shadow-sm">
+    <div className="w-full rounded-3xl border border-border/60 bg-card/80 p-5 shadow-sm backdrop-blur sm:p-6">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.24em] text-primary/80">Relay Cinema Discovery</p>
+            <h2 className="text-lg font-semibold">Descubra vídeos, canais e tags com filtros inteligentes</h2>
+          </div>
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/10 px-3 py-1 text-xs text-primary">
+            <Sparkles className="size-3.5" />
+            Busca por texto, idioma, autor, geohash e período
+          </div>
+        </div>
         <Collapsible open={isOpen} onOpenChange={setIsOpen} className="space-y-4">
           <div className="flex flex-col gap-3 lg:flex-row">
             <div className="relative flex-1">
@@ -119,12 +136,12 @@ export function AdvancedSearch() {
                 }}
                 onBlur={() => applyInput(searchInput)}
                 placeholder="Buscar vídeos, tag:bitcoin, lang:pt, author:npub..."
-                className="pl-8"
+                className="h-11 rounded-2xl border-border/60 bg-background/70 pl-8"
               />
             </div>
 
             <Select value={selectedLanguage || 'all'} onValueChange={injectLanguage}>
-              <SelectTrigger className="w-full lg:w-[190px]">
+              <SelectTrigger className="h-11 w-full rounded-2xl border-border/60 bg-background/70 lg:w-[190px]">
                 <SelectValue placeholder="Idioma" />
               </SelectTrigger>
               <SelectContent>
@@ -137,14 +154,18 @@ export function AdvancedSearch() {
               </SelectContent>
             </Select>
 
-            <Button type="submit">Buscar</Button>
+            <Button type="submit" className="h-11 rounded-2xl px-5">Buscar</Button>
+
+            <Button type="button" variant="ghost" className="h-11 rounded-2xl" onClick={clearFilters}>
+              Limpar
+            </Button>
 
             <CollapsibleTrigger asChild>
               <Button
                 variant="outline"
                 size="icon"
                 type="button"
-                className={isOpen ? 'bg-accent text-accent-foreground' : ''}
+                className={`h-11 w-11 rounded-2xl ${isOpen ? 'bg-accent text-accent-foreground' : ''}`}
               >
                 <SlidersHorizontal className="h-4 w-4" />
                 <span className="sr-only">Filtros Avançados</span>
@@ -153,7 +174,7 @@ export function AdvancedSearch() {
           </div>
 
           {chips.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 rounded-2xl border border-border/50 bg-muted/20 p-3">
               {chips.map((chip) => (
                 <Badge key={`${chip.type}:${chip.value}`} variant="secondary" className="px-3 py-1">
                   {chip.label}
@@ -169,7 +190,7 @@ export function AdvancedSearch() {
             </div>
           ) : null}
 
-          <CollapsibleContent className="space-y-4 pt-4 border-t animate-in slide-in-from-top-2">
+          <CollapsibleContent className="space-y-4 border-t pt-4 animate-in slide-in-from-top-2">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="author">Autor (Npub)</Label>

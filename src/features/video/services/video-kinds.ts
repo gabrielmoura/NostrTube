@@ -6,3 +6,6 @@ export const VIDEO_EVENT_KINDS = [
   34235,
   34236
 ];
+
+/** NIP-53: Live Streaming Event */
+export const LIVE_EVENT_KIND = 30311

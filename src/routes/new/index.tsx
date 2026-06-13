@@ -3,6 +3,7 @@ import { t } from 'i18next'
 import { lazy, Suspense } from 'react'
 import { withAuth } from '@/components/AuthGuard.tsx'
 import { PageSpinner } from '@/components/PageSpinner'
+import { AppShell } from '@/components/layout/AppShell'
 import { UploadErrorBoundary } from '@/features/upload/components/UploadErrorBoundary'
 import { Route as rootRoute } from '@/routes/__root'
 
@@ -29,10 +30,12 @@ export const Route = createRoute({
 
 function NewVideoPage() {
   return (
-    <UploadErrorBoundary>
-      <Suspense fallback={<PageSpinner />}>
-        <UploadPageContainer />
-      </Suspense>
-    </UploadErrorBoundary>
+    <AppShell activeKey="upload" title={t('upload_new_video', 'Upload New Video')}>
+      <UploadErrorBoundary>
+        <Suspense fallback={<PageSpinner />}>
+          <UploadPageContainer />
+        </Suspense>
+      </UploadErrorBoundary>
+    </AppShell>
   )
 }

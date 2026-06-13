@@ -1,12 +1,13 @@
 import type { NDKEvent, NDKUserProfile } from '@nostr-dev-kit/ndk-hooks'
 import { Avatar, Badge } from '@radix-ui/themes'
 import { Link } from '@tanstack/react-router'
-import { Zap } from 'lucide-react'
+import { Bookmark, Check, Zap } from 'lucide-react'
 import { lazy, useState } from 'react'
 import { HiCheckBadge } from 'react-icons/hi2'
 import FollowButton from '@/components/FollowButton'
 import { RenderText } from '@/components/RenderText'
 import { Button } from '@/components/ui/button'
+import { useWatchLater } from '@/features/library/hooks/use-watch-later'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { ZapModal } from '@/features/zap/components/ZapModal'
 import { cn, formatCount, getLettersPlain, getNameToShow } from '@/helper/format'
@@ -26,11 +27,13 @@ interface VideoActionsViewProps {
 
 export function VideoActionsView({ event, profile, summary, title, followerCount }: VideoActionsViewProps) {
   const npub = event.author.npub
+  const { has, toggle } = useWatchLater()
   const tags = event.tags
     .filter((tag) => tag[0] === 't')
     .map((tag) => tag[1])
     .filter(Boolean)
   const [zapOpen, setZapOpen] = useState(false)
+  const savedForLater = has(event.id)
 
   return (
     <div className="space-y-2.5 py-2">
@@ -71,6 +74,16 @@ export function VideoActionsView({ event, profile, summary, title, followerCount
           </div>
         </div>
         <div className="ml-auto flex items-center gap-3 text-muted-foreground">
+          <Button
+            type="button"
+            variant={savedForLater ? 'default' : 'outline'}
+            className="rounded-full"
+            aria-label={savedForLater ? 'Remover de assistir mais tarde' : 'Salvar para assistir mais tarde'}
+            onClick={() => toggle(event)}
+          >
+            {savedForLater ? <Check className="size-4" /> : <Bookmark className="size-4" />}
+            <span className="hidden sm:inline">{savedForLater ? 'Salvo' : 'Assistir mais tarde'}</span>
+          </Button>
           <Button
             type="button"
             variant="secondary"

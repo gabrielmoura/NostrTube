@@ -2,10 +2,11 @@ import * as React from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useNDKCurrentPubkey } from "@nostr-dev-kit/ndk-hooks";
 import { getTagValue } from "@welshman/util";
-import { Download, ExternalLink, FileJson, Flag, ListPlus, Pencil, Send, ShieldAlert, Share2, Wrench } from "lucide-react";
+import { Bookmark, Download, ExternalLink, FileJson, Flag, ListPlus, Pencil, Send, ShieldAlert, Share2, Wrench } from "lucide-react";
 import { toast } from "sonner";
 import { Share } from "@capacitor/share";
 import type { NDKEvent } from "@nostr-dev-kit/ndk";
+import { isInWatchLater, toggleWatchLater } from "@/features/library/services/watch-later.service";
 import { copyText, getVideoDetails } from "@/helper/format";
 import AddToPlaylistModal from "@/routes/v/@components/AddToPlaylistModal";
 import { modal } from "@/components/modal_v2/modal-manager";
@@ -58,6 +59,14 @@ export function useVideoMenuActions(event: NDKEvent) {
         action: () => {
           const dTagId = event.dTag ?? "";
           modal.show(<AddToPlaylistModal eventIdTag={`${event.kind}:${event.pubkey}:${dTagId}`} />);
+        }
+      },
+      {
+        label: isInWatchLater(event.id) ? 'Remove from Watch Later' : 'Save to Watch Later',
+        icon: <Bookmark className="size-4" />,
+        action: () => {
+          const saved = toggleWatchLater(event)
+          toast.success(saved ? 'Saved to Watch Later' : 'Removed from Watch Later')
         }
       },
       {
