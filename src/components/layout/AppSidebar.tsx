@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router'
 import {
   BellRing,
   Bookmark,
+  ChevronDown,
   Cloud,
   Compass,
   Flame,
@@ -21,8 +22,10 @@ import {
   Wifi,
 } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import logoNostrTube from '@/assets/logo-nostrtube.png'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { StatusBadge } from '@/components/ui/status-badge'
 import { cn } from '@/lib/utils'
 import useUserStore from '@/store/useUserStore'
@@ -68,8 +71,9 @@ const primaryItems: SidebarItem[] = [
   { key: 'blossom', label: 'Blossom', icon: Cloud, to: '/blossom' },
 ]
 
-const libraryItems: SidebarItem[] = [
-  { key: 'library', label: 'Biblioteca', icon: FolderOpen, to: '/library' },
+const libraryItems: SidebarItem[] = [{ key: 'library', label: 'Biblioteca', icon: FolderOpen, to: '/library' }]
+
+const librarySubItems: SidebarItem[] = [
   { key: 'history', label: 'Histórico', icon: History, to: '/library', search: { tab: 'history' } },
   { key: 'watchlater', label: 'Assistir mais tarde', icon: Bookmark, to: '/library', search: { tab: 'watchlater' } },
   { key: 'liked', label: 'Vídeos curtidos', icon: Heart, to: '/library', search: { tab: 'liked' } },
@@ -99,10 +103,16 @@ function SidebarRow({ item, activeKey }: { item: SidebarItem; activeKey?: Sideba
 
   const content = (
     <>
-      <item.icon className={cn('size-4', active ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground')} />
+      <item.icon
+        className={cn('size-4', active ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground')}
+      />
       <span className="flex-1 text-left">{item.label}</span>
       {item.badge ? (
-        item.badge === 'soon' ? <StatusBadge tone="neutral">soon</StatusBadge> : <StatusBadge tone="partial">{item.badge}</StatusBadge>
+        item.badge === 'soon' ? (
+          <StatusBadge tone="neutral">soon</StatusBadge>
+        ) : (
+          <StatusBadge tone="partial">{item.badge}</StatusBadge>
+        )
       ) : null}
     </>
   )
@@ -122,6 +132,115 @@ function SidebarRow({ item, activeKey }: { item: SidebarItem; activeKey?: Sideba
   )
 }
 
+function SidebarBrand() {
+  return (
+    <div className="mb-5 flex items-center gap-3 px-3">
+      <img src={logoNostrTube} alt="NostrTube" className="size-10 rounded-2xl object-contain shadow-lg" />
+      <div className="min-w-0">
+        <p className="font-display text-lg font-semibold leading-tight tracking-tight text-sidebar-foreground">
+          NostrTube
+        </p>
+        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Relay Cinema</p>
+      </div>
+    </div>
+  )
+}
+
+function SidebarNavSection({
+  items,
+  activeKey,
+  label,
+}: {
+  items: SidebarItem[]
+  activeKey?: SidebarKey
+  label: string
+}) {
+  return (
+    <nav className="space-y-1" aria-label={label}>
+      {items.map((item) => (
+        <SidebarRow key={item.key} item={item} activeKey={activeKey} />
+      ))}
+    </nav>
+  )
+}
+
+function SidebarLibrarySection({ activeKey }: { activeKey?: SidebarKey }) {
+  const hasActiveLibraryChild = librarySubItems.some((item) => item.key === activeKey)
+  const [open, setOpen] = useState(hasActiveLibraryChild)
+  const libraryItem = libraryItems[0]
+
+  useEffect(() => {
+    if (hasActiveLibraryChild) setOpen(true)
+  }, [hasActiveLibraryChild])
+
+  return (
+    <div className="space-y-1" aria-label="Biblioteca">
+      <SidebarRow item={libraryItem} activeKey={activeKey} />
+      <Collapsible open={open} onOpenChange={setOpen}>
+        <CollapsibleTrigger className="group flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60">
+          <FolderOpen className="size-4 text-muted-foreground group-hover:text-foreground" />
+          <span className="flex-1 text-left">Itens da biblioteca</span>
+          <ChevronDown className={cn('size-4 transition-transform', open && 'rotate-180')} />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-1 space-y-1 pl-3">
+          {librarySubItems.map((item) => (
+            <SidebarRow key={item.key} item={item} activeKey={activeKey} />
+          ))}
+        </CollapsibleContent>
+      </Collapsible>
+    </div>
+  )
+}
+
+function SidebarUserCard({
+  currentUser,
+  relayCount,
+  profileLabel,
+  profileImage,
+  profileFallback,
+}: {
+  currentUser: ReturnType<typeof useNDKCurrentUser>
+  relayCount: number
+  profileLabel: string
+  profileImage?: string
+  profileFallback: string
+}) {
+  return (
+    <div className="mt-auto rounded-2xl border border-sidebar-border bg-sidebar-accent/45 p-4 text-sidebar-foreground shadow-[inset_0_1px_0_color-mix(in_oklab,var(--foreground)_8%,transparent)]">
+      <div className="flex items-center gap-3">
+        {currentUser ? (
+          <Avatar className="size-9 border border-sidebar-border">
+            <AvatarImage src={profileImage} alt={profileLabel} />
+            <AvatarFallback>{profileFallback}</AvatarFallback>
+          </Avatar>
+        ) : (
+          <div className="rounded-2xl bg-primary/14 p-2 text-primary">
+            <ShieldCheck className="size-4" />
+          </div>
+        )}
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium">{profileLabel}</p>
+          <p className="text-xs text-muted-foreground">{currentUser ? 'Sessão Nostr ativa' : 'Navegando sem login'}</p>
+        </div>
+      </div>
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <StatusBadge tone={currentUser ? 'healthy' : 'neutral'}>{currentUser ? 'logado' : 'anônimo'}</StatusBadge>
+        <StatusBadge tone={relayCount > 0 ? 'healthy' : 'warning'}>{relayCount} relays</StatusBadge>
+        {currentUser ? (
+          <Link
+            to="/u/$userId"
+            params={{ userId: currentUser.npub ?? currentUser.pubkey }}
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+          >
+            <UserRound className="size-3.5" />
+            perfil
+          </Link>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
 export interface AppSidebarProps {
   activeKey?: SidebarKey
   className?: string
@@ -137,67 +256,32 @@ export function AppSidebar({ activeKey, className }: AppSidebarProps) {
   const profileFallback = (profileName || profileIdentifier || 'U').slice(0, 1).toUpperCase()
 
   return (
-    <aside className={cn('flex h-full w-full max-w-[248px] flex-col border-r border-sidebar-border bg-sidebar/90 px-3 py-4 backdrop-blur-xl', className)}>
-      <div className="mb-5 flex items-center gap-3 px-3">
-        <img src={logoNostrTube} alt="NostrTube" className="size-10 rounded-2xl object-contain shadow-lg" />
-        <div className="min-w-0">
-          <p className="font-display text-lg font-semibold leading-tight tracking-tight text-sidebar-foreground">NostrTube</p>
-          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Relay Cinema</p>
-        </div>
-      </div>
-
-      <nav className="space-y-1" aria-label="Navegação principal">
-        {primaryItems.map((item) => (
-          <SidebarRow key={item.key} item={item} activeKey={activeKey} />
-        ))}
-      </nav>
+    <aside
+      className={cn(
+        'flex h-full w-full max-w-[248px] flex-col overflow-y-auto border-r border-sidebar-border bg-sidebar/90 px-3 py-4 backdrop-blur-xl',
+        className,
+      )}
+    >
+      <SidebarBrand />
+      <SidebarNavSection items={primaryItems} activeKey={activeKey} label="Navegação principal" />
 
       <div className="my-4 border-t border-sidebar-border" />
 
-      <div className="mb-2 px-3 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Biblioteca</div>
-
-      <nav className="space-y-1" aria-label="Biblioteca">
-        {libraryItems.map((item) => (
-          <SidebarRow key={item.key} item={item} activeKey={activeKey} />
-        ))}
-      </nav>
+      <div className="mb-2 px-3 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+        Biblioteca
+      </div>
+      <SidebarLibrarySection activeKey={activeKey} />
 
       <div className="my-4 border-t border-sidebar-border" />
 
-      <div className="space-y-1" aria-label="Preferências">
-        {secondaryItems.map((item) => (
-          <SidebarRow key={item.key} item={item} activeKey={activeKey} />
-        ))}
-      </div>
-
-      <div className="mt-auto rounded-2xl border border-sidebar-border bg-sidebar-accent/45 p-4 text-sidebar-foreground shadow-[inset_0_1px_0_color-mix(in_oklab,var(--foreground)_8%,transparent)]">
-        <div className="flex items-center gap-3">
-          {currentUser ? (
-            <Avatar className="size-9 border border-sidebar-border">
-              <AvatarImage src={profileImage} alt={profileLabel} />
-              <AvatarFallback>{profileFallback}</AvatarFallback>
-            </Avatar>
-          ) : (
-            <div className="rounded-2xl bg-primary/14 p-2 text-primary">
-              <ShieldCheck className="size-4" />
-            </div>
-          )}
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium">{profileLabel}</p>
-            <p className="text-xs text-muted-foreground">{currentUser ? 'Sessão Nostr ativa' : 'Navegando sem login'}</p>
-          </div>
-        </div>
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          <StatusBadge tone={currentUser ? 'healthy' : 'neutral'}>{currentUser ? 'logado' : 'anônimo'}</StatusBadge>
-          <StatusBadge tone={relayCount > 0 ? 'healthy' : 'warning'}>{relayCount} relays</StatusBadge>
-          {currentUser ? (
-            <Link to="/u/$userId" params={{ userId: currentUser.npub ?? currentUser.pubkey }} className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
-              <UserRound className="size-3.5" />
-              perfil
-            </Link>
-          ) : null}
-        </div>
-      </div>
+      <SidebarNavSection items={secondaryItems} activeKey={activeKey} label="Preferências" />
+      <SidebarUserCard
+        currentUser={currentUser}
+        relayCount={relayCount}
+        profileLabel={profileLabel}
+        profileImage={profileImage}
+        profileFallback={profileFallback}
+      />
     </aside>
   )
 }

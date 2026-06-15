@@ -15,20 +15,25 @@ export interface RelayHealthRow {
   latency: number | null | undefined
 }
 
-function mapRelayStatus(status: number): Omit<RelayHealthRow, 'url' | 'attempts' | 'successCount' | 'latency'> {
-  if (status >= NDKRelayStatus.AUTHENTICATED || status >= NDKRelayStatus.CONNECTED) {
-    return { state: 'connected', label: 'Conectado', tone: 'healthy' }
+function mapRelayStatus(
+  status?: NDKRelayStatus,
+): Omit<RelayHealthRow, 'url' | 'attempts' | 'successCount' | 'latency'> {
+  switch (status) {
+    case NDKRelayStatus.CONNECTED:
+    case NDKRelayStatus.AUTH_REQUESTED:
+    case NDKRelayStatus.AUTHENTICATING:
+    case NDKRelayStatus.AUTHENTICATED:
+      return { state: 'connected', label: 'Conectado', tone: 'healthy' }
+    case NDKRelayStatus.CONNECTING:
+    case NDKRelayStatus.RECONNECTING:
+      return { state: 'connecting', label: 'Conectando', tone: 'warning' }
+    case NDKRelayStatus.FLAPPING:
+      return { state: 'unstable', label: 'Instável', tone: 'partial' }
+    case NDKRelayStatus.DISCONNECTING:
+    case NDKRelayStatus.DISCONNECTED:
+    default:
+      return { state: 'offline', label: 'Offline', tone: 'danger' }
   }
-
-  if (status >= NDKRelayStatus.CONNECTING || status >= NDKRelayStatus.RECONNECTING) {
-    return { state: 'connecting', label: 'Conectando', tone: 'warning' }
-  }
-
-  if (status === NDKRelayStatus.FLAPPING) {
-    return { state: 'unstable', label: 'Instável', tone: 'partial' }
-  }
-
-  return { state: 'offline', label: 'Offline', tone: 'danger' }
 }
 
 export function useRelayHealth(relayUrls: string[]) {
@@ -49,16 +54,19 @@ export function useRelayHealth(relayUrls: string[]) {
     return latency
   }, [])
 
-  const testAllRelays = useCallback(async () => {
-    if (!relayUrls.length) return
-    setIsTestingAll(true)
-    const entries = await Promise.all(relayUrls.map(async (relayUrl) => [relayUrl, await checkLatency(relayUrl)] as const))
-    setLatencies((previous) => ({
-      ...previous,
-      ...Object.fromEntries(entries),
-    }))
-    setIsTestingAll(false)
-  }, [relayUrls])
+  const testAllRelays = useCallback(
+    async (urls: string[] = relayUrls) => {
+      if (!urls.length) return
+      setIsTestingAll(true)
+      const entries = await Promise.all(urls.map(async (relayUrl) => [relayUrl, await checkLatency(relayUrl)] as const))
+      setLatencies((previous) => ({
+        ...previous,
+        ...Object.fromEntries(entries),
+      }))
+      setIsTestingAll(false)
+    },
+    [relayUrls],
+  )
 
   useEffect(() => {
     const missingLatencies = relayUrls.filter((relayUrl) => !(relayUrl in latencies))
@@ -70,7 +78,7 @@ export function useRelayHealth(relayUrls: string[]) {
     void version
     return relayUrls.map((relayUrl) => {
       const relay = ndk?.pool.relays.get(relayUrl)
-      const mapped = mapRelayStatus(relay?.status ?? 0)
+      const mapped = mapRelayStatus(relay?.status)
       return {
         url: relayUrl,
         ...mapped,

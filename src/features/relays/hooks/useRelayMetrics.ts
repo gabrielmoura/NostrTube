@@ -1,11 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
-import { getEvents, type CacheEventRow } from '@/features/debug/services/cache.service'
+import { type CacheEventRow, getEvents } from '@/features/debug/services/cache.service'
 import { getCacheMetrics } from '@/features/debug/services/metrics.service'
 
 export interface RelayMetricRow {
   url: string
   events5m: number | null
   cachedTotal: number | null
+}
+
+function normalizeRelayMetricKey(relayUrl: string) {
+  return relayUrl.trim().replace(/\/+$/, '')
 }
 
 export function useRelayMetrics(relayUrls: string[]) {
@@ -18,16 +22,22 @@ export function useRelayMetrics(relayUrls: string[]) {
       const recentByRelay = new Map<string, number>()
       recentRows.forEach((row: CacheEventRow) => {
         if (!row.relay) return
-        recentByRelay.set(row.relay, (recentByRelay.get(row.relay) ?? 0) + 1)
+        const relayKey = normalizeRelayMetricKey(row.relay)
+        recentByRelay.set(relayKey, (recentByRelay.get(relayKey) ?? 0) + 1)
       })
 
-      const totalByRelay = new Map(cacheMetrics.eventsByRelay.map((entry) => [entry.relay, entry.count]))
+      const totalByRelay = new Map(
+        cacheMetrics.eventsByRelay.map((entry) => [normalizeRelayMetricKey(entry.relay), entry.count]),
+      )
 
-      const rows: RelayMetricRow[] = relayUrls.map((relayUrl) => ({
-        url: relayUrl,
-        events5m: recentByRelay.get(relayUrl) ?? 0,
-        cachedTotal: totalByRelay.get(relayUrl) ?? 0,
-      }))
+      const rows: RelayMetricRow[] = relayUrls.map((relayUrl) => {
+        const relayKey = normalizeRelayMetricKey(relayUrl)
+        return {
+          url: relayUrl,
+          events5m: recentByRelay.get(relayKey) ?? 0,
+          cachedTotal: totalByRelay.get(relayKey) ?? 0,
+        }
+      })
 
       return {
         rows,
