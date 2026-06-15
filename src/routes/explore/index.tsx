@@ -1,5 +1,5 @@
 import type { NDKEvent } from '@nostr-dev-kit/ndk'
-import { NDKSubscriptionCacheUsage, useSubscribe, type NDKFilter } from '@nostr-dev-kit/ndk-hooks'
+import { type NDKFilter, NDKSubscriptionCacheUsage, useSubscribe } from '@nostr-dev-kit/ndk-hooks'
 import { createRoute, Link } from '@tanstack/react-router'
 import {
   Activity,
@@ -26,7 +26,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import { useBatchProfiles } from '@/features/nostr/hooks/useBatchProfiles'
 import { VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
-import { getTagValues } from '@welshman/util'
+import { getTagValues } from '@/helper/nostrTags'
 import { Route as rootRoute } from '@/routes/__root'
 
 // ─── Rotas ───────────────────────────────────────────────
@@ -80,28 +80,26 @@ function useExploreData() {
         if (normalized) tagCount.set(normalized, (tagCount.get(normalized) || 0) + 1)
       })
     })
-    return [...tagCount.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 20)
+    return [...tagCount.entries()].sort((a, b) => b[1] - a[1]).slice(0, 20)
   }, [videoEvents])
 
   // Autores únicos (canais)
   const uniqueAuthors = useMemo(() => {
     const seen = new Set<string>()
-    return videoEvents.filter((ev: NDKEvent) => {
-      if (ev.pubkey && !seen.has(ev.pubkey)) {
-        seen.add(ev.pubkey)
-        return true
-      }
-      return false
-    }).slice(0, 12)
+    return videoEvents
+      .filter((ev: NDKEvent) => {
+        if (ev.pubkey && !seen.has(ev.pubkey)) {
+          seen.add(ev.pubkey)
+          return true
+        }
+        return false
+      })
+      .slice(0, 12)
   }, [videoEvents])
 
   // Vídeos em destaque (top 12 mais recentes)
   const featuredVideos = useMemo(() => {
-    return [...videoEvents]
-      .sort((a: NDKEvent, b: NDKEvent) => (b.created_at ?? 0) - (a.created_at ?? 0))
-      .slice(0, 12)
+    return [...videoEvents].sort((a: NDKEvent, b: NDKEvent) => (b.created_at ?? 0) - (a.created_at ?? 0)).slice(0, 12)
   }, [videoEvents])
 
   return {
@@ -230,7 +228,13 @@ function ExplorePage() {
   // Loading
   if (isLoading && videoEvents.length === 0) {
     return (
-      <AppShell activeKey="explore" title="Explorar" description="Descubra novos conteúdos, criadores e comunidades do ecossistema Nostr." icon={Compass} aside={aside}>
+      <AppShell
+        activeKey="explore"
+        title="Explorar"
+        description="Descubra novos conteúdos, criadores e comunidades do ecossistema Nostr."
+        icon={Compass}
+        aside={aside}
+      >
         <div className="space-y-8">
           {/* Skeleton categorias */}
           <div className="flex gap-3 overflow-x-auto pb-2">
@@ -252,7 +256,13 @@ function ExplorePage() {
   // Empty
   if (isEmpty) {
     return (
-      <AppShell activeKey="explore" title="Explorar" description="Descubra novos conteúdos, criadores e comunidades do ecossistema Nostr." icon={Compass} aside={aside}>
+      <AppShell
+        activeKey="explore"
+        title="Explorar"
+        description="Descubra novos conteúdos, criadores e comunidades do ecossistema Nostr."
+        icon={Compass}
+        aside={aside}
+      >
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="mb-4 inline-flex size-16 items-center justify-center rounded-full bg-muted">
             <Compass className="size-8 text-muted-foreground" />
@@ -261,7 +271,7 @@ function ExplorePage() {
           <p className="mb-6 max-w-md text-sm text-muted-foreground">
             Nenhum conteúdo encontrado nos relays consultados. Tente alterar os filtros ou buscar por palavras-chave.
           </p>
-          <Link to="/search" className={buttonVariants({ variant: "gradient" })}>
+          <Link to="/search" className={buttonVariants({ variant: 'gradient' })}>
             <Search className="mr-2 size-4" />
             Buscar conteúdo
           </Link>
@@ -271,7 +281,13 @@ function ExplorePage() {
   }
 
   return (
-    <AppShell activeKey="explore" title="Explorar" description="Descubra novos conteúdos, criadores e comunidades do ecossistema Nostr." icon={Compass} aside={aside}>
+    <AppShell
+      activeKey="explore"
+      title="Explorar"
+      description="Descubra novos conteúdos, criadores e comunidades do ecossistema Nostr."
+      icon={Compass}
+      aside={aside}
+    >
       {/* Barra de busca rápida */}
       <Link
         to="/search"
@@ -279,9 +295,7 @@ function ExplorePage() {
       >
         <Search className="size-4" />
         <span>Buscar no explorar...</span>
-        <kbd className="ml-auto hidden rounded-md border border-border bg-muted px-2 py-0.5 text-xs md:inline">
-          ⌘K
-        </kbd>
+        <kbd className="ml-auto hidden rounded-md border border-border bg-muted px-2 py-0.5 text-xs md:inline">⌘K</kbd>
       </Link>
 
       {/* Categorias principais */}
@@ -406,11 +420,7 @@ function ExplorePage() {
                 Lives ao vivo aparecerão aqui quando disponíveis nos relays.
               </p>
             </div>
-            <Link
-              to="/search"
-              search={{ tag: 'live' }}
-              className={buttonVariants({ variant: "glass", size: "sm" })}
-            >
+            <Link to="/search" search={{ tag: 'live' }} className={buttonVariants({ variant: 'glass', size: 'sm' })}>
               <Radio className="mr-2 size-4" />
               Buscar lives
             </Link>
@@ -425,11 +435,11 @@ function ExplorePage() {
           Use Zaps para apoiar diretamente os criadores de conteúdo que você mais gosta no ecossistema Nostr.
         </p>
         <div className="flex justify-center gap-3">
-          <Link to="/zaps" className={buttonVariants({ variant: "gradient" })}>
+          <Link to="/zaps" className={buttonVariants({ variant: 'gradient' })}>
             <Zap className="mr-2 size-4" />
             Ver Zaps
           </Link>
-          <Link to="/trending" className={buttonVariants({ variant: "glass" })}>
+          <Link to="/trending" className={buttonVariants({ variant: 'glass' })}>
             <TrendingUp className="mr-2 size-4" />
             Trending
           </Link>

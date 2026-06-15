@@ -4,9 +4,9 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { Bell, CircleHelp, LogIn, LogOut, Menu, Search, Settings2, ShieldCheck, Upload, UserRound } from 'lucide-react'
 import type { KeyboardEvent } from 'react'
 import { useState } from 'react'
-import logoNostrTube from '@/assets/logo-nostrtube.png'
 import { AuthModal } from '@/components/AuthModal'
 import { AppSidebar, type SidebarKey } from '@/components/layout/AppSidebar'
+import { NostrTubeLogo } from '@/components/logo/NostrTube.tsx'
 import { modal } from '@/components/modal_v2/modal-manager'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -64,11 +64,8 @@ function MobileNavigation({ activeKey }: { activeKey?: SidebarKey }) {
 
 function MobileBrand() {
   return (
-    <Link to="/" className="mr-1 flex min-w-0 items-center gap-2 lg:hidden">
-      <img src={logoNostrTube} alt="NostrTube" className="size-9 shrink-0 rounded-2xl object-contain shadow-lg" />
-      <span className="hidden font-display text-sm font-semibold tracking-tight text-foreground sm:inline">
-        NostrTube
-      </span>
+    <Link to="/" className="mr-1 flex size-9 shrink-0 items-center justify-center lg:hidden" aria-label="NostrTube">
+      <NostrTubeLogo className="size-9" />
     </Link>
   )
 }

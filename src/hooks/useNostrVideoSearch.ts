@@ -1,9 +1,9 @@
 import { useNDK } from '@nostr-dev-kit/ndk-hooks'
-import { getTagValue, getTagValues } from '@welshman/util'
 import { nip19 } from 'nostr-tools'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { fetchVideoEventByReference } from '@/features/nostr/services/ndk-query.service'
+import { getTagValue, getTagValues } from '@/helper/nostrTags'
 import { newVideoStore } from '@/store/videoUploadStore.ts'
 
 export function useNostrVideoSearch() {

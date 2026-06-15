@@ -23,7 +23,7 @@ import {
 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useEffect, useState } from 'react'
-import logoNostrTube from '@/assets/logo-nostrtube.png'
+import { NostrTubeLogoWhitText } from '@/components/logo/NostrTube.tsx'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { StatusBadge } from '@/components/ui/status-badge'
@@ -134,15 +134,14 @@ function SidebarRow({ item, activeKey }: { item: SidebarItem; activeKey?: Sideba
 
 function SidebarBrand() {
   return (
-    <div className="mb-5 flex items-center gap-3 px-3">
-      <img src={logoNostrTube} alt="NostrTube" className="size-10 rounded-2xl object-contain shadow-lg" />
-      <div className="min-w-0">
-        <p className="font-display text-lg font-semibold leading-tight tracking-tight text-sidebar-foreground">
-          NostrTube
-        </p>
-        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Relay Cinema</p>
-      </div>
-    </div>
+    <Link to="/" className="mb-5 block px-2" aria-label="Ir para a página inicial do NostrTube">
+      <NostrTubeLogoWhitText
+        className="h-auto w-full max-w-[210px] text-sidebar-foreground"
+        nostrTextColor="var(--sidebar-foreground)"
+        tubeTextColor="var(--primary)"
+        taglineColor="var(--muted-foreground)"
+      />
+    </Link>
   )
 }
 

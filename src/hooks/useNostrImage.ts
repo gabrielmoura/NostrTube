@@ -1,9 +1,9 @@
-import { useState, useMemo } from "react";
-import { NDKEvent, mapImetaTag } from "@nostr-dev-kit/ndk";
-import { getTags } from "@welshman/util";
-import { extractTag } from "@/helper/extractTag.ts";
-import { ifHasString } from "@/helper/format.ts";
-import { getOptimizedImageSrc } from "@/helper/http.ts";
+import { mapImetaTag, NDKEvent } from '@nostr-dev-kit/ndk'
+import { useMemo, useState } from 'react'
+import { extractTag } from '@/helper/extractTag.ts'
+import { ifHasString } from '@/helper/format.ts'
+import { getOptimizedImageSrc } from '@/helper/http.ts'
+import { getTags } from '@/helper/nostrTags'
 
 /**
  * Hook customizado para processamento e gestão de mídia em eventos Nostr.
@@ -28,35 +28,35 @@ import { getOptimizedImageSrc } from "@/helper/http.ts";
  * );
  */
 export function useNostrImage(event: NDKEvent) {
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   const imageSpecs = useMemo(() => {
-    const { image, thumb, title, url: directUrl } = extractTag(event.tags);
+    const { image, thumb, title, url: directUrl } = extractTag(event.tags)
 
     // Resolução de URL seguindo a hierarquia de prioridade
-    let finalUrl = directUrl;
+    let finalUrl = directUrl
     if (!finalUrl) {
-      const imeta = getTags("imeta", event.tags)
-        .map(tag => mapImetaTag(tag))
-        .find(i => i.url);
-      finalUrl = imeta?.url;
+      const imeta = getTags('imeta', event.tags)
+        .map((tag) => mapImetaTag(tag))
+        .find((i) => i.url)
+      finalUrl = imeta?.url
     }
 
-    const source = ifHasString(thumb, image) || finalUrl;
+    const source = ifHasString(thumb, image) || finalUrl
 
     // Otimização
     const optimized = source
-      ? getOptimizedImageSrc(source, "480", {
-        resize: { resizing_type: "fit", width: 480, height: 480 },
-        format: "webp"
-      })
-      : null;
+      ? getOptimizedImageSrc(source, '480', {
+          resize: { resizing_type: 'fit', width: 480, height: 480 },
+          format: 'webp',
+        })
+      : null
 
-    const isNSFW = event.tags.some(t => t[0] === "content-warning" || t[0] === "nsfw");
+    const isNSFW = event.tags.some((t) => t[0] === 'content-warning' || t[0] === 'nsfw')
 
-    return { optimized, title, isNSFW };
-  }, [event]);
+    return { optimized, title, isNSFW }
+  }, [event])
 
   return {
     ...imageSpecs,
@@ -64,7 +64,10 @@ export function useNostrImage(event: NDKEvent) {
     error,
     handlers: {
       onLoad: () => setLoading(false),
-      onError: () => { setLoading(false); setError(true); }
-    }
-  };
+      onError: () => {
+        setLoading(false)
+        setError(true)
+      },
+    },
+  }
 }

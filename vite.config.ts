@@ -65,14 +65,7 @@ export default defineConfig(({ mode }) => {
       return 'ndk-extensions'
     }
 
-    if (
-      includesAny(id, [
-        'node_modules/nostr-tools/nip19',
-        'node_modules/nostr-tools/',
-        'node_modules/@welshman/',
-        'node_modules/@noble/',
-      ])
-    ) {
+    if (includesAny(id, ['node_modules/nostr-tools/nip19', 'node_modules/nostr-tools/', 'node_modules/@noble/'])) {
       return 'nostr-utils'
     }
 
@@ -118,6 +111,7 @@ export default defineConfig(({ mode }) => {
   }
 
   const sentryEnabled = Boolean(process.env.SENTRY_AUTH_TOKEN && process.env.SENTRY_ORG && process.env.SENTRY_PROJECT)
+  const shouldGenerateSourcemap = sentryEnabled || env.VITE_BUILD_SOURCEMAP === 'true'
 
   return {
     define: {
@@ -141,7 +135,7 @@ export default defineConfig(({ mode }) => {
         includeManifestIcons: true,
         injectManifest: {
           minify: false,
-          sourcemap: true,
+          sourcemap: shouldGenerateSourcemap,
           // This increase the cache limit to 8mB
           maximumFileSizeToCacheInBytes: 1024 * 1024 * 8,
           globIgnores: ['**/route-debug*.js', '**/route-debug*.js.map'],
@@ -201,7 +195,7 @@ export default defineConfig(({ mode }) => {
         : []),
     ],
     build: {
-      sourcemap: sentryEnabled ? 'hidden' : true,
+      sourcemap: sentryEnabled ? 'hidden' : shouldGenerateSourcemap,
       cssMinify: true,
       minify: true,
       cssCodeSplit: true,

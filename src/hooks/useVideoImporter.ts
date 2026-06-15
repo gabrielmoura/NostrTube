@@ -1,5 +1,4 @@
 import { useNDK } from '@nostr-dev-kit/ndk-hooks'
-import { getTagValue, getTagValues } from '@welshman/util'
 import { nip19 } from 'nostr-tools'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -8,6 +7,7 @@ import { uploadToConfiguredBlossomServers } from '@/features/upload/services/blo
 import { requestDvmThumbnails } from '@/features/upload/services/dvm-thumbnail.service'
 import { generateVideoThumbnailFromUrl } from '@/features/upload/services/local-media-processing.service'
 import { normalizeVideoEventAssets } from '@/features/video/services/video-imeta.service'
+import { getTagValue, getTagValues } from '@/helper/nostrTags'
 import { useUploadPreferencesStore } from '@/store/useUploadPreferencesStore'
 import { useVideoUploadStore } from '@/store/videoUpload/useVideoUploadStore.ts'
 

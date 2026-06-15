@@ -1,9 +1,9 @@
 /**
  * Converts a byte array to a lowercase hexadecimal string.
  *
- * This replaces the small `bytesToHex` helper previously imported from
- * `@welshman/util` and keeps worker code independent from that package.
+ * This keeps worker code independent from broad utility packages when only a
+ * small hexadecimal formatter is needed.
  */
 export function bytesToHex(bytes: Uint8Array): string {
-  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
 }
