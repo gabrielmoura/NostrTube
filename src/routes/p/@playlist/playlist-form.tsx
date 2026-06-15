@@ -2,8 +2,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type PlaylistFormData, playlistSchema } from "./types";
 import { useCreatePlaylist } from "./use-create-playlist";
-import { Image, Loader2, Music, Save } from "lucide-react";
+import { Image, ListVideo, Loader2, Music, Save } from "lucide-react";
 import { useNDK, useNDKCurrentPubkey } from "@nostr-dev-kit/ndk-hooks";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea.tsx";
 
 interface PlaylistFormProps {
@@ -30,51 +34,50 @@ export function PlaylistForm({ className = "", onSuccess, inModal = false }: Pla
   });
 
   const { submit, isPending, error } = useCreatePlaylist({ onSuccess, ndk: ndk!, pubkey: pubkey! });
-  console.log(errors);
 
   // Watch para o Preview em tempo real
   const formValues = watch();
 
   return (
-    <div className={`grid gap-8 ${inModal ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-3"} ${className}`}>
+    <div className={`grid gap-6 ${inModal ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-[minmax(0,1fr)_336px]"} ${className}`}>
 
       {/* Coluna do Formulário (Ocupa 2/3 se não for modal) */}
-      <div className={`${inModal ? "" : "lg:col-span-2"} space-y-6`}>
-        <div className="space-y-2">
-          <h2 className="text-2xl font-bold tracking-tight text-foreground">Nova Playlist</h2>
-          <p className="text-muted-foreground text-sm">
-            Crie uma coleção curada de vídeos para seus seguidores no Nostr.
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit(submit)} className="space-y-4">
+      <Card className={inModal ? "" : "lg:col-span-1"}>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <ListVideo className="size-5 text-primary" />
+            <CardTitle>Detalhes da playlist</CardTitle>
+          </div>
+          <CardDescription>Crie uma coleção curada de vídeos para seus seguidores no Nostr.</CardDescription>
+        </CardHeader>
+        <CardContent>
+        <form onSubmit={handleSubmit(submit)} className="space-y-5">
           {/* Nome */}
           <div className="space-y-2">
-            <label htmlFor="name"
-                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            <Label htmlFor="name">
               Nome da Playlist
-            </label>
-            <input
+            </Label>
+            <Input
               {...register("name")}
               id="name"
               placeholder="Ex: Melhores Tutoriais de React"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              aria-invalid={Boolean(errors.name)}
             />
             {errors.name && <span className="text-destructive text-xs">{errors.name.message}</span>}
           </div>
 
           {/* Descrição */}
           <div className="space-y-2">
-            <label htmlFor="description" className="text-sm font-medium leading-none">
+            <Label htmlFor="description">
               Descrição
-            </label>
+            </Label>
             <Textarea
               {...register("description")}
               id="description"
               rows={4}
               placeholder="Sobre o que é esta coleção?"
               maxLength={500}
-              className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              className="min-h-32 resize-y"
             />
 
             {formValues?.description && <p className="text-xs text-right text-muted-foreground">
@@ -84,15 +87,16 @@ export function PlaylistForm({ className = "", onSuccess, inModal = false }: Pla
 
           {/* URL da Capa */}
           <div className="space-y-2">
-            <label htmlFor="coverImage" className="text-sm font-medium leading-none">
+            <Label htmlFor="coverImage">
               URL da Capa (Opcional)
-            </label>
+            </Label>
             <div className="relative">
-              <input
+              <Input
                 {...register("coverImage")}
                 id="coverImage"
                 placeholder="https://..."
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm pl-10 focus-visible:ring-2"
+                className="pl-10"
+                aria-invalid={Boolean(errors.coverImage)}
               />
               <Image className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             </div>
@@ -104,17 +108,18 @@ export function PlaylistForm({ className = "", onSuccess, inModal = false }: Pla
 
           {/* Erros de API */}
           {error && (
-            <div className="p-3 rounded-md bg-destructive/15 text-destructive text-sm font-medium">
+            <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm font-medium text-destructive">
               {error}
             </div>
           )}
 
           {/* Ações */}
           <div className="flex justify-end gap-3 pt-4">
-            <button
+            <Button
               type="submit"
               disabled={isPending}
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full sm:w-auto"
+              variant="gradient"
+              className="w-full sm:w-auto"
             >
               {isPending ? (
                 <>
@@ -127,15 +132,15 @@ export function PlaylistForm({ className = "", onSuccess, inModal = false }: Pla
                   Publicar Playlist
                 </>
               )}
-            </button>
+            </Button>
           </div>
         </form>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Coluna de Preview (Visualização de como ficará o card) */}
       <div className="hidden lg:block space-y-6">
-        <h3 className="text-lg font-medium">Pré-visualização</h3>
-        <div className="rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden">
+        <Card className="overflow-hidden py-0">
           {/* Mock do Card de Playlist */}
           <div className="aspect-video w-full bg-muted relative group flex items-center justify-center overflow-hidden">
             {formValues.coverImage ? (
@@ -177,9 +182,9 @@ export function PlaylistForm({ className = "", onSuccess, inModal = false }: Pla
               <span>Agora</span>
             </div>
           </div>
-        </div>
+        </Card>
 
-        <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-500 text-sm">
+        <div className="rounded-2xl border border-primary/20 bg-primary/10 p-4 text-sm text-muted-foreground">
           <strong>Dica Pro:</strong> Após criar a playlist, você poderá adicionar vídeos clicando no botão "Salvar em"
           enquanto assiste a qualquer conteúdo.
         </div>

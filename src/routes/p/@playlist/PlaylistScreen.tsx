@@ -14,7 +14,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy
 } from "@dnd-kit/sortable";
-import { Loader2, Pencil, PlayCircle, Save, Trash } from "lucide-react";
+import { ListVideo, Loader2, Pencil, PlayCircle, Save, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -26,6 +26,9 @@ import { useNavigate, useParams } from "@tanstack/react-router";
 import { useNDK, useNDKCurrentPubkey } from "@nostr-dev-kit/ndk-hooks";
 import type { NDKEvent } from "@nostr-dev-kit/ndk";
 import { toast } from "sonner";
+import { AppShell } from "@/components/layout/AppShell";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 
 export default function PlaylistScreen() {
   const { listId } = useParams({ strict: false });
@@ -86,7 +89,7 @@ export default function PlaylistScreen() {
   };
 
   const handleRemoveItem = (itemId: string) => {
-    if (!playlist) return;
+    if (!playlist || !isOwner) return;
     setPlaylist({
       ...playlist,
       items: playlist.items.filter(i => i.id !== itemId)
@@ -139,47 +142,54 @@ export default function PlaylistScreen() {
 
   if (loading) {
     return (
-      <div className="container max-w-3xl mx-auto p-4 space-y-4">
-        <Skeleton className="h-48 w-full rounded-xl" />
-        <Skeleton className="h-20 w-full" />
-        <Skeleton className="h-20 w-full" />
-      </div>
+      <AppShell activeKey="playlists" title="Playlist" description="Carregando playlist." icon={ListVideo}>
+        <div className="mx-auto max-w-4xl space-y-4">
+          <Skeleton className="h-48 w-full rounded-xl" />
+          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-20 w-full" />
+        </div>
+      </AppShell>
     );
   }
 
-  if (!playlist) return <div className="p-10 text-center">Playlist não encontrada.</div>;
+  if (!playlist) {
+    return (
+      <AppShell activeKey="playlists" title="Playlist não encontrada" description="Não foi possível carregar esta playlist." icon={ListVideo}>
+        <Card className="mx-auto max-w-3xl p-10 text-center text-muted-foreground">
+          Playlist não encontrada.
+        </Card>
+      </AppShell>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-24">
-      {/* Header Section */}
-      <div className="bg-muted/30 border-b mb-6">
-        <div className="container max-w-3xl mx-auto p-6 flex flex-col md:flex-row gap-6 items-start">
-          {/* Cover Image */}
-          <div
-            className="w-full md:w-48 aspect-video md:aspect-square rounded-lg overflow-hidden shadow-md bg-muted flex-shrink-0">
+    <AppShell activeKey="playlists" title="Playlist" description="Assista e organize vídeos em sequência." icon={ListVideo} className="pb-24">
+      <div className="mx-auto max-w-4xl space-y-6">
+        <section className="rounded-2xl border border-border/70 bg-card/70 p-5 shadow-sm">
+          <div className="flex flex-col gap-6 md:flex-row md:items-start">
+          <div className="aspect-video w-full flex-shrink-0 overflow-hidden rounded-xl bg-muted shadow-sm md:aspect-square md:w-48">
             {playlist.coverImage ? (
-              <img src={playlist.coverImage} alt={playlist.name} className="w-full h-full object-cover" />
+              <img src={playlist.coverImage} alt={playlist.name} className="h-full w-full object-cover" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gray-800"><PlayCircle size={32} /></div>
+              <div className="flex h-full w-full items-center justify-center bg-secondary/70"><PlayCircle size={32} /></div>
             )}
           </div>
 
-          {/* Metadata */}
-          <div className="flex-1 space-y-2 w-full">
-            <div className="flex justify-between items-start">
-              <div>
-                <h1 className="text-2xl font-bold">{playlist.name}</h1>
-                <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-                  {playlist.description}
-                </p>
-                <div className="mt-4 text-xs text-muted-foreground flex gap-4">
-                  <span>{playlist.items.length} vídeos</span>
-                  <span>Criado por {playlist.ownerPubkey.substring(0, 8)}...</span>
+          <div className="min-w-0 flex-1 space-y-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <Badge variant="secondary">Playlist</Badge>
+                  {!isOwner ? <Badge variant="outline">Somente visualização</Badge> : null}
                 </div>
+                <h1 className="text-2xl font-bold tracking-tight">{playlist.name}</h1>
+                {playlist.description ? (
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{playlist.description}</p>
+                ) : null}
               </div>
 
               {isOwner ? (
-                <div className="gap-1 flex">
+                <div className="flex shrink-0 gap-2">
                   <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)}>
                     <Pencil className="w-4 h-4 mr-2" />
                     Editar
@@ -191,12 +201,15 @@ export default function PlaylistScreen() {
                 </div>
               ) : null}
             </div>
+            <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+              <span>{playlist.items.length} vídeos</span>
+              <span>Criado por {playlist.ownerPubkey.substring(0, 8)}...</span>
+            </div>
           </div>
         </div>
-      </div>
+        </section>
 
-      {/* List Section */}
-      <div className="container max-w-3xl mx-auto px-4">
+      <section className="space-y-3">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -211,17 +224,19 @@ export default function PlaylistScreen() {
                 key={item.id}
                 item={item}
                 onRemove={handleRemoveItem}
-                onPlay={handlePlayVideo}
+                onPlay={(id) => handlePlayVideo(id)}
+                canEdit={isOwner}
               />
             ))}
           </SortableContext>
         </DndContext>
 
         {playlist.items.length === 0 && (
-          <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg">
-            Playlist vazia. Adicione vídeos.
+          <div className="rounded-2xl border-2 border-dashed py-10 text-center text-muted-foreground">
+            {isOwner ? "Playlist vazia. Adicione vídeos." : "Esta playlist ainda não tem vídeos."}
           </div>
         )}
+      </section>
       </div>
 
       {/* Floating Save Button - Left Fixed */}
@@ -250,6 +265,6 @@ export default function PlaylistScreen() {
         playlist={playlist}
         onSave={handleUpdateMeta}
       />
-    </div>
+    </AppShell>
   );
 }

@@ -13,3 +13,7 @@ export function getVideoReference(event: NDKEvent): VideoReference {
     eventAddress: identifier ? `${event.kind}:${event.pubkey}:${identifier}` : undefined
   };
 }
+
+export function getVideoRouteReference(event: NDKEvent): string {
+  return event.tagValue("d") || event.dTag || event.encode();
+}

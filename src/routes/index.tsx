@@ -14,6 +14,7 @@ import { Section, SectionContent, SectionHeader, SectionTitle } from '@/componen
 import { useBatchProfiles } from '@/features/nostr/hooks/useBatchProfiles'
 import { useZapStats } from '@/features/zap/hooks/useZapStats'
 import { filterEventsByAge } from '@/features/video/services/age-filter.service'
+import { getVideoRouteReference } from '@/features/video/services/video-reference.service'
 import { VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
 import { sortEventsByImages } from '@/helper/format.ts'
 import { cn } from '@/lib/utils'
@@ -341,11 +342,11 @@ function HomePage() {
                 )}
                 role="link"
                 tabIndex={0}
-                onClick={() => navigate({ to: '/v/$eventId', params: { eventId: event.encode() } })}
+                onClick={() => navigate({ to: '/v/$eventId', params: { eventId: getVideoRouteReference(event) } })}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
-                    navigate({ to: '/v/$eventId', params: { eventId: event.encode() } })
+                    navigate({ to: '/v/$eventId', params: { eventId: getVideoRouteReference(event) } })
                   }
                 }}
               >

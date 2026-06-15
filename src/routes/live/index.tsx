@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import { nip19 } from 'nostr-tools'
 import { useEffect, useMemo, useState } from 'react'
+import { z } from 'zod'
 import { AppShell } from '@/components/layout/AppShell'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
@@ -76,11 +77,16 @@ const CATEGORY_TAG_MAP: Record<string, string[]> = {
   talks: ['talks', 'lecture', 'conference', 'podcast'],
 }
 
+const LiveSearchSchema = z.object({
+  liveId: z.string().optional(),
+})
+
 // ─── Rota ────────────────────────────────────────────────
 export const Route = createRoute({
   getParentRoute: () => rootRoute,
   path: '/live',
   component: LivePage,
+  validateSearch: LiveSearchSchema,
   head: () => ({
     meta: [
       { title: `Ao vivo - ${import.meta.env.VITE_APP_NAME}` },
@@ -168,6 +174,8 @@ function useLiveData() {
 
 // ─── Página Principal ────────────────────────────────────
 function LivePage() {
+  const { liveId } = Route.useSearch()
+  const navigate = Route.useNavigate()
   const {
     liveNow,
     planned,
@@ -178,23 +186,20 @@ function LivePage() {
   } = useLiveData()
 
   const [activeCategory, setActiveCategory] = useState('all')
-  const [selectedLiveId, setSelectedLiveId] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!featured) {
-      setSelectedLiveId(null)
-      return
-    }
-    setSelectedLiveId((current) => {
-      if (current && liveNow.some((live) => live.id === current)) return current
-      return featured.id
-    })
-  }, [featured, liveNow])
+    if (!liveId || liveNow.some((live) => live.id === liveId)) return
+    navigate({ search: (old: { liveId?: string }) => ({ ...old, liveId: undefined }), replace: true })
+  }, [liveId, liveNow, navigate])
 
   const activeLive = useMemo(() => {
-    if (!selectedLiveId) return featured
-    return liveNow.find((live) => live.id === selectedLiveId) || featured
-  }, [featured, liveNow, selectedLiveId])
+    if (!liveId) return featured
+    return liveNow.find((live) => live.id === liveId) || featured
+  }, [featured, liveNow, liveId])
+
+  const handleSelectLive = (nextLiveId: string) => {
+    navigate({ search: (old: { liveId?: string }) => ({ ...old, liveId: nextLiveId }) })
+  }
 
   // Filtrar lives pela categoria ativa
   const filteredOther = useMemo(() => {
@@ -457,10 +462,10 @@ function LivePage() {
               <button
                 key={live.id}
                 type="button"
-                onClick={() => setSelectedLiveId(live.id)}
+                onClick={() => handleSelectLive(live.id)}
                 className={cn(
                   'group relative overflow-hidden rounded-xl border border-border/50 bg-card text-left transition-all hover:border-primary/30',
-                  selectedLiveId === live.id && 'border-primary/50 ring-1 ring-primary/30',
+                  activeLive?.id === live.id && 'border-primary/50 ring-1 ring-primary/30',
                 )}
               >
                 <div className="relative aspect-video w-full bg-muted">

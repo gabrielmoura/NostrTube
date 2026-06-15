@@ -11,11 +11,13 @@ interface PlaylistCardProps {
 
 export function PlaylistCard({ event }: PlaylistCardProps) {
   const { title, description, image, videoCount } = extractPlaylistData(event);
+  const dTag = event.tagValue("d") || event.dTag;
+  const listId = dTag || event.id;
 
   return (
     <Link
-      to={"/p/$listId"} // Rota hipotética para visualizar a playlist
-      params={{ listId: event.dTag! }} // Ou usar o ID, dependendo da sua rota
+      to={"/p/$listId"}
+      params={{ listId }}
       className="group block focus:outline-none"
     >
       <Card

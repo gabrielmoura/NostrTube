@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { useNDK, useNDKCurrentUser } from '@nostr-dev-kit/ndk-hooks'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import {
   Bell,
   Cloud,
@@ -40,6 +40,7 @@ import { StatusBadge } from '@/components/ui/status-badge'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { modal } from '@/components/modal_v2/modal-manager.ts'
+import { useZapStats } from '@/features/zap/hooks/useZapStats'
 import { publishDmRelayList } from '@/lib/ndk-messages'
 import { BlossomSettings } from '@/routes/configuration/@components/BlossomSettings.tsx'
 import { PermissionSettings } from '@/routes/configuration/@components/PermissionSettings.tsx'
@@ -48,7 +49,25 @@ import { VisibilitySettings } from '@/routes/configuration/@components/Visibilit
 import { useUploadPreferencesStore, type ThumbnailGenerationMode } from '@/store/useUploadPreferencesStore'
 import useUserStore from '@/store/useUserStore.ts'
 
-type SettingsTab = 'profile' | 'account' | 'appearance' | 'notifications' | 'privacy' | 'player' | 'relays-blossom'
+type SettingsTab = 'appearance' | 'player' | 'privacy' | 'relays-blossom' | 'profile' | 'account' | 'notifications'
+type SettingsGroup = 'platform' | 'user'
+const userSettingsTabs: SettingsTab[] = ['profile', 'account', 'notifications']
+const platformSettingsTabs: SettingsTab[] = ['appearance', 'player', 'privacy', 'relays-blossom']
+
+function getSettingsGroup(tab: SettingsTab): SettingsGroup {
+  return userSettingsTabs.includes(tab) ? 'user' : 'platform'
+}
+
+function formatSats(value: number | null | undefined) {
+  if (value == null) return '0 sats'
+  return `${value.toLocaleString()} sats`
+}
+
+function shortenIdentifier(identifier?: string) {
+  if (!identifier) return ''
+  if (identifier.length <= 18) return identifier
+  return `${identifier.slice(0, 10)}...${identifier.slice(-6)}`
+}
 
 // ====================================================================
 // Sub-componentes para as novas seções
@@ -451,18 +470,64 @@ function PlayerSection() {
 export default function ConfigurationPageContent() {
   const currentUser = useNDKCurrentUser()
   const { ndk } = useNDK()
+  const navigate = useNavigate()
+  const { tab: searchTab } = useSearch({ from: '/configuration' })
+  const zapStatsQuery = useZapStats()
   const selectedRelays = useUserStore((state) => state.session?.relays) ?? import.meta.env.VITE_NOSTR_RELAYS ?? []
   const blossomDefault = useUserStore((state) => state.blossom.default)
   const blossomMirrors = useUserStore((state) => state.blossom.mirrors)
-  const [activeTab, setActiveTab] = useState<SettingsTab>('profile')
+  const [activeTab, setActiveTabState] = useState<SettingsTab>(() => (searchTab === 'user' ? 'profile' : 'appearance'))
+  const profileName = currentUser?.profile?.displayName || currentUser?.profile?.name
+  const sessionIdentifier = currentUser?.npub || currentUser?.pubkey
+  const sessionMetricValue = currentUser ? profileName || shortenIdentifier(sessionIdentifier) || 'Conectada' : 'Anônima'
+  const zapMetricValue = currentUser
+    ? zapStatsQuery.isLoading
+      ? 'Carregando'
+      : formatSats(zapStatsQuery.data?.received30d)
+    : 'Login'
+  const zapMetricDescription = currentUser
+    ? zapStatsQuery.isError
+      ? 'Não foi possível carregar seus Zaps agora.'
+      : 'Recebidos nos últimos 30 dias.'
+    : 'Entre para ver seus Zaps.'
+
+  const setActiveTab = useCallback((nextTab: SettingsTab) => {
+    setActiveTabState(nextTab)
+    navigate({
+      to: '/configuration',
+      search: (old: { tab?: SettingsGroup }) => ({ ...old, tab: getSettingsGroup(nextTab) }),
+      replace: true,
+    })
+  }, [navigate])
+
+  useEffect(() => {
+    if (!currentUser && userSettingsTabs.includes(activeTab)) {
+      setActiveTab('appearance')
+    }
+  }, [activeTab, currentUser, setActiveTab])
+
+  useEffect(() => {
+    if (searchTab === 'user') {
+      if (currentUser) {
+        if (!userSettingsTabs.includes(activeTab)) setActiveTabState('profile')
+      } else {
+        setActiveTab('appearance')
+      }
+      return
+    }
+
+    if (searchTab === 'platform' && !platformSettingsTabs.includes(activeTab)) {
+      setActiveTabState('appearance')
+    }
+  }, [activeTab, currentUser, searchTab, setActiveTab])
 
   // Coluna direita
   const aside = (
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Resumo da conta</CardTitle>
-          <CardDescription>Dados da sua presença no NostrTube.</CardDescription>
+          <CardTitle className="text-base">Resumo da plataforma</CardTitle>
+          <CardDescription>Preferências disponíveis neste dispositivo.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center justify-between text-sm">
@@ -483,13 +548,15 @@ export default function ConfigurationPageContent() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Integrações</CardTitle>
-          <CardDescription>Ferramentas conectadas ao seu perfil.</CardDescription>
+          <CardDescription>Ferramentas locais e integrações da conta.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <div className="flex items-center gap-2 rounded-xl border border-border/60 px-3 py-2">
             <ShieldCheck className="size-4 text-primary" />
             <span className="text-muted-foreground">Nostr Extension</span>
-            <StatusBadge tone="healthy" className="ml-auto">Conectada</StatusBadge>
+            <StatusBadge tone={currentUser ? 'healthy' : 'warning'} className="ml-auto">
+              {currentUser ? 'Conectada' : 'Login'}
+            </StatusBadge>
           </div>
           <div className="flex items-center gap-2 rounded-xl border border-border/60 px-3 py-2">
             <Zap className="size-4 text-[oklch(var(--lightning))]" />
@@ -531,37 +598,11 @@ export default function ConfigurationPageContent() {
     </>
   )
 
-  if (!currentUser) {
-    return (
-      <AppShell
-        activeKey="settings"
-        title="Configurações"
-        description="Personalize sua conta, experiência e integrações no NostrTube."
-        icon={Settings2}
-        eyebrow="Fase 4"
-        badge="Relay Cinema"
-        aside={aside}
-      >
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Settings2 className="size-5 text-primary" />
-              <CardTitle className="text-base">Configurações</CardTitle>
-            </div>
-            <CardDescription>Entre primeiro para gerenciar relays, mídia e permissões locais.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Esta área depende da sua sessão Nostr ativa para publicar preferências de DM e aplicar ajustes no cliente.
-            </p>
-            <Button variant="gradient" onClick={() => modal.show(<AuthModal />, { id: 'auth' })}>Fazer login</Button>
-          </CardContent>
-        </Card>
-      </AppShell>
-    )
-  }
-
   const handlePublishDmRelays = async () => {
+    if (!currentUser) {
+      modal.show(<AuthModal />, { id: 'auth' })
+      return
+    }
     if (!ndk) {
       toast.error('NDK ainda não está pronto.')
       return
@@ -588,19 +629,27 @@ export default function ConfigurationPageContent() {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard title="Relays configurados" value={`${selectedRelays.length}`} description="Pool ativa para sincronização." icon={Wifi} tone="relay" />
         <MetricCard title="Mirrors Blossom" value={`${blossomMirrors.length}`} description={blossomDefault ? 'Primário definido.' : 'Fallback padrão.'} icon={Cloud} tone="zap" />
-        <MetricCard title="Sessão Nostr" value={currentUser.profile?.name || currentUser.profile?.displayName || 'Conectada'} description="Pronta para publicar eventos." icon={ShieldCheck} tone="success" />
-        <MetricCard title="Zaps recebidos" value="—" description="Métrica disponível na tela de Zaps." icon={HandCoins} tone="default" />
+        <MetricCard title="Sessão Nostr" value={sessionMetricValue} description={currentUser ? 'Sessão ativa neste dispositivo.' : 'Configurações da plataforma seguem disponíveis.'} icon={ShieldCheck} tone={currentUser ? 'success' : 'default'} />
+        <MetricCard title="Zaps recebidos" value={zapMetricValue} description={zapMetricDescription} icon={HandCoins} tone="zap" />
       </div>
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as SettingsTab)} className="w-full">
         <TabsList className="mb-6 flex h-auto w-full flex-wrap justify-start gap-2 rounded-2xl border border-border/70 bg-card/70 p-2">
-          <TabsTrigger value="profile" className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary">Perfil</TabsTrigger>
-          <TabsTrigger value="account" className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary">Conta</TabsTrigger>
+          <span className="flex items-center px-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Plataforma</span>
           <TabsTrigger value="appearance" className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary">Aparência</TabsTrigger>
-          <TabsTrigger value="notifications" className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary">Notificações</TabsTrigger>
-          <TabsTrigger value="privacy" className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary">Privacidade</TabsTrigger>
           <TabsTrigger value="player" className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary">Player</TabsTrigger>
+          <TabsTrigger value="privacy" className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary">Privacidade</TabsTrigger>
           <TabsTrigger value="relays-blossom" className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary">Relays &amp; Blossom</TabsTrigger>
+          <span className="flex items-center px-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Usuário</span>
+          {currentUser ? (
+            <>
+              <TabsTrigger value="profile" className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary">Perfil</TabsTrigger>
+              <TabsTrigger value="account" className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary">Conta</TabsTrigger>
+              <TabsTrigger value="notifications" className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary">Notificações</TabsTrigger>
+            </>
+          ) : (
+            <Button variant="glass" size="sm" onClick={() => modal.show(<AuthModal />, { id: 'auth' })}>Entrar para conta</Button>
+          )}
         </TabsList>
 
         <TabsContent value="profile" className="space-y-4">

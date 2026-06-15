@@ -4,6 +4,7 @@ import { NDKEvent } from "@nostr-dev-kit/ndk";
 import { Link } from "@tanstack/react-router";
 import VideoCard from "@/components/cards/videoCard";
 import { useGridColumns } from "@/hooks/useGridColumns";
+import { getVideoRouteReference } from "@/features/video/services/video-reference.service";
 
 interface VirtualizedVideoGridProps {
   events: NDKEvent[];
@@ -58,7 +59,7 @@ export function VirtualizedVideoGrid({ events, fetchNextPage, hasNextPage, isFet
             <ul className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {rows[virtualRow.index].map((e) => (
                 <li key={e.id} className="flex">
-                  <Link to="/v/$eventId" params={{ eventId: e.encode() }} className="block w-full hover:scale-[1.02] transition-transform">
+                  <Link to="/v/$eventId" params={{ eventId: getVideoRouteReference(e) }} className="block w-full hover:scale-[1.02] transition-transform">
                     <VideoCard event={e} />
                   </Link>
                 </li>

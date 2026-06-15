@@ -1,9 +1,9 @@
 import { type NDKEvent, NDKKind, NDKSubscriptionCacheUsage } from "@nostr-dev-kit/ndk";
 import { useNDKCurrentPubkey, useSubscribe } from "@nostr-dev-kit/ndk-hooks";
-import { getTagValue } from "@welshman/util";
 import { toast } from "sonner";
 import { addToPlayListEvent } from "@/helper/actions/playlist.ts";
 import { cn } from "@/lib/utils";
+import { getTagValue } from "@/helper/nostrTags";
 import Spinner from "@/components/Spinner.tsx";
 import { modal } from "@/components/modal_v2/modal-manager.ts";
 import {
@@ -145,4 +145,3 @@ export function TileButton({
     </button>
   );
 }
-

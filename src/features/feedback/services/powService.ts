@@ -1,5 +1,5 @@
-import type { OwnedEvent } from "@welshman/util";
 import { FeedbackFlowError } from "@/features/feedback/types/feedback";
+import type { OwnedEvent } from "@/helper/nostrEvents";
 
 interface MineEventWithPowOptions {
   signal?: AbortSignal;

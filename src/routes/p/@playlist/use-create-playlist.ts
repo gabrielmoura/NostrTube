@@ -4,7 +4,6 @@ import { makeEvent } from "@/helper/pow/pow.ts";
 import { nostrNow } from "@/helper/date.ts";
 import NDK__default, { NDKKind } from "@nostr-dev-kit/ndk";
 import { ulid } from "ulid";
-import { nip19 } from "nostr-tools";
 
 interface PlaylistConfigProps {
   ndk: NDK__default;
@@ -39,12 +38,7 @@ const createNostrPlaylistEvent = async ({
 
   await event.publish();
 
-  return nip19.naddrEncode({
-    identifier: newDTag,
-    pubkey,
-    kind: NDKKind.VideoCurationSet,
-    relays: import.meta.env.PROD ? import.meta.env.VITE_NOSTR_RELAYS : import.meta.env.VITE_NOSTR_DEV_RELAYS
-  });
+  return newDTag;
 };
 
 interface useCreatePlaylistProps extends PlaylistConfigProps {

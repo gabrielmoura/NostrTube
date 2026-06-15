@@ -8,6 +8,7 @@ import { cn } from "@/helper/format";
 import useUserStore from "@/store/useUserStore";
 import { formatDuration } from "@/helper/date.ts";
 import { NSFWOverlay } from "@/components/NSFWOverlay.tsx";
+import { getVideoRouteReference } from "@/features/video/services/video-reference.service";
 
 interface VideoCardProps {
   event: NDKEvent;
@@ -27,7 +28,7 @@ export function VideoCard({ event }: VideoCardProps) {
   return (
     <Link
       to={"/v/$eventId"}
-      params={{ eventId: event.id }}
+      params={{ eventId: getVideoRouteReference(event) }}
       className="group block transition-all focus:outline-none"
     >
       <Card

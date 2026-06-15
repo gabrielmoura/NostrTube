@@ -13,6 +13,7 @@ import { ButtonUploadThumb } from "@/routes/new/@components/ButtonUploadThumb";
 import { Image } from "@/components/Image";
 import { geVideoByEventIdData } from "@/helper/loaders/geVideoByEventIdData";
 import { buildAddressableVideoEvent } from "@/features/upload/services/video-event-builder.service";
+import { getVideoRouteReference } from "@/features/video/services/video-reference.service";
 import { applyDraftToImeta, extractEditableVideoDraft } from "@/features/upload/services/editable-video-draft.service";
 import { makeEvent } from "@/helper/pow/pow";
 import { nostrNow } from "@/helper/date";
@@ -89,7 +90,7 @@ function VideoEditRoute() {
 
       await signedEvent.publishReplaceable();
       toast.success("Vídeo atualizado com sucesso.");
-      await navigate({ to: "/v/$eventId", params: { eventId: signedEvent.encode() } });
+      await navigate({ to: "/v/$eventId", params: { eventId: getVideoRouteReference(signedEvent) } });
     } catch (error) {
       console.error(error);
       toast.error("Falha ao atualizar o vídeo.");
@@ -152,7 +153,7 @@ function VideoEditRoute() {
           <AddTagInput initialTags={hashtags} onTagsChange={setHashtags} label="Hashtags" placeholder="Ex: Nostr, Bitcoin" />
           <AddTagInput initialTags={indexers} onTagsChange={setIndexers} label="Indexers" placeholder="Ex: imdb:tt12345" />
           <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={() => navigate({ to: "/v/$eventId", params: { eventId: event.encode() } })}>Cancelar</Button>
+            <Button variant="outline" onClick={() => navigate({ to: "/v/$eventId", params: { eventId: getVideoRouteReference(event) } })}>Cancelar</Button>
             <ButtonWithLoader isLoading={isSaving} onClick={handleSave}>Salvar alterações</ButtonWithLoader>
           </div>
         </div>

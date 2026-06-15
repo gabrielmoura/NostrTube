@@ -1,5 +1,6 @@
 import type { NDKEvent } from '@nostr-dev-kit/ndk'
-import { getTagValue } from '@welshman/util'
+import { getVideoRouteReference } from '@/features/video/services/video-reference.service'
+import { getTagValue } from '@/helper/nostrTags'
 
 const WATCH_LATER_KEY = 'nostrtube:watch-later'
 const WATCH_LATER_EVENT = 'nostrtube:watch-later-changed'
@@ -64,7 +65,7 @@ function writeItems(items: WatchLaterItem[]) {
 export function buildWatchLaterItem(event: NDKEvent): WatchLaterItem {
   return {
     eventId: event.id,
-    eventRef: event.encode(),
+    eventRef: getVideoRouteReference(event),
     title: getTagValue('title', event.tags) || getTagValue('name', event.tags) || 'Untitled video',
     thumbnail: getTagValue('thumb', event.tags) || getTagValue('image', event.tags) || undefined,
     authorPubkey: event.pubkey,

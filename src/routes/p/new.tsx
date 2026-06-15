@@ -1,6 +1,12 @@
 import { createRoute, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ListVideo, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
+import { useNDKCurrentPubkey } from '@nostr-dev-kit/ndk-hooks'
+import { AuthModal } from '@/components/AuthModal'
+import { AppShell } from '@/components/layout/AppShell'
+import { modal } from '@/components/modal_v2/modal-manager'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Route as rootRoute } from '@/routes/__root'
 import { PlaylistForm } from './@playlist/playlist-form.tsx'
 
@@ -12,6 +18,7 @@ export const Route = createRoute({
 
 function RouteComponent() {
   const navigate = useNavigate()
+  const pubkey = useNDKCurrentPubkey()
 
   const handleSuccess = (listId: string) => {
     toast.success('Playlist criada com sucesso! (Redirecionando...)')
@@ -21,19 +28,40 @@ function RouteComponent() {
     })
   }
 
-  return (
-    <div className="container max-w-5xl mx-auto py-10 px-4">
-      {/* Navegação simples de volta */}
-      <button
-        onClick={() => window.history.back()}
-        className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Voltar
-      </button>
+  if (!pubkey) {
+    return (
+      <AppShell activeKey="playlists" title="Nova playlist" description="Crie coleções públicas de vídeos no Nostr." icon={ListVideo}>
+        <Card className="mx-auto max-w-2xl">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <LogIn className="size-5 text-primary" />
+              <CardTitle className="text-base">Entre para criar playlists</CardTitle>
+            </div>
+            <CardDescription>Playlists são publicadas como eventos Nostr e precisam de uma sessão ativa.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3 sm:flex-row">
+            <Button variant="gradient" onClick={() => modal.show(<AuthModal />, { id: 'auth' })}>
+              Entrar
+            </Button>
+            <Button variant="glass" onClick={() => navigate({ to: '/library', search: { tab: 'playlists' } as never })}>
+              Ver playlists
+            </Button>
+          </CardContent>
+        </Card>
+      </AppShell>
+    )
+  }
 
-      {/* Componente encapsulado */}
-      <PlaylistForm onSuccess={handleSuccess} />
-    </div>
+  return (
+    <AppShell activeKey="playlists" title="Nova playlist" description="Organize vídeos em uma coleção pública da rede Nostr." icon={ListVideo}>
+      <div className="mx-auto max-w-5xl space-y-6">
+        <Button variant="glass" onClick={() => window.history.back()}>
+          <ArrowLeft className="size-4" />
+          Voltar
+        </Button>
+
+        <PlaylistForm onSuccess={handleSuccess} />
+      </div>
+    </AppShell>
   )
 }

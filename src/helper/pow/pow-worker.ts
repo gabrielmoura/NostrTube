@@ -1,6 +1,6 @@
 import { createSHA256 } from "hash-wasm";
-import { bytesToHex } from "@welshman/util/dist/lib/src";
-import type { HashedEvent } from "@welshman/util";
+import { bytesToHex } from "@/helper/hex";
+import type { HashedEvent } from "@/helper/nostrEvents";
 
 interface PowRequest {
   taskId: string;

@@ -5,13 +5,13 @@ import { HiCheckBadge } from "react-icons/hi2";
 import { cn, formatCount, getLettersPlain, getNameToShow, getVideoDetails } from "@/helper/format.ts";
 import { RenderText } from "@/components/RenderText.tsx";
 import { ErrorBoundaryVideo } from "./error.tsx";
-import { getTagValues } from "@welshman/util";
 import { Link } from "@tanstack/react-router";
 import LikeToggleButton from "@/components/LikeToggleButton.tsx";
 import { lazy } from "react";
 import { DropdownMenuVideo } from "@/routes/v/@components/DropdownMenuVideo.tsx";
 import FollowButton from "@/components/FollowButton.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
+import { getTagValues } from "@/helper/nostrTags";
 
 const VideoMeta = lazy(() => import("@/routes/v/@components/VideoMeta.tsx"));
 const LikeButton = lazy(() => import("@/routes/v/@components/LikeButton.tsx"));

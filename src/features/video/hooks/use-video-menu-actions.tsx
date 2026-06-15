@@ -1,7 +1,6 @@
 import * as React from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useNDKCurrentPubkey } from "@nostr-dev-kit/ndk-hooks";
-import { getTagValue } from "@welshman/util";
 import { Bookmark, Download, ExternalLink, FileJson, Flag, ListPlus, Pencil, Send, ShieldAlert, Share2, Wrench } from "lucide-react";
 import { toast } from "sonner";
 import { Share } from "@capacitor/share";
@@ -57,7 +56,11 @@ export function useVideoMenuActions(event: NDKEvent) {
         label: "Add to Playlist",
         icon: <ListPlus className="size-4" />,
         action: () => {
-          const dTagId = event.dTag ?? "";
+          const dTagId = event.tagValue("d") || event.dTag || event.tagId();
+          if (!dTagId) {
+            toast.error("Não foi possível identificar a tag d deste vídeo.");
+            return;
+          }
           modal.show(<AddToPlaylistModal eventIdTag={`${event.kind}:${event.pubkey}:${dTagId}`} />);
         }
       },

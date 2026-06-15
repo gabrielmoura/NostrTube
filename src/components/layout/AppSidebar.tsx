@@ -21,6 +21,8 @@ import {
   Wifi,
 } from 'lucide-react'
 import type { ReactNode } from 'react'
+import logoNostrTube from '@/assets/logo-nostrtube.png'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { StatusBadge } from '@/components/ui/status-badge'
 import { cn } from '@/lib/utils'
 import useUserStore from '@/store/useUserStore'
@@ -49,6 +51,7 @@ interface SidebarItem {
   label: string
   icon: typeof LayoutGrid
   to?: string
+  search?: Record<string, string>
   disabled?: boolean
   badge?: ReactNode
 }
@@ -67,16 +70,22 @@ const primaryItems: SidebarItem[] = [
 
 const libraryItems: SidebarItem[] = [
   { key: 'library', label: 'Biblioteca', icon: FolderOpen, to: '/library' },
-  { key: 'history', label: 'Histórico', icon: History, to: '/library' },
-  { key: 'watchlater', label: 'Assistir mais tarde', icon: Bookmark, to: '/library' },
-  { key: 'liked', label: 'Vídeos curtidos', icon: Heart, to: '/library' },
-  { key: 'myvideos', label: 'Seus vídeos', icon: PlaySquare, to: '/library' },
-  { key: 'playlists', label: 'Playlists', icon: ListVideo, to: '/library' },
+  { key: 'history', label: 'Histórico', icon: History, to: '/library', search: { tab: 'history' } },
+  { key: 'watchlater', label: 'Assistir mais tarde', icon: Bookmark, to: '/library', search: { tab: 'watchlater' } },
+  { key: 'liked', label: 'Vídeos curtidos', icon: Heart, to: '/library', search: { tab: 'liked' } },
+  { key: 'myvideos', label: 'Seus vídeos', icon: PlaySquare, to: '/library', search: { tab: 'myvideos' } },
+  { key: 'playlists', label: 'Playlists', icon: ListVideo, to: '/library', search: { tab: 'playlists' } },
 ]
 
 const secondaryItems: SidebarItem[] = [
-  { key: 'settings', label: 'Configurações', icon: Settings2, to: '/configuration' },
+  { key: 'settings', label: 'Configurações', icon: Settings2, to: '/configuration', search: { tab: 'platform' } },
 ]
+
+function shortenIdentifier(identifier?: string) {
+  if (!identifier) return ''
+  if (identifier.length <= 18) return identifier
+  return `${identifier.slice(0, 10)}...${identifier.slice(-6)}`
+}
 
 function SidebarRow({ item, activeKey }: { item: SidebarItem; activeKey?: SidebarKey }) {
   const active = item.key === activeKey
@@ -107,7 +116,7 @@ function SidebarRow({ item, activeKey }: { item: SidebarItem; activeKey?: Sideba
   }
 
   return (
-    <Link to={item.to} className={rowClass} activeProps={{ className: rowClass }}>
+    <Link to={item.to} search={item.search as never} className={rowClass} activeProps={{ className: rowClass }}>
       {content}
     </Link>
   )
@@ -121,12 +130,16 @@ export interface AppSidebarProps {
 export function AppSidebar({ activeKey, className }: AppSidebarProps) {
   const currentUser = useNDKCurrentUser()
   const relayCount = useUserStore((state) => state.session?.relays?.length ?? 0)
-  const profileName = currentUser?.profile?.displayName || currentUser?.profile?.name || 'Sessão anônima'
+  const profileName = currentUser?.profile?.displayName || currentUser?.profile?.name
+  const profileIdentifier = currentUser?.npub || currentUser?.pubkey
+  const profileLabel = profileName || (currentUser ? shortenIdentifier(profileIdentifier) : 'Sessão anônima')
+  const profileImage = currentUser?.profile?.image || currentUser?.profile?.picture
+  const profileFallback = (profileName || profileIdentifier || 'U').slice(0, 1).toUpperCase()
 
   return (
     <aside className={cn('flex h-full w-full max-w-[248px] flex-col border-r border-sidebar-border bg-sidebar/90 px-3 py-4 backdrop-blur-xl', className)}>
       <div className="mb-5 flex items-center gap-3 px-3">
-        <div className="flex size-10 items-center justify-center rounded-2xl brand-gradient text-sm font-bold text-white shadow-lg">NT</div>
+        <img src={logoNostrTube} alt="NostrTube" className="size-10 rounded-2xl object-contain shadow-lg" />
         <div className="min-w-0">
           <p className="font-display text-lg font-semibold leading-tight tracking-tight text-sidebar-foreground">NostrTube</p>
           <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Relay Cinema</p>
@@ -159,15 +172,23 @@ export function AppSidebar({ activeKey, className }: AppSidebarProps) {
 
       <div className="mt-auto rounded-2xl border border-sidebar-border bg-sidebar-accent/45 p-4 text-sidebar-foreground shadow-[inset_0_1px_0_color-mix(in_oklab,var(--foreground)_8%,transparent)]">
         <div className="flex items-center gap-3">
-          <div className="rounded-2xl bg-primary/14 p-2 text-primary">
-            <ShieldCheck className="size-4" />
-          </div>
-          <div>
-            <p className="text-sm font-medium">{profileName}</p>
-            <p className="text-xs text-muted-foreground">Infra local pronta para redesign</p>
+          {currentUser ? (
+            <Avatar className="size-9 border border-sidebar-border">
+              <AvatarImage src={profileImage} alt={profileLabel} />
+              <AvatarFallback>{profileFallback}</AvatarFallback>
+            </Avatar>
+          ) : (
+            <div className="rounded-2xl bg-primary/14 p-2 text-primary">
+              <ShieldCheck className="size-4" />
+            </div>
+          )}
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium">{profileLabel}</p>
+            <p className="text-xs text-muted-foreground">{currentUser ? 'Sessão Nostr ativa' : 'Navegando sem login'}</p>
           </div>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2">
+          <StatusBadge tone={currentUser ? 'healthy' : 'neutral'}>{currentUser ? 'logado' : 'anônimo'}</StatusBadge>
           <StatusBadge tone={relayCount > 0 ? 'healthy' : 'warning'}>{relayCount} relays</StatusBadge>
           {currentUser ? (
             <Link to="/u/$userId" params={{ userId: currentUser.npub ?? currentUser.pubkey }} className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">

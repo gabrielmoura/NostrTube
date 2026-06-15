@@ -1,6 +1,6 @@
 import { LoggerAgent } from "@/lib/debug.ts";
-import type { SignedEvent } from "@welshman/util/dist/util/src/Events";
 import * as nip19 from "nostr-tools/nip19";
+import type { SignedEvent } from "@/helper/nostrEvents";
 
 
 const log = LoggerAgent.create("NOSTR_WASM");

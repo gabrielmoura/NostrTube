@@ -50,7 +50,7 @@ export async function addToPlayList({ ndk, playListId, eventIdTag }: AddToPlayLi
   });
 
   if (eventX) {
-    eventX.tags.push(["e", eventIdTag]);
+    eventX.tags.push(["a", eventIdTag]);
     await eventX.sign();
     await eventX.publish();
     return eventX;
@@ -80,4 +80,3 @@ export function createPlayList({ title, description, events, imageUrl }: CreateP
     ]
   };
 }
-

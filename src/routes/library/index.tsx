@@ -1,4 +1,4 @@
-import type { NDKEvent } from '@nostr-dev-kit/ndk'
+import { NDKKind, type NDKEvent } from '@nostr-dev-kit/ndk'
 import { NDKSubscriptionCacheUsage, useNDK, useNDKCurrentUser, useSubscribe, type NDKFilter } from '@nostr-dev-kit/ndk-hooks'
 import { createRoute, Link } from '@tanstack/react-router'
 import {
@@ -17,8 +17,10 @@ import {
   UserRound,
 } from 'lucide-react'
 import { useMemo } from 'react'
+import { z } from 'zod'
 import VideoCard, { VideoCardLoading } from '@/components/cards/videoCard'
 import { AppShell } from '@/components/layout/AppShell'
+import type { SidebarKey } from '@/components/layout/AppSidebar'
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -31,6 +33,28 @@ import { Route as rootRoute } from '@/routes/__root'
 
 // ─── Tipos ───────────────────────────────────────────────
 type LibraryTab = 'all' | 'playlists' | 'liked' | 'watchlater' | 'history' | 'myvideos' | 'downloads'
+
+const LibrarySearchSchema = z.object({
+  tab: z.enum(['all', 'playlists', 'liked', 'watchlater', 'history', 'myvideos', 'downloads']).optional(),
+})
+
+function isResolvablePlaylistVideoTag(tag: string[]) {
+  const [, value] = tag
+  if (!value) return false
+
+  if (tag[0] === 'e') {
+    const parts = value.split(':')
+    const eventId = parts.length === 2 ? parts[1] : value
+    return eventId.length === 64
+  }
+
+  if (tag[0] === 'a') {
+    const parts = value.split(':')
+    return (parts.length === 3 && Boolean(parts[0] && parts[1] && parts[2])) || (parts.length === 2 && parts[1]?.length === 64)
+  }
+
+  return false
+}
 
 const TABS: { key: LibraryTab; label: string; icon: typeof FolderOpen }[] = [
   { key: 'all', label: 'Tudo', icon: FolderOpen },
@@ -47,6 +71,7 @@ export const Route = createRoute({
   getParentRoute: () => rootRoute,
   path: '/library',
   component: LibraryPage,
+  validateSearch: LibrarySearchSchema,
   head: () => ({
     meta: [
       { title: `Biblioteca - ${import.meta.env.VITE_APP_NAME}` },
@@ -73,9 +98,9 @@ function useLibraryData() {
     { closeOnEose: false, cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST },
   )
 
-  // Playlists do usuário (kind 30001)
+  // Playlists de vídeo do usuário (kind 30005 / NDKKind.VideoCurationSet)
   const playlistsFilter: NDKFilter | null = currentPubkey
-    ? { kinds: [30001], authors: [currentPubkey], limit: 50 }
+    ? { kinds: [NDKKind.VideoCurationSet], authors: [currentPubkey], limit: 100 }
     : null
   const { events: playlists, eose: playlistsEose } = useSubscribe(
     playlistsFilter ? [playlistsFilter] : false,
@@ -121,9 +146,10 @@ function useLibraryData() {
     return playlists.map((ev) => {
       const title = ev.tagValue('title') || ev.tagValue('name') || 'Playlist sem título'
       const description = ev.tagValue('description') || ''
-      const videoCount = ev.tags.filter((t) => t[0] === 'a' || t[0] === 'e').length
+      const videoCount = ev.tags.filter(isResolvablePlaylistVideoTag).length
       const dTag = ev.tagValue('d') || ev.id
-      return { id: ev.id, dTag, title, description, videoCount, event: ev }
+      const listId = ev.tagValue('d') || ev.id
+      return { id: ev.id, dTag, listId, title, description, videoCount, event: ev }
     })
   }, [playlists])
 
@@ -144,6 +170,8 @@ function useLibraryData() {
 
 // ─── Componente principal ────────────────────────────────
 function LibraryPage() {
+  const { tab } = Route.useSearch()
+  const navigate = Route.useNavigate()
   const { items: watchLaterItems, remove: removeWatchLater } = useWatchLater()
   const {
     currentUser,
@@ -156,6 +184,17 @@ function LibraryPage() {
   } = useLibraryData()
 
   const isLoggedIn = !!currentUser
+  const activeTab = tab || 'all'
+  const activeSidebarKey: SidebarKey = activeTab === 'all' || activeTab === 'downloads' ? 'library' : activeTab
+
+  const setActiveTab = (nextTab: string) => {
+    navigate({
+      search: (old: { tab?: LibraryTab }) => ({
+        ...old,
+        tab: nextTab === 'all' ? undefined : (nextTab as LibraryTab),
+      }),
+    })
+  }
 
   // Coluna direita
   const aside = (
@@ -196,7 +235,7 @@ function LibraryPage() {
               <Link
                 key={pl.id}
                 to="/p/$listId"
-                params={{ listId: pl.dTag }}
+                params={{ listId: pl.listId }}
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
               >
                 <ListVideo className="size-4 shrink-0" />
@@ -247,7 +286,7 @@ function LibraryPage() {
   // Loading
   if (isLoading && myVideos.length === 0 && playlists.length === 0) {
     return (
-      <AppShell activeKey="library" title="Biblioteca" description="Tudo o que você salvou, organizou e acompanhou." icon={FolderOpen} aside={aside}>
+      <AppShell activeKey={activeSidebarKey} title="Biblioteca" description="Tudo o que você salvou, organizou e acompanhou." icon={FolderOpen} aside={aside}>
         <div className="space-y-6">
           <div className="flex gap-2 overflow-x-auto pb-2">
             {TABS.map((t) => (
@@ -265,8 +304,8 @@ function LibraryPage() {
   }
 
   return (
-    <AppShell activeKey="library" title="Biblioteca" description="Tudo o que você salvou, organizou e acompanhou." icon={FolderOpen} aside={aside}>
-      <Tabs defaultValue="all" className="w-full">
+    <AppShell activeKey={activeSidebarKey} title="Biblioteca" description="Tudo o que você salvou, organizou e acompanhou." icon={FolderOpen} aside={aside}>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-6 flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-none border-b border-border bg-transparent p-0 pb-px scrollbar-thin">
           {TABS.map((tab) => (
             <TabsTrigger
@@ -298,10 +337,7 @@ function LibraryPage() {
                 <button
                   type="button"
                   className="mt-2 inline-flex items-center text-xs font-medium text-primary hover:underline"
-                  onClick={() => {
-                    const tabTrigger = document.querySelector('[value="myvideos"]') as HTMLElement
-                    tabTrigger?.click()
-                  }}
+                  onClick={() => setActiveTab('myvideos')}
                 >
                   Ver todos os {myVideos.length} vídeos <ChevronRight className="ml-1 size-3" />
                 </button>
@@ -321,7 +357,7 @@ function LibraryPage() {
                   <Link
                     key={pl.id}
                     to="/p/$listId"
-                    params={{ listId: pl.dTag }}
+                    params={{ listId: pl.listId }}
                     className="flex items-center gap-4 rounded-xl border border-border/50 bg-card/50 p-4 transition-colors hover:bg-muted/30"
                   >
                     <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-primary/10">
@@ -389,7 +425,7 @@ function LibraryPage() {
                 <Link
                   key={pl.id}
                   to="/p/$listId"
-                  params={{ listId: pl.dTag }}
+                  params={{ listId: pl.listId }}
                   className="flex items-center gap-4 rounded-xl border border-border/50 bg-card/50 p-5 transition-colors hover:bg-muted/30"
                 >
                   <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-primary/10">

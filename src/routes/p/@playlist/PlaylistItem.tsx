@@ -19,10 +19,11 @@ interface PlaylistItemProps {
   item: VideoItem;
   onRemove: (id: string) => void;
   onPlay: (id: string) => void;
+  canEdit?: boolean;
   isDragging?: boolean;
 }
 
-export const PlaylistItem = ({ item, onRemove, onPlay }: PlaylistItemProps) => {
+export const PlaylistItem = ({ item, onRemove, onPlay, canEdit = false }: PlaylistItemProps) => {
   const {
     attributes,
     listeners,
@@ -43,6 +44,7 @@ export const PlaylistItem = ({ item, onRemove, onPlay }: PlaylistItemProps) => {
   const formattedDate = new Date(item.publishedAt).toLocaleDateString(undefined, {
     day: "numeric", month: "short", year: "numeric"
   });
+  const routeReference = item.dTag || item.id;
 
   return (
     <div ref={setNodeRef} style={style} className="mb-2 sm:mb-3 touch-none outline-none">
@@ -56,16 +58,16 @@ export const PlaylistItem = ({ item, onRemove, onPlay }: PlaylistItemProps) => {
         )}
       >
         {/* --- ESQUERDA: Drag Handle --- */}
-        <button
-          {...attributes}
-          {...listeners}
-          // Mobile: Padding minimo. Desktop: Padding normal.
-          className="p-1 sm:p-2 text-muted-foreground/40 hover:text-foreground hover:bg-muted rounded cursor-grab active:cursor-grabbing transition-colors focus-visible:outline-primary flex-shrink-0"
-          aria-label="Reordenar item"
-        >
-          {/* Ícone menor no mobile */}
-          <GripVertical className="w-5 h-5 sm:w-5 sm:h-5" />
-        </button>
+        {canEdit ? (
+          <button
+            {...attributes}
+            {...listeners}
+            className="flex-shrink-0 rounded p-1 text-muted-foreground/40 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-primary active:cursor-grabbing sm:p-2"
+            aria-label="Reordenar item"
+          >
+            <GripVertical className="h-5 w-5" />
+          </button>
+        ) : null}
 
         {/* --- CENTRO: Wrapper de Conteúdo --- */}
         <div className="flex-1 flex flex-row items-start gap-3 sm:gap-4 overflow-hidden group/item">
@@ -73,7 +75,7 @@ export const PlaylistItem = ({ item, onRemove, onPlay }: PlaylistItemProps) => {
           {/* Thumbnail Responsiva */}
           <div
             className="relative w-24 sm:w-40 aspect-video flex-shrink-0 rounded-md overflow-hidden cursor-pointer outline-offset-1 focus-visible:outline-primary bg-muted"
-            onClick={() => onPlay(item.id)}
+            onClick={() => onPlay(routeReference)}
           >
             <img
               src={item.thumbnailUrl}
@@ -85,7 +87,7 @@ export const PlaylistItem = ({ item, onRemove, onPlay }: PlaylistItemProps) => {
             <Link
               className="hidden sm:flex absolute inset-0 bg-black/0 transition-all duration-300 group-hover/item:bg-black/30 items-center justify-center"
               to="/v/$eventId"
-              params={{ eventId: item.id }}
+              params={{ eventId: routeReference }}
             >
               <Play
                 size={32}
@@ -105,7 +107,7 @@ export const PlaylistItem = ({ item, onRemove, onPlay }: PlaylistItemProps) => {
             {/* Título: Menor e com clamp de 2 linhas no mobile */}
             <h3
               className="font-semibold text-sm sm:text-base leading-tight line-clamp-2 sm:line-clamp-1 hover:text-primary transition-colors cursor-pointer"
-              onClick={() => onPlay(item.id)}
+              onClick={() => onPlay(routeReference)}
             >
               {item.title}
             </h3>
@@ -141,16 +143,18 @@ export const PlaylistItem = ({ item, onRemove, onPlay }: PlaylistItemProps) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onClick={() => onPlay(item.id)}>
+            <DropdownMenuItem onClick={() => onPlay(routeReference)}>
               <Play className="mr-2 h-4 w-4" /> Reproduzir agora
             </DropdownMenuItem>
             <DropdownMenuItem>
               <ListVideo className="mr-2 h-4 w-4" /> Adicionar à fila
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => onRemove(item.id)} className="text-destructive">
-              <Trash2 className="mr-2 h-4 w-4" /> Remover
-            </DropdownMenuItem>
+            {canEdit ? (
+              <DropdownMenuItem onClick={() => onRemove(item.id)} className="text-destructive">
+                <Trash2 className="mr-2 h-4 w-4" /> Remover
+              </DropdownMenuItem>
+            ) : null}
           </DropdownMenuContent>
         </DropdownMenu>
       </Card>

@@ -1,5 +1,6 @@
-import { getTagValues } from "@welshman/util";
 import type { NDKEvent } from "@nostr-dev-kit/ndk";
+import { getVideoRouteReference } from "@/features/video/services/video-reference.service";
+import { getTagValues } from "@/helper/nostrTags";
 
 const WATCH_HISTORY_KEY = "nostrtube-watch-history";
 const MAX_HISTORY_ITEMS = 30;
@@ -32,7 +33,7 @@ export function recordWatchHistory(event: NDKEvent) {
   const tags = getTagValues("t", event.tags).slice(0, 10);
   const nextEntry: WatchHistoryEntry = {
     eventId: event.id,
-    eventRef: event.encode(),
+    eventRef: getVideoRouteReference(event),
     title: event.tagValue("title") || event.tagValue("name") || "Untitled",
     tags,
     watchedAt: Date.now()

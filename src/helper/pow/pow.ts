@@ -1,8 +1,8 @@
-import type { HashedEvent, OwnedEvent } from "@welshman/util";
-import { getTag } from "@welshman/util";
 import { NDKEvent } from "@nostr-dev-kit/ndk-hooks";
 import NDK from "@nostr-dev-kit/ndk";
 import { logger, powManager } from "./pow-manager";
+import type { HashedEvent, OwnedEvent } from "@/helper/nostrEvents";
+import { getTag } from "@/helper/nostrTags";
 
 
 export interface MakeEventParams {
@@ -47,7 +47,7 @@ export async function makeEvent({ ndk, event, difficulty }: MakeEventParams): Pr
 }
 
 export const getPow = (event: HashedEvent): number => {
-  const tag = getTag("nonce", event.tags);
+  const tag = getTag(event.tags, "nonce");
   if (!tag) return 0;
 
   const targetDifficulty = parseInt(tag[2]);

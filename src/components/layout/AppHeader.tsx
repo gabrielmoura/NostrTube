@@ -1,13 +1,24 @@
-import { useNDKCurrentUser } from '@nostr-dev-kit/ndk-hooks'
+import { useNDKCurrentUser, useNDKSessionLogout } from '@nostr-dev-kit/ndk-hooks'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { Bell, CircleHelp, Menu, Search, Settings2, ShieldCheck, Upload, Zap } from 'lucide-react'
+import { Bell, CircleHelp, LogOut, Menu, Search, Settings2, ShieldCheck, Upload, UserRound } from 'lucide-react'
 import type { KeyboardEvent } from 'react'
 import { useState } from 'react'
+import logoNostrTube from '@/assets/logo-nostrtube.png'
 import { AppSidebar, type SidebarKey } from '@/components/layout/AppSidebar'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button, buttonVariants } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { FeedbackButton } from '@/features/feedback/components/FeedbackButton'
+import useUserStore from '@/store/useUserStore'
 
 export interface AppHeaderProps {
   activeKey?: SidebarKey
@@ -16,7 +27,18 @@ export interface AppHeaderProps {
 export function AppHeader({ activeKey }: AppHeaderProps) {
   const navigate = useNavigate()
   const currentUser = useNDKCurrentUser()
+  const logout = useNDKSessionLogout()
+  const clearSession = useUserStore((state) => state.clearSession)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const profileName = currentUser?.profile?.displayName || currentUser?.profile?.name || 'Usuário'
+  const profileImage = currentUser?.profile?.image || currentUser?.profile?.picture
+  const profileFallback = profileName.slice(0, 1).toUpperCase()
+
+  const handleLogout = () => {
+    logout()
+    clearSession()
+    navigate({ to: '/' })
+  }
 
   const handleSearch = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key !== 'Enter') return
@@ -41,7 +63,7 @@ export function AppHeader({ activeKey }: AppHeaderProps) {
         </Sheet>
 
         <Link to="/" className="mr-1 flex min-w-0 items-center gap-2 lg:hidden">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-2xl brand-gradient text-sm font-bold text-white shadow-lg">NT</span>
+          <img src={logoNostrTube} alt="NostrTube" className="size-9 shrink-0 rounded-2xl object-contain shadow-lg" />
           <span className="hidden font-display text-sm font-semibold tracking-tight text-foreground sm:inline">NostrTube</span>
         </Link>
 
@@ -54,10 +76,7 @@ export function AppHeader({ activeKey }: AppHeaderProps) {
           <Button variant="glass" size="icon" className="sm:hidden" aria-label="Buscar" onClick={() => setMobileSearchOpen((open) => !open)}>
             <Search className="size-4" />
           </Button>
-          <Link to="/zaps" className={buttonVariants({ variant: 'zap', size: 'sm', className: 'hidden md:inline-flex' })}>
-            <Zap className="size-4" />
-            Sats
-          </Link>
+          <FeedbackButton />
           <Link to="/faq" className={buttonVariants({ variant: 'glass', size: 'icon-sm', className: 'hidden sm:inline-flex md:hidden' })}>
             <CircleHelp className="size-4" />
             <span className="sr-only">FAQ</span>
@@ -81,17 +100,44 @@ export function AppHeader({ activeKey }: AppHeaderProps) {
           <Button variant="glass" size="icon" aria-label="Notificações">
             <Bell className="size-4" />
           </Button>
-          <Link to="/configuration" className={buttonVariants({ variant: 'glass', size: 'icon' })}>
-            <Settings2 className="size-4" />
-            <span className="sr-only">Configurações</span>
-          </Link>
-          {currentUser ? (
-            <Link to="/u/$userId" params={{ userId: currentUser.npub ?? currentUser.pubkey }} className="rounded-full border border-border/70 bg-card/70 p-1 transition-colors hover:border-primary/40">
-              <Avatar className="size-8">
-                <AvatarImage src={currentUser.profile?.image || currentUser.profile?.picture} />
-                <AvatarFallback>{(currentUser.profile?.name || 'U').slice(0, 1).toUpperCase()}</AvatarFallback>
-              </Avatar>
+          {!currentUser ? (
+            <Link to="/configuration" search={{ tab: 'platform' }} className={buttonVariants({ variant: 'glass', size: 'icon' })}>
+              <Settings2 className="size-4" />
+              <span className="sr-only">Configurações</span>
             </Link>
+          ) : null}
+          {currentUser ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="glass" size="icon" className="rounded-full p-1" aria-label="Menu do usuário">
+                  <Avatar className="size-8">
+                    <AvatarImage src={profileImage} alt={profileName} />
+                    <AvatarFallback>{profileFallback}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="truncate">{profileName}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/u/$userId" params={{ userId: currentUser.npub ?? currentUser.pubkey }}>
+                    <UserRound className="size-4" />
+                    Perfil
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/configuration">
+                    <Settings2 className="size-4" />
+                    Configurações
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="size-4" />
+                  Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : null}
         </div>
       </div>

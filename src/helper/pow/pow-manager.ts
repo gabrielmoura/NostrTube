@@ -1,5 +1,5 @@
-import type { OwnedEvent } from "@welshman/util";
 import { LoggerAgent } from "@/lib/debug.ts";
+import type { OwnedEvent } from "@/helper/nostrEvents";
 
 export const logger = LoggerAgent.create("POW");
 

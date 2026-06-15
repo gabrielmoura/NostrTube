@@ -3,6 +3,7 @@ import VideoCard, { VideoCardLoading } from "@/components/cards/videoCard";
 import type { ReactNode } from "react";
 import { cn } from "@/helper/format.ts";
 import type { NDKEvent } from "@nostr-dev-kit/ndk";
+import { getVideoRouteReference } from "@/features/video/services/video-reference.service";
 
 type VideosGridProps = {
   events: NDKEvent[];
@@ -76,12 +77,12 @@ export function VideosGrid({
             className="cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary rounded-lg"
             onClick={(event) => {
               if ((event.target as HTMLElement).closest("a")) return;
-              navigate({ to: "/v/$eventId", params: { eventId: e.encode() } });
+              navigate({ to: "/v/$eventId", params: { eventId: getVideoRouteReference(e) } });
             }}
             onKeyDown={(event) => {
               if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
-                navigate({ to: "/v/$eventId", params: { eventId: e.encode() } });
+                navigate({ to: "/v/$eventId", params: { eventId: getVideoRouteReference(e) } });
               }
             }}
           >

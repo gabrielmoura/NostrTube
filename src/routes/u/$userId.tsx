@@ -26,7 +26,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card } from '@/components/ui/card.tsx'
-import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { filterEventsByAge } from '@/features/video/services/age-filter.service'
 import { VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
@@ -151,55 +150,47 @@ function ProfilePage() {
   const getInitials = (name: string) => name?.slice(0, 2).toUpperCase() || 'U'
 
   return (
-    <AppShell>
-      {/* --- Header Section --- */}
-      <div className="relative">
-        {/* Banner */}
-        <div className="w-full h-48 md:h-64 lg:h-80 bg-muted overflow-hidden relative">
+    <AppShell className="pt-0">
+      <section className="overflow-hidden rounded-2xl border border-border/70 bg-card/70 shadow-sm">
+        <div className="relative h-44 w-full overflow-hidden bg-muted md:h-56 lg:h-64">
           {userProfile?.banner ? (
-            <img src={userProfile?.banner} alt="Banner" className="w-full h-full object-cover" />
+            <img src={userProfile?.banner} alt="Banner" className="h-full w-full object-cover" />
           ) : (
-            <div className="w-full h-full bg-gradient-to-r from-gray-800 to-gray-900" />
+            <div className="h-full w-full brand-gradient opacity-70" />
           )}
         </div>
 
-        {/* Profile Info Bar */}
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-start md:items-end -mt-16 md:-mt-10 mb-6 gap-6 relative z-10">
-            {/* Avatar */}
-            <Avatar className="w-32 h-32 md:w-40 md:h-40 border-4 border-background shadow-xl">
+        <div className="px-4 pb-6 sm:px-6">
+          <div className="relative z-10 -mt-14 flex flex-col gap-5 md:-mt-16 md:flex-row md:items-end">
+            <Avatar className="size-28 border-4 border-background shadow-xl md:size-36">
               <AvatarImage src={userProfile?.picture} alt={userProfile?.name} className="object-cover" />
-              <AvatarFallback className="text-4xl font-bold bg-secondary">
+              <AvatarFallback className="bg-secondary text-3xl font-bold">
                 {getInitials(userProfile?.name || '')}
               </AvatarFallback>
             </Avatar>
 
-            {/* Info Text */}
-            <div className="flex-1 mt-2 md:mt-0 md:mb-4">
-              <div className="flex items-center gap-2">
-                <h1 className="text-3xl font-bold tracking-tight">{profileTitle}</h1>
+            <div className="min-w-0 flex-1 md:mb-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="min-w-0 truncate text-2xl font-bold tracking-tight md:text-3xl">{profileTitle}</h1>
                 {userProfile?.nip05 && (
                   <Badge variant="secondary" className="text-xs font-normal">
                     nip05 verified
                   </Badge>
                 )}
               </div>
-              <p className="text-muted-foreground font-mono text-sm mt-1">{profileHandle}</p>
+              <p className="mt-1 truncate font-mono text-sm text-muted-foreground">{profileHandle}</p>
 
-              {/* Stats Row (Mocked numbers for demo) */}
-              <div className="flex gap-4 mt-3 text-sm text-muted-foreground">
+              <div className="mt-3 flex flex-wrap gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
-                  <strong className="text-foreground">{videos.length}</strong> Videos
+                  <strong className="text-foreground">{videos.length}</strong> vídeos
                 </span>
-                {/* Nota: Seguidores reais requerem uma query complexa ou indexador */}
                 <span className="flex items-center gap-1">
-                  <strong className="text-foreground">--</strong> Seguidores
+                  <strong className="text-foreground">{playlists.length}</strong> playlists
                 </span>
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-3 mb-4 w-full md:w-auto">
+            <div className="flex w-full items-center gap-3 md:mb-3 md:w-auto">
               <FollowButton pubkey={metaEvent?.pubkey} currentUser={currentUser ?? undefined} />
               {metaEvent?.pubkey ? (
                 <ZapButton
@@ -217,23 +208,20 @@ function ProfilePage() {
             </div>
           </div>
 
-          {/* Bio Mobile/Desktop */}
           {userProfile?.about && (
-            <div className="mb-8 max-w-3xl">
-              <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap text-muted-foreground">
+            <div className="mt-5 max-w-3xl">
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground md:text-base">
                 {userProfile?.about}
               </p>
             </div>
           )}
         </div>
-      </div>
-
-      <Separator className="mb-6" />
+      </section>
 
       {/* --- Content Tabs --- */}
-      <div className="container mx-auto px-4">
+      <div>
         <Tabs defaultValue={tab || 'videos'} className="w-full">
-          <TabsList className="w-full justify-start h-auto p-0 bg-transparent border-b border-border mb-8 rounded-none gap-6">
+          <TabsList className="mb-6 flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-none border-b border-border bg-transparent p-0 pb-px">
             <TabsTrigger
               onClick={() => {
                 navigate({
@@ -241,7 +229,7 @@ function ProfilePage() {
                 })
               }}
               value="videos"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all"
+              className="shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 font-medium text-muted-foreground transition-all data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
             >
               <Grid className="w-4 h-4 mr-2" />
               Vídeos
@@ -253,7 +241,7 @@ function ProfilePage() {
                   search: (old: { tab?: 'videos' | 'playlists' | 'about' | 'alerts' }) => ({ ...old, tab: 'playlists' }),
                 })
               }}
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all"
+              className="shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 font-medium text-muted-foreground transition-all data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
             >
               <PlaySquare className="w-4 h-4 mr-2" />
               Playlists
@@ -265,7 +253,7 @@ function ProfilePage() {
                   search: (old: { tab?: 'videos' | 'playlists' | 'about' | 'alerts' }) => ({ ...old, tab: 'about' }),
                 })
               }}
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all"
+              className="shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 font-medium text-muted-foreground transition-all data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
             >
               <Info className="w-4 h-4 mr-2" />
               Sobre
@@ -278,7 +266,7 @@ function ProfilePage() {
                     search: (old: { tab?: 'videos' | 'playlists' | 'about' | 'alerts' }) => ({ ...old, tab: 'alerts' }),
                   })
                 }}
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all"
+                className="shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 font-medium text-muted-foreground transition-all data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
               >
                 <AlertTriangle className="w-4 h-4 mr-2" />
                 Alertas
@@ -301,17 +289,13 @@ function ProfilePage() {
 
           {/* Playlists Grid */}
           <TabsContent value="playlists" className="mt-0">
-            {/*// Uma faixa contendo a contagem de playlists a esquerda por extendo e a direita um botão de criar playlist se for o usuário atual*/}
-            <div className="flex items-center justify-between mb-6 h-2">
-              <h2 className="text-lg font-semibold">Playlists ({playlists.length})</h2>
-              {currentUser && (currentUser.npub === userId || currentUser.pubkey === userId) && (
-                <Link
-                  to="/p/new"
-                  className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
-                >
-                  Criar Nova Playlist
-                </Link>
-              )}
+            <div className="mb-6 flex items-center justify-between gap-3 rounded-2xl border border-border/70 bg-card/70 px-4 py-3">
+              <div>
+                <h2 className="text-lg font-semibold">Playlists públicas</h2>
+                <p className="text-sm text-muted-foreground">
+                  {playlists.length} {playlists.length === 1 ? 'playlist publicada' : 'playlists publicadas'} por este perfil.
+                </p>
+              </div>
             </div>
             {playlists.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

@@ -9,16 +9,88 @@ import { type IPlaylistAPI, type PlaylistFetch, type VideoItem } from './types'
 
 const log = LoggerAgent.create('playlistApi')
 
-function buildAddressTag(item: VideoItem): string {
+function buildPlaylistItemTag(item: VideoItem): string[] {
   if (item.address && item.address.split(':').length === 3) {
-    return item.address
+    return ['a', item.address, '']
   }
 
   if (item.dTag) {
-    return `${item.kind}:${item.author.pubkey}:${item.dTag}`
+    return ['a', `${item.kind}:${item.author.pubkey}:${item.dTag}`, '']
   }
 
-  return `${item.kind}:${item.author.pubkey}:${item.id}`
+  return ['e', item.id]
+}
+
+type PlaylistReference =
+  | { type: 'event'; value: string }
+  | { type: 'address'; value: string; kind: number; pubkey: string; dTag: string }
+
+function parsePlaylistReference(tag: string[]): PlaylistReference | null {
+  const [, value] = tag
+  if (!value) return null
+
+  if (tag[0] === 'e') {
+    const parts = value.split(':')
+    const eventId = parts.length === 2 ? parts[1] : value
+    return eventId.length === 64 ? { type: 'event', value: eventId } : null
+  }
+
+  if (tag[0] !== 'a') return null
+
+  const parts = value.split(':')
+  if (parts.length === 3) {
+    const [kind, pubkey, dTag] = parts
+    if (!kind || !pubkey || !dTag) return null
+    return {
+      type: 'address',
+      value,
+      kind: Number(kind),
+      pubkey,
+      dTag,
+    }
+  }
+
+  // Legacy fallback: older helpers stored addressable videos as "kind:eventId".
+  if (parts.length === 2 && parts[1]?.length === 64) {
+    return { type: 'event', value: parts[1] }
+  }
+
+  return null
+}
+
+function buildEventAddress(event: NDKEvent) {
+  const dTag = event.tagValue('d') || event.dTag
+  return dTag ? `${event.kind}:${event.pubkey}:${dTag}` : null
+}
+
+function newestEvent(events: Iterable<NDKEvent>): NDKEvent | null {
+  let newest: NDKEvent | null = null
+  for (const event of events) {
+    if (!newest || (event.created_at || 0) > (newest.created_at || 0)) {
+      newest = event
+    }
+  }
+  return newest
+}
+
+function dedupeNewestAddressableEvents(events: Iterable<NDKEvent>) {
+  const byAddress = new Map<string, NDKEvent>()
+  const byId = new Map<string, NDKEvent>()
+
+  for (const event of events) {
+    const address = buildEventAddress(event)
+    if (address) {
+      const existing = byAddress.get(address)
+      if (!existing || (event.created_at || 0) > (existing.created_at || 0)) {
+        byAddress.set(address, event)
+      }
+      continue
+    }
+
+    byId.set(event.id, event)
+  }
+
+  return [...byAddress.values(), ...byId.values()]
 }
 
 export const playlistApi: IPlaylistAPI = {
@@ -50,37 +122,51 @@ export const playlistApi: IPlaylistAPI = {
     }
 
     // 2. Buscar o Evento da Playlist
-    const metaEvent = await fetchEventCached(ndk, filter, {
-      mode: 'parallel',
-    })
+    const metaEvents = id.length === 64
+      ? await fetchEventsCached(ndk, filter, {
+          mode: 'parallel',
+        })
+      : await fetchEventsCached(ndk, { ...filter, limit: 100 }, {
+          mode: 'parallel',
+        })
+    const metaEvent = newestEvent(metaEvents)
 
-    if (!metaEvent) throw notFound()
+    let directMetaEvent = metaEvent
+    if (!directMetaEvent) {
+      directMetaEvent = await fetchEventCached(ndk, filter, {
+        mode: 'parallel',
+      })
+    }
+
+    if (!directMetaEvent) throw notFound()
 
     // 3. Extrair Metadados da Playlist
-    const name = metaEvent.tagValue('title') || metaEvent.tagValue('name') || 'Playlist sem nome'
-    const description = metaEvent.tagValue('description') || ''
-    const coverImage = metaEvent.tagValue('image') || ''
+    const name = directMetaEvent.tagValue('title') || directMetaEvent.tagValue('name') || 'Playlist sem nome'
+    const description = directMetaEvent.tagValue('description') || ''
+    const coverImage = directMetaEvent.tagValue('image') || ''
 
     // 4. OTIMIZAÇÃO: Agrupar Filtros de Vídeo
     // Em vez de criar 1 filtro por item, agrupamos por (Kind + Pubkey) para reduzir a carga no relay.
+    const playlistReferences = directMetaEvent.tags
+      .filter((tag) => tag[0] === 'a' || tag[0] === 'e')
+      .map(parsePlaylistReference)
+      .filter((ref): ref is PlaylistReference => Boolean(ref))
+
     const eIds: string[] = []
     // Map: "kind:pubkey" -> Set<dTags>
     const coordinateMap = new Map<string, Set<string>>()
 
-    metaEvent.tags.forEach((tag: string[]) => {
-      if (tag[0] === 'e') {
-        eIds.push(tag[1])
-      } else if (tag[0] === 'a') {
-        const parts = tag[1].split(':')
-        if (parts.length === 3) {
-          const [kind, pubkey, dTag] = parts
-          const key = `${kind}:${pubkey}`
-          if (!coordinateMap.has(key)) {
-            coordinateMap.set(key, new Set())
-          }
-          coordinateMap.get(key)!.add(dTag)
-        }
+    playlistReferences.forEach((ref) => {
+      if (ref.type === 'event') {
+        eIds.push(ref.value)
+        return
       }
+
+      const key = `${ref.kind}:${ref.pubkey}`
+      if (!coordinateMap.has(key)) {
+        coordinateMap.set(key, new Set())
+      }
+      coordinateMap.get(key)!.add(ref.dTag)
     })
 
     const itemFilters: NDKFilter[] = []
@@ -104,14 +190,14 @@ export const playlistApi: IPlaylistAPI = {
     if (itemFilters.length === 0) {
       return {
         playlist: {
-          id: metaEvent.dTag!,
+          id: directMetaEvent.dTag!,
           name,
           description,
           coverImage,
-          ownerPubkey: metaEvent.pubkey,
+          ownerPubkey: directMetaEvent.pubkey,
           items: [],
         },
-        metaEvent,
+        metaEvent: directMetaEvent,
       }
     }
 
@@ -123,7 +209,8 @@ export const playlistApi: IPlaylistAPI = {
     // 6. OTIMIZAÇÃO: Buscar Perfis em Massa (Batch Fetch Authors)
     // Coletamos todos os pubkeys únicos para fazer UM único request de perfis
     const uniquePubkeys = new Set<string>()
-    videoEvents.forEach((event: NDKEvent) => uniquePubkeys.add(event.pubkey))
+    const newestVideoEvents = dedupeNewestAddressableEvents(videoEvents)
+    newestVideoEvents.forEach((event: NDKEvent) => uniquePubkeys.add(event.pubkey))
 
     const authorsMap = new Map<string, NDKUserProfile>()
 
@@ -150,7 +237,10 @@ export const playlistApi: IPlaylistAPI = {
     }
 
     // 7. Mapear para VideoItem (Agora síncrono e rápido)
-    const items: VideoItem[] = Array.from(videoEvents).map((event: NDKEvent) => {
+    const itemByEventId = new Map<string, VideoItem>()
+    const itemByAddress = new Map<string, VideoItem>()
+
+    newestVideoEvents.forEach((event: NDKEvent) => {
       const authorProfile = authorsMap.get(event.pubkey)
 
       const title = event.tagValue('title') || 'Sem título'
@@ -159,7 +249,7 @@ export const playlistApi: IPlaylistAPI = {
       const durationStr = event.tagValue('duration')
       const duration = durationStr ? parseInt(durationStr) : 0
 
-      return {
+      const item: VideoItem = {
         id: event.id,
         kind: event.kind,
         title,
@@ -175,16 +265,15 @@ export const playlistApi: IPlaylistAPI = {
           image: authorProfile?.image || authorProfile?.picture,
         },
       }
+
+      itemByEventId.set(event.id, item)
+      const address = buildEventAddress(event)
+      if (address) itemByAddress.set(address, item)
     })
 
-    // Ordenar os itens baseados na ordem original da playlist (opcional, mas recomendado)
-    // O código abaixo reordena `items` para bater com a ordem das tags `a` e `e` no evento original.
-    const _orderedItems: VideoItem[] = []
-    const _itemMap = new Map(items.map((i) => [i.id, i])) // Mapa por ID
-
-    // Tentar mapear também por d-tag para address-pointers
-    // Nota: Lógica simplificada de ordenação. Para precisão total, precisaríamos verificar se o tag era 'a' ou 'e' no loop original.
-    // Abaixo apenas retorna a lista bruta encontrada, mas a otimização de performance está garantida acima.
+    const items = playlistReferences
+      .map((ref) => (ref.type === 'address' ? itemByAddress.get(ref.value) : itemByEventId.get(ref.value)))
+      .filter((item): item is VideoItem => Boolean(item))
 
     return {
       playlist: {
@@ -192,10 +281,10 @@ export const playlistApi: IPlaylistAPI = {
         name,
         description,
         coverImage,
-        ownerPubkey: metaEvent.pubkey,
-        items: items, // Ou orderedItems se implementar a lógica de ordenação
+        ownerPubkey: directMetaEvent.pubkey,
+        items,
       },
-      metaEvent,
+      metaEvent: directMetaEvent,
     }
   },
 
@@ -209,7 +298,7 @@ export const playlistApi: IPlaylistAPI = {
     pEvent.tags = pEvent.tags.filter((tag) => tag[0] !== 'a' && tag[0] !== 'e')
 
     playlist.items.forEach((item) => {
-      pEvent.tags.push(['a', buildAddressTag(item), ''])
+      pEvent.tags.push(buildPlaylistItemTag(item))
     })
 
     // Remove a Tag Client
