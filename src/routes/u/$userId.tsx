@@ -11,6 +11,7 @@ import {
   Info,
   KeyRound,
   List,
+  Network,
   PlaySquare,
   UserRound,
   Wallet,
@@ -35,13 +36,14 @@ import { type GetVideosFromUserDataParams, getVideosFromUserData } from '@/helpe
 import { DropdownMenuProfile } from '@/routes/u/@components/DropdownMenuProfile.tsx'
 import { FollowButton } from '@/routes/u/@components/FollowButton.tsx'
 import { PlaylistCard } from '@/routes/u/@components/PlaylistCard.tsx'
+import { SocialGraphTab } from '@/routes/u/@components/SocialGraphTab.tsx'
 import { VideoCard } from '@/routes/u/@components/VideoCard.tsx'
 import { Route as rootRoute } from '@/routes/__root'
 import useUserStore from '@/store/useUserStore'
 import CreateProfile from './@components/EditProfile.tsx'
 
 export const ProfilePageSchema = z.object({
-  tab: z.enum(['videos', 'playlists', 'about', 'alerts']).optional(),
+  tab: z.enum(['videos', 'playlists', 'about', 'network', 'alerts']).optional(),
 })
 export const Route = createRoute({
   getParentRoute: () => rootRoute,
@@ -225,7 +227,7 @@ function ProfilePage() {
             <TabsTrigger
               onClick={() => {
                 navigate({
-                  search: (old: { tab?: 'videos' | 'playlists' | 'about' | 'alerts' }) => ({ ...old, tab: undefined }),
+                  search: (old) => ({ ...old, tab: undefined }),
                 })
               }}
               value="videos"
@@ -238,7 +240,7 @@ function ProfilePage() {
               value="playlists"
               onClick={() => {
                 navigate({
-                  search: (old: { tab?: 'videos' | 'playlists' | 'about' | 'alerts' }) => ({ ...old, tab: 'playlists' }),
+                  search: (old) => ({ ...old, tab: 'playlists' }),
                 })
               }}
               className="shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 font-medium text-muted-foreground transition-all data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
@@ -250,7 +252,7 @@ function ProfilePage() {
               value="about"
               onClick={() => {
                 navigate({
-                  search: (old: { tab?: 'videos' | 'playlists' | 'about' | 'alerts' }) => ({ ...old, tab: 'about' }),
+                  search: (old) => ({ ...old, tab: 'about' }),
                 })
               }}
               className="shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 font-medium text-muted-foreground transition-all data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
@@ -258,12 +260,24 @@ function ProfilePage() {
               <Info className="w-4 h-4 mr-2" />
               Sobre
             </TabsTrigger>
+            <TabsTrigger
+              value="network"
+              onClick={() => {
+                navigate({
+                  search: (old) => ({ ...old, tab: 'network' }),
+                })
+              }}
+              className="shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 font-medium text-muted-foreground transition-all data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
+            >
+              <Network className="w-4 h-4 mr-2" />
+              Rede
+            </TabsTrigger>
             {isOwner ? (
               <TabsTrigger
                 value="alerts"
                 onClick={() => {
                   navigate({
-                    search: (old: { tab?: 'videos' | 'playlists' | 'about' | 'alerts' }) => ({ ...old, tab: 'alerts' }),
+                    search: (old) => ({ ...old, tab: 'alerts' }),
                   })
                 }}
                 className="shrink-0 rounded-none border-b-2 border-transparent px-4 py-3 font-medium text-muted-foreground transition-all data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
@@ -351,6 +365,13 @@ function ProfilePage() {
                 </div>
               </Card>
             </div>
+          </TabsContent>
+          <TabsContent value="network" className="mt-0">
+            <SocialGraphTab
+              pubkey={metaEvent?.pubkey || identifiers.pubkey}
+              profileTitle={profileTitle}
+              profilePicture={userProfile?.picture || userProfile?.image}
+            />
           </TabsContent>
           {isOwner ? (
             <TabsContent value="alerts" className="mt-0">

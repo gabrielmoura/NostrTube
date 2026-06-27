@@ -335,6 +335,34 @@
       "unknown": "An unexpected error occurred while sending the ZAP."
     }
   },
+  "image_proxy": {
+    "title": "Image proxy",
+    "description": "Choose how thumbnails and images are loaded on this device.",
+    "mode_label": "Mode",
+    "base_url_label": "Server base URL",
+    "options": {
+      "none": "None",
+      "imgproxy": "imgproxy",
+      "imageproxy": "imageproxy"
+    },
+    "helper_none": "No proxy is active. Images use the original URLs published on the network.",
+    "helper_imgproxy": "Uses the imgproxy format: /insecure/... with client-generated transformations.",
+    "helper_imageproxy": "Uses the imageproxy format: /options/remote-url to resize through the server."
+  },
+  "cors_proxy": {
+    "title": "CORS proxy",
+    "description": "Configure an HTTPS proxy for external requests that block CORS.",
+    "mode_label": "Mode",
+    "custom_url_label": "cors-anywhere URL",
+    "options": {
+      "none": "None",
+      "custom": "Custom server",
+      "corsproxy_io": "Use corsproxy.io"
+    },
+    "helper_none": "No CORS proxy is active.",
+    "helper_custom": "Use an HTTPS URL for a compatible cors-anywhere server.",
+    "helper_corsproxy_io": "Uses https://corsproxy.io with the target URL encoded."
+  },
   "video_metrics": {
     "open_button": "ZAP / Metrics",
     "modal_title": "Video metrics and support",

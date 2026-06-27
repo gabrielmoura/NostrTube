@@ -277,7 +277,7 @@ export const playlistApi: IPlaylistAPI = {
 
     return {
       playlist: {
-        id: metaEvent.dTag!,
+        id: directMetaEvent.dTag!,
         name,
         description,
         coverImage,

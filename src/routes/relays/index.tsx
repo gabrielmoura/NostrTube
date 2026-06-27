@@ -70,6 +70,14 @@ function formatSuccessRate(rows: RelayHealthRow[]) {
   return Math.round((successes / attempts) * 100)
 }
 
+function formatRelayCapability(isEnabled: boolean | undefined) {
+  return isEnabled ? 'Ativa' : 'Inativa'
+}
+
+function getRelayCapabilityTone(isEnabled: boolean | undefined) {
+  return isEnabled ? 'healthy' : 'warning'
+}
+
 interface RelayRowViewModel {
   url: string
   health?: RelayHealthRow
@@ -223,8 +231,16 @@ function SelectedRelaysTable({
                 </td>
                 <td className="px-4 py-4 font-mono text-sm">{formatLatency(row.health?.latency)}</td>
                 <td className="px-4 py-4 font-mono text-sm">{row.metrics?.events5m ?? '—'}</td>
-                <td className="px-4 py-4 text-muted-foreground">—</td>
-                <td className="px-4 py-4 text-muted-foreground">—</td>
+                <td className="px-4 py-4">
+                  <StatusBadge tone={getRelayCapabilityTone(row.health?.canRead)}>
+                    {formatRelayCapability(row.health?.canRead)}
+                  </StatusBadge>
+                </td>
+                <td className="px-4 py-4">
+                  <StatusBadge tone={getRelayCapabilityTone(row.health?.canWrite)}>
+                    {formatRelayCapability(row.health?.canWrite)}
+                  </StatusBadge>
+                </td>
                 <td className="px-4 py-4 font-mono text-sm">
                   {formatConnection(row.health?.attempts ?? null, row.health?.successCount ?? null)}
                 </td>

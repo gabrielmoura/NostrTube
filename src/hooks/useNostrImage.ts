@@ -4,6 +4,7 @@ import { extractTag } from '@/helper/extractTag.ts'
 import { ifHasString } from '@/helper/format.ts'
 import { getOptimizedImageSrc } from '@/helper/http.ts'
 import { getTags } from '@/helper/nostrTags'
+import useImageProxySettingsStore from '@/store/useImageProxySettingsStore.ts'
 
 /**
  * Hook customizado para processamento e gestão de mídia em eventos Nostr.
@@ -30,6 +31,7 @@ import { getTags } from '@/helper/nostrTags'
 export function useNostrImage(event: NDKEvent) {
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(true)
+  const imageProxy = useImageProxySettingsStore((state) => state.imageProxy)
 
   const imageSpecs = useMemo(() => {
     const { image, thumb, title, url: directUrl } = extractTag(event.tags)
@@ -50,13 +52,13 @@ export function useNostrImage(event: NDKEvent) {
       ? getOptimizedImageSrc(source, '480', {
           resize: { resizing_type: 'fit', width: 480, height: 480 },
           format: 'webp',
-        })
+        }, imageProxy)
       : null
 
     const isNSFW = event.tags.some((t) => t[0] === 'content-warning' || t[0] === 'nsfw')
 
     return { optimized, title, isNSFW }
-  }, [event])
+  }, [event, imageProxy])
 
   return {
     ...imageSpecs,

@@ -1,5 +1,6 @@
 import type { DetailedHTMLProps, ImgHTMLAttributes } from "react";
 import { getOptimizedImageSrc } from "@/helper/http.ts";
+import useImageProxySettingsStore from "@/store/useImageProxySettingsStore.ts";
 
 interface ImageProps extends DetailedHTMLProps<ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement> {
   src: string;
@@ -8,8 +9,10 @@ interface ImageProps extends DetailedHTMLProps<ImgHTMLAttributes<HTMLImageElemen
 }
 
 export function Image({ alt, src, width, ...props }: ImageProps) {
+  const imageProxy = useImageProxySettingsStore((state) => state.imageProxy);
+
   return <img
-    src={getOptimizedImageSrc(src, width)}
+    src={getOptimizedImageSrc(src, width, undefined, imageProxy)}
     alt={alt}
     width={width}
     {...props}

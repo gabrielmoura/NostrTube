@@ -278,5 +278,33 @@
         "placeholder": "Describe tu sugerencia, problema o agradecimiento. Incluye pasos para reproducirlo si es un error."
       }
     }
+  },
+  "image_proxy": {
+    "title": "Proxy de imágenes",
+    "description": "Elige cómo se cargan las miniaturas e imágenes en este dispositivo.",
+    "mode_label": "Modo",
+    "base_url_label": "URL base del servidor",
+    "options": {
+      "none": "Ninguno",
+      "imgproxy": "imgproxy",
+      "imageproxy": "imageproxy"
+    },
+    "helper_none": "No hay proxy activo. Las imágenes usan las URL originales publicadas en la red.",
+    "helper_imgproxy": "Usa el formato de imgproxy: /insecure/... con transformaciones generadas por el cliente.",
+    "helper_imageproxy": "Usa el formato de imageproxy: /opciones/url-remota para redimensionar en el servidor."
+  },
+  "cors_proxy": {
+    "title": "Proxy CORS",
+    "description": "Configura un proxy HTTPS para solicitudes externas que bloquean CORS.",
+    "mode_label": "Modo",
+    "custom_url_label": "URL de cors-anywhere",
+    "options": {
+      "none": "Ninguno",
+      "custom": "Servidor personalizado",
+      "corsproxy_io": "Usar corsproxy.io"
+    },
+    "helper_none": "No hay proxy CORS activo.",
+    "helper_custom": "Usa una URL HTTPS de un servidor cors-anywhere compatible.",
+    "helper_corsproxy_io": "Usa https://corsproxy.io con la URL de destino codificada."
   }
 }

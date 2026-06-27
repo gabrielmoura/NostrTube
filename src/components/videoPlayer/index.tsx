@@ -16,6 +16,7 @@ import type { DataVideo } from "./types.ts";
 import { VideoLayout } from "./layout.tsx";
 import { getOptimizedImageSrc } from "@/helper/http.ts";
 import { cn } from "@/helper/format.ts";
+import useImageProxySettingsStore from "@/store/useImageProxySettingsStore.ts";
 import useUserStore from "@/store/useUserStore.ts";
 
 interface VideoPlayerParams extends DataVideo {
@@ -37,6 +38,7 @@ export function VideoPlayer({
   const handledErrorForSourceRef = useRef<string | null>(null);
   const persistedMuted = useUserStore((state) => state.session?.videoMuted ?? true);
   const setVideoMuted = useUserStore((state) => state.setVideoMuted);
+  const imageProxy = useImageProxySettingsStore((state) => state.imageProxy);
 
   useEffect(() => {
     handledErrorForSourceRef.current = null;
@@ -118,7 +120,7 @@ export function VideoPlayer({
 
         <Poster
           className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity data-[visible]:opacity-100"
-          src={getOptimizedImageSrc(image, "500")}
+          src={getOptimizedImageSrc(image, "500", undefined, imageProxy)}
           alt={title}
         />
       </MediaProvider>

@@ -1,5 +1,10 @@
-import type { NDKUser } from '@nostr-dev-kit/ndk'
-import { useNDKCurrentUser, useNDKSessionLogout } from '@nostr-dev-kit/ndk-hooks'
+import { NDKKind, type NDKUser } from '@nostr-dev-kit/ndk'
+import {
+  useCurrentUserProfile,
+  useNDKCurrentUser,
+  useNDKSessionEvent,
+  useNDKSessionLogout,
+} from '@nostr-dev-kit/ndk-hooks'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Bell, CircleHelp, LogIn, LogOut, Menu, Search, Settings2, ShieldCheck, Upload, UserRound } from 'lucide-react'
 import type { KeyboardEvent } from 'react'
@@ -21,6 +26,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { FeedbackButton } from '@/features/feedback/components/FeedbackButton'
+import { getNip01PictureFromMetadataEvent } from '@/helper/nostrProfile'
 import useUserStore from '@/store/useUserStore'
 
 export interface AppHeaderProps {
@@ -172,8 +178,8 @@ function HeaderUserMenu({
       <DropdownMenuTrigger asChild>
         <Button variant="glass" size="icon" className="rounded-full p-1" aria-label="Menu do usuário">
           <Avatar className="size-8">
-            <AvatarImage src={profileImage} alt={profileName} />
-            <AvatarFallback>{profileFallback}</AvatarFallback>
+            {profileImage ? <AvatarImage src={profileImage} alt={profileName} /> : null}
+            {!profileImage ? <AvatarFallback>{profileFallback}</AvatarFallback> : null}
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -207,9 +213,17 @@ export function AppHeader({ activeKey }: AppHeaderProps) {
   const currentUser = useNDKCurrentUser()
   const logout = useNDKSessionLogout()
   const clearSession = useUserStore((state) => state.clearSession)
+  const currentProfile = useCurrentUserProfile()
+  const metadataEvent = useNDKSessionEvent(NDKKind.Metadata)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
-  const profileName = currentUser?.profile?.displayName || currentUser?.profile?.name || 'Usuário'
-  const profileImage = currentUser?.profile?.image || currentUser?.profile?.picture
+  const profileName =
+    currentProfile?.displayName ||
+    currentProfile?.name ||
+    currentUser?.profile?.displayName ||
+    currentUser?.profile?.name ||
+    'Usuário'
+  const profileImage =
+    getNip01PictureFromMetadataEvent(metadataEvent) || currentProfile?.picture || currentUser?.profile?.picture
   const profileFallback = profileName.slice(0, 1).toUpperCase()
 
   const handleLogout = () => {

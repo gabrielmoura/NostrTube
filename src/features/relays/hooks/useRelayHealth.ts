@@ -1,4 +1,4 @@
-import { NDKRelayStatus } from '@nostr-dev-kit/ndk'
+import NDK, { NDKRelayStatus, tryNormalizeRelayUrl } from '@nostr-dev-kit/ndk'
 import { useNDK } from '@nostr-dev-kit/ndk-hooks'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { checkLatency } from '@/helper/checkLatency'
@@ -13,11 +13,13 @@ export interface RelayHealthRow {
   attempts: number | null
   successCount: number | null
   latency: number | null | undefined
+  canRead: boolean
+  canWrite: boolean
 }
 
 function mapRelayStatus(
   status?: NDKRelayStatus,
-): Omit<RelayHealthRow, 'url' | 'attempts' | 'successCount' | 'latency'> {
+): Omit<RelayHealthRow, 'url' | 'attempts' | 'successCount' | 'latency' | 'canRead' | 'canWrite'> {
   switch (status) {
     case NDKRelayStatus.CONNECTED:
     case NDKRelayStatus.AUTH_REQUESTED:
@@ -34,6 +36,12 @@ function mapRelayStatus(
     default:
       return { state: 'offline', label: 'Offline', tone: 'danger' }
   }
+}
+
+function getRelayFromPool(ndk: NDK | null | undefined, relayUrl: string) {
+  const relayPool = ndk?.pool.relays
+  if (!relayPool) return undefined
+  return relayPool.get(tryNormalizeRelayUrl(relayUrl) ?? relayUrl) ?? relayPool.get(relayUrl)
 }
 
 export function useRelayHealth(relayUrls: string[]) {
@@ -77,17 +85,20 @@ export function useRelayHealth(relayUrls: string[]) {
   const rows = useMemo<RelayHealthRow[]>(() => {
     void version
     return relayUrls.map((relayUrl) => {
-      const relay = ndk?.pool.relays.get(relayUrl)
+      const relay = getRelayFromPool(ndk, relayUrl)
       const mapped = mapRelayStatus(relay?.status)
+      const isInPool = Boolean(relay)
       return {
         url: relayUrl,
         ...mapped,
         attempts: relay?.connectionStats?.attempts ?? null,
         successCount: relay?.connectionStats?.success ?? null,
         latency: latencies[relayUrl],
+        canRead: isInPool,
+        canWrite: isInPool,
       }
     })
-  }, [latencies, ndk?.pool.relays, relayUrls, version])
+  }, [latencies, ndk, relayUrls, version])
 
   const connectedCount = rows.filter((row) => row.state === 'connected').length
 

@@ -1,4 +1,4 @@
-import NDK, { type NDKCacheAdapter, NDKPool, NDKRelay } from '@nostr-dev-kit/ndk'
+import NDK, { type NDKCacheAdapter, NDKPool, NDKRelay, tryNormalizeRelayUrl } from '@nostr-dev-kit/ndk'
 import NDKCacheAdapterDexie from '@nostr-dev-kit/ndk-cache-dexie'
 import { NDKSessionLocalStorage } from '@nostr-dev-kit/ndk-hooks'
 import { ndkNexusBridge } from '@/lib/nexus-p2p'
@@ -18,7 +18,14 @@ if (typeof window !== 'undefined') {
 const relays = import.meta.env.PROD ? import.meta.env.VITE_NOSTR_RELAYS : import.meta.env.VITE_NOSTR_DEV_RELAYS
 
 export function normalizeRelayUrls(relayUrls: string[] = []): string[] {
-  return Array.from(new Set(relayUrls.filter((relay) => relay.startsWith('ws://') || relay.startsWith('wss://'))))
+  return Array.from(
+    new Set(
+      relayUrls
+        .filter((relay) => relay.startsWith('ws://') || relay.startsWith('wss://'))
+        .map((relay) => tryNormalizeRelayUrl(relay))
+        .filter((relay): relay is string => Boolean(relay)),
+    ),
+  )
 }
 
 // 4. NDK Instance
@@ -56,6 +63,12 @@ export function syncNdkRelayPool(relayUrls: string[]) {
   normalized.forEach((relayUrl) => {
     if (!existingRelayUrls.has(relayUrl)) {
       ndkInstance.pool.addRelay(new NDKRelay(relayUrl, undefined, ndkInstance), true)
+      return
+    }
+
+    const relay = ndkInstance.pool.relays.get(relayUrl)
+    if (relay && !relay.connected) {
+      relay.connect().catch((error) => console.warn('Failed to connect relay', relayUrl, error))
     }
   })
 }

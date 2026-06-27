@@ -43,6 +43,8 @@ import { modal } from '@/components/modal_v2/modal-manager.ts'
 import { useZapStats } from '@/features/zap/hooks/useZapStats'
 import { publishDmRelayList } from '@/lib/ndk-messages'
 import { BlossomSettings } from '@/routes/configuration/@components/BlossomSettings.tsx'
+import { CorsProxySettings } from '@/routes/configuration/@components/CorsProxySettings.tsx'
+import { ImageProxySettings } from '@/routes/configuration/@components/ImageProxySettings.tsx'
 import { PermissionSettings } from '@/routes/configuration/@components/PermissionSettings.tsx'
 import { RelaySettings } from '@/routes/configuration/@components/RelaySettings.tsx'
 import { VisibilitySettings } from '@/routes/configuration/@components/VisibilitySettings.tsx'
@@ -495,7 +497,7 @@ export default function ConfigurationPageContent() {
     setActiveTabState(nextTab)
     navigate({
       to: '/configuration',
-      search: (old: { tab?: SettingsGroup }) => ({ ...old, tab: getSettingsGroup(nextTab) }),
+      search: (old) => ({ ...old, tab: getSettingsGroup(nextTab) }),
       replace: true,
     })
   }, [navigate])
@@ -680,6 +682,8 @@ export default function ConfigurationPageContent() {
         <TabsContent value="relays-blossom" className="space-y-6">
           <RelaySettings />
           <BlossomSettings />
+          <ImageProxySettings />
+          <CorsProxySettings />
 
           <Card>
             <CardHeader>

@@ -335,6 +335,34 @@
       "unknown": "Ocorreu um erro inesperado ao enviar o ZAP."
     }
   },
+  "image_proxy": {
+    "title": "Proxy de imagens",
+    "description": "Escolha como miniaturas e imagens são carregadas neste dispositivo.",
+    "mode_label": "Modo",
+    "base_url_label": "URL base do servidor",
+    "options": {
+      "none": "Nenhum",
+      "imgproxy": "imgproxy",
+      "imageproxy": "imageproxy"
+    },
+    "helper_none": "Nenhum proxy ativo. As imagens usam as URLs originais publicadas na rede.",
+    "helper_imgproxy": "Usa o formato do imgproxy: /insecure/... com transformações geradas pelo cliente.",
+    "helper_imageproxy": "Usa o formato do imageproxy: /opções/URL-remota para redimensionar via servidor."
+  },
+  "cors_proxy": {
+    "title": "Proxy CORS",
+    "description": "Configure um proxy HTTPS para requisições externas que bloqueiam CORS.",
+    "mode_label": "Modo",
+    "custom_url_label": "URL do cors-anywhere",
+    "options": {
+      "none": "Nenhum",
+      "custom": "Servidor customizado",
+      "corsproxy_io": "Usar corsproxy.io"
+    },
+    "helper_none": "Nenhum proxy CORS ativo.",
+    "helper_custom": "Use uma URL HTTPS de um servidor cors-anywhere compatível.",
+    "helper_corsproxy_io": "Usa https://corsproxy.io com a URL de destino codificada."
+  },
   "video_metrics": {
     "open_button": "Zap / Métricas",
     "modal_title": "Métricas e apoio do vídeo",

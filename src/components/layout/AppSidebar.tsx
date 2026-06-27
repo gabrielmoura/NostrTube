@@ -1,4 +1,5 @@
-import { useNDKCurrentUser } from '@nostr-dev-kit/ndk-hooks'
+import { NDKKind } from '@nostr-dev-kit/ndk'
+import { useCurrentUserProfile, useNDKCurrentUser, useNDKSessionEvent } from '@nostr-dev-kit/ndk-hooks'
 import { Link } from '@tanstack/react-router'
 import {
   BellRing,
@@ -27,6 +28,7 @@ import { NostrTubeLogoWhitText } from '@/components/logo/NostrTube.tsx'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { StatusBadge } from '@/components/ui/status-badge'
+import { getNip01PictureFromMetadataEvent } from '@/helper/nostrProfile'
 import { cn } from '@/lib/utils'
 import useUserStore from '@/store/useUserStore'
 
@@ -209,8 +211,8 @@ function SidebarUserCard({
       <div className="flex items-center gap-3">
         {currentUser ? (
           <Avatar className="size-9 border border-sidebar-border">
-            <AvatarImage src={profileImage} alt={profileLabel} />
-            <AvatarFallback>{profileFallback}</AvatarFallback>
+            {profileImage ? <AvatarImage src={profileImage} alt={profileLabel} /> : null}
+            {!profileImage ? <AvatarFallback>{profileFallback}</AvatarFallback> : null}
           </Avatar>
         ) : (
           <div className="rounded-2xl bg-primary/14 p-2 text-primary">
@@ -247,11 +249,18 @@ export interface AppSidebarProps {
 
 export function AppSidebar({ activeKey, className }: AppSidebarProps) {
   const currentUser = useNDKCurrentUser()
+  const currentProfile = useCurrentUserProfile()
+  const metadataEvent = useNDKSessionEvent(NDKKind.Metadata)
   const relayCount = useUserStore((state) => state.session?.relays?.length ?? 0)
-  const profileName = currentUser?.profile?.displayName || currentUser?.profile?.name
+  const profileName =
+    currentProfile?.displayName ||
+    currentProfile?.name ||
+    currentUser?.profile?.displayName ||
+    currentUser?.profile?.name
   const profileIdentifier = currentUser?.npub || currentUser?.pubkey
   const profileLabel = profileName || (currentUser ? shortenIdentifier(profileIdentifier) : 'Sessão anônima')
-  const profileImage = currentUser?.profile?.image || currentUser?.profile?.picture
+  const profileImage =
+    getNip01PictureFromMetadataEvent(metadataEvent) || currentProfile?.picture || currentUser?.profile?.picture
   const profileFallback = (profileName || profileIdentifier || 'U').slice(0, 1).toUpperCase()
 
   return (

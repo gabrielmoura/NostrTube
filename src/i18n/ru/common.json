@@ -278,5 +278,33 @@
         "placeholder": "Опишите ваше предложение, проблему или благодарность. Добавьте шаги воспроизведения, если это ошибка."
       }
     }
+  },
+  "image_proxy": {
+    "title": "Прокси изображений",
+    "description": "Выберите, как миниатюры и изображения загружаются на этом устройстве.",
+    "mode_label": "Режим",
+    "base_url_label": "Базовый URL сервера",
+    "options": {
+      "none": "Нет",
+      "imgproxy": "imgproxy",
+      "imageproxy": "imageproxy"
+    },
+    "helper_none": "Прокси не активен. Изображения используют исходные URL, опубликованные в сети.",
+    "helper_imgproxy": "Использует формат imgproxy: /insecure/... с преобразованиями, созданными клиентом.",
+    "helper_imageproxy": "Использует формат imageproxy: /options/remote-url для изменения размера через сервер."
+  },
+  "cors_proxy": {
+    "title": "CORS-прокси",
+    "description": "Настройте HTTPS-прокси для внешних запросов, которые блокируют CORS.",
+    "mode_label": "Режим",
+    "custom_url_label": "URL cors-anywhere",
+    "options": {
+      "none": "Нет",
+      "custom": "Свой сервер",
+      "corsproxy_io": "Использовать corsproxy.io"
+    },
+    "helper_none": "CORS-прокси не активен.",
+    "helper_custom": "Используйте HTTPS URL совместимого сервера cors-anywhere.",
+    "helper_corsproxy_io": "Использует https://corsproxy.io с закодированным целевым URL."
   }
 }

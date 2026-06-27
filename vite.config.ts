@@ -134,6 +134,7 @@ export default defineConfig(({ mode }) => {
         // strategies: "generateSW",
         includeManifestIcons: true,
         injectManifest: {
+          rollupFormat: 'iife',
           minify: false,
           sourcemap: shouldGenerateSourcemap,
           // This increase the cache limit to 8mB
@@ -201,6 +202,10 @@ export default defineConfig(({ mode }) => {
       cssCodeSplit: true,
       chunkSizeWarningLimit: 1300,
       rolldownOptions: {
+        checks: {
+          eval: false,
+          pluginTimings: false,
+        },
         output: {
           chunkFileNames: 'assets/[name]-[hash].js',
           codeSplitting: {
