@@ -223,10 +223,11 @@ Este projeto está sob a licença especificada no arquivo LICENSE.
 **Gabriel Moura**
 - Email: gmouradev96@gmail.com
 - GitHub: [@gabrielmoura](https://github.com/gabrielmoura)
+- Nostr:  [`npub102cjfjzr29gxjw84q27lzj53gvwecr6h3rdd3tlhxk4xerxvn89qal7ng0`](https://nostr.com/npub102cjfjzr29gxjw84q27lzj53gvwecr6h3rdd3tlhxk4xerxvn89qal7ng0)
 
 ## 🔗 Links
 
-- [Website](https://nostrtube.vercel.app)
+- [Website](https://nostr-tube.vercel.app/)
 - [Protocolo Nostr](https://nostr.com)
 
 ---
