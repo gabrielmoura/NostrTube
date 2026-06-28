@@ -48,6 +48,10 @@ function canUseProxyForDerivedThumbnail(proxyConfig: ImageProxyConfig): boolean 
     return Boolean(proxyConfig.imgproxyBaseUrl?.trim())
   }
 
+  if (proxyConfig.mode === 'nostube-imgproxy') {
+    return Boolean(proxyConfig.nostubeImgproxyBaseUrl?.trim())
+  }
+
   if (proxyConfig.mode === 'imageproxy') {
     return Boolean(proxyConfig.imageproxyBaseUrl?.trim())
   }

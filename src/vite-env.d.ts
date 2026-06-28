@@ -7,7 +7,9 @@ declare global {
     readonly VITE_NOSTR_DEV_RELAYS: string[]
     readonly VITE_APP_NAME: string
     readonly VITE_APP_DESCRIPTION: string
+    readonly VITE_APP_IMAGE_PROXY_MODE?: "none" | "imgproxy" | "nostube-imgproxy" | "imageproxy"
     readonly VITE_APP_IMGPROXY?: string
+    readonly VITE_APP_NOSTUBE_IMGPROXY?: string
     readonly VITE_PUBLIC_ROOT_DOMAIN: string
     readonly VITE_NOSTR_BLOSSOM_FALLBACK?: string
     readonly VITE_BEACON_URL?: string

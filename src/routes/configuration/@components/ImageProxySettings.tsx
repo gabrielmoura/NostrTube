@@ -14,10 +14,26 @@ export function ImageProxySettings() {
   const imageProxy = useImageProxySettingsStore((state) => state.imageProxy);
   const setImageProxyMode = useImageProxySettingsStore((state) => state.setImageProxyMode);
   const setImgproxyBaseUrl = useImageProxySettingsStore((state) => state.setImgproxyBaseUrl);
+  const setNostubeImgproxyBaseUrl = useImageProxySettingsStore((state) => state.setNostubeImgproxyBaseUrl);
   const setImageproxyBaseUrl = useImageProxySettingsStore((state) => state.setImageproxyBaseUrl);
 
-  const activeBaseUrl = imageProxy.mode === "imgproxy" ? imageProxy.imgproxyBaseUrl : imageProxy.imageproxyBaseUrl;
-  const activeBaseUrlSetter = imageProxy.mode === "imgproxy" ? setImgproxyBaseUrl : setImageproxyBaseUrl;
+  const activeBaseUrl = imageProxy.mode === "nostube-imgproxy"
+    ? imageProxy.nostubeImgproxyBaseUrl
+    : imageProxy.mode === "imgproxy"
+      ? imageProxy.imgproxyBaseUrl
+      : imageProxy.imageproxyBaseUrl;
+  const activeBaseUrlSetter = imageProxy.mode === "nostube-imgproxy"
+    ? setNostubeImgproxyBaseUrl
+    : imageProxy.mode === "imgproxy"
+      ? setImgproxyBaseUrl
+      : setImageproxyBaseUrl;
+  const helperText = imageProxy.mode === "none"
+    ? t("image_proxy.helper_none")
+    : imageProxy.mode === "imgproxy"
+      ? t("image_proxy.helper_imgproxy")
+      : imageProxy.mode === "nostube-imgproxy"
+        ? t("image_proxy.helper_nostube_imgproxy")
+        : t("image_proxy.helper_imageproxy");
 
   return (
     <Card>
@@ -37,6 +53,7 @@ export function ImageProxySettings() {
               <SelectContent>
                 <SelectItem value="none">{t("image_proxy.options.none")}</SelectItem>
                 <SelectItem value="imgproxy">{t("image_proxy.options.imgproxy")}</SelectItem>
+                <SelectItem value="nostube-imgproxy">{t("image_proxy.options.nostube_imgproxy")}</SelectItem>
                 <SelectItem value="imageproxy">{t("image_proxy.options.imageproxy")}</SelectItem>
               </SelectContent>
             </Select>
@@ -55,11 +72,7 @@ export function ImageProxySettings() {
         </div>
 
         <p className="text-sm text-muted-foreground">
-          {imageProxy.mode === "none"
-            ? t("image_proxy.helper_none")
-            : imageProxy.mode === "imgproxy"
-              ? t("image_proxy.helper_imgproxy")
-              : t("image_proxy.helper_imageproxy")}
+          {helperText}
         </p>
       </CardContent>
     </Card>

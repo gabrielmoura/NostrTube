@@ -343,10 +343,12 @@
     "options": {
       "none": "None",
       "imgproxy": "imgproxy",
+      "nostube_imgproxy": "nostube-imgproxy",
       "imageproxy": "imageproxy"
     },
     "helper_none": "No proxy is active. Images use the original URLs published on the network.",
     "helper_imgproxy": "Uses the imgproxy format: /insecure/... with client-generated transformations.",
+    "helper_nostube_imgproxy": "Uses the nostube-imgproxy imgproxy-compatible API: /insecure/.../plain/encoded-URL, including thumbnails derived from videos through FFmpeg.",
     "helper_imageproxy": "Uses the imageproxy format: /options/remote-url to resize through the server."
   },
   "cors_proxy": {

@@ -287,10 +287,12 @@
     "options": {
       "none": "Нет",
       "imgproxy": "imgproxy",
+      "nostube_imgproxy": "nostube-imgproxy",
       "imageproxy": "imageproxy"
     },
     "helper_none": "Прокси не активен. Изображения используют исходные URL, опубликованные в сети.",
     "helper_imgproxy": "Использует формат imgproxy: /insecure/... с преобразованиями, созданными клиентом.",
+    "helper_nostube_imgproxy": "Использует совместимый с imgproxy API nostube-imgproxy: /insecure/.../plain/encoded-URL, включая миниатюры из видео через FFmpeg.",
     "helper_imageproxy": "Использует формат imageproxy: /options/remote-url для изменения размера через сервер."
   },
   "cors_proxy": {

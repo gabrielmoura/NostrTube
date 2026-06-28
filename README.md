@@ -76,6 +76,24 @@ cp .env.example .env
 - `VITE_NOSTR_FEEDBACK_RECIPIENT_NPUB`: destinatário das mensagens de feedback.
   - Se não for definido, a aplicação usa `npub1733g4vyyqjkan972u90zfysguc09vvcvkwhmesacpd73ljf4jqlsrz0sq8`.
   - O valor é validado como `npub` NIP-19 e convertido internamente para pubkey hex.
+- `VITE_APP_IMAGE_PROXY_MODE`: modo inicial do proxy de imagem. Valores aceitos: `none`, `imgproxy`, `nostube-imgproxy`, `imageproxy`.
+  - Se não for definido e `VITE_APP_NOSTUBE_IMGPROXY` existir, o padrão será `nostube-imgproxy`.
+  - Se não for definido e `VITE_APP_NOSTUBE_IMGPROXY` não existir, o padrão será `none`.
+- `VITE_APP_IMGPROXY`: URL base de um servidor `imgproxy` compatível com `/insecure/...`. Para usá-la como padrão, defina `VITE_APP_IMAGE_PROXY_MODE=imgproxy`.
+- `VITE_APP_NOSTUBE_IMGPROXY`: URL base de uma instância [`nostube-imgproxy`](https://github.com/flox1an/nostube-imgproxy).
+  - Quando definida e `VITE_APP_IMAGE_PROXY_MODE` não estiver definido, ela é usada como modo padrão de proxy de imagem.
+  - Esse modo usa `/insecure/<directives>/plain/<url-codificada>` e pode derivar thumbnails de URLs de vídeo com FFmpeg no servidor.
+
+### Proxy de imagens
+
+Em `Configurações > Relays & Blossom > Proxy de imagens`, a aplicação suporta:
+
+- `Nenhum`: usa a URL original da imagem.
+- `imgproxy`: usa a geração de URL via `@imgproxy/imgproxy-js-core`.
+- `nostube-imgproxy`: usa o formato compatível com imgproxy de `nostube-imgproxy`, gerando URLs como `https://proxy.example/insecure/f:webp/rs:fit:480:480/plain/<url-codificada>`.
+- `imageproxy`: usa o formato simples `/opções/url-remota`.
+
+O modo `nostube-imgproxy` é recomendado quando a fonte pode ser vídeo (`mp4`, `webm`, `m3u8` etc.), porque o servidor consegue extrair uma thumbnail e retornar uma imagem otimizada.
 
 ## 💻 Desenvolvimento
 
