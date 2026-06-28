@@ -89,6 +89,73 @@ async function createBlossomAuthHeader(ndk: NDK, sha256: string, content: string
   return `Nostr ${btoa(JSON.stringify(authEvent.rawEvent()))}`;
 }
 
+async function calculateFileSha256(file: File) {
+  const digest = await crypto.subtle.digest("SHA-256", await file.arrayBuffer());
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function getUploadUrl(server: string) {
+  return `${server}/upload`;
+}
+
+function normalizeUploadResult(
+  server: string,
+  file: File,
+  sha256: string,
+  responseBody: unknown
+): BlossomMediaUploadResult {
+  const response = responseBody && typeof responseBody === "object" ? responseBody as Partial<BlossomMediaUploadResult> : {};
+  return {
+    ...response,
+    url: response.url || `${server}/${sha256}`,
+    sha256: response.sha256 || sha256,
+    x: response.x || sha256,
+    size: response.size || String(file.size),
+    m: response.m || file.type,
+  };
+}
+
+function parseJsonResponse(text: string): unknown {
+  if (!text) return undefined;
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return undefined;
+  }
+}
+
+async function uploadToSpecificServerDirect(
+  ndk: NDK,
+  file: File,
+  server: string,
+  onProgress?: (progress: UploadProgress) => void
+): Promise<BlossomMediaUploadResult> {
+  const sha256 = await calculateFileSha256(file);
+  const authorization = await createBlossomAuthHeader(ndk, sha256, `Upload ${file.name}`);
+  onProgress?.({ loaded: 0, total: file.size });
+
+  const response = await fetch(getUploadUrl(server), {
+    method: "PUT",
+    headers: {
+      Authorization: authorization,
+      "Content-Type": file.type || "application/octet-stream"
+    },
+    body: file
+  });
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => "");
+    throw new Error(body || `Upload request failed with status ${response.status}`);
+  }
+
+  const text = await response.text();
+  const responseBody = parseJsonResponse(text);
+  onProgress?.({ loaded: file.size, total: file.size });
+  return normalizeUploadResult(server, file, sha256, responseBody);
+}
+
 async function uploadToSpecificServer(
   ndk: NDK,
   file: File,
@@ -105,7 +172,16 @@ async function uploadToSpecificServer(
     };
   }
 
-  return blossom.upload(file, { server }) as Promise<BlossomMediaUploadResult>;
+  try {
+    return await uploadToSpecificServerDirect(ndk, file, server, onProgress);
+  } catch (error) {
+    logger.debug("Direct BUD-01 upload failed, trying NDK Blossom upload", {
+      server,
+      fileName: file.name,
+      error: error instanceof Error ? error.message : String(error)
+    });
+    return blossom.upload(file, { server }) as Promise<BlossomMediaUploadResult>;
+  }
 }
 
 async function mirrorToServer(

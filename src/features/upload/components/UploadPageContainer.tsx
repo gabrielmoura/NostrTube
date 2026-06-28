@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { UploadFormView } from '@/features/upload/components/UploadFormView'
 import { useUploadDraftPersistence } from '@/features/upload/hooks/useUploadDraftPersistence'
-import { prepareVideoUploadAsset } from '@/features/upload/services/local-media-processing.service'
+import { generateVideoThumbnailFromUrl, prepareVideoUploadAsset } from '@/features/upload/services/local-media-processing.service'
 import { usePublishVideo } from '@/hooks/usePublishVideo'
 import { copyText } from '@/helper/format'
 import { useVideoUploadStore } from '@/store/videoUpload/useVideoUploadStore'
@@ -212,6 +212,7 @@ function UploadSidebarPanel({ onSaveDraft, uploadStage }: { onSaveDraft: () => v
   const setThumbnailInputUrl = useVideoUploadStore((state) => state.setThumbnailInputUrl)
   const setThumbnailGenerating = useVideoUploadStore((state) => state.setThumbnailGenerating)
   const setThumbnailError = useVideoUploadStore((state) => state.setThumbnailError)
+  const setVideoData = useVideoUploadStore((state) => state.setVideoData)
   const clearThumbnail = useVideoUploadStore((state) => state.clearThumbnail)
   const thumbnail = thumbnailState.localPreviewUrl || thumbnailState.remoteUrl || thumbnailPreviewUrl || videoData.thumbnail
   const isUrlModeInvalid = thumbnailState.mode === 'url' && Boolean(thumbnailState.inputUrl) && !looksLikeImageUrl(thumbnailState.inputUrl)
@@ -246,25 +247,41 @@ function UploadSidebarPanel({ onSaveDraft, uploadStage }: { onSaveDraft: () => v
 
   const handleAutoRetry = async () => {
     setThumbnailMode('auto')
-    if (!sourceVideoFile) {
-      setThumbnailError(t('thumbnail_wait_for_video', 'Select a local video before generating a thumbnail.'))
+    if (!sourceVideoFile && !videoData.url) {
+      setThumbnailError(t('thumbnail_wait_for_video', 'Select or restore a video before generating a thumbnail.'))
       return
     }
 
     try {
       setThumbnailGenerating(true)
       setThumbnailError(undefined)
-      const prepared = await prepareVideoUploadAsset(sourceVideoFile, {
-        enableFFmpeg: true,
-        generateThumbnail: true,
-        thumbnailGenerationMode: 'local',
-      })
 
-      if (!prepared.thumbnailFile || !prepared.thumbnailPreviewUrl) {
-        throw new Error(t('thumbnail_generation_failed', 'Could not generate a thumbnail automatically.'))
+      if (sourceVideoFile) {
+        const prepared = await prepareVideoUploadAsset(sourceVideoFile, {
+          enableFFmpeg: true,
+          generateThumbnail: true,
+          thumbnailGenerationMode: 'local',
+        })
+
+        if (!prepared.thumbnailFile || !prepared.thumbnailPreviewUrl) {
+          throw new Error(t('thumbnail_generation_failed', 'Could not generate a thumbnail automatically.'))
+        }
+
+        if (prepared.duration && !videoData.duration) {
+          setVideoData({ duration: prepared.duration })
+        }
+
+        setThumbnailFile(prepared.thumbnailFile, prepared.thumbnailPreviewUrl)
+        return
       }
 
-      setThumbnailFile(prepared.thumbnailFile, prepared.thumbnailPreviewUrl)
+      if (videoData.url) {
+        const generated = await generateVideoThumbnailFromUrl(videoData.url, videoData.title || 'video-thumbnail')
+        if (generated.duration && !videoData.duration) {
+          setVideoData({ duration: generated.duration })
+        }
+        setThumbnailFile(generated.file, generated.objectUrl)
+      }
     } catch (error) {
       setThumbnailError(error instanceof Error ? error.message : String(error))
     } finally {
@@ -360,6 +377,12 @@ function UploadSidebarPanel({ onSaveDraft, uploadStage }: { onSaveDraft: () => v
               <AlertCircle className="mt-0.5 size-4 shrink-0" />
               <p>{thumbnailState.error}</p>
             </div>
+          ) : null}
+          {!thumbnail && thumbnailState.mode === 'auto' && videoData.url ? (
+            <Button variant="outline" size="sm" className="w-full" onClick={() => void handleAutoRetry()} disabled={thumbnailState.isGenerating}>
+              <WandSparkles className="size-4" />
+              {t('generate_thumbnail_now', 'Generate thumbnail now')}
+            </Button>
           ) : null}
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="flex-1" onClick={() => fileInputRef.current?.click()}>

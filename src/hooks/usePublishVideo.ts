@@ -10,6 +10,7 @@ import { type VideoMetadata, useVideoUploadStore } from "@/store/videoUpload/use
 import { buildAddressableVideoEvent } from "@/features/upload/services/video-event-builder.service";
 import { uploadToConfiguredBlossomServers } from "@/features/upload/services/blossom-server.service";
 import {
+  generateVideoThumbnailFromUrl,
   generateBlurhashFromImageFile,
   prepareVideoUploadAsset
 } from "@/features/upload/services/local-media-processing.service";
@@ -89,19 +90,41 @@ export function usePublishVideo() {
     if (thumbnailState.mode === "auto" && !thumbnailFile && !thumbnailUrl && sourceVideoFile) {
       store.setThumbnailGenerating(true);
       store.setThumbnailError(undefined);
-      const prepared = await prepareVideoUploadAsset(sourceVideoFile, {
-        enableFFmpeg: true,
-        generateThumbnail: true,
-        thumbnailGenerationMode: "local",
-      });
-      thumbnailFile = prepared.thumbnailFile;
-      if (prepared.duration && !snap.duration) {
-        snap = { ...snap, duration: prepared.duration };
+      try {
+        const prepared = await prepareVideoUploadAsset(sourceVideoFile, {
+          enableFFmpeg: true,
+          generateThumbnail: true,
+          thumbnailGenerationMode: "local",
+        });
+        thumbnailFile = prepared.thumbnailFile;
+        if (prepared.duration && !snap.duration) {
+          snap = { ...snap, duration: prepared.duration };
+        }
+        if (prepared.thumbnailPreviewUrl) {
+          store.setThumbnailFile(thumbnailFile, prepared.thumbnailPreviewUrl);
+        }
+      } finally {
+        store.setThumbnailGenerating(false);
       }
-      if (prepared.thumbnailPreviewUrl) {
-        store.setThumbnailFile(thumbnailFile, prepared.thumbnailPreviewUrl);
+    }
+
+    if (thumbnailState.mode === "auto" && !thumbnailFile && !thumbnailUrl && snap.url) {
+      store.setThumbnailGenerating(true);
+      store.setThumbnailError(undefined);
+      try {
+        const generated = await generateVideoThumbnailFromUrl(snap.url, snap.title || "video-thumbnail");
+        thumbnailFile = generated.file;
+        if (generated.duration && !snap.duration) {
+          snap = { ...snap, duration: generated.duration };
+        }
+        store.setThumbnailFile(generated.file, generated.objectUrl);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : t("thumbnail_generation_failed", "Could not generate a thumbnail automatically.");
+        store.setThumbnailError(message);
+        throw new Error(message);
+      } finally {
+        store.setThumbnailGenerating(false);
       }
-      store.setThumbnailGenerating(false);
     }
 
     if (thumbnailFile) {
