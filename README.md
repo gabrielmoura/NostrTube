@@ -18,6 +18,7 @@ NostrTube é uma aplicação de compartilhamento de vídeos descentralizada que 
 - 👤 Perfis de usuário
 - 💬 Feedback direto via Nostr com POW e ZAP opcional
 - 🎬 Player de vídeo com suporte a HLS e DASH
+- 🌐 Nexus P2P Sidecar inspirado no fluxo NIP-95 para cache distribuído de eventos
 - 📱 Aplicativo móvel (Android/iOS) via Capacitor
 - 🌐 Progressive Web App (PWA)
 - 🌍 Suporte multilíngue (i18n)
@@ -39,6 +40,7 @@ NostrTube é uma aplicação de compartilhamento de vídeos descentralizada que 
 - **NDK (Nostr Development Kit)** - Kit de desenvolvimento Nostr
 - **nostr-tools** - Ferramentas Nostr
 - **Blossom Client SDK** - Cliente para armazenamento de mídia
+- **Nexus P2P / NIP-95** - Sidecar WebRTC para distribuição híbrida de eventos Nostr
 
 ### Vídeo
 - **Vidstack** - Player de vídeo
@@ -83,6 +85,10 @@ cp .env.example .env
 - `VITE_APP_NOSTUBE_IMGPROXY`: URL base de uma instância [`nostube-imgproxy`](https://github.com/flox1an/nostube-imgproxy).
   - Quando definida e `VITE_APP_IMAGE_PROXY_MODE` não estiver definido, ela é usada como modo padrão de proxy de imagem.
   - Esse modo usa `/insecure/<directives>/plain/<url-codificada>` e pode derivar thumbnails de URLs de vídeo com FFmpeg no servidor.
+- `VITE_NEXUS_P2P_RELAY_URL`: relay de signaling do Nexus P2P Sidecar.
+  - Se não for definido, a aplicação usa `wss://nexus.libernet.app`.
+- `VITE_NEXUS_P2P_ENABLED`: controle global do sidecar P2P.
+  - Use `false` para desativar a integração em build/runtime.
 
 ### Proxy de imagens
 
@@ -94,6 +100,14 @@ Em `Configurações > Relays & Blossom > Proxy de imagens`, a aplicação suport
 - `imageproxy`: usa o formato simples `/opções/url-remota`.
 
 O modo `nostube-imgproxy` é recomendado quando a fonte pode ser vídeo (`mp4`, `webm`, `m3u8` etc.), porque o servidor consegue extrair uma thumbnail e retornar uma imagem otimizada.
+
+### NIP-95 / Nexus P2P
+
+O projeto possui uma implementação cliente-side chamada **Nexus P2P Sidecar**, inspirada no fluxo NIP-95 de distribuição híbrida Relay-P2P via WebRTC. Ela usa WebRTC para distribuir eventos Nostr entre peers enquanto mantém fallback normal via relay/NDK.
+
+No estado atual, o app implementa registro de peer, anúncio de cache, signaling, requisição/resposta de eventos por Data Channel e métricas de debug. O relay seed/signaling server, reputação de peers e promoção formal para Super Peer não são implementados no frontend.
+
+Essa camada não distribui arquivos de mídia. Uploads e thumbnails continuam usando Blossom, URLs públicas, DVMs ou proxies de imagem; o Nexus P2P atua apenas sobre eventos Nostr.
 
 ## 💻 Desenvolvimento
 
@@ -168,8 +182,7 @@ NostrTube/
 ├── docs/               # Documentação técnica de arquitetura frontend
 ├── public/             # Arquivos estáticos
 ├── android/            # Projeto Android (Capacitor)
-├── ios/                # Projeto iOS (Capacitor)
-└── _doc/              # Documentação
+└── ios/                # Projeto iOS (Capacitor)
 ```
 
 ## 💬 Fluxo de Feedback
@@ -189,6 +202,7 @@ NostrTube/
 - Componentes: `docs/components-tree.md`
 - Estado: `docs/state-management.md`
 - Decisões: `docs/decisions-frontend.md`
+- NIP-95 / Nexus P2P: `docs/nip-95-nexus-p2p.md`
 
 ## 🤝 Contribuindo
 
