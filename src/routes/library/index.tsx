@@ -6,6 +6,7 @@ import {
   ChevronRight,
   Clock,
   Download,
+  FilePenLine,
   FolderOpen,
   Heart,
   History,
@@ -16,7 +17,7 @@ import {
   Tv,
   UserRound,
 } from 'lucide-react'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { z } from 'zod'
 import VideoCard, { VideoCardLoading } from '@/components/cards/videoCard'
 import { AppShell } from '@/components/layout/AppShell'
@@ -29,14 +30,23 @@ import { useWatchLater } from '@/features/library/hooks/use-watch-later'
 import { useBatchProfiles } from '@/features/nostr/hooks/useBatchProfiles'
 import { VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
 import { getWatchHistory } from '@/features/recommendations/services/watch-history.service'
+import {
+  canUseNip44Drafts,
+  clearVideoUploadDraft,
+  loadVideoUploadDraft,
+  type UploadDraftSnapshot,
+} from '@/features/upload/services/nip37-draft.service'
 import { Route as rootRoute } from '@/routes/__root'
+import { useVideoUploadStore } from '@/store/videoUpload/useVideoUploadStore'
 
 // ─── Tipos ───────────────────────────────────────────────
-type LibraryTab = 'all' | 'playlists' | 'liked' | 'watchlater' | 'history' | 'myvideos' | 'downloads'
+type LibraryTab = 'all' | 'playlists' | 'liked' | 'watchlater' | 'history' | 'myvideos' | 'drafts' | 'downloads'
 
 const LibrarySearchSchema = z.object({
-  tab: z.enum(['all', 'playlists', 'liked', 'watchlater', 'history', 'myvideos', 'downloads']).optional(),
+  tab: z.enum(['all', 'playlists', 'liked', 'watchlater', 'history', 'myvideos', 'drafts', 'downloads']).optional(),
 })
+
+const UPLOAD_DRAFT_STORAGE_KEY = 'video-upload-draft'
 
 function isResolvablePlaylistVideoTag(tag: string[]) {
   const [, value] = tag
@@ -63,8 +73,27 @@ const TABS: { key: LibraryTab; label: string; icon: typeof FolderOpen }[] = [
   { key: 'watchlater', label: 'Assistir mais tarde', icon: Bookmark },
   { key: 'history', label: 'Histórico', icon: History },
   { key: 'myvideos', label: 'Seus vídeos', icon: UserRound },
+  { key: 'drafts', label: 'Rascunhos', icon: FilePenLine },
   { key: 'downloads', label: 'Downloads', icon: Download },
 ]
+
+function readLocalUploadDraft(): UploadDraftSnapshot | null {
+  const raw = localStorage.getItem(UPLOAD_DRAFT_STORAGE_KEY)
+  if (!raw) return null
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<UploadDraftSnapshot>
+    if (!parsed.videoData) return null
+    return {
+      videoData: parsed.videoData,
+      currentStep: parsed.currentStep || 1,
+      updatedAt: parsed.updatedAt || Date.now(),
+      thumbnailPreviewUrl: parsed.thumbnailPreviewUrl,
+    }
+  } catch {
+    return null
+  }
+}
 
 // ─── Rota ────────────────────────────────────────────────
 export const Route = createRoute({
@@ -172,7 +201,11 @@ function useLibraryData() {
 function LibraryPage() {
   const { tab } = Route.useSearch()
   const navigate = Route.useNavigate()
+  const { ndk } = useNDK()
   const { items: watchLaterItems, remove: removeWatchLater } = useWatchLater()
+  const applyDraftSnapshot = useVideoUploadStore((state) => state.applyDraftSnapshot)
+  const clearLocalDraft = useVideoUploadStore((state) => state.clearLocalDraft)
+  const [uploadDraft, setUploadDraft] = useState<UploadDraftSnapshot | null>(() => readLocalUploadDraft())
   const {
     currentUser,
     watchHistory,
@@ -185,7 +218,36 @@ function LibraryPage() {
 
   const isLoggedIn = !!currentUser
   const activeTab = tab || 'all'
-  const activeSidebarKey: SidebarKey = activeTab === 'all' || activeTab === 'downloads' ? 'library' : activeTab
+  const activeSidebarKey: SidebarKey = activeTab === 'all' || activeTab === 'downloads' || activeTab === 'drafts' ? 'library' : activeTab
+
+  useEffect(() => {
+    setUploadDraft(readLocalUploadDraft())
+  }, [activeTab])
+
+  useEffect(() => {
+    if (!ndk || !currentUser) return
+
+    const ndkInstance = ndk
+    const user = currentUser
+    let cancelled = false
+    async function loadRemoteDraft() {
+      if (!(await canUseNip44Drafts(ndkInstance))) return
+      const remoteDraft = await loadVideoUploadDraft({ ndk: ndkInstance, currentUser: user })
+      if (!cancelled && remoteDraft) {
+        const localDraft = readLocalUploadDraft()
+        setUploadDraft(
+          [localDraft, remoteDraft]
+            .filter(Boolean)
+            .sort((a, b) => (b?.updatedAt || 0) - (a?.updatedAt || 0))[0] ?? null,
+        )
+      }
+    }
+
+    void loadRemoteDraft()
+    return () => {
+      cancelled = true
+    }
+  }, [currentUser, ndk])
 
   const setActiveTab = (nextTab: string) => {
     navigate({
@@ -194,6 +256,23 @@ function LibraryPage() {
         tab: nextTab === 'all' ? undefined : (nextTab as LibraryTab),
       }),
     })
+  }
+
+  const continueUploadDraft = () => {
+    if (!uploadDraft) return
+    applyDraftSnapshot({
+      ...uploadDraft,
+      currentStep: uploadDraft.currentStep > 1 ? uploadDraft.currentStep : 2,
+    })
+    navigate({ to: '/new' })
+  }
+
+  const removeUploadDraft = async () => {
+    clearLocalDraft()
+    if (ndk && currentUser && await canUseNip44Drafts(ndk)) {
+      await clearVideoUploadDraft({ ndk, currentUser })
+    }
+    setUploadDraft(null)
   }
 
   // Coluna direita
@@ -220,6 +299,10 @@ function LibraryPage() {
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Downloads</span>
             <span className="font-medium">—</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Rascunhos</span>
+            <span className="font-medium">{uploadDraft ? 1 : 0}</span>
           </div>
         </CardContent>
       </Card>
@@ -321,6 +404,18 @@ function LibraryPage() {
 
         {/* ── Tudo ── */}
         <TabsContent value="all" className="mt-0 space-y-8">
+          {uploadDraft && (
+            <section>
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="font-semibold">Rascunho em andamento</h3>
+                <span className="text-xs text-muted-foreground">
+                  {new Date(uploadDraft.updatedAt).toLocaleString()}
+                </span>
+              </div>
+              <DraftCard draft={uploadDraft} onContinue={continueUploadDraft} onRemove={removeUploadDraft} />
+            </section>
+          )}
+
           {/* Seus vídeos recentes */}
           {myVideos.length > 0 && (
             <section>
@@ -401,7 +496,7 @@ function LibraryPage() {
           )}
 
           {/* Empty state */}
-           {myVideos.length === 0 && playlists.length === 0 && watchHistory.length === 0 && watchLaterItems.length === 0 && (
+           {myVideos.length === 0 && playlists.length === 0 && watchHistory.length === 0 && watchLaterItems.length === 0 && !uploadDraft && (
              <div className="flex flex-col items-center justify-center py-16 text-center">
               <div className="mb-4 inline-flex size-16 items-center justify-center rounded-full bg-muted">
                 <FolderOpen className="size-8 text-muted-foreground" />
@@ -571,6 +666,21 @@ function LibraryPage() {
           )}
         </TabsContent>
 
+        {/* ── Rascunhos ── */}
+        <TabsContent value="drafts" className="mt-0">
+          {uploadDraft ? (
+            <DraftCard draft={uploadDraft} onContinue={continueUploadDraft} onRemove={removeUploadDraft} />
+          ) : (
+            <EmptyState
+              icon={FilePenLine}
+              title="Nenhum rascunho"
+              description="Rascunhos salvos no fluxo de envio aparecerão aqui para você continuar e publicar depois."
+              cta="Novo vídeo"
+              ctaTo="/new"
+            />
+          )}
+        </TabsContent>
+
         {/* ── Downloads ── */}
         <TabsContent value="downloads" className="mt-0">
           <EmptyState
@@ -581,6 +691,55 @@ function LibraryPage() {
         </TabsContent>
       </Tabs>
     </AppShell>
+  )
+}
+
+function DraftCard({
+  draft,
+  onContinue,
+  onRemove,
+}: {
+  draft: UploadDraftSnapshot
+  onContinue: () => void
+  onRemove: () => void
+}) {
+  const thumbnail = draft.thumbnailPreviewUrl || draft.videoData.thumbnail
+  const title = draft.videoData.title?.trim() || 'Vídeo sem título'
+  const stepLabel = draft.currentStep === 3 ? 'Revisão' : draft.currentStep === 2 ? 'Metadados' : 'Arquivo'
+
+  return (
+    <div className="flex flex-col gap-4 rounded-xl border border-border/50 bg-card/50 p-4 transition-colors hover:bg-muted/30 sm:flex-row sm:items-center">
+      {thumbnail ? (
+        <img src={thumbnail} alt={title} className="aspect-video w-full rounded-lg border object-cover sm:w-44" />
+      ) : (
+        <div className="flex aspect-video w-full items-center justify-center rounded-lg border border-dashed text-xs text-muted-foreground sm:w-44">
+          Sem thumbnail
+        </div>
+      )}
+      <div className="min-w-0 flex-1">
+        <div className="mb-2 flex flex-wrap items-center gap-2">
+          <Badge variant="glass">Rascunho</Badge>
+          <Badge variant="secondary" className="text-[10px]">Etapa: {stepLabel}</Badge>
+        </div>
+        <p className="line-clamp-2 text-sm font-medium">{title}</p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Atualizado em {new Date(draft.updatedAt).toLocaleString()}
+        </p>
+        {draft.videoData.url ? (
+          <p className="mt-1 truncate text-xs text-muted-foreground">{draft.videoData.url}</p>
+        ) : null}
+      </div>
+      <div className="flex shrink-0 flex-wrap gap-2 sm:flex-col">
+        <Button variant="glass" onClick={onContinue}>
+          <FilePenLine className="size-4" />
+          Continuar publicação
+        </Button>
+        <Button variant="ghost" onClick={onRemove}>
+          <Trash2 className="size-4" />
+          Remover
+        </Button>
+      </div>
+    </div>
   )
 }
 

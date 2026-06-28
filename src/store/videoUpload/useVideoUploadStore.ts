@@ -287,11 +287,18 @@ export const useVideoUploadStore = create<VideoUploadState>()(
 
       setVideoUpload: (data) =>
         set((state) => {
+          const previousThumbnail = state.videoData.thumbnail;
+          const previousPreviewUrl = state.thumbnailPreviewUrl;
+          const previousThumbnailState = state.thumbnailState;
           state.videoData = data;
           if (data.thumbnail && !data.thumbnail.startsWith("blob:")) {
             state.thumbnailState.remoteUrl = data.thumbnail;
             state.thumbnailState.inputUrl = data.thumbnail;
             state.thumbnailPreviewUrl = data.thumbnail;
+          } else if (previousThumbnailState.localPreviewUrl || previousPreviewUrl || previousThumbnail) {
+            state.thumbnailState = previousThumbnailState;
+            state.thumbnailPreviewUrl = previousPreviewUrl;
+            state.videoData.thumbnail = previousThumbnail;
           }
         }, false, "video/setVideoUpload"),
 
