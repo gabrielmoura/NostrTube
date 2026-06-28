@@ -38,9 +38,32 @@ export interface VideoMetadata {
 
 const DRAFT_KEY = "video-upload-draft";
 
+export type ThumbnailMode = "auto" | "upload" | "url";
+
+export interface UploadThumbnailState {
+  mode: ThumbnailMode;
+  file?: File;
+  localPreviewUrl?: string;
+  remoteUrl?: string;
+  inputUrl?: string;
+  isGenerating: boolean;
+  isUploading: boolean;
+  error?: string;
+}
+
+interface UploadDraftSnapshot {
+  videoData: Partial<VideoMetadata>;
+  currentStep: 1 | 2 | 3;
+  updatedAt: number;
+  thumbnailPreviewUrl?: string;
+  thumbnailState?: Pick<UploadThumbnailState, "mode" | "remoteUrl" | "inputUrl" | "error">;
+}
+
 export interface VideoUploadState {
   videoData: Partial<VideoMetadata>;
   thumbnailPreviewUrl?: string;
+  thumbnailState: UploadThumbnailState;
+  sourceVideoFile?: File;
   currentStep: 1 | 2 | 3;
   isUploading: boolean;
   uploadProgress: number;
@@ -63,6 +86,15 @@ export interface VideoUploadState {
   setUrl: (url: string) => void;
   setThumbnail: (thumbnail: string) => void;
   setThumbnailPreviewUrl: (thumbnailPreviewUrl?: string) => void;
+  setThumbnailMode: (mode: ThumbnailMode) => void;
+  setThumbnailFile: (file?: File, localPreviewUrl?: string) => void;
+  setThumbnailRemoteUrl: (url?: string) => void;
+  setThumbnailInputUrl: (url: string) => void;
+  setThumbnailGenerating: (isGenerating: boolean) => void;
+  setThumbnailUploading: (isUploading: boolean) => void;
+  setThumbnailError: (error?: string) => void;
+  clearThumbnail: () => void;
+  setSourceVideoFile: (file?: File) => void;
   setSummary: (summary: string) => void;
   setContentWarning: (contentWarning: string) => void;
   setVideoUpload: (data: Partial<VideoMetadata>) => void;
@@ -70,20 +102,37 @@ export interface VideoUploadState {
   saveDraft: () => void;
   loadDraft: () => void;
   clearLocalDraft: () => void;
-  getDraftSnapshot: () => { videoData: Partial<VideoMetadata>; currentStep: 1 | 2 | 3; updatedAt: number };
-  applyDraftSnapshot: (snapshot: { videoData: Partial<VideoMetadata>; currentStep?: 1 | 2 | 3; updatedAt?: number; thumbnailPreviewUrl?: string }) => void;
+  getDraftSnapshot: () => UploadDraftSnapshot;
+  applyDraftSnapshot: (snapshot: Partial<UploadDraftSnapshot>) => void;
 }
 
 const initialState = {
   videoData: {},
+  sourceVideoFile: undefined,
   currentStep: 1 as const,
   isUploading: false,
   uploadProgress: 0,
   uploadStage: "idle" as const,
   error: undefined,
   showEventInput: false,
-  thumbnailPreviewUrl: undefined
+  thumbnailPreviewUrl: undefined,
+  thumbnailState: {
+    mode: "auto" as const,
+    file: undefined,
+    localPreviewUrl: undefined,
+    remoteUrl: undefined,
+    inputUrl: undefined,
+    isGenerating: false,
+    isUploading: false,
+    error: undefined
+  }
 };
+
+function revokeObjectUrl(url?: string) {
+  if (url?.startsWith("blob:")) {
+    URL.revokeObjectURL(url);
+  }
+}
 
 export const useVideoUploadStore = create<VideoUploadState>()(
   devtools(
@@ -138,12 +187,93 @@ export const useVideoUploadStore = create<VideoUploadState>()(
       setThumbnail: (thumbnail) =>
         set((state) => {
           state.videoData.thumbnail = thumbnail;
+          state.thumbnailState.remoteUrl = thumbnail || undefined;
+          state.thumbnailState.inputUrl = thumbnail || state.thumbnailState.inputUrl;
+          state.thumbnailState.error = undefined;
         }, false, "video/setThumbnail"),
 
       setThumbnailPreviewUrl: (thumbnailPreviewUrl) =>
         set((state) => {
+          if (state.thumbnailPreviewUrl !== thumbnailPreviewUrl) {
+            revokeObjectUrl(state.thumbnailPreviewUrl);
+          }
           state.thumbnailPreviewUrl = thumbnailPreviewUrl;
         }, false, "video/setThumbnailPreviewUrl"),
+
+      setThumbnailMode: (mode) =>
+        set((state) => {
+          state.thumbnailState.mode = mode;
+          state.thumbnailState.error = undefined;
+        }, false, "thumbnail/setMode"),
+
+      setThumbnailFile: (file, localPreviewUrl) =>
+        set((state) => {
+          if (state.thumbnailState.localPreviewUrl !== localPreviewUrl) {
+            revokeObjectUrl(state.thumbnailState.localPreviewUrl);
+          }
+          if (state.thumbnailPreviewUrl !== localPreviewUrl) {
+            revokeObjectUrl(state.thumbnailPreviewUrl);
+          }
+          state.thumbnailState.file = file;
+          state.thumbnailState.localPreviewUrl = localPreviewUrl;
+          state.thumbnailState.remoteUrl = undefined;
+          state.thumbnailState.error = undefined;
+          state.thumbnailPreviewUrl = localPreviewUrl;
+          if (state.videoData.thumbnail?.startsWith("blob:")) {
+            state.videoData.thumbnail = undefined;
+          }
+        }, false, "thumbnail/setFile"),
+
+      setThumbnailRemoteUrl: (url) =>
+        set((state) => {
+          revokeObjectUrl(state.thumbnailState.localPreviewUrl);
+          revokeObjectUrl(state.thumbnailPreviewUrl);
+          state.thumbnailState.file = undefined;
+          state.thumbnailState.localPreviewUrl = undefined;
+          state.thumbnailState.remoteUrl = url;
+          state.thumbnailState.inputUrl = url || state.thumbnailState.inputUrl;
+          state.thumbnailState.error = undefined;
+          state.videoData.thumbnail = url || undefined;
+          state.thumbnailPreviewUrl = url;
+        }, false, "thumbnail/setRemoteUrl"),
+
+      setThumbnailInputUrl: (url) =>
+        set((state) => {
+          state.thumbnailState.inputUrl = url;
+        }, false, "thumbnail/setInputUrl"),
+
+      setThumbnailGenerating: (isGenerating) =>
+        set((state) => {
+          state.thumbnailState.isGenerating = isGenerating;
+        }, false, "thumbnail/setGenerating"),
+
+      setThumbnailUploading: (isUploading) =>
+        set((state) => {
+          state.thumbnailState.isUploading = isUploading;
+        }, false, "thumbnail/setUploading"),
+
+      setThumbnailError: (error) =>
+        set((state) => {
+          state.thumbnailState.error = error;
+        }, false, "thumbnail/setError"),
+
+      clearThumbnail: () =>
+        set((state) => {
+          revokeObjectUrl(state.thumbnailState.localPreviewUrl);
+          revokeObjectUrl(state.thumbnailPreviewUrl);
+          state.thumbnailState.file = undefined;
+          state.thumbnailState.localPreviewUrl = undefined;
+          state.thumbnailState.remoteUrl = undefined;
+          state.thumbnailState.inputUrl = undefined;
+          state.thumbnailState.error = undefined;
+          state.thumbnailPreviewUrl = undefined;
+          state.videoData.thumbnail = undefined;
+        }, false, "thumbnail/clear"),
+
+      setSourceVideoFile: (file) =>
+        set((state) => {
+          state.sourceVideoFile = file;
+        }, false, "video/setSourceVideoFile"),
 
       setSummary: (summary) =>
         set((state) => {
@@ -158,6 +288,11 @@ export const useVideoUploadStore = create<VideoUploadState>()(
       setVideoUpload: (data) =>
         set((state) => {
           state.videoData = data;
+          if (data.thumbnail && !data.thumbnail.startsWith("blob:")) {
+            state.thumbnailState.remoteUrl = data.thumbnail;
+            state.thumbnailState.inputUrl = data.thumbnail;
+            state.thumbnailPreviewUrl = data.thumbnail;
+          }
         }, false, "video/setVideoUpload"),
 
       clearUploadedMedia: () =>
@@ -176,6 +311,10 @@ export const useVideoUploadStore = create<VideoUploadState>()(
           state.videoData.geohash = undefined;
           state.videoData.origin = undefined;
           state.videoData.thumbnail = undefined;
+          state.sourceVideoFile = undefined;
+          revokeObjectUrl(state.thumbnailState.localPreviewUrl);
+          revokeObjectUrl(state.thumbnailPreviewUrl);
+          state.thumbnailState = { ...initialState.thumbnailState };
           state.thumbnailPreviewUrl = undefined;
           state.isUploading = false;
           state.uploadProgress = 0;
@@ -210,6 +349,8 @@ export const useVideoUploadStore = create<VideoUploadState>()(
       resetForm: () => {
         localStorage.removeItem(DRAFT_KEY);
         set((state) => {
+          revokeObjectUrl(state.thumbnailState.localPreviewUrl);
+          revokeObjectUrl(state.thumbnailPreviewUrl);
           Object.assign(state, initialState);
         }, false, "video/resetForm");
       },
@@ -219,10 +360,18 @@ export const useVideoUploadStore = create<VideoUploadState>()(
       },
 
       getDraftSnapshot: () => {
-        const { videoData, currentStep } = get();
+        const { videoData, currentStep, thumbnailPreviewUrl, thumbnailState } = get();
+        const persistedPreviewUrl = thumbnailPreviewUrl?.startsWith("blob:") ? undefined : thumbnailPreviewUrl;
         return {
           videoData,
           currentStep,
+          thumbnailPreviewUrl: persistedPreviewUrl,
+          thumbnailState: {
+            mode: thumbnailState.mode,
+            remoteUrl: thumbnailState.remoteUrl,
+            inputUrl: thumbnailState.inputUrl,
+            error: thumbnailState.error
+          },
           updatedAt: Date.now()
         };
       },
@@ -232,11 +381,16 @@ export const useVideoUploadStore = create<VideoUploadState>()(
           state.videoData = snapshot.videoData || {};
           state.currentStep = snapshot.currentStep || 1;
           state.thumbnailPreviewUrl = snapshot.thumbnailPreviewUrl ?? snapshot.videoData?.thumbnail;
+          state.thumbnailState = {
+            ...initialState.thumbnailState,
+            ...snapshot.thumbnailState,
+            remoteUrl: snapshot.thumbnailState?.remoteUrl ?? snapshot.videoData?.thumbnail,
+            inputUrl: snapshot.thumbnailState?.inputUrl ?? snapshot.videoData?.thumbnail,
+          };
         }, false, "video/applyDraftSnapshot"),
 
       saveDraft: () => {
-        const { videoData, currentStep, thumbnailPreviewUrl } = get();
-        const draft = JSON.stringify({ videoData, currentStep, thumbnailPreviewUrl, updatedAt: Date.now() });
+        const draft = JSON.stringify(get().getDraftSnapshot());
         localStorage.setItem(DRAFT_KEY, draft);
         console.log("Rascunho salvo com sucesso!");
       },
@@ -250,6 +404,12 @@ export const useVideoUploadStore = create<VideoUploadState>()(
               state.videoData = parsed.videoData || {};
               state.currentStep = parsed.currentStep || 1;
               state.thumbnailPreviewUrl = parsed.thumbnailPreviewUrl ?? parsed.videoData?.thumbnail;
+              state.thumbnailState = {
+                ...initialState.thumbnailState,
+                ...parsed.thumbnailState,
+                remoteUrl: parsed.thumbnailState?.remoteUrl ?? parsed.videoData?.thumbnail,
+                inputUrl: parsed.thumbnailState?.inputUrl ?? parsed.videoData?.thumbnail,
+              };
             }, false, "video/loadDraft");
           } catch (e) {
             console.error("Falha ao carregar rascunho:", e);

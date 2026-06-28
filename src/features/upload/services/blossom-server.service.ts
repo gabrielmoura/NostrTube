@@ -146,22 +146,47 @@ export async function uploadToConfiguredBlossomServers({
   onMirroringStart?: () => void;
   label?: string;
 }) {
-  const { primary, mirrors } = getConfiguredBlossomServers();
-  if (!primary) {
-    throw new Error("No Blossom primary server configured");
+  const { primary, mirrors, available } = getConfiguredBlossomServers();
+  const uploadCandidates = uniqueStrings([primary, ...available]);
+  if (uploadCandidates.length === 0) {
+    throw new Error("No Blossom server configured");
   }
 
-  logger.debug("Uploading to Blossom primary", { primary, label, fileName: file.name, mirrors });
-  const primaryUpload = await uploadToSpecificServer(ndk, file, primary, onProgress);
+  let primaryUpload: BlossomMediaUploadResult | undefined;
+  let selectedServer: string | undefined;
+  const uploadErrors: string[] = [];
+
+  for (const server of uploadCandidates) {
+    try {
+      logger.debug("Uploading to Blossom server", { server, label, fileName: file.name, mirrors });
+      primaryUpload = await uploadToSpecificServer(ndk, file, server, onProgress);
+      selectedServer = server;
+      break;
+    } catch (uploadError) {
+      const message = uploadError instanceof Error ? uploadError.message : String(uploadError);
+      uploadErrors.push(`${server}: ${message}`);
+      logger.debug("Blossom upload failed, trying next server", {
+        server,
+        label,
+        error: message
+      });
+    }
+  }
+
+  if (!primaryUpload || !selectedServer) {
+    throw new Error(`Upload failed on all configured Blossom servers: ${uploadErrors.join("; ")}`);
+  }
+
   const sha256 = primaryUpload.x || primaryUpload.sha256;
 
   const fallbackUrls: string[] = [];
+  const mirrorCandidates = mirrors.filter((server) => server !== selectedServer);
 
-  if (mirrors.length > 0 && sha256) {
+  if (mirrorCandidates.length > 0 && sha256) {
     onMirroringStart?.();
   }
 
-  for (const mirrorServer of mirrors) {
+  for (const mirrorServer of mirrorCandidates) {
     if (!sha256) {
       logger.debug("Skipping mirror because sha256 is missing", { mirrorServer, label });
       continue;

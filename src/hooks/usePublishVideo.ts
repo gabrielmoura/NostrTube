@@ -6,8 +6,13 @@ import { toast } from "sonner";
 import { t } from "i18next";
 import { makeEvent, type MakeEventParams } from "@/helper/pow/pow.ts";
 import { LoggerAgent } from "@/lib/debug.ts";
-import { type VideoMetadata } from "@/store/videoUpload/useVideoUploadStore.ts";
+import { type VideoMetadata, useVideoUploadStore } from "@/store/videoUpload/useVideoUploadStore.ts";
 import { buildAddressableVideoEvent } from "@/features/upload/services/video-event-builder.service";
+import { uploadToConfiguredBlossomServers } from "@/features/upload/services/blossom-server.service";
+import {
+  generateBlurhashFromImageFile,
+  prepareVideoUploadAsset
+} from "@/features/upload/services/local-media-processing.service";
 
 const log = LoggerAgent.create("usePublishVideo");
 
@@ -15,6 +20,40 @@ export interface PublishedVideoResult {
   event: NDKEvent;
   naddr: string;
   shareUrl: string;
+}
+
+function isTemporaryUrl(url?: string) {
+  return Boolean(url?.startsWith("blob:") || url?.startsWith("data:"));
+}
+
+function isValidImageUrl(url?: string) {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function applyThumbnailToDraft(draft: Partial<VideoMetadata>, thumbnailUrl: string, blurhash?: string): Partial<VideoMetadata> {
+  const withImage = <T extends object | undefined>(imeta: T): T =>
+    imeta
+      ? ({
+          ...imeta,
+          image: thumbnailUrl,
+          blurhash: blurhash ?? (imeta as { blurhash?: string }).blurhash,
+          duration: draft.duration ? String(draft.duration) : (imeta as { duration?: string }).duration
+        } as T)
+      : imeta;
+
+  return {
+    ...draft,
+    thumbnail: thumbnailUrl,
+    blurhash: blurhash ?? draft.blurhash,
+    imetaVideo: withImage(draft.imetaVideo),
+    imetaVariants: draft.imetaVariants?.map((variant) => withImage(variant)),
+  };
 }
 
 export function usePublishVideo() {
@@ -31,6 +70,65 @@ export function usePublishVideo() {
     }
   });
 
+  const resolveThumbnailBeforePublish = async (snap: Partial<VideoMetadata>): Promise<Partial<VideoMetadata>> => {
+    const store = useVideoUploadStore.getState();
+    const { thumbnailState, sourceVideoFile } = store;
+    let thumbnailFile = thumbnailState.file;
+    let thumbnailUrl = thumbnailState.remoteUrl || snap.thumbnail;
+    let blurhash = snap.blurhash;
+
+    if (thumbnailState.mode === "url") {
+      const inputUrl = thumbnailState.inputUrl?.trim();
+      if (!isValidImageUrl(inputUrl)) {
+        throw new Error(t("invalid_thumbnail_url", "Enter a valid thumbnail URL before publishing."));
+      }
+      thumbnailUrl = inputUrl;
+      store.setThumbnailRemoteUrl(inputUrl);
+    }
+
+    if (thumbnailState.mode === "auto" && !thumbnailFile && !thumbnailUrl && sourceVideoFile) {
+      store.setThumbnailGenerating(true);
+      store.setThumbnailError(undefined);
+      const prepared = await prepareVideoUploadAsset(sourceVideoFile, {
+        enableFFmpeg: true,
+        generateThumbnail: true,
+        thumbnailGenerationMode: "local",
+      });
+      thumbnailFile = prepared.thumbnailFile;
+      if (prepared.duration && !snap.duration) {
+        snap = { ...snap, duration: prepared.duration };
+      }
+      if (prepared.thumbnailPreviewUrl) {
+        store.setThumbnailFile(thumbnailFile, prepared.thumbnailPreviewUrl);
+      }
+      store.setThumbnailGenerating(false);
+    }
+
+    if (thumbnailFile) {
+      if (!ndk) throw new Error("NDK is required to upload thumbnail");
+      store.setThumbnailUploading(true);
+      const thumbnailUpload = await uploadToConfiguredBlossomServers({
+        ndk,
+        file: thumbnailFile,
+        label: "thumbnail-upload-before-publish",
+      });
+      thumbnailUrl = thumbnailUpload.url;
+      blurhash = await generateBlurhashFromImageFile(thumbnailFile) ?? blurhash;
+      store.setThumbnailRemoteUrl(thumbnailUrl);
+      store.setThumbnailUploading(false);
+    }
+
+    if (isTemporaryUrl(thumbnailUrl)) {
+      throw new Error(t("temporary_thumbnail_url_error", "Thumbnail is still local. Upload it or use a public URL before publishing."));
+    }
+
+    if (!thumbnailUrl) {
+      throw new Error(t("missing_thumbnail", "Resolve a thumbnail before publishing."));
+    }
+
+    return applyThumbnailToDraft(snap, thumbnailUrl, blurhash);
+  };
+
   const publish = async (snap: Partial<VideoMetadata>): Promise<PublishedVideoResult | undefined> => {
     if (!ndk || !currentUser) return;
     if (!snap.url || !snap.title) {
@@ -39,8 +137,9 @@ export function usePublishVideo() {
     }
 
     try {
+      const publishableSnap = await resolveThumbnailBeforePublish(snap);
       const addressableEvent = buildAddressableVideoEvent({
-        draft: snap,
+        draft: publishableSnap,
         currentPubkey: currentUser.pubkey
       });
 
@@ -68,7 +167,10 @@ export function usePublishVideo() {
       return { event, naddr, shareUrl };
     } catch (err) {
       log.error("error publishing event", err);
-      toast.error(t("error_publishing_video", "Error publishing video"));
+      const message = err instanceof Error ? err.message : t("error_publishing_video", "Error publishing video");
+      useVideoUploadStore.getState().setThumbnailUploading(false);
+      useVideoUploadStore.getState().setThumbnailGenerating(false);
+      toast.error(message);
       return undefined;
     }
   };

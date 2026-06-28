@@ -4,9 +4,8 @@ import { toast } from 'sonner'
 import { t } from 'i18next'
 import { uploadToConfiguredBlossomServers } from '@/features/upload/services/blossom-server.service'
 import { requestDvmThumbnails } from '@/features/upload/services/dvm-thumbnail.service'
-import { generateBlurhashFromImageFile, prepareVideoUploadAsset } from '@/features/upload/services/local-media-processing.service'
+import { prepareVideoUploadAsset } from '@/features/upload/services/local-media-processing.service'
 import { LoggerAgent } from '@/lib/debug.ts'
-import { useUploadPreferencesStore } from '@/store/useUploadPreferencesStore'
 import { useVideoUploadStore } from '@/store/videoUpload/useVideoUploadStore.ts'
 
 const logger = LoggerAgent.create('useVideoUploader')
@@ -20,9 +19,13 @@ export function useVideoUploader() {
   const setUploadingState = useVideoUploadStore((s) => s.setUploadingState)
   const setUploadProgress = useVideoUploadStore((s) => s.setUploadProgress)
   const setUploadStage = useVideoUploadStore((s) => s.setUploadStage)
+  const setThumbnailFile = useVideoUploadStore((s) => s.setThumbnailFile)
+  const setThumbnailGenerating = useVideoUploadStore((s) => s.setThumbnailGenerating)
+  const setThumbnailError = useVideoUploadStore((s) => s.setThumbnailError)
   const setThumbnailPreviewUrl = useVideoUploadStore((s) => s.setThumbnailPreviewUrl)
+  const setSourceVideoFile = useVideoUploadStore((s) => s.setSourceVideoFile)
   const setError = useVideoUploadStore((s) => s.setError)
-  const thumbnailGenerationMode = useUploadPreferencesStore((s) => s.thumbnailGenerationMode)
+  const thumbnailMode = useVideoUploadStore((s) => s.thumbnailState.mode)
   const isLoading = useVideoUploadStore((s) => s.isUploading)
   const progress = useVideoUploadStore((s) => s.uploadProgress)
   const uploadStage = useVideoUploadStore((s) => s.uploadStage)
@@ -40,6 +43,8 @@ export function useVideoUploader() {
     setUploadStage('validating')
     setError(undefined)
     setThumbnailPreviewUrl(undefined)
+    setThumbnailError(undefined)
+    setSourceVideoFile(file.type.startsWith('video/') ? file : undefined)
 
     const handleProgress = (p: { loaded: number, total: number }) => {
       const percentage = Math.round((p.loaded / p.total) * 100)
@@ -57,10 +62,11 @@ export function useVideoUploader() {
 
       if (file.type.startsWith('video/')) {
         setUploadStage('processing')
+        setThumbnailGenerating(thumbnailMode === 'auto')
         const prepared = await prepareVideoUploadAsset(file, {
-          enableFFmpeg: thumbnailGenerationMode === 'local',
-          generateThumbnail: thumbnailGenerationMode === 'local',
-          thumbnailGenerationMode,
+          enableFFmpeg: true,
+          generateThumbnail: thumbnailMode === 'auto',
+          thumbnailGenerationMode: thumbnailMode === 'auto' ? 'local' : 'remote',
         })
         uploadFile = prepared.uploadFile
         generatedThumbnailFile = prepared.thumbnailFile
@@ -70,8 +76,11 @@ export function useVideoUploader() {
         preparedMimeType = prepared.mimeType
 
         if (generatedThumbnailPreviewUrl) {
-          setThumbnailPreviewUrl(generatedThumbnailPreviewUrl)
+          setThumbnailFile(generatedThumbnailFile, generatedThumbnailPreviewUrl)
+        } else if (thumbnailMode === 'auto') {
+          setThumbnailError(t('thumbnail_generation_failed', 'Could not generate a thumbnail automatically. Upload an image or add a URL before publishing.'))
         }
+        setThumbnailGenerating(false)
       }
 
       const imeta = await uploadToConfiguredBlossomServers({
@@ -82,30 +91,21 @@ export function useVideoUploader() {
         label: 'video-upload',
       })
 
-      let thumbnailUrl: string | undefined
       let blurhash = imeta.blurhash || undefined
       let dim = preparedDim || imeta.dim || undefined
       let duration = preparedDuration || imeta.duration || undefined
 
-      if (generatedThumbnailFile) {
-        const thumbnailUpload = await uploadToConfiguredBlossomServers({
-          ndk: ndkInstance,
-          file: generatedThumbnailFile,
-          onMirroringStart: () => setUploadStage('mirroring'),
-          label: 'thumbnail-upload',
-        })
-        thumbnailUrl = thumbnailUpload.url
-        blurhash = await generateBlurhashFromImageFile(generatedThumbnailFile)
-      }
-
-      if (!thumbnailUrl && file.type.startsWith('video/') && thumbnailGenerationMode === 'remote') {
+      if (file.type.startsWith('video/') && thumbnailMode === 'auto' && !generatedThumbnailFile) {
         try {
           const dvmResult = await requestDvmThumbnails({
             ndk: ndkInstance,
             videoUrl: imeta.url!,
             requesterPubkey: ndkInstance.activeUser!.pubkey,
           })
-          thumbnailUrl = dvmResult?.thumbnails[0]
+          const thumbnailUrl = dvmResult?.thumbnails[0]
+          if (thumbnailUrl) {
+            useVideoUploadStore.getState().setThumbnailRemoteUrl(thumbnailUrl)
+          }
           dim = dvmResult?.dim || dim
           duration = dvmResult?.duration || duration
         } catch (dvmError) {
@@ -126,10 +126,10 @@ export function useVideoUploader() {
         dim,
         duration: duration ? Number(duration) : undefined,
         mime_type: preparedMimeType || imeta.m || undefined,
-        thumbnail: thumbnailUrl,
+        thumbnail: useVideoUploadStore.getState().thumbnailState.remoteUrl,
         imetaVideo: {
           ...imeta,
-          image: thumbnailUrl,
+          image: useVideoUploadStore.getState().thumbnailState.remoteUrl,
           blurhash,
           dim,
           duration,
@@ -137,17 +137,13 @@ export function useVideoUploader() {
         },
         imetaVariants: [{
           ...imeta,
-          image: thumbnailUrl,
+          image: useVideoUploadStore.getState().thumbnailState.remoteUrl,
           blurhash,
           dim,
           duration,
           fallback: fallbackUrls,
         }],
       })
-
-      if (!thumbnailUrl && generatedThumbnailPreviewUrl) {
-        setThumbnailPreviewUrl(generatedThumbnailPreviewUrl)
-      }
 
       setUploadStage('complete')
       setUploadProgress(100)
@@ -157,11 +153,12 @@ export function useVideoUploader() {
       logger.error('Fatal upload error', error)
       setUploadStage('error')
       setError(error instanceof Error ? error.message : String(error))
+      setThumbnailGenerating(false)
       toast.error(t('upload_error', 'Error during file upload'))
     } finally {
       setUploadingState(false)
     }
-  }, [setError, setShowEventInput, setThumbnailPreviewUrl, setUploadProgress, setUploadStage, setUploadingState, setVideoUpload, thumbnailGenerationMode])
+  }, [setError, setShowEventInput, setSourceVideoFile, setThumbnailError, setThumbnailFile, setThumbnailGenerating, setThumbnailPreviewUrl, setUploadProgress, setUploadStage, setUploadingState, setVideoUpload, thumbnailMode])
 
   return { upload, isLoading, progress, uploadStage }
 }

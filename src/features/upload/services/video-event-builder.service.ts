@@ -92,6 +92,11 @@ export function buildAddressableVideoEvent({
     tags.push(["alt", draft.summary]);
   }
 
+  if (draft.thumbnail) {
+    tags.push(["thumb", draft.thumbnail]);
+    tags.push(["image", draft.thumbnail]);
+  }
+
   tags.push(...imetaTags);
 
   const duration = draft.duration ?? draft.imetaVariants?.[0]?.duration ?? draft.imetaVideo?.duration;

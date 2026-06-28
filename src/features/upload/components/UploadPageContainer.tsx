@@ -1,20 +1,20 @@
-import { useEffect, useMemo, useState } from 'react'
+import { type ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { t } from 'i18next'
-import { CheckCircle2, ChevronLeft, ChevronRight, CircleHelp, Copy, ExternalLink, Film, Rocket, ShieldCheck, Sparkles } from 'lucide-react'
+import { AlertCircle, CheckCircle2, ChevronLeft, ChevronRight, CircleHelp, Copy, ExternalLink, Film, ImagePlus, LinkIcon, Rocket, ShieldCheck, Sparkles, Trash2, UploadCloud, WandSparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import { ButtonWithLoader } from '@/components/ButtonWithLoader'
 import { Image } from '@/components/Image'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { UploadFormView } from '@/features/upload/components/UploadFormView'
 import { useUploadDraftPersistence } from '@/features/upload/hooks/useUploadDraftPersistence'
+import { prepareVideoUploadAsset } from '@/features/upload/services/local-media-processing.service'
 import { usePublishVideo } from '@/hooks/usePublishVideo'
 import { copyText } from '@/helper/format'
-import { useUploadPreferencesStore } from '@/store/useUploadPreferencesStore'
 import { useVideoUploadStore } from '@/store/videoUpload/useVideoUploadStore'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/videoPlayer/components/Tooltip'
-import { ButtonUploadThumb } from '@/routes/new/@components/ButtonUploadThumb'
 import Player, { VideoUpload } from '@/routes/new/@components/VideoUpload'
 
 interface PublishedState {
@@ -190,49 +190,189 @@ function UploadReviewCard({ title, summary, thumbnail, language, hashtags, index
   )
 }
 
-function UploadSidebarPanel({ thumbnail, onThumbnailChange, onSaveDraft, thumbnailMode, uploadStage }: { thumbnail?: string, onThumbnailChange: (value: string) => void, onSaveDraft: () => void, thumbnailMode: 'local' | 'remote', uploadStage: string }) {
+function looksLikeImageUrl(value?: string) {
+  if (!value) return false
+  try {
+    const url = new URL(value)
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
+function UploadSidebarPanel({ onSaveDraft, uploadStage }: { onSaveDraft: () => void, uploadStage: string }) {
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const videoData = useVideoUploadStore((state) => state.videoData)
+  const thumbnailPreviewUrl = useVideoUploadStore((state) => state.thumbnailPreviewUrl)
+  const thumbnailState = useVideoUploadStore((state) => state.thumbnailState)
+  const sourceVideoFile = useVideoUploadStore((state) => state.sourceVideoFile)
+  const setThumbnailMode = useVideoUploadStore((state) => state.setThumbnailMode)
+  const setThumbnailFile = useVideoUploadStore((state) => state.setThumbnailFile)
+  const setThumbnailRemoteUrl = useVideoUploadStore((state) => state.setThumbnailRemoteUrl)
+  const setThumbnailInputUrl = useVideoUploadStore((state) => state.setThumbnailInputUrl)
+  const setThumbnailGenerating = useVideoUploadStore((state) => state.setThumbnailGenerating)
+  const setThumbnailError = useVideoUploadStore((state) => state.setThumbnailError)
+  const clearThumbnail = useVideoUploadStore((state) => state.clearThumbnail)
+  const thumbnail = thumbnailState.localPreviewUrl || thumbnailState.remoteUrl || thumbnailPreviewUrl || videoData.thumbnail
+  const isUrlModeInvalid = thumbnailState.mode === 'url' && Boolean(thumbnailState.inputUrl) && !looksLikeImageUrl(thumbnailState.inputUrl)
+  const isAutoWorking = thumbnailState.isGenerating || (thumbnailState.mode === 'auto' && uploadStage === 'processing')
+
+  const handleManualThumbnail = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setThumbnailError(t('invalid_file_type', 'Invalid file type'))
+      return
+    }
+
+    setThumbnailMode('upload')
+    setThumbnailFile(file, URL.createObjectURL(file))
+  }
+
+  const handleUrlChange = (value: string) => {
+    setThumbnailMode('url')
+    setThumbnailInputUrl(value)
+    if (!value.trim()) {
+      setThumbnailError(undefined)
+      return
+    }
+    if (looksLikeImageUrl(value)) {
+      setThumbnailRemoteUrl(value.trim())
+      return
+    }
+    setThumbnailError(t('invalid_thumbnail_url', 'Enter a valid image URL.'))
+  }
+
+  const handleAutoRetry = async () => {
+    setThumbnailMode('auto')
+    if (!sourceVideoFile) {
+      setThumbnailError(t('thumbnail_wait_for_video', 'Select a local video before generating a thumbnail.'))
+      return
+    }
+
+    try {
+      setThumbnailGenerating(true)
+      setThumbnailError(undefined)
+      const prepared = await prepareVideoUploadAsset(sourceVideoFile, {
+        enableFFmpeg: true,
+        generateThumbnail: true,
+        thumbnailGenerationMode: 'local',
+      })
+
+      if (!prepared.thumbnailFile || !prepared.thumbnailPreviewUrl) {
+        throw new Error(t('thumbnail_generation_failed', 'Could not generate a thumbnail automatically.'))
+      }
+
+      setThumbnailFile(prepared.thumbnailFile, prepared.thumbnailPreviewUrl)
+    } catch (error) {
+      setThumbnailError(error instanceof Error ? error.message : String(error))
+    } finally {
+      setThumbnailGenerating(false)
+    }
+  }
+
+  const modeButtonClass = (active: boolean) =>
+    active
+      ? 'border-primary/50 bg-primary/10 text-primary'
+      : 'border-border/70 bg-background/50 text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+
   return (
     <aside className="space-y-5 lg:sticky lg:top-24 lg:h-fit">
       <div className="rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur">
         <div className="mb-3 flex items-center gap-2">
           <p className="text-sm font-medium">Thumbnail</p>
-          <InfoHint text={t('thumbnail_tooltip', 'Choose a clearer cover if the automatic frame is not ideal. This keeps the video card visually strong in feeds.')} />
+          <InfoHint text={t('thumbnail_tooltip', 'Generate a frame automatically, upload an image, or use a public image URL. Local previews are uploaded before publishing.')} />
         </div>
-        {thumbnail
-          ? (
-              <div className="space-y-3">
-                <Image src={thumbnail} alt="Thumbnail" width={288} className="aspect-video w-full rounded-lg border object-cover" />
-                <Button variant="outline" className="w-full" onClick={() => onThumbnailChange('')}>{t('Change', 'Change')}</Button>
-              </div>
-            )
-          : (
-              <ButtonUploadThumb setUrl={(url) => url && onThumbnailChange(url)} url={thumbnail} accept={{ 'image/*': [] }}>
-                <Button variant="outline" className="w-full">{t('Upload_thumbnail', 'Upload thumbnail')}</Button>
-              </ButtonUploadThumb>
-            )}
-      </div>
 
-      <div className="rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur">
-        <div className="mb-4 flex items-center gap-2">
-          <ShieldCheck className="size-4 text-primary" />
-          <p className="text-sm font-medium">Geração de thumbnail</p>
+        <div className="grid grid-cols-3 gap-2">
+          <button type="button" className={`rounded-xl border px-2 py-2 text-xs font-medium transition-colors ${modeButtonClass(thumbnailState.mode === 'auto')}`} onClick={() => void handleAutoRetry()}>
+            <WandSparkles className="mx-auto mb-1 size-4" />
+            Auto
+          </button>
+          <button type="button" className={`rounded-xl border px-2 py-2 text-xs font-medium transition-colors ${modeButtonClass(thumbnailState.mode === 'upload')}`} onClick={() => {
+            setThumbnailMode('upload')
+            fileInputRef.current?.click()
+          }}>
+            <UploadCloud className="mx-auto mb-1 size-4" />
+            Upload
+          </button>
+          <button type="button" className={`rounded-xl border px-2 py-2 text-xs font-medium transition-colors ${modeButtonClass(thumbnailState.mode === 'url')}`} onClick={() => setThumbnailMode('url')}>
+            <LinkIcon className="mx-auto mb-1 size-4" />
+            URL
+          </button>
         </div>
-        <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
-          <p className="text-sm font-medium">{thumbnailMode === 'local' ? 'Modo local' : 'Modo remoto'}</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {thumbnailMode === 'local'
-              ? 'O app tenta gerar a thumbnail no navegador e usa ffmpeg.wasm como fallback quando disponível.'
-              : 'O app solicita thumbnails a um DVM após enviar ou importar a fonte de vídeo.'}
-          </p>
+
+        <input ref={fileInputRef} type="file" accept="image/*" className="sr-only" onChange={handleManualThumbnail} />
+
+        <div className="mt-3 overflow-hidden rounded-xl border border-border/70 bg-background/60">
+          {thumbnail ? (
+            <div className="relative">
+              <img src={thumbnail} alt={t('thumbnail_preview', 'Thumbnail preview')} className="aspect-video w-full object-cover" />
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent px-3 py-3 text-white">
+                <p className="text-sm font-medium">
+                  {thumbnailState.file
+                    ? t('thumbnail_local_ready', 'Thumbnail ready for upload')
+                    : t('thumbnail_loaded', 'Thumbnail loaded')}
+                </p>
+                <p className="text-xs text-white/80">
+                  {thumbnailState.file
+                    ? t('thumbnail_uploads_on_publish', 'It will be uploaded to Blossom before publishing.')
+                    : t('thumbnail_public_url_ready', 'This public URL will be used in the event.')}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex aspect-video flex-col items-center justify-center gap-2 p-4 text-center text-muted-foreground">
+              <ImagePlus className="size-8" />
+              <p className="text-sm font-medium text-foreground">{t('no_thumbnail_available', 'No thumbnail available')}</p>
+              <p className="max-w-[240px] text-xs">{t('thumbnail_empty_hint', 'Auto generation starts after selecting a local video. You can also upload an image or paste a URL.')}</p>
+            </div>
+          )}
         </div>
-        {uploadStage === 'processing' ? (
-          <div className="mt-3 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-primary">
-            {thumbnailMode === 'local'
-              ? 'Tentando gerar thumbnail localmente...'
-              : 'Preparando mídia para envio e solicitação remota de thumbnail...'}
+
+        {thumbnailState.mode === 'url' ? (
+          <div className="mt-3 space-y-2">
+            <label className="text-xs font-medium text-muted-foreground" htmlFor="thumbnail-url">URL da thumbnail</label>
+            <Input
+              id="thumbnail-url"
+              value={thumbnailState.inputUrl ?? ''}
+              placeholder="https://example.com/thumbnail.jpg"
+              aria-invalid={isUrlModeInvalid}
+              onChange={(event) => handleUrlChange(event.target.value)}
+            />
           </div>
         ) : null}
-        <p className="mt-3 text-xs text-muted-foreground">Altere essa preferência em Configurações → Player e upload.</p>
+
+        <div className="mt-3 space-y-2">
+          {isAutoWorking ? (
+            <div className="rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-primary">
+              {t('generating_thumbnail', 'Generating thumbnail...')}
+            </div>
+          ) : null}
+          {thumbnailState.isUploading ? (
+            <div className="rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-primary">
+              {t('uploading_thumbnail', 'Uploading thumbnail before publishing...')}
+            </div>
+          ) : null}
+          {thumbnailState.error ? (
+            <div className="flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+              <AlertCircle className="mt-0.5 size-4 shrink-0" />
+              <p>{thumbnailState.error}</p>
+            </div>
+          ) : null}
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" className="flex-1" onClick={() => fileInputRef.current?.click()}>
+              <UploadCloud className="size-4" />
+              {thumbnail ? t('replace', 'Replace') : t('Upload_thumbnail', 'Upload thumbnail')}
+            </Button>
+            {thumbnail ? (
+              <Button variant="ghost" size="sm" onClick={clearThumbnail} aria-label={t('remove_thumbnail', 'Remove thumbnail')}>
+                <Trash2 className="size-4" />
+              </Button>
+            ) : null}
+          </div>
+        </div>
       </div>
 
       <div className="rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur">
@@ -257,7 +397,7 @@ export function UploadPageContainer() {
   const navigate = useNavigate()
   const videoData = useVideoUploadStore((state) => state.videoData)
   const thumbnailPreviewUrl = useVideoUploadStore((state) => state.thumbnailPreviewUrl)
-  const thumbnailGenerationMode = useUploadPreferencesStore((state) => state.thumbnailGenerationMode)
+  const thumbnailState = useVideoUploadStore((state) => state.thumbnailState)
   const currentStep = useVideoUploadStore((state) => state.currentStep)
   const setCurrentStep = useVideoUploadStore((state) => state.setCurrentStep)
   const setTitle = useVideoUploadStore((state) => state.setTitle)
@@ -267,7 +407,6 @@ export function UploadPageContainer() {
   const setIndexers = useVideoUploadStore((state) => state.setIndexers)
   const setLanguage = useVideoUploadStore((state) => state.setLanguage)
   const setGeohash = useVideoUploadStore((state) => state.setGeohash)
-  const setThumbnail = useVideoUploadStore((state) => state.setThumbnail)
   const clearUploadedMedia = useVideoUploadStore((state) => state.clearUploadedMedia)
   const resetForm = useVideoUploadStore((state) => state.resetForm)
   const isUploading = useVideoUploadStore((state) => state.isUploading)
@@ -282,7 +421,7 @@ export function UploadPageContainer() {
     void restoreDraft()
   }, [restoreDraft])
 
-  const displayThumbnail = thumbnailPreviewUrl || videoData.thumbnail
+  const displayThumbnail = thumbnailState.localPreviewUrl || thumbnailState.remoteUrl || thumbnailPreviewUrl || videoData.thumbnail
   const canContinueFromStepOne = Boolean(videoData.url) && !isUploading
   const canContinueFromStepTwo = Boolean(videoData.title?.trim())
   const canPublish = Boolean(videoData.url && videoData.title && !publishedState)
@@ -455,10 +594,7 @@ export function UploadPageContainer() {
         </div>
 
         <UploadSidebarPanel
-          thumbnail={displayThumbnail}
-          onThumbnailChange={setThumbnail}
           onSaveDraft={handleSaveDraft}
-          thumbnailMode={thumbnailGenerationMode}
           uploadStage={uploadStage}
         />
       </div>

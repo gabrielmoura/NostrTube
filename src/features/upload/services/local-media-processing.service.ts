@@ -105,6 +105,7 @@ export async function generateVideoThumbnailLocally(file: File, seekToSeconds = 
       video.pause();
       video.removeAttribute('src');
       video.load();
+      URL.revokeObjectURL(objectUrl);
     };
 
     video.onerror = () => {
@@ -182,8 +183,29 @@ export async function prepareVideoUploadAsset(
   }
 
   const metadata = await extractVideoMetadataLocally(file).catch(() => undefined)
+  const shouldGenerateThumbnail = generateThumbnail && thumbnailGenerationMode !== 'remote'
 
-  if (!generateThumbnail || thumbnailGenerationMode === 'remote') {
+  if (enableFFmpeg) {
+    const ffmpegResult = await processVideoWithFFmpeg(file).catch(() => null)
+    if (ffmpegResult) {
+      if (!shouldGenerateThumbnail) {
+        URL.revokeObjectURL(ffmpegResult.thumbnailPreviewUrl ?? '')
+      }
+
+      return {
+        uploadFile: ffmpegResult.file ?? file,
+        thumbnailFile: shouldGenerateThumbnail ? ffmpegResult.thumbnailFile : undefined,
+        thumbnailPreviewUrl: shouldGenerateThumbnail ? ffmpegResult.thumbnailPreviewUrl : undefined,
+        width: ffmpegResult.width || metadata?.width,
+        height: ffmpegResult.height || metadata?.height,
+        duration: ffmpegResult.duration || metadata?.duration,
+        mimeType: ffmpegResult.mimeType ?? file.type,
+        strategy: 'ffmpeg',
+      }
+    }
+  }
+
+  if (!shouldGenerateThumbnail) {
     return {
       uploadFile: file,
       width: metadata?.width,
@@ -208,22 +230,6 @@ export async function prepareVideoUploadAsset(
     }
   } catch {
     // Fallback below: ffmpeg can still extract a thumbnail when canvas/video APIs fail.
-  }
-
-  if (enableFFmpeg) {
-    const ffmpegResult = await processVideoWithFFmpeg(file).catch(() => null)
-    if (ffmpegResult) {
-      return {
-        uploadFile: ffmpegResult.file ?? file,
-        thumbnailFile: generateThumbnail ? ffmpegResult.thumbnailFile : undefined,
-        thumbnailPreviewUrl: generateThumbnail ? ffmpegResult.thumbnailPreviewUrl : undefined,
-        width: ffmpegResult.width || metadata?.width,
-        height: ffmpegResult.height || metadata?.height,
-        duration: ffmpegResult.duration || metadata?.duration,
-        mimeType: ffmpegResult.mimeType ?? file.type,
-        strategy: 'ffmpeg',
-      }
-    }
   }
 
   return {

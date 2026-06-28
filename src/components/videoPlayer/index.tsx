@@ -108,7 +108,7 @@ export function VideoPlayer({
       crossOrigin="anonymous"
       autoplay
       muted={persistedMuted}
-      logLevel={import.meta.env.PROD ? "warn" : "debug"}
+      logLevel="warn"
       onProviderChange={onProviderChange}
       onCanPlay={onCanPlay}
       onPlaying={() => {
