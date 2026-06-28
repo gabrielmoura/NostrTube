@@ -1,10 +1,59 @@
-import { mapImetaTag, NDKEvent } from '@nostr-dev-kit/ndk'
-import { useMemo, useState } from 'react'
+import { mapImetaTag, type NDKEvent } from '@nostr-dev-kit/ndk'
+import { useEffect, useMemo, useState } from 'react'
 import { extractTag } from '@/helper/extractTag.ts'
-import { ifHasString } from '@/helper/format.ts'
-import { getOptimizedImageSrc } from '@/helper/http.ts'
-import { getTags } from '@/helper/nostrTags'
+import { getOptimizedImageSrc, type ImageProxyConfig } from '@/helper/http.ts'
+import { getTags, type NostrTag } from '@/helper/nostrTags'
 import useImageProxySettingsStore from '@/store/useImageProxySettingsStore.ts'
+
+export interface UseNostrImageOptions {
+  width?: number | string
+  height?: number | string
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0
+}
+
+function extractImetaField(tag: NostrTag, field: 'image' | 'url'): string | undefined {
+  const prefix = `${field} `
+  const value = tag.find((item) => item.startsWith(prefix))?.slice(prefix.length)
+
+  return isNonEmptyString(value) ? value : undefined
+}
+
+function getFirstImetaField(tags: NostrTag[], field: 'image' | 'url'): string | undefined {
+  for (const tag of tags) {
+    const mapped = mapImetaTag(tag) as Partial<Record<'image' | 'url', unknown>>
+    const mappedValue = mapped[field]
+
+    if (isNonEmptyString(mappedValue)) {
+      return mappedValue
+    }
+
+    const extractedValue = extractImetaField(tag, field)
+    if (extractedValue) {
+      return extractedValue
+    }
+  }
+
+  return undefined
+}
+
+function canUseProxyForDerivedThumbnail(proxyConfig: ImageProxyConfig): boolean {
+  if (proxyConfig.mode === 'none') {
+    return false
+  }
+
+  if (proxyConfig.mode === 'imgproxy') {
+    return Boolean(proxyConfig.imgproxyBaseUrl?.trim())
+  }
+
+  if (proxyConfig.mode === 'imageproxy') {
+    return Boolean(proxyConfig.imageproxyBaseUrl?.trim())
+  }
+
+  return false
+}
 
 /**
  * Hook customizado para processamento e gestão de mídia em eventos Nostr.
@@ -28,29 +77,37 @@ import useImageProxySettingsStore from '@/store/useImageProxySettingsStore.ts'
  * </div>
  * );
  */
-export function useNostrImage(event: NDKEvent) {
+export function useNostrImage(event: NDKEvent, options?: UseNostrImageOptions) {
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(true)
   const imageProxy = useImageProxySettingsStore((state) => state.imageProxy)
+  const width = options?.width ?? 480
+  const height = options?.height ?? width
 
   const imageSpecs = useMemo(() => {
     const { image, thumb, title, url: directUrl } = extractTag(event.tags)
+    const imetaTags = getTags('imeta', event.tags)
+    const imetaImage = getFirstImetaField(imetaTags, 'image')
+    const imetaUrl = getFirstImetaField(imetaTags, 'url')
+    const canUseProxyUrlCandidate = canUseProxyForDerivedThumbnail(imageProxy)
 
-    // Resolução de URL seguindo a hierarquia de prioridade
-    let finalUrl = directUrl
-    if (!finalUrl) {
-      const imeta = getTags('imeta', event.tags)
-        .map((tag) => mapImetaTag(tag))
-        .find((i) => i.url)
-      finalUrl = imeta?.url
-    }
-
-    const source = ifHasString(thumb, image) || finalUrl
+    const candidates = [
+      thumb,
+      image,
+      imetaImage,
+      canUseProxyUrlCandidate ? directUrl : undefined,
+      canUseProxyUrlCandidate ? imetaUrl : undefined,
+    ].filter(isNonEmptyString)
+    const source = candidates[0]
 
     // Otimização
     const optimized = source
-      ? getOptimizedImageSrc(source, '480', {
-          resize: { resizing_type: 'fit', width: 480, height: 480 },
+      ? getOptimizedImageSrc(source, width, {
+          resize: {
+            resizing_type: 'fit',
+            width: Number(width),
+            height: Number(height),
+          },
           format: 'webp',
         }, imageProxy)
       : null
@@ -58,7 +115,12 @@ export function useNostrImage(event: NDKEvent) {
     const isNSFW = event.tags.some((t) => t[0] === 'content-warning' || t[0] === 'nsfw')
 
     return { optimized, title, isNSFW }
-  }, [event, imageProxy])
+  }, [event.tags, imageProxy, width, height])
+
+  useEffect(() => {
+    setLoading(Boolean(imageSpecs.optimized))
+    setError(false)
+  }, [imageSpecs.optimized])
 
   return {
     ...imageSpecs,
