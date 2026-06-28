@@ -116,21 +116,24 @@ export function relativeTimeSmall(timestamp: Date) {
  * Aceita string (comum em tags Nostr) ou número.
  * * @returns {string | null} Retorna a string formatada ou `null` caso o parâmetro seja inválido ou ausente.
  * * @example
- * formatDuration(3661); // Retorna "01:01:01"
- * formatDuration(125);  // Retorna "02:05"
+ * formatDuration(3661); // Retorna "1:01:01"
+ * formatDuration(125);  // Retorna "2:05"
  * formatDuration(undefined); // Retorna null
  */
 export const formatDuration = (seconds?: string | number): string | null => {
   if (!seconds) return null;
 
   const duration = Number(seconds);
-  if (isNaN(duration)) return null;
+  if (!Number.isFinite(duration) || duration <= 0) return null;
 
-  const date = new Date(duration * 1000);
+  const totalSeconds = Math.floor(duration);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const remainingSeconds = totalSeconds % 60;
 
-  // UX: Se o vídeo tem mais de uma hora, mostramos o segmento de horas (índice 11)
-  // Caso contrário, mostramos apenas a partir dos minutos (índice 14)
-  return duration >= 3600
-    ? date.toISOString().substring(11, 19)
-    : date.toISOString().substring(14, 19);
+  if (hours > 0) {
+    return `${hours}:${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+  }
+
+  return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
 };

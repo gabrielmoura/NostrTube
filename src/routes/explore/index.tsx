@@ -1,6 +1,6 @@
 import type { NDKEvent } from '@nostr-dev-kit/ndk'
 import { type NDKFilter, NDKSubscriptionCacheUsage, useSubscribe } from '@nostr-dev-kit/ndk-hooks'
-import { createRoute, Link } from '@tanstack/react-router'
+import { createRoute, Link, useNavigate } from '@tanstack/react-router'
 import {
   Activity,
   ChevronRight,
@@ -26,6 +26,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import { useBatchProfiles } from '@/features/nostr/hooks/useBatchProfiles'
 import { VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
+import { getVideoRouteReference } from '@/features/video/services/video-reference.service'
 import { getTagValues } from '@/helper/nostrTags'
 import { Route as rootRoute } from '@/routes/__root'
 
@@ -116,6 +117,7 @@ function useExploreData() {
 // ─── Página Principal ────────────────────────────────────
 function ExplorePage() {
   const { videoEvents, profiles, trendingHashtags, uniqueAuthors, featuredVideos, isLoading, eose } = useExploreData()
+  const navigate = useNavigate()
 
   const isEmpty = eose && videoEvents.length === 0
 
@@ -361,7 +363,23 @@ function ExplorePage() {
           </div>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {featuredVideos.map((ev) => (
-              <VideoCard key={ev.id} event={ev} profile={profiles[ev.pubkey]} />
+              <div
+                key={ev.id}
+                role="link"
+                tabIndex={0}
+                className="cursor-pointer rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                onClick={(event) => {
+                  if ((event.target as HTMLElement).closest('a, button')) return
+                  navigate({ to: '/v/$eventId', params: { eventId: getVideoRouteReference(ev) } })
+                }}
+                onKeyDown={(event) => {
+                  if (event.key !== 'Enter' && event.key !== ' ') return
+                  event.preventDefault()
+                  navigate({ to: '/v/$eventId', params: { eventId: getVideoRouteReference(ev) } })
+                }}
+              >
+                <VideoCard event={ev} profile={profiles[ev.pubkey]} />
+              </div>
             ))}
           </div>
         </section>

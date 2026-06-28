@@ -6,9 +6,9 @@ import { useNostrImage } from "@/hooks/useNostrImage";
 import { extractTag } from "@/helper/extractTag";
 import { cn } from "@/helper/format";
 import useUserStore from "@/store/useUserStore";
-import { formatDuration } from "@/helper/date.ts";
 import { NSFWOverlay } from "@/components/NSFWOverlay.tsx";
 import { getVideoRouteReference } from "@/features/video/services/video-reference.service";
+import { getFormattedVideoDuration } from "@/features/video/services/video-duration.service";
 
 interface VideoCardProps {
   event: NDKEvent;
@@ -22,7 +22,7 @@ export function VideoCard({ event }: VideoCardProps) {
   const tagData = extractTag(event.tags);
   const nsfwEnabled = useUserStore((state) => state.session?.nsfw) ?? false;
   const title = tagData.title || imgTitle || "Vídeo sem título";
-  const duration = formatDuration(tagData?.duration);
+  const duration = getFormattedVideoDuration(event);
   const shouldBlur = isNSFW && !nsfwEnabled;
 
   return (

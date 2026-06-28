@@ -17,3 +17,7 @@ export function getVideoReference(event: NDKEvent): VideoReference {
 export function getVideoRouteReference(event: NDKEvent): string {
   return event.tagValue("d") || event.dTag || event.encode();
 }
+
+export function getVideoWatchUrl(event: NDKEvent): string {
+  return `/v/${encodeURIComponent(getVideoRouteReference(event))}`;
+}

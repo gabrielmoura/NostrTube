@@ -35,7 +35,7 @@ export interface MediaButtonProps {
 
 // 🎨 Base de estilo para botões do player
 export const buttonClass =
-  "group relative inline-flex h-10 w-10 items-center justify-center rounded-md text-white/90 hover:text-sky-400 hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-sky-400 outline-none transition-all duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed";
+  "group relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md bg-black/35 text-white shadow-sm outline-none ring-1 ring-white/10 transition-all duration-200 hover:bg-white/15 hover:text-white focus-visible:ring-2 focus-visible:ring-primary active:scale-95 disabled:cursor-not-allowed disabled:opacity-40";
 
 // 🎨 Base de estilo para tooltips
 export const tooltipClass =

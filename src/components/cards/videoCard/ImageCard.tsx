@@ -5,6 +5,7 @@ import useUserStore from "@/store/useUserStore.ts";
 import { useNostrImage } from "@/hooks/useNostrImage.ts";
 import type { NDKEvent } from "@nostr-dev-kit/ndk";
 import { NSFWOverlay } from "@/components/NSFWOverlay.tsx";
+import { getFormattedVideoDuration } from "@/features/video/services/video-duration.service";
 
 interface ImageCardProps {
   event: NDKEvent;
@@ -14,6 +15,7 @@ interface ImageCardProps {
 export function ImageCard({ event, className }: ImageCardProps) {
   const { optimized, title, isNSFW, loading, error, handlers } = useNostrImage(event);
   const nsfwEnabled = useUserStore((state) => state.session?.nsfw) ?? false;
+  const duration = getFormattedVideoDuration(event);
 
   const shouldBlockNSFW = isNSFW && !nsfwEnabled;
 
@@ -43,6 +45,11 @@ export function ImageCard({ event, className }: ImageCardProps) {
             )}
           />
         </>
+      )}
+      {duration && (
+        <span className="absolute bottom-2 right-2 z-20 rounded bg-black/85 px-1.5 py-0.5 font-mono text-[11px] font-semibold leading-none text-white shadow-sm ring-1 ring-white/15 backdrop-blur-sm">
+          {duration}
+        </span>
       )}
     </AspectRatio>
   );

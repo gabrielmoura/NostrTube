@@ -2,6 +2,7 @@ import NDK, { type NDKEvent, type NDKFilter, NDKKind } from '@nostr-dev-kit/ndk'
 import { nip19 } from 'nostr-tools'
 import { VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
 import { extractSingleEventId, type NexusFetchOptions, type NexusOperationType, ndkNexusBridge } from '@/lib/nexus-p2p'
+import { resolveVideoRouteParam } from '@/features/video/services/video-route-resolution.service'
 
 type FetchMode = 'cache-first' | 'parallel'
 
@@ -101,7 +102,8 @@ function newestEvent(events: Iterable<NDKEvent>) {
 }
 
 function isAddressableVideoReference(reference: string) {
-  return !reference.startsWith('n') && reference.length !== 64
+  const resolution = resolveVideoRouteParam(reference)
+  return resolution.type === 'd-tag' || resolution.type === 'naddr'
 }
 
 /**
@@ -112,52 +114,38 @@ function isAddressableVideoReference(reference: string) {
  * selecting the newest matching event.
  */
 export function buildVideoLookupFilters(reference: string): NDKFilter[] {
-  if (!reference || reference.length <= 5) {
-    throw new Error('Invalid event reference')
+  const resolution = resolveVideoRouteParam(reference)
+
+  switch (resolution.type) {
+    case 'event-id':
+    case 'nevent':
+    case 'note':
+      return [{ ids: [resolution.id], limit: 1 }]
+    case 'naddr':
+      return [
+        {
+          authors: [resolution.pubkey],
+          kinds: [resolution.kind],
+          '#d': [resolution.identifier],
+          limit: 1,
+        },
+        {
+          kinds: [resolution.kind],
+          '#d': [resolution.identifier],
+          limit: 1,
+        },
+      ]
+    case 'd-tag':
+      return [
+        {
+          '#d': [resolution.dTag],
+          kinds: VIDEO_EVENT_KINDS,
+          limit: 1,
+        },
+      ]
+    case 'invalid':
+      throw new Error(resolution.reason)
   }
-
-  if (reference.startsWith('n')) {
-    const { type, data } = nip19.decode(reference)
-
-    switch (type) {
-      case 'note':
-        return [{ ids: [data], limit: 1 }]
-      case 'nevent': {
-        const eventData = data as nip19.EventPointer
-        return [{ ids: [eventData.id], limit: 1 }]
-      }
-      case 'naddr': {
-        const addr = data as nip19.AddressPointer
-        return [
-          {
-            authors: [addr.pubkey],
-            kinds: [addr.kind],
-            '#d': [addr.identifier],
-            limit: 1,
-          },
-          {
-            kinds: [addr.kind],
-            '#d': [addr.identifier],
-            limit: 1,
-          },
-        ]
-      }
-      default:
-        throw new Error(`Unsupported nostr reference: ${type}`)
-    }
-  }
-
-  if (reference.length === 64) {
-    return [{ ids: [reference], limit: 1 }]
-  }
-
-  return [
-    {
-      '#d': [reference],
-      kinds: [NDKKind.Video, NDKKind.HorizontalVideo, 34235, 34236],
-      limit: 1,
-    },
-  ]
 }
 
 /**

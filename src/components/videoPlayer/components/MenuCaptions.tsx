@@ -15,12 +15,12 @@ export interface MenuProps {
 }
 
 export const buttonClass =
-  "group ring-media-focus relative inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-md outline-none ring-inset hover:bg-white/10 focus-visible:ring-4 aria-disabled:hidden";
+  "group relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md bg-black/35 text-white shadow-sm outline-none ring-1 ring-white/10 transition-all duration-200 hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-primary active:scale-95 aria-disabled:hidden";
 
 export const tooltipClass =
   "animate-out fade-out slide-out-to-bottom-2 data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in data-[state=delayed-open]:slide-in-from-bottom-4 z-10 rounded-sm bg-black/90 px-2 py-0.5 text-sm font-medium text-white parent-data-[open]:hidden";
 const menuClass =
-  "animate-out fade-out z-[9999] slide-in-from-bottom-4 data-[state=open]:animate-in data-[state=open]:fade-in data-[state=open]:slide-out-to-bottom-2 flex max-h-[400px] min-w-[260px] flex-col rounded-md border border-white/10 bg-black/95 p-2.5 font-sans text-[15px] font-medium outline-none backdrop-blur-sm duration-300";
+  "animate-out fade-out z-[9999] slide-in-from-bottom-4 data-[state=open]:animate-in data-[state=open]:fade-in data-[state=open]:slide-out-to-bottom-2 flex max-h-[400px] min-w-[260px] flex-col rounded-md border border-white/10 bg-neutral-950/95 p-2.5 font-sans text-[15px] font-medium text-white outline-none backdrop-blur-md duration-300";
 
 export function MenuCaptions({
                                side = "top",

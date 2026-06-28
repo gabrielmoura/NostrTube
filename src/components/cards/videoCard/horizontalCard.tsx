@@ -7,6 +7,7 @@ import { relativeTime } from "@/helper/date.ts";
 import { extractTag } from "@/helper/extractTag.ts";
 import { AspectRatio, Avatar, Skeleton } from "@radix-ui/themes";
 import { HiCheckBadge } from "react-icons/hi2";
+import { getFormattedVideoDuration } from "@/features/video/services/video-duration.service";
 
 
 type VideoCardProps = {
@@ -31,7 +32,9 @@ export default function HorizontalVideoCard({
 
   const npub = event.author.npub;
   const profile = useProfileValue(event.author.pubkey);
-  const { publishedAt, thumbnail, title } = extractTag(event.tags);
+  const { image, published_at: publishedAt, thumb, title } = extractTag(event.tags);
+  const thumbnail = thumb || image;
+  const duration = getFormattedVideoDuration(event);
 
   return (
     <div ref={containerRef} className={cn("group flex space-x-3", className)}>
@@ -48,6 +51,11 @@ export default function HorizontalVideoCard({
                 "aspect-[21/14]"
               )}
             />
+          )}
+          {duration && (
+            <span className="absolute bottom-1.5 right-1.5 rounded bg-black/85 px-1.5 py-0.5 font-mono text-[10px] font-semibold leading-none text-white shadow-sm ring-1 ring-white/15 backdrop-blur-sm">
+              {duration}
+            </span>
           )}
         </AspectRatio>
       </div>

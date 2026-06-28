@@ -40,19 +40,19 @@ export function VideoLayout({
       )}
       <Controls.Root className={cn(
         "absolute inset-0 z-10 flex h-full w-full flex-col",
-        "opacity-0 transition-opacity duration-300 bg-gradient-to-t from-background/80 via-background/10 to-transparent",
+        "opacity-0 transition-opacity duration-300 bg-gradient-to-t from-black/90 via-black/20 to-black/40",
         "data-[visible]:opacity-100"
       )}>
 
         <div className="flex-1" />
-        <Controls.Group className="absolute right-0 top-0 flex items-center px-2">
+        <Controls.Group className="absolute right-2 top-2 flex items-center rounded-lg border border-white/10 bg-black/45 px-1 shadow-sm backdrop-blur-md">
           <Menus />
         </Controls.Group>
         <Controls.Group className="-mb-2 flex w-full items-center px-2">
           <Sliders.Time thumbnails={thumbnails} />
         </Controls.Group>
         <Controls.Group
-          className="-mt-0.5 flex w-full items-center justify-between overflow-hidden px-0.5 pb-0.5">
+          className="-mt-0.5 flex w-full items-center justify-between overflow-hidden border-t border-white/10 bg-black/45 px-1 pb-1 shadow-[0_-8px_24px_rgba(0,0,0,0.25)] backdrop-blur-md">
           <div className="flex grow items-center justify-start overflow-hidden">
             <Play tooltipOffset={popupOffset} />
             <div className="group/volume flex items-center px-1">

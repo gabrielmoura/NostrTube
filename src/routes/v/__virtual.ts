@@ -1,5 +1,6 @@
-import { route } from "@tanstack/virtual-file-routes";
-
 export default [
-  route("$eventId", "$eventId.tsx")
+  {
+    path: "$eventId",
+    file: "$eventId.tsx",
+  },
 ];
