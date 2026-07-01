@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getFeedbackRecipientConfig, parseFeedbackRecipientPubkey } from '@/config/feedback'
+import { getFeedbackRecipientConfig, parseFeedbackRecipientPubkey } from '@/helper/feedback.ts'
 
 describe('feedback config', () => {
   it('parses a hex pubkey recipient', () => {

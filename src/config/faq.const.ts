@@ -1,19 +1,4 @@
-import type { Language } from "@/components/ComboBox/ComboLanguage.tsx";
 import type { FaqEntry } from "@/routes/faq";
-
-export const COMBOBOX_LANGUAGES: Language[] = [
-  { id: "zh", name: "Mandarin Chinese", native: "普通话 / 汉语" },
-  { id: "es", name: "Spanish", native: "Español" },
-  { id: "en", name: "English", native: "English" },
-  { id: "hi", name: "Hindi", native: "हिन्दी" },
-  { id: "ar", name: "Arabic", native: "العربية" },
-  { id: "bn", name: "Bengali", native: "বাংলা" },
-  { id: "pt", name: "Portuguese", native: "Português" },
-  { id: "ru", name: "Russian", native: "Русский" },
-  { id: "ja", name: "Japanese", native: "日本語" },
-  { id: "pa", name: "Punjabi", native: "ਪੰਜਾਬੀ / پنجابی" }
-];
-
 // FAQ Data
 const faqDataEn: FaqEntry[] = [
   {
@@ -153,21 +138,3 @@ export const faqData = {
   en: faqDataEn,
   pt: faqDataPt
 };
-
-export interface BlossomServer {
-  url: string;
-  name: string;
-  region: string;
-}
-
-// Mock Blossom servers data
-export const MOCK_BLOSSOM_SERVERS: BlossomServer[] = [
-  { url: "https://cdn.nostr.build", name: "Nostr.Build CDN", region: "Global" },
-  { url: "https://media.libernet.app", name: "LiberMedia", region: "Global" },
-  { url: "https://cdn.void.cat", name: "Void Cat", region: "Global" },
-  { url: "https://internationalright-wing.org", name: "Organização da Direita Internacional", region: "BR" },
-  { url: "https://cdn.satellite.earth", name: "Satellite CDN", region: "US" },
-  { url: "https://media.nostr.band", name: "Nostr Band", region: "US" },
-  { url: "https://blossom.primal.net", name: "Primal Storage", region: "EU" },
-  { url: "https://files.nostr.ch", name: "Nostr CH", region: "EU" }
-];
