@@ -8,7 +8,12 @@ export function VideoPageContainer() {
   const { video, assets, handleCanPlay } = useVideoPageController()
 
   if (!video?.event || !video.identification) {
-    return <PageSpinner />
+    return (
+      <PageSpinner
+        label="Carregando vídeo"
+        description="Buscando metadados, mídia e recomendações nos relays conectados."
+      />
+    )
   }
 
   return (

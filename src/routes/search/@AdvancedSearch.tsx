@@ -1,4 +1,5 @@
 import { useNavigate, useSearch } from '@tanstack/react-router'
+import { useDebouncedValue } from '@tanstack/react-pacer'
 import { Search as SearchIcon, SlidersHorizontal, Sparkles, X } from 'lucide-react'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -25,6 +26,11 @@ export function AdvancedSearch() {
 
   const [isOpen, setIsOpen] = useState(false)
   const [searchInput, setSearchInput] = useState('')
+  const [debouncedSearchInput, searchDebouncer] = useDebouncedValue(
+    searchInput,
+    { wait: 220 },
+    (state) => ({ isPending: state.isPending }),
+  )
   const [chips, setChips] = useState<SearchChipToken[]>([])
   const [geohashEnabled, setGeohashEnabled] = useState(false)
 
@@ -62,6 +68,10 @@ export function AdvancedSearch() {
     setValue('author', parsed.author || undefined)
     setValue('lang', parsed.lang || undefined)
   }
+
+  useEffect(() => {
+    applyInput(debouncedSearchInput)
+  }, [debouncedSearchInput])
 
   const removeChip = (chipToRemove: SearchChipToken) => {
     const nextChips = chips.filter((chip) => !(chip.type === chipToRemove.type && chip.value === chipToRemove.value))
@@ -129,16 +139,15 @@ export function AdvancedSearch() {
               <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 value={searchInput}
-                onChange={(event) => {
-                  const nextValue = event.target.value
-                  setSearchInput(nextValue)
-                  applyInput(nextValue)
-                }}
+                onChange={(event) => setSearchInput(event.target.value)}
                 onBlur={() => applyInput(searchInput)}
                 placeholder="Buscar vídeos, tag:bitcoin, lang:pt, author:npub..."
                 className="h-11 rounded-2xl border-border/60 bg-background/70 pl-8"
               />
             </div>
+            {searchDebouncer.state.isPending ? (
+              <span className="self-center text-xs text-muted-foreground">Interpretando...</span>
+            ) : null}
 
             <Select value={selectedLanguage || 'all'} onValueChange={injectLanguage}>
               <SelectTrigger className="h-11 w-full rounded-2xl border-border/60 bg-background/70 lg:w-[190px]">

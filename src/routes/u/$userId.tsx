@@ -439,7 +439,13 @@ function AuthorAlertsPanel({
         </Card>
       </div>
 
-      {alertsQuery.isLoading ? <PageSpinner /> : null}
+      {alertsQuery.isLoading ? (
+        <PageSpinner
+          variant="inline"
+          label="Verificando sinalizações"
+          description="Buscando alertas da comunidade relacionados aos seus vídeos."
+        />
+      ) : null}
 
       {!alertsQuery.isLoading && alertsQuery.data?.length === 0 ? (
         <EmptyState label="Nenhum alerta encontrado para seus vídeos." />

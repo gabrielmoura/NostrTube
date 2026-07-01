@@ -308,5 +308,61 @@
     "helper_none": "No hay proxy CORS activo.",
     "helper_custom": "Usa una URL HTTPS de un servidor cors-anywhere compatible.",
     "helper_corsproxy_io": "Usa https://corsproxy.io con la URL de destino codificada."
+  },
+  "blossom": {
+    "settings": {
+      "add_server": "Agregar servidor",
+      "dialog_title": "Nuevo servidor Blossom",
+      "dialog_description": "Validamos el endpoint antes de guardar. Si la prueba pasa, puedes usarlo como principal o mirror.",
+      "server_url": "URL del servidor",
+      "server_placeholder": "https://blossom.example.com",
+      "set_primary": "Definir como principal",
+      "set_primary_desc": "Los nuevos envíos de medios irán primero a este servidor.",
+      "add_mirror": "Agregar como mirror",
+      "add_mirror_desc": "La app intentará BUD-04 y caerá a subida directa si es necesario.",
+      "testing_server": "Probando servidor...",
+      "save_server": "Guardar servidor",
+      "card_title": "Servidores de medios Blossom",
+      "card_description": "Elige a dónde van primero los envíos y qué servidores actúan como respaldo en los eventos generados.",
+      "primary_label": "Principal",
+      "not_configured": "no configurado",
+      "custom": "Personalizado",
+      "mirror": "Mirror",
+      "primary": "Principal",
+      "set_primary_action": "Definir principal",
+      "ping_server_aria": "Probar conexión con {{server}}",
+      "helper": "La app envía primero al principal. Los mirrors intentan PUT /mirror siguiendo BUD-04 y, si falla, intentan subida directa. Solo los mirrors exitosos entran como fallbacks en eventos de video.",
+      "invalid_url": "Usa una URL http(s) válida para el servidor Blossom.",
+      "server_unreachable": "El servidor Blossom no respondió correctamente.",
+      "ping_idle": "Ping no ejecutado",
+      "ping_checking": "Haciendo ping...",
+      "ping_online": "En línea",
+      "ping_online_with_latency": "En línea en {{latency}}ms",
+      "ping_offline": "Fuera de línea"
+    }
+  },
+  "video_metrics": {
+    "open_button": "ZAP / Métricas",
+    "modal_title": "Métricas y apoyo del video",
+    "modal_description": "Mira el rendimiento del video y envía un ZAP sin salir de la página.",
+    "partial_error": "Algunas métricas no están disponibles ahora. Aún puedes apoyar el video con un ZAP.",
+    "cards": {
+      "views": "Visualizaciones",
+      "comments": "Comentarios",
+      "zap_count": "ZAPs recibidos",
+      "zap_total": "Total recibido"
+    },
+    "support": {
+      "title": "Apoyar este video",
+      "submit": "Enviar ZAP al video",
+      "retransmit": "Retransmitir",
+      "retransmitting": "Retransmitiendo...",
+      "retransmit_success": "Evento retransmitido a {{count}} relay(s).",
+      "retransmit_no_ndk": "La sesión NDK no está disponible para retransmitir.",
+      "retransmit_no_relays": "No hay relays conectados ahora mismo.",
+      "retransmit_failed": "No se pudo retransmitir el evento.",
+      "refresh": "Actualizar",
+      "refreshing": "Actualizando..."
+    }
   }
 }

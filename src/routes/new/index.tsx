@@ -40,7 +40,11 @@ function NewVideoPage() {
       icon={MonitorUp}
     >
       <UploadErrorBoundary>
-        <Suspense fallback={<PageSpinner />}>
+        <Suspense
+          fallback={
+            <PageSpinner label="Preparando estúdio" description="Carregando ferramentas de upload e rascunhos locais." />
+          }
+        >
           <UploadPageContainer />
         </Suspense>
       </UploadErrorBoundary>

@@ -1,4 +1,5 @@
 import { sentryVitePlugin } from '@sentry/vite-plugin'
+import { devtools } from '@tanstack/devtools-vite'
 import tailwindcss from '@tailwindcss/vite'
 import legacy from '@vitejs/plugin-legacy'
 import react from '@vitejs/plugin-react'
@@ -124,6 +125,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     plugins: [
+      ...devtools(),
       tailwindcss(),
       react(),
       VitePWA({

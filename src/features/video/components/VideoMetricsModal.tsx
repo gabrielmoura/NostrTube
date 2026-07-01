@@ -1,8 +1,10 @@
 import type { NDKEvent } from '@nostr-dev-kit/ndk'
+import { NDKRelaySet } from '@nostr-dev-kit/ndk'
 import { useNDK } from '@nostr-dev-kit/ndk-hooks'
 import { t } from 'i18next'
 import { BarChart3, MessageSquareText, PlayCircle, Wallet } from 'lucide-react'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { toast } from 'sonner'
 import { useMediaQuery } from '@/components/modal_v2/use-media-query'
 import { Button } from '@/components/ui/button'
 import {
@@ -67,7 +69,36 @@ function MetricCard({
 export function VideoMetricsModal({ open, onOpenChange, event }: VideoMetricsModalProps) {
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const { ndk } = useNDK()
+  const [isRetransmitting, setIsRetransmitting] = useState(false)
   const metrics = useVideoMetrics({ ndk: ndk ?? undefined, event, enabled: open })
+  const connectedRelays = useMemo(() => {
+    if (!ndk?.pool?.relays) return []
+    return Array.from(ndk.pool.relays.values()).filter((relay) => relay.connected)
+  }, [ndk])
+
+  const handleRetransmit = async () => {
+    if (!ndk) {
+      toast.error(t('video_metrics.support.retransmit_no_ndk'))
+      return
+    }
+
+    if (connectedRelays.length === 0) {
+      toast.error(t('video_metrics.support.retransmit_no_relays'))
+      return
+    }
+
+    setIsRetransmitting(true)
+    try {
+      const relaySet = new NDKRelaySet(new Set(connectedRelays), ndk)
+      await event.publish(relaySet)
+      toast.success(t('video_metrics.support.retransmit_success', { count: connectedRelays.length }))
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t('video_metrics.support.retransmit_failed')
+      toast.error(message)
+    } finally {
+      setIsRetransmitting(false)
+    }
+  }
 
   const cards = useMemo(
     () => [
@@ -119,7 +150,16 @@ export function VideoMetricsModal({ open, onOpenChange, event }: VideoMetricsMod
         </div>
       ) : null}
 
-      <div className="flex justify-end">
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button
+          type="button"
+          variant="relay"
+          size="sm"
+          onClick={() => void handleRetransmit()}
+          disabled={isRetransmitting || connectedRelays.length === 0}
+        >
+          {isRetransmitting ? t('video_metrics.support.retransmitting') : t('video_metrics.support.retransmit')}
+        </Button>
         {metrics.isFetching && !metrics.isLoading ? (
           <Button type="button" variant="ghost" size="sm" onClick={() => void metrics.refetch()}>
             {t('video_metrics.support.refreshing')}

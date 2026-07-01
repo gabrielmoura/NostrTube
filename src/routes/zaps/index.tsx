@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNDKCurrentUser } from '@nostr-dev-kit/ndk-hooks'
+import { useDebouncedValue } from '@tanstack/react-pacer'
 import { Link, createRoute } from '@tanstack/react-router'
 import { ArrowRight, BarChart3, HandCoins, HeartHandshake, Search, Sparkles, Target, Wallet, Zap } from 'lucide-react'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -94,6 +95,11 @@ function ZapsPage() {
   const [activeTab, setActiveTab] = useState<ZapTab>('received')
   const [timeRange, setTimeRange] = useState<TimeRange>('thirty')
   const [search, setSearch] = useState('')
+  const [debouncedSearch, searchDebouncer] = useDebouncedValue(
+    search,
+    { wait: 250 },
+    (state) => ({ isPending: state.isPending }),
+  )
 
   const statsQuery = useZapStats()
   const activityQuery = useZapActivity()
@@ -131,7 +137,9 @@ function ZapsPage() {
   }
 
   if (statsQuery.isLoading) {
-    return <PageSpinner />
+    return (
+      <PageSpinner label="Carregando Zaps" description="Consultando pagamentos, apoiadores e campanhas nos relays." />
+    )
   }
 
   if (statsQuery.isError) {
@@ -160,7 +168,7 @@ function ZapsPage() {
   const filteredActivity = activity.filter((item) => {
     const tabMatches = activeTab === 'received' ? item.direction === 'received' : activeTab === 'sent' ? item.direction === 'sent' : true
     const content = `${item.targetLabel} ${item.message ?? ''} ${item.senderPubkey ?? ''} ${item.recipientPubkey ?? ''}`.toLowerCase()
-    return tabMatches && content.includes(search.toLowerCase())
+    return tabMatches && content.includes(debouncedSearch.toLowerCase())
   })
 
   const bestVideo = data?.bestVideo
@@ -391,6 +399,11 @@ function ZapsPage() {
                 <div className="relative w-full max-w-sm">
                   <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Filtrar atividade..." className="pl-9" />
+                  {searchDebouncer.state.isPending ? (
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                      Filtrando...
+                    </span>
+                  ) : null}
                 </div>
               </div>
             </CardHeader>

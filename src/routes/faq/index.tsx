@@ -1,4 +1,5 @@
 import { createRoute } from '@tanstack/react-router'
+import { useDebouncedValue } from '@tanstack/react-pacer'
 import { t } from 'i18next'
 import { HelpCircle, Search, ShieldCheck, Sparkles } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
@@ -38,14 +39,19 @@ export interface FaqEntry {
 
 function FaqPage({ faqData }: { faqData: FaqEntry[] }) {
   const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearchTerm, searchDebouncer] = useDebouncedValue(
+    searchTerm,
+    { wait: 200 },
+    (state) => ({ isPending: state.isPending }),
+  )
 
   const filteredFaqs = useMemo(() => {
-    if (!searchTerm) return faqData
-    const lower = searchTerm.toLowerCase()
+    if (!debouncedSearchTerm) return faqData
+    const lower = debouncedSearchTerm.toLowerCase()
     return faqData.filter(
       (faq) => faq.question.toLowerCase().includes(lower) || faq.answer.toLowerCase().includes(lower),
     )
-  }, [searchTerm, faqData])
+  }, [debouncedSearchTerm, faqData])
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:py-12">
@@ -77,6 +83,11 @@ function FaqPage({ faqData }: { faqData: FaqEntry[] }) {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="h-11 rounded-xl border-border/60 bg-background/70 pl-9"
         />
+        {searchDebouncer.state.isPending ? (
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+            Filtrando...
+          </span>
+        ) : null}
       </div>
 
       {filteredFaqs.length > 0 ? (

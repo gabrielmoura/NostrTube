@@ -1,4 +1,5 @@
 import { createRoute, Link } from '@tanstack/react-router'
+import { useDebouncedValue } from '@tanstack/react-pacer'
 import {
   Activity,
   ArrowDown,
@@ -18,7 +19,6 @@ import {
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { AppShell } from '@/components/layout/AppShell'
-import { PageSpinner } from '@/components/PageSpinner'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -115,6 +115,7 @@ function RelayControls({
   isTestingAll,
   canTest,
   onAdd,
+  isFiltering,
 }: {
   search: string
   statusFilter: StatusFilter
@@ -124,6 +125,7 @@ function RelayControls({
   isTestingAll: boolean
   canTest: boolean
   onAdd: () => void
+  isFiltering?: boolean
 }) {
   return (
     <Card>
@@ -137,6 +139,11 @@ function RelayControls({
               placeholder="Buscar relays..."
               className="pl-9"
             />
+            {isFiltering ? (
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                Filtrando...
+              </span>
+            ) : null}
           </div>
           <Select value={statusFilter} onValueChange={(value) => onStatusFilterChange(value as StatusFilter)}>
             <SelectTrigger className="w-full sm:w-[180px]">
@@ -273,12 +280,14 @@ function PublicRelaysToolbar({
   isTestingAll,
   onSearchChange,
   onTestPublicRelays,
+  isFiltering,
 }: {
   search: string
   count: number
   isTestingAll: boolean
   onSearchChange: (value: string) => void
   onTestPublicRelays: () => void
+  isFiltering?: boolean
 }) {
   return (
     <Card>
@@ -291,6 +300,11 @@ function PublicRelaysToolbar({
             placeholder="Pesquisar relays públicos..."
             className="pl-9"
           />
+          {isFiltering ? (
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+              Filtrando...
+            </span>
+          ) : null}
         </div>
         <Button variant="glass" onClick={onTestPublicRelays} disabled={isTestingAll || count === 0}>
           <RefreshCw className={`size-4 ${isTestingAll ? 'animate-spin' : ''}`} />
@@ -410,6 +424,11 @@ export const Route = createRoute({
 function RelaysPage() {
   const [activeTab, setActiveTab] = useState<RelayTab>('mine')
   const [search, setSearch] = useState('')
+  const [debouncedSearch, searchDebouncer] = useDebouncedValue(
+    search,
+    { wait: 250 },
+    (state) => ({ isPending: state.isPending }),
+  )
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [manualRelayUrl, setManualRelayUrl] = useState('')
   const [manualRelayError, setManualRelayError] = useState<string | null>(null)
@@ -441,24 +460,24 @@ function RelaysPage() {
           }
         })
         .filter((row) => {
-          const matchesSearch = row.url.toLowerCase().includes(search.toLowerCase())
+          const matchesSearch = row.url.toLowerCase().includes(debouncedSearch.toLowerCase())
           const matchesStatus = statusFilter === 'all' || row.health?.state === statusFilter
           return matchesSearch && matchesStatus
         }),
-    [relayHealth.rows, relayMetrics.rowMap, search, selectedRelays, statusFilter],
+    [debouncedSearch, relayHealth.rows, relayMetrics.rowMap, selectedRelays, statusFilter],
   )
 
   const publicRelayRows = useMemo(
     () =>
       publicRelays
-        .filter((relayUrl) => relayUrl.toLowerCase().includes(search.toLowerCase()))
+        .filter((relayUrl) => relayUrl.toLowerCase().includes(debouncedSearch.toLowerCase()))
         .map((relayUrl) => ({
           url: relayUrl,
           selected: selectedRelays.includes(relayUrl),
           health: relayHealth.rows.find((row) => row.url === relayUrl),
           metrics: relayMetrics.rowMap.get(relayUrl),
         })),
-    [publicRelays, relayHealth.rows, relayMetrics.rowMap, search, selectedRelays],
+    [debouncedSearch, publicRelays, relayHealth.rows, relayMetrics.rowMap, selectedRelays],
   )
 
   const selectedConnectedCount = selectedHealthRows.filter((row) => row.state === 'connected').length
@@ -674,6 +693,7 @@ function RelaysPage() {
             isTestingAll={relayHealth.isTestingAll}
             canTest={selectedRelays.length > 0}
             onAdd={() => setActiveTab('add')}
+            isFiltering={searchDebouncer.state.isPending}
           />
 
           {selectedRelays.length === 0 ? (
@@ -695,6 +715,7 @@ function RelaysPage() {
             isTestingAll={relayHealth.isTestingAll}
             onSearchChange={setSearch}
             onTestPublicRelays={() => void relayHealth.testAllRelays(publicRelays)}
+            isFiltering={searchDebouncer.state.isPending}
           />
           {relayDirectoryQuery.isError ? (
             <Card>

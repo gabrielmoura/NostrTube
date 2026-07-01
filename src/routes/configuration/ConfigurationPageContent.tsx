@@ -1,5 +1,3 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { toast } from 'sonner'
 import { useNDK, useNDKCurrentUser } from '@nostr-dev-kit/ndk-hooks'
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import {
@@ -25,9 +23,11 @@ import {
   Wifi,
   Zap,
 } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { toast } from 'sonner'
 import { AuthModal } from '@/components/AuthModal.tsx'
 import { AppShell } from '@/components/layout/AppShell'
-import { cn } from '@/lib/utils'
+import { modal } from '@/components/modal_v2/modal-manager.ts'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -39,22 +39,51 @@ import { Separator } from '@/components/ui/separator'
 import { StatusBadge } from '@/components/ui/status-badge'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { modal } from '@/components/modal_v2/modal-manager.ts'
 import { useZapStats } from '@/features/zap/hooks/useZapStats'
 import { publishDmRelayList } from '@/lib/ndk-messages'
+import { cn } from '@/lib/utils'
 import { BlossomSettings } from '@/routes/configuration/@components/BlossomSettings.tsx'
 import { CorsProxySettings } from '@/routes/configuration/@components/CorsProxySettings.tsx'
 import { ImageProxySettings } from '@/routes/configuration/@components/ImageProxySettings.tsx'
 import { PermissionSettings } from '@/routes/configuration/@components/PermissionSettings.tsx'
 import { RelaySettings } from '@/routes/configuration/@components/RelaySettings.tsx'
 import { VisibilitySettings } from '@/routes/configuration/@components/VisibilitySettings.tsx'
-import { useUploadPreferencesStore, type ThumbnailGenerationMode } from '@/store/useUploadPreferencesStore'
+import { type ThumbnailGenerationMode, useUploadPreferencesStore } from '@/store/useUploadPreferencesStore'
 import useUserStore from '@/store/useUserStore.ts'
 
 type SettingsTab = 'appearance' | 'player' | 'privacy' | 'relays-blossom' | 'profile' | 'account' | 'notifications'
 type SettingsGroup = 'platform' | 'user'
+type SettingsSub =
+  | 'appearance'
+  | 'player'
+  | 'privacy'
+  | 'privacy-notifications'
+  | 'privacy-visibility'
+  | 'relays-blossom'
+  | 'blossom'
+  | 'imgproxy'
+  | 'corsproxy'
+  | 'dm-relays'
+  | 'profile'
+  | 'account'
+  | 'notifications'
 const userSettingsTabs: SettingsTab[] = ['profile', 'account', 'notifications']
 const platformSettingsTabs: SettingsTab[] = ['appearance', 'player', 'privacy', 'relays-blossom']
+const platformSubTabMap: Record<SettingsSub, SettingsTab> = {
+  appearance: 'appearance',
+  player: 'player',
+  privacy: 'privacy',
+  'privacy-notifications': 'privacy',
+  'privacy-visibility': 'privacy',
+  'relays-blossom': 'relays-blossom',
+  blossom: 'relays-blossom',
+  imgproxy: 'player',
+  corsproxy: 'player',
+  'dm-relays': 'privacy',
+  profile: 'profile',
+  account: 'account',
+  notifications: 'notifications',
+}
 
 function getSettingsGroup(tab: SettingsTab): SettingsGroup {
   return userSettingsTabs.includes(tab) ? 'user' : 'platform'
@@ -69,6 +98,17 @@ function shortenIdentifier(identifier?: string) {
   if (!identifier) return ''
   if (identifier.length <= 18) return identifier
   return `${identifier.slice(0, 10)}...${identifier.slice(-6)}`
+}
+
+function getNextSubTab(nextTab: SettingsTab): SettingsSub | undefined {
+  if (nextTab === 'appearance') return 'appearance'
+  if (nextTab === 'player') return 'player'
+  if (nextTab === 'privacy') return 'privacy-notifications'
+  if (nextTab === 'relays-blossom') return 'blossom'
+  if (nextTab === 'profile') return 'profile'
+  if (nextTab === 'account') return 'account'
+  if (nextTab === 'notifications') return 'notifications'
+  return undefined
 }
 
 // ====================================================================
@@ -110,7 +150,11 @@ function ProfileSection() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="settings-name">Nome de exibição</Label>
-            <Input id="settings-name" defaultValue={profile?.displayName || profile?.name || ''} placeholder="Seu nome" />
+            <Input
+              id="settings-name"
+              defaultValue={profile?.displayName || profile?.name || ''}
+              placeholder="Seu nome"
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="settings-website">Website</Label>
@@ -118,7 +162,11 @@ function ProfileSection() {
           </div>
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="settings-bio">Bio</Label>
-            <Input id="settings-bio" defaultValue={profile?.bio || profile?.about || ''} placeholder="Conte um pouco sobre você" />
+            <Input
+              id="settings-bio"
+              defaultValue={profile?.bio || profile?.about || ''}
+              placeholder="Conte um pouco sobre você"
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="settings-location">Localização</Label>
@@ -144,7 +192,7 @@ function ProfileSection() {
           <Link
             to="/u/$userId/edit"
             params={{ userId: currentUser.npub ?? currentUser.pubkey }}
-            className={buttonVariants({ variant: "glass" })}
+            className={buttonVariants({ variant: 'glass' })}
           >
             Editar perfil completo
           </Link>
@@ -179,7 +227,9 @@ function AccountSection() {
               <p className="text-xs text-muted-foreground">{currentUser ? 'Ativa' : 'Inativa — faça login'}</p>
             </div>
           </div>
-          <StatusBadge tone={currentUser ? 'healthy' : 'warning'}>{currentUser ? 'Conectada' : 'Desconectada'}</StatusBadge>
+          <StatusBadge tone={currentUser ? 'healthy' : 'warning'}>
+            {currentUser ? 'Conectada' : 'Desconectada'}
+          </StatusBadge>
         </div>
 
         <div className="flex items-center justify-between">
@@ -203,7 +253,7 @@ function AccountSection() {
 
 function AppearanceSection() {
   const [theme, setTheme] = useState<'dark' | 'light' | 'system'>(
-    () => (localStorage.getItem('theme') as 'dark' | 'light' | 'system') || 'dark'
+    () => (localStorage.getItem('theme') as 'dark' | 'light' | 'system') || 'dark',
   )
 
   const handleThemeChange = (value: string) => {
@@ -267,9 +317,21 @@ function AppearanceSection() {
             <p className="text-xs text-muted-foreground">Roxo, ciano ou âmbar.</p>
           </div>
           <div className="flex gap-2">
-            <button type="button" className="size-7 rounded-full bg-[oklch(var(--primary))] ring-2 ring-primary ring-offset-2 ring-offset-background" aria-label="Roxo" />
-            <button type="button" className="size-7 rounded-full bg-cyan-400 ring-offset-2 ring-offset-background hover:ring-2 hover:ring-cyan-400" aria-label="Ciano" />
-            <button type="button" className="size-7 rounded-full bg-amber-400 ring-offset-2 ring-offset-background hover:ring-2 hover:ring-amber-400" aria-label="Âmbar" />
+            <button
+              type="button"
+              className="size-7 rounded-full bg-[oklch(var(--primary))] ring-2 ring-primary ring-offset-2 ring-offset-background"
+              aria-label="Roxo"
+            />
+            <button
+              type="button"
+              className="size-7 rounded-full bg-cyan-400 ring-offset-2 ring-offset-background hover:ring-2 hover:ring-cyan-400"
+              aria-label="Ciano"
+            />
+            <button
+              type="button"
+              className="size-7 rounded-full bg-amber-400 ring-offset-2 ring-offset-background hover:ring-2 hover:ring-amber-400"
+              aria-label="Âmbar"
+            />
           </div>
         </div>
 
@@ -318,17 +380,52 @@ function NotificationsSection() {
         <CardDescription>Controle quais notificações você recebe.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <NotificationRow label="Novos comentários" description="Alertas de respostas nos seus vídeos." checked={switches.comments} onChange={() => toggle('comments')} />
-        <NotificationRow label="Zaps recebidos" description="Notifique quando receber um Zap." checked={switches.zaps} onChange={() => toggle('zaps')} />
-        <NotificationRow label="Inscrições" description="Novos vídeos de criadores que você segue." checked={switches.subscriptions} onChange={() => toggle('subscriptions')} />
-        <NotificationRow label="Relays instáveis" description="Alertas sobre quedas de conexão." checked={switches.relays} onChange={() => toggle('relays')} />
-        <NotificationRow label="Resumo semanal" description="Email ou notificação com resumo da semana." checked={switches.weekly} onChange={() => toggle('weekly')} />
+        <NotificationRow
+          label="Novos comentários"
+          description="Alertas de respostas nos seus vídeos."
+          checked={switches.comments}
+          onChange={() => toggle('comments')}
+        />
+        <NotificationRow
+          label="Zaps recebidos"
+          description="Notifique quando receber um Zap."
+          checked={switches.zaps}
+          onChange={() => toggle('zaps')}
+        />
+        <NotificationRow
+          label="Inscrições"
+          description="Novos vídeos de criadores que você segue."
+          checked={switches.subscriptions}
+          onChange={() => toggle('subscriptions')}
+        />
+        <NotificationRow
+          label="Relays instáveis"
+          description="Alertas sobre quedas de conexão."
+          checked={switches.relays}
+          onChange={() => toggle('relays')}
+        />
+        <NotificationRow
+          label="Resumo semanal"
+          description="Email ou notificação com resumo da semana."
+          checked={switches.weekly}
+          onChange={() => toggle('weekly')}
+        />
       </CardContent>
     </Card>
   )
 }
 
-function NotificationRow({ label, description, checked, onChange }: { label: string; description: string; checked: boolean; onChange: () => void }) {
+function NotificationRow({
+  label,
+  description,
+  checked,
+  onChange,
+}: {
+  label: string
+  description: string
+  checked: boolean
+  onChange: () => void
+}) {
   return (
     <div className="flex items-center justify-between rounded-xl border border-border/60 bg-card/60 px-4 py-3">
       <div className="space-y-0.5">
@@ -473,15 +570,20 @@ export default function ConfigurationPageContent() {
   const currentUser = useNDKCurrentUser()
   const { ndk } = useNDK()
   const navigate = useNavigate()
-  const { tab: searchTab } = useSearch({ from: '/configuration' })
+  const { tab: searchTab, sub: searchSub } = useSearch({ from: '/configuration' })
   const zapStatsQuery = useZapStats()
   const selectedRelays = useUserStore((state) => state.session?.relays) ?? import.meta.env.VITE_NOSTR_RELAYS ?? []
   const blossomDefault = useUserStore((state) => state.blossom.default)
   const blossomMirrors = useUserStore((state) => state.blossom.mirrors)
-  const [activeTab, setActiveTabState] = useState<SettingsTab>(() => (searchTab === 'user' ? 'profile' : 'appearance'))
+  const blossomPresetActive = !blossomDefault && blossomMirrors.length === 0
+  const [activeTab, setActiveTabState] = useState<SettingsTab>(() =>
+    searchTab === 'user' ? 'profile' : searchSub === 'blossom' ? 'relays-blossom' : 'appearance',
+  )
   const profileName = currentUser?.profile?.displayName || currentUser?.profile?.name
   const sessionIdentifier = currentUser?.npub || currentUser?.pubkey
-  const sessionMetricValue = currentUser ? profileName || shortenIdentifier(sessionIdentifier) || 'Conectada' : 'Anônima'
+  const sessionMetricValue = currentUser
+    ? profileName || shortenIdentifier(sessionIdentifier) || 'Conectada'
+    : 'Anônima'
   const zapMetricValue = currentUser
     ? zapStatsQuery.isLoading
       ? 'Carregando'
@@ -493,14 +595,22 @@ export default function ConfigurationPageContent() {
       : 'Recebidos nos últimos 30 dias.'
     : 'Entre para ver seus Zaps.'
 
-  const setActiveTab = useCallback((nextTab: SettingsTab) => {
-    setActiveTabState(nextTab)
-    navigate({
-      to: '/configuration',
-      search: (old) => ({ ...old, tab: getSettingsGroup(nextTab) }),
-      replace: true,
-    })
-  }, [navigate])
+  const setActiveTab = useCallback(
+    (nextTab: SettingsTab) => {
+      setActiveTabState(nextTab)
+      navigate({
+        to: '/configuration',
+        search: (old) => {
+          const nextSub = getNextSubTab(nextTab)
+          return nextSub
+            ? { ...old, tab: getSettingsGroup(nextTab), sub: nextSub }
+            : { ...old, tab: getSettingsGroup(nextTab), sub: undefined }
+        },
+        replace: true,
+      })
+    },
+    [navigate],
+  )
 
   useEffect(() => {
     if (!currentUser && userSettingsTabs.includes(activeTab)) {
@@ -518,10 +628,46 @@ export default function ConfigurationPageContent() {
       return
     }
 
-    if (searchTab === 'platform' && !platformSettingsTabs.includes(activeTab)) {
-      setActiveTabState('appearance')
+    if (searchTab === 'platform') {
+      const targetTab = searchSub ? platformSubTabMap[searchSub as SettingsSub] : undefined
+      if (targetTab) {
+        if (activeTab !== targetTab) setActiveTabState(targetTab)
+        return
+      }
+
+      if (!platformSettingsTabs.includes(activeTab)) {
+        setActiveTabState('appearance')
+      }
     }
-  }, [activeTab, currentUser, searchTab, setActiveTab])
+  }, [activeTab, currentUser, searchSub, searchTab, setActiveTab])
+
+  useEffect(() => {
+    if (searchTab !== 'platform' || !searchSub) return
+
+    const targetId = {
+      appearance: 'appearance-settings',
+      player: 'player-settings',
+      privacy: 'privacy-notifications-settings',
+      'privacy-notifications': 'privacy-notifications-settings',
+      'privacy-visibility': 'privacy-visibility-settings',
+      'relays-blossom': 'blossom-settings',
+      blossom: 'blossom-settings',
+      imgproxy: 'imgproxy-settings',
+      corsproxy: 'corsproxy-settings',
+      'dm-relays': 'dm-relays-settings',
+      profile: 'profile-settings',
+      account: 'account-settings',
+      notifications: 'notifications-settings',
+    }[searchSub as SettingsSub]
+
+    if (!targetId) return
+
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+
+    return () => window.cancelAnimationFrame(frame)
+  }, [searchSub, searchTab])
 
   // Coluna direita
   const aside = (
@@ -563,12 +709,16 @@ export default function ConfigurationPageContent() {
           <div className="flex items-center gap-2 rounded-xl border border-border/60 px-3 py-2">
             <Zap className="size-4 text-[oklch(var(--lightning))]" />
             <span className="text-muted-foreground">Lightning Wallet</span>
-            <StatusBadge tone="neutral" className="ml-auto">Wallet</StatusBadge>
+            <StatusBadge tone="neutral" className="ml-auto">
+              Wallet
+            </StatusBadge>
           </div>
           <div className="flex items-center gap-2 rounded-xl border border-border/60 px-3 py-2">
             <Cloud className="size-4 text-cyan-400" />
             <span className="text-muted-foreground">Blossom</span>
-            <StatusBadge tone={blossomDefault ? 'healthy' : 'warning'} className="ml-auto">{blossomDefault ? 'Configurado' : 'Pendente'}</StatusBadge>
+            <StatusBadge tone={blossomDefault ? 'healthy' : 'neutral'} className="ml-auto">
+              {blossomDefault ? 'Personalizado' : 'Padrão do app'}
+            </StatusBadge>
           </div>
         </CardContent>
       </Card>
@@ -579,9 +729,18 @@ export default function ConfigurationPageContent() {
           <CardDescription>Pequenos hábitos para fortalecer sua presença.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <div className="flex items-start gap-2"><Lightbulb className="mt-0.5 size-4 shrink-0 text-primary" />Configure ao menos 3 relays para redundância.</div>
-          <div className="flex items-start gap-2"><Lightbulb className="mt-0.5 size-4 shrink-0 text-primary" />Use Blossom mirrors para distribuir sua mídia.</div>
-          <div className="flex items-start gap-2"><Lightbulb className="mt-0.5 size-4 shrink-0 text-primary" />Ative notificações de Zaps para não perder apoios.</div>
+          <div className="flex items-start gap-2">
+            <Lightbulb className="mt-0.5 size-4 shrink-0 text-primary" />
+            Configure ao menos 3 relays para redundância.
+          </div>
+          <div className="flex items-start gap-2">
+            <Lightbulb className="mt-0.5 size-4 shrink-0 text-primary" />
+            Use Blossom mirrors para distribuir sua mídia.
+          </div>
+          <div className="flex items-start gap-2">
+            <Lightbulb className="mt-0.5 size-4 shrink-0 text-primary" />
+            Ative notificações de Zaps para não perder apoios.
+          </div>
         </CardContent>
       </Card>
 
@@ -591,7 +750,7 @@ export default function ConfigurationPageContent() {
           <CardDescription>Compartilhe conteúdo e conecte-se com a comunidade.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Link to="/new" className={cn(buttonVariants({ variant: "gradient" }), "w-full")}>
+          <Link to="/new" className={cn(buttonVariants({ variant: 'gradient' }), 'w-full')}>
             Publicar vídeo
             <Upload className="size-4" />
           </Link>
@@ -629,77 +788,163 @@ export default function ConfigurationPageContent() {
       aside={aside}
     >
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard title="Relays configurados" value={`${selectedRelays.length}`} description="Pool ativa para sincronização." icon={Wifi} tone="relay" />
-        <MetricCard title="Mirrors Blossom" value={`${blossomMirrors.length}`} description={blossomDefault ? 'Primário definido.' : 'Fallback padrão.'} icon={Cloud} tone="zap" />
-        <MetricCard title="Sessão Nostr" value={sessionMetricValue} description={currentUser ? 'Sessão ativa neste dispositivo.' : 'Configurações da plataforma seguem disponíveis.'} icon={ShieldCheck} tone={currentUser ? 'success' : 'default'} />
-        <MetricCard title="Zaps recebidos" value={zapMetricValue} description={zapMetricDescription} icon={HandCoins} tone="zap" />
+        <MetricCard
+          title="Relays configurados"
+          value={`${selectedRelays.length}`}
+          description="Pool ativa para sincronização."
+          icon={Wifi}
+          tone="relay"
+        />
+        <MetricCard
+          title="Mirrors Blossom"
+          value={`${blossomMirrors.length}`}
+          description={blossomPresetActive ? 'Preset do app ativo.' : 'Primário definido pelo usuário.'}
+          icon={Cloud}
+          tone="zap"
+        />
+        <MetricCard
+          title="Sessão Nostr"
+          value={sessionMetricValue}
+          description={
+            currentUser ? 'Sessão ativa neste dispositivo.' : 'Configurações da plataforma seguem disponíveis.'
+          }
+          icon={ShieldCheck}
+          tone={currentUser ? 'success' : 'default'}
+        />
+        <MetricCard
+          title="Zaps recebidos"
+          value={zapMetricValue}
+          description={zapMetricDescription}
+          icon={HandCoins}
+          tone="zap"
+        />
       </div>
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as SettingsTab)} className="w-full">
         <TabsList className="mb-6 flex h-auto w-full flex-wrap justify-start gap-2 rounded-2xl border border-border/70 bg-card/70 p-2">
-          <span className="flex items-center px-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Plataforma</span>
-          <TabsTrigger value="appearance" className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary">Aparência</TabsTrigger>
-          <TabsTrigger value="player" className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary">Player</TabsTrigger>
-          <TabsTrigger value="privacy" className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary">Privacidade</TabsTrigger>
-          <TabsTrigger value="relays-blossom" className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary">Relays &amp; Blossom</TabsTrigger>
-          <span className="flex items-center px-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Usuário</span>
+          <span className="flex items-center px-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+            Plataforma
+          </span>
+          <TabsTrigger
+            value="appearance"
+            className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary"
+          >
+            Aparência
+          </TabsTrigger>
+          <TabsTrigger
+            value="player"
+            className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary"
+          >
+            Player
+          </TabsTrigger>
+          <TabsTrigger
+            value="privacy"
+            className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary"
+          >
+            Privacidade
+          </TabsTrigger>
+          <TabsTrigger
+            value="relays-blossom"
+            className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary"
+          >
+            Relays &amp; Blossom
+          </TabsTrigger>
+          <span className="flex items-center px-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+            Usuário
+          </span>
           {currentUser ? (
             <>
-              <TabsTrigger value="profile" className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary">Perfil</TabsTrigger>
-              <TabsTrigger value="account" className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary">Conta</TabsTrigger>
-              <TabsTrigger value="notifications" className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary">Notificações</TabsTrigger>
+              <TabsTrigger
+                value="profile"
+                className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary"
+              >
+                Perfil
+              </TabsTrigger>
+              <TabsTrigger
+                value="account"
+                className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary"
+              >
+                Conta
+              </TabsTrigger>
+              <TabsTrigger
+                value="notifications"
+                className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary"
+              >
+                Notificações
+              </TabsTrigger>
             </>
           ) : (
-            <Button variant="glass" size="sm" onClick={() => modal.show(<AuthModal />, { id: 'auth' })}>Entrar para conta</Button>
+            <Button variant="glass" size="sm" onClick={() => modal.show(<AuthModal />, { id: 'auth' })}>
+              Entrar para conta
+            </Button>
           )}
         </TabsList>
 
         <TabsContent value="profile" className="space-y-4">
-          <ProfileSection />
+          <div id="profile-settings" className="scroll-mt-24">
+            <ProfileSection />
+          </div>
         </TabsContent>
 
         <TabsContent value="account" className="space-y-4">
-          <AccountSection />
+          <div id="account-settings" className="scroll-mt-24">
+            <AccountSection />
+          </div>
         </TabsContent>
 
         <TabsContent value="appearance" className="space-y-4">
-          <AppearanceSection />
+          <div id="appearance-settings" className="scroll-mt-24">
+            <AppearanceSection />
+          </div>
         </TabsContent>
 
         <TabsContent value="notifications" className="space-y-4">
-          <NotificationsSection />
-        </TabsContent>
-
-        <TabsContent value="privacy" className="space-y-4">
-          <PermissionSettings />
-          <VisibilitySettings />
+          <div id="notifications-settings" className="scroll-mt-24">
+            <NotificationsSection />
+          </div>
         </TabsContent>
 
         <TabsContent value="player" className="space-y-4">
-          <PlayerSection />
+          <div id="player-settings" className="scroll-mt-24">
+            <PlayerSection />
+          </div>
+          <div id="imgproxy-settings" className="scroll-mt-24">
+            <ImageProxySettings />
+          </div>
+          <div id="corsproxy-settings" className="scroll-mt-24">
+            <CorsProxySettings />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="privacy" className="space-y-4">
+          <div id="privacy-notifications-settings" className="scroll-mt-24">
+            <PermissionSettings />
+          </div>
+          <div id="privacy-visibility-settings" className="scroll-mt-24">
+            <VisibilitySettings />
+          </div>
+          <div id="dm-relays-settings" className="scroll-mt-24">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Mail className="size-5 text-primary" />
+                  <CardTitle className="text-base">Mensagens privadas Nostr</CardTitle>
+                </div>
+                <CardDescription>Publique a sua lista de relays preferidos para DM via NIP-17.</CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Isso ajuda outros clientes a descobrir onde entregar mensagens privadas para a sua conta.
+                </p>
+                <Button onClick={handlePublishDmRelays}>Publicar relays de DM</Button>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="relays-blossom" className="space-y-6">
-          <RelaySettings />
           <BlossomSettings />
-          <ImageProxySettings />
-          <CorsProxySettings />
-
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Mail className="size-5 text-primary" />
-                <CardTitle className="text-base">Mensagens privadas Nostr</CardTitle>
-              </div>
-              <CardDescription>Publique a sua lista de relays preferidos para DM via NIP-17.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-muted-foreground">
-                Isso ajuda outros clientes a descobrir onde entregar mensagens privadas para a sua conta.
-              </p>
-              <Button onClick={handlePublishDmRelays}>Publicar relays de DM</Button>
-            </CardContent>
-          </Card>
+          <RelaySettings />
         </TabsContent>
       </Tabs>
     </AppShell>

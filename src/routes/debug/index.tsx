@@ -15,7 +15,11 @@ export const Route = createRoute({
 function DebugPage() {
   return (
     <ErrorBoundary title="Não foi possível carregar a página de debug">
-      <Suspense fallback={<PageSpinner />}>
+      <Suspense
+        fallback={
+          <PageSpinner label="Carregando diagnóstico" description="Preparando ferramentas de inspeção e estado da aplicação." />
+        }
+      >
         <DebugPageContent />
       </Suspense>
     </ErrorBoundary>
