@@ -1,5 +1,5 @@
 import { t } from "i18next";
-import { FEEDBACK_SOURCE_TAG } from "@/config/feedback.constants";
+import { FEEDBACK_SOURCE_TAG } from "@/config/feedback.const";
 import type { FeedbackCategoryDefinition } from "@/features/feedback/constants/feedbackCategories";
 import type { FeedbackTechnicalDetails } from "@/features/feedback/types/feedback";
 
