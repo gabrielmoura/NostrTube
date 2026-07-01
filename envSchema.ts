@@ -1,6 +1,6 @@
 import { ValidateEnv } from '@julr/vite-plugin-validate-env'
 import { z } from 'zod'
-import { DEFAULT_FEEDBACK_RECIPIENT_NPUB } from './src/config/feedback.constants'
+import { DEFAULT_FEEDBACK_RECIPIENT_NPUB } from './src/config/feedback.const'
 
 // Helper para validar e transformar strings separadas por vírgula em Array
 const csvToArray = z.string().transform((str) =>

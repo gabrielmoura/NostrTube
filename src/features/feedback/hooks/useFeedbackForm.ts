@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { t } from "i18next";
 import { type Resolver, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FEEDBACK_DRAFT_STORAGE_KEY } from "@/config/feedback.constants";
+import { FEEDBACK_DRAFT_STORAGE_KEY } from "@/config/feedback.const";
 import { getFeedbackCategory } from "@/features/feedback/constants/feedbackCategories";
 import { type FeedbackFormValues, feedbackFormSchema, resolveFeedbackZapAmount } from "@/features/feedback/types/feedback";
 

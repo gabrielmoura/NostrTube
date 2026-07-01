@@ -5,7 +5,7 @@ import {
   type FeedbackCategoryValue,
   type FeedbackZapPresetValue
 } from "@/features/feedback/constants/feedbackCategories";
-import { FEEDBACK_MAX_CUSTOM_ZAP_SATS } from "@/config/feedback.constants";
+import { FEEDBACK_MAX_CUSTOM_ZAP_SATS } from "@/config/feedback.const";
 
 const feedbackCategoryValues = FEEDBACK_CATEGORIES.map((category) => category.value) as [FeedbackCategoryValue, ...FeedbackCategoryValue[]];
 
