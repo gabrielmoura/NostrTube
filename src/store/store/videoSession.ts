@@ -3,6 +3,7 @@ import type { NDKEvent } from '@nostr-dev-kit/ndk-hooks'
 import type { StateCreator } from 'zustand/index'
 import type { VideoAssetSet } from '@/features/video/services/video-imeta.service'
 import { normalizeVideoEventAssets } from '@/features/video/services/video-imeta.service'
+import { getVideoEventIdentifier } from '@/features/video/services/video-reference.service'
 import { extractTag } from '@/helper/extractTag.ts'
 import { getTags, getTagValue } from '@/helper/nostrTags'
 import { AgeEnum } from '@/store/store/sessionTypes.ts'
@@ -65,7 +66,7 @@ export const createVideoSlice: StateCreator<VideoStore, [['zustand/devtools', ne
             title: tEvent.title,
             summary: tEvent.summary,
             url: primaryVariant?.candidates[0]?.url ?? url,
-            identification: e.dTag,
+            identification: getVideoEventIdentifier(e),
             image: primaryVariant?.posterUrls[0] ?? tEvent.image,
             assets,
           },

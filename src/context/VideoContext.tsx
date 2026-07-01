@@ -4,6 +4,7 @@ import { useNDK } from '@nostr-dev-kit/ndk-hooks'
 import { useParams } from '@tanstack/react-router'
 import { createContext, type ReactNode, useContext, useEffect, useState } from 'react'
 import { normalizeVideoEventAssets, type VideoAssetSet } from '@/features/video/services/video-imeta.service'
+import { getVideoEventIdentifier } from '@/features/video/services/video-reference.service'
 import { extractTag } from '@/helper/extractTag.ts'
 import { type GeVideoByEventIdDataParams, geVideoByEventIdData } from '@/helper/loaders/geVideoByEventIdData.ts'
 import { getTags, getTagValue } from '@/helper/nostrTags'
@@ -58,7 +59,7 @@ function wrapSetVideo(
       title: tEvent.title,
       summary: tEvent.summary,
       url: resolvedUrl,
-      identification: event.dTag,
+      identification: getVideoEventIdentifier(event),
       image: primaryVariant?.posterUrls[0] ?? tEvent.image ?? image,
       fallbacks: primaryVariant?.candidates.slice(1).map((candidate) => candidate.url) ?? fallbacks,
       assets,

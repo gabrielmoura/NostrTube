@@ -18,6 +18,10 @@ export function getVideoRouteReference(event: NDKEvent): string {
   return event.tagValue("d") || event.dTag || event.encode();
 }
 
+export function getVideoEventIdentifier(event: NDKEvent): string {
+  return event.tagValue("d") || event.dTag || event.encode() || event.id;
+}
+
 export function getVideoWatchUrl(event: NDKEvent): string {
   return `/v/${encodeURIComponent(getVideoRouteReference(event))}`;
 }
