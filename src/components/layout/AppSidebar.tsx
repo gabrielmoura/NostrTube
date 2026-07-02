@@ -21,6 +21,7 @@ import {
   UserRound,
   WalletCards,
   Wifi,
+  Youtube,
 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useEffect, useState } from 'react'
@@ -37,6 +38,7 @@ type SidebarKey =
   | 'explore'
   | 'trending'
   | 'upload'
+  | 'youtubeImport'
   | 'relays'
   | 'blossom'
   | 'zaps'
@@ -69,6 +71,7 @@ const primaryItems: SidebarItem[] = [
   { key: 'zaps', label: 'Zaps', icon: WalletCards, to: '/zaps' },
   { key: 'explore', label: 'Explorar', icon: Compass, to: '/explore' },
   { key: 'upload', label: 'Enviar vídeo', icon: MonitorUp, to: '/new' },
+  { key: 'youtubeImport', label: 'Importar YouTube', icon: Youtube, to: '/import/youtube' },
   { key: 'relays', label: 'Relays', icon: Wifi, to: '/relays', badge: 'hot' },
   { key: 'blossom', label: 'Blossom', icon: Cloud, to: '/blossom' },
 ]

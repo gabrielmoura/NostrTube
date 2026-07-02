@@ -6,7 +6,7 @@ import {
   useNDKSessionLogout,
 } from '@nostr-dev-kit/ndk-hooks'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { Bell, CircleHelp, LogIn, LogOut, Menu, Search, Settings2, ShieldCheck, Upload, UserRound } from 'lucide-react'
+import { Bell, CircleHelp, LogIn, LogOut, Menu, Search, Settings2, ShieldCheck, Upload, UserRound, Youtube } from 'lucide-react'
 import type { KeyboardEvent } from 'react'
 import { useState } from 'react'
 import { AuthModal } from '@/components/AuthModal'
@@ -113,6 +113,13 @@ function HeaderUtilityActions({
       >
         <Upload className="size-4" />
         Enviar vídeo
+      </Link>
+      <Link
+        to="/import/youtube"
+        className={buttonVariants({ variant: 'glass', size: 'sm', className: 'hidden xl:inline-flex' })}
+      >
+        <Youtube className="size-4" />
+        Importar YouTube
       </Link>
       <Link to="/new" className={buttonVariants({ variant: 'gradient', size: 'icon', className: 'sm:hidden' })}>
         <Upload className="size-4" />

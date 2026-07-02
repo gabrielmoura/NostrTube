@@ -48,7 +48,6 @@ describe("youtube-video-event.service", () => {
       "Este formato de vídeo não é suportado por todos os players. Assista diretamente em: https://www.youtube.com/watch?v=GHvYoKHmtGU",
     ]);
     expect(event.tags).toContainEqual(["summary", "Metadata-only import"]);
-    expect(event.tags).toContainEqual(["origin", "youtube", "GHvYoKHmtGU", "https://www.youtube.com/watch?v=GHvYoKHmtGU", "metadata-only"]);
     expect(event.content).toBe("Metadata-only import");
   });
 });

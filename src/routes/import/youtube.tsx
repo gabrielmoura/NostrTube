@@ -35,14 +35,14 @@ export const Route = createRoute({
 function YouTubeImportPage() {
   return (
     <AppShell
-      activeKey="upload"
+      activeKey="youtubeImport"
       title={t("import_youtube_title", "Importar vídeo do YouTube")}
       description={t(
         "import_youtube_page_desc",
         "Prepare uma referência Nostr para um vídeo do YouTube sem baixar ou hospedar o arquivo no Blossom.",
       )}
       eyebrow="Creator Studio"
-      badge="Unlisted"
+      badge="YouTube"
       icon={Youtube}
     >
       <UploadErrorBoundary>

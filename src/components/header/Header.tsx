@@ -46,6 +46,7 @@ export default function Header() {
   ]
   if (currentUser) {
     options.push({ to: `/new`, label: 'Novo' })
+    options.push({ to: '/import/youtube', label: 'Importar YouTube' })
   }
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
