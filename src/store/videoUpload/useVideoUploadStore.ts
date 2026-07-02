@@ -9,6 +9,7 @@ export interface VideoMetadata {
   fallback: string[];
   title: string;
   summary: string;
+  alt: string;
   thumbnail: string;
   fileType: string;
   fileHash: string;
@@ -23,6 +24,7 @@ export interface VideoMetadata {
   imetaVideo: NDKImetaTag;
   imetaVariants?: NDKImetaTag[];
   imetaAudioTracks?: NDKImetaTag[];
+  rawImetaTags?: string[][];
   imetaThumb: NDKImetaTag;
   imetaImage: NDKImetaTag;
   age: AgeEnum;

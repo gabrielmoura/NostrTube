@@ -22,6 +22,10 @@ function buildIdentifier(appName: string): string {
 }
 
 function buildImetaTags(draft: Partial<VideoMetadata>): string[][] {
+  if (draft.rawImetaTags?.length) {
+    return draft.rawImetaTags;
+  }
+
   const videoVariants = draft.imetaVariants?.length
     ? draft.imetaVariants
     : draft.imetaVideo
@@ -88,8 +92,13 @@ export function buildAddressableVideoEvent({
     ["published_at", String(publishedAt)]
   ];
 
+  const alt = draft.alt || draft.summary;
+  if (alt) {
+    tags.push(["alt", alt]);
+  }
+
   if (draft.summary) {
-    tags.push(["alt", draft.summary]);
+    tags.push(["summary", draft.summary]);
   }
 
   if (draft.thumbnail) {

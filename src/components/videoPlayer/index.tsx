@@ -22,6 +22,9 @@ import useUserStore from "@/store/useUserStore.ts";
 interface VideoPlayerParams extends DataVideo {
   onCanPlay?: () => void;
   onPlaybackError?: () => void;
+  onDurationChange?: (duration: number) => void;
+  onTitleChange?: (title: string) => void;
+  onTimeChange?: (currentTime: number) => void;
   className?: string;
 }
 
@@ -32,6 +35,9 @@ export function VideoPlayer({
                               title,
                               onCanPlay,
                               onPlaybackError,
+                              onDurationChange,
+                              onTitleChange,
+                              onTimeChange,
                               className
                              }: VideoPlayerParams) {
   const playerRef = useRef<MediaPlayerInstance | null>(null);
@@ -111,6 +117,9 @@ export function VideoPlayer({
       logLevel="warn"
       onProviderChange={onProviderChange}
       onCanPlay={onCanPlay}
+      onDurationChange={(duration) => onDurationChange?.(duration)}
+      onTitleChange={(nextTitle) => onTitleChange?.(nextTitle)}
+      onTimeChange={(currentTime) => onTimeChange?.(currentTime)}
       onPlaying={() => {
         handledErrorForSourceRef.current = null;
       }}

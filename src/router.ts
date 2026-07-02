@@ -7,6 +7,7 @@ import { Route as libraryRoute } from '@/routes/library/index'
 import { Route as liveRoute } from '@/routes/live/index'
 import { Route as subscriptionsRoute } from '@/routes/subscriptions/index'
 import { Route as indexRoute } from '@/routes/index'
+import { Route as youtubeImportRoute } from '@/routes/import/youtube'
 import { Route as newRoute } from '@/routes/new/index'
 import { Route as playlistRoute } from '@/routes/p/$listId'
 import { Route as playlistNewRoute } from '@/routes/p/new'
@@ -24,6 +25,7 @@ import { Route as zapsRoute } from '@/routes/zaps/index'
 export const routeTree = rootRoute.addChildren([
   indexRoute,
   searchRoute,
+  youtubeImportRoute,
   newRoute,
   relaysRoute,
   blossomRoute,
