@@ -1,0 +1,26 @@
+{
+  "video_metrics": {
+    "open_button": "ZAP / Метрики",
+    "modal_title": "Метрики и поддержка видео",
+    "modal_description": "Посмотрите показатели видео и отправьте ZAP, не покидая страницу.",
+    "partial_error": "Часть метрик сейчас недоступна. Видео всё равно можно поддержать ZAP.",
+    "cards": {
+      "views": "Просмотры",
+      "comments": "Комментарии",
+      "zap_count": "Полученные ZAP",
+      "zap_total": "Всего получено"
+    },
+    "support": {
+      "title": "Поддержать это видео",
+      "submit": "Отправить ZAP видео",
+      "retransmit": "Ретранслировать",
+      "retransmitting": "Ретрансляция...",
+      "retransmit_success": "Событие ретранслировано на {{count}} relay(s).",
+      "retransmit_no_ndk": "Сессия NDK недоступна для ретрансляции.",
+      "retransmit_no_relays": "Сейчас нет подключенных relay.",
+      "retransmit_failed": "Не удалось ретранслировать событие.",
+      "refresh": "Обновить",
+      "refreshing": "Обновление..."
+    }
+  }
+}

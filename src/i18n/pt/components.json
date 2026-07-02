@@ -1,0 +1,43 @@
+{
+  "age": {
+    "combo": {
+      "title": "Classificação Etária",
+      "placeholder": "Selecione a idade...",
+      "helper": "Defina a audiência apropriada para este conteúdo.",
+      "search": "Buscar classificação...",
+      "empty": "Nenhuma opção encontrada."
+    },
+    "options": {
+      "kids": {
+        "label": "Infantil",
+        "description": "Conteúdo adequado para crianças."
+      },
+      "teen": {
+        "label": "Juvenil",
+        "description": "Conteúdo recomendado para adolescentes."
+      },
+      "adult": {
+        "label": "Adulto",
+        "description": "Conteúdo destinado ao público adulto."
+      },
+      "porn": {
+        "label": "Pornografia",
+        "description": "Conteúdo explícito para adultos."
+      }
+    }
+  },
+  "components": {
+    "comboLanguage": {
+      "noLanguageFound": "Nenhum idioma encontrado",
+      "clearSelection": "Limpar seleção",
+      "selectYourLanguage": "Selecione o idioma do seu conteúdo."
+    },
+    "addTagInput": {
+      "error": {
+        "empty": "O campo não pode estar vazio.",
+        "invalidFormat": "Formato inválido.",
+        "duplicate": "Esta tag já existe."
+      }
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "age": {
+    "combo": {
+      "title": "Age Rating",
+      "placeholder": "Select an age...",
+      "helper": "Define the appropriate audience for this content.",
+      "search": "Search rating...",
+      "empty": "No options found."
+    },
+    "options": {
+      "kids": {
+        "label": "Kids",
+        "description": "Content suitable for children."
+      },
+      "teen": {
+        "label": "Teen",
+        "description": "Content recommended for teenagers."
+      },
+      "adult": {
+        "label": "Adult",
+        "description": "Content intended for adults."
+      },
+      "porn": {
+        "label": "NSFW",
+        "description": "Explicit content for mature audiences."
+      }
+    }
+  },
+  "components": {
+    "comboLanguage": {
+      "noLanguageFound": "No language found",
+      "clearSelection": "Clear selection",
+      "selectYourLanguage": "Select your content language."
+    },
+    "addTagInput": {
+      "error": {
+        "empty": "The field cannot be empty.",
+        "invalidFormat": "Invalid format.",
+        "duplicate": "This tag already exists."
+      }
+    }
+  }
+}

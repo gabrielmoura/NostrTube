@@ -1,0 +1,26 @@
+{
+  "video_metrics": {
+    "open_button": "ZAP / Metrics",
+    "modal_title": "Video metrics and support",
+    "modal_description": "See how the video is performing and send a ZAP without leaving the page.",
+    "partial_error": "Some metrics are unavailable right now. You can still support the video with a ZAP.",
+    "cards": {
+      "views": "Views",
+      "comments": "Comments",
+      "zap_count": "Received ZAPs",
+      "zap_total": "Total received"
+    },
+    "support": {
+      "title": "Support this video",
+      "submit": "Send ZAP to video",
+      "retransmit": "Retransmit",
+      "retransmitting": "Retransmitting...",
+      "retransmit_success": "Event retransmitted to {{count}} relay(s).",
+      "retransmit_no_ndk": "The NDK session is unavailable for retransmission.",
+      "retransmit_no_relays": "There are no connected relays right now.",
+      "retransmit_failed": "The event could not be retransmitted.",
+      "refresh": "Refresh",
+      "refreshing": "Refreshing..."
+    }
+  }
+}

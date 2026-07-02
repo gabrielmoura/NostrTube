@@ -1,0 +1,189 @@
+{
+  "feedback": {
+    "header_button": "Feedback",
+    "header_button_aria": "Open feedback",
+    "modal_title": "Direct feedback",
+    "modal_description": "Send suggestions, bug reports, thanks and support through a private NIP-17 message with an optional ZAP.",
+    "confirm_discard": "Discard the current feedback draft?",
+    "message_placeholder_default": "Describe your suggestion, issue or appreciation. Include reproduction steps if this is a bug.",
+    "fields": {
+      "title": "Title",
+      "title_placeholder": "Ex: Improve video search by hashtag",
+      "category": "Category",
+      "name": "Optional name",
+      "name_placeholder": "How should we identify you",
+      "email": "Optional email",
+      "email_placeholder": "you@example.com",
+      "message": "Message",
+      "message_help": "Your message will be published to the Nostr network and may be publicly visible.",
+      "message_help_private": "Your message will be sent as a private NIP-17 message to the configured recipient.",
+      "include_technical": "Include basic technical details",
+      "include_technical_help": "Includes current URL, shortened user agent, app version, timestamp and locale.",
+      "zap": "Optional ZAP",
+      "zap_help": "The ZAP will be attempted after the feedback is published.",
+      "zap_note": "Optional ZAP note",
+      "zap_note_placeholder": "Ex: Thanks for prioritizing this feature"
+    },
+    "auth_required": {
+      "title": "Login required to publish",
+      "description": "You can fill out the form now, but you must log in with your Nostr identity before sending.",
+      "action": "Login with Nostr"
+    },
+    "privacy": {
+      "pow_notice": "We use a small proof of work to reduce spam. This may take a few seconds.",
+      "private_message_notice": "Your feedback will be sent as a private NIP-17 message, but still avoid sharing passwords, private keys, tokens or sensitive data.",
+      "security_notice": "Do not send passwords, private keys, tokens or sensitive data."
+    },
+    "progress": {
+      "pow_title": "Calculating POW 16",
+      "pow_attempts": "Current attempts: {{count}}"
+    },
+    "actions": {
+      "submit": "Send feedback",
+      "preparing": "Preparing...",
+      "calculating_pow": "Calculating POW...",
+      "signing": "Signing...",
+      "publishing": "Publishing...",
+      "starting_zap": "Starting ZAP...",
+      "sent": "Sent",
+      "cancel": "Cancel",
+      "cancel_sending": "Cancel sending",
+      "close": "Close",
+      "send_another": "Send another feedback"
+    },
+    "success": {
+      "title": "Feedback sent",
+      "description": "Your feedback has been published to the Nostr network.",
+      "sent": "Feedback sent successfully.",
+      "sent_with_zap": "Feedback and ZAP sent successfully.",
+      "invoice_ready": "Feedback sent. Open your Lightning wallet to complete the ZAP.",
+      "zap_failed_after_feedback": "Feedback was sent successfully, but the ZAP could not be completed.",
+      "feedback_id": "Feedback ID",
+      "feedback_published": "The public feedback event was published and can be tracked with this identifier.",
+      "message_id": "Message ID",
+      "private_delivery_notice": "Delivered as a private NIP-17 message.",
+      "event_id": "Event ID",
+      "open_in_njump": "Open in njump",
+      "complete_zap": "Complete ZAP",
+      "invoice_description": "A real Lightning invoice was generated. Open your wallet to complete the payment.",
+      "open_wallet": "Open Lightning wallet",
+      "webln_preimage_fallback": "paid-via-webln"
+    },
+    "errors": {
+      "unauthenticated": "Log in with your Nostr identity before sending feedback.",
+      "invalid_recipient": "The configured feedback recipient is invalid.",
+      "pow_cancelled": "Sending was cancelled during POW calculation.",
+      "pow_failed": "The feedback POW could not be calculated.",
+      "sign_failed": "The Nostr event could not be signed.",
+      "publish_timeout": "Sending timed out before publication was confirmed on relays.",
+      "publish_failed": "The feedback could not be published to relays.",
+      "relay_unavailable": "No relay is available to publish the feedback.",
+      "recipient_metadata_failed": "Recipient metadata could not be loaded for ZAP.",
+      "zap_unavailable": "The recipient does not have a Lightning address configured for ZAP.",
+      "zap_invoice_failed": "The Lightning invoice for the ZAP could not be generated.",
+      "zap_payment_failed": "The feedback was sent, but the Lightning payment was not completed.",
+      "unknown": "An unexpected error occurred while sending feedback."
+    },
+    "event": {
+      "title_label": "Title",
+      "category_label": "Category",
+      "name_label": "Name",
+      "email_label": "Email",
+      "browser_language_label": "Browser language",
+      "zap_label": "ZAP",
+      "zap_note_label": "ZAP note",
+      "technical_details_label": "Basic technical details",
+      "locale_label": "Locale",
+      "app_version_label": "App version",
+      "timestamp_label": "Timestamp"
+    },
+    "zap": {
+      "21": "21 sats",
+      "100": "100 sats",
+      "500": "500 sats",
+      "1000": "1000 sats",
+      "5000": "5000 sats",
+      "none": "No ZAP",
+      "custom": "Custom amount",
+      "custom_placeholder": "Ex: 2100",
+      "unit": "sats"
+    },
+    "categories": {
+      "feature-request": {
+        "label": "New feature",
+        "description": "A new idea that would add value to the product.",
+        "placeholder": "Describe the desired feature, why it would be useful and how you imagine it working."
+      },
+      "bug-report": {
+        "label": "Bug report",
+        "description": "Something is not working as expected.",
+        "placeholder": "Describe the bug, what you expected to happen, what happened and the steps to reproduce it."
+      },
+      "thanks": {
+        "label": "Thanks",
+        "description": "A message of support or appreciation.",
+        "placeholder": "Share what you liked, why it was useful and whether you want to support it with a ZAP."
+      },
+      "ui-ux": {
+        "label": "UI/UX improvement",
+        "description": "Adjustments to the visual or usage experience.",
+        "placeholder": "Explain what part of the interface can improve and how it impacts the experience."
+      },
+      "performance": {
+        "label": "Performance",
+        "description": "Slowness, freezing or excessive resource usage.",
+        "placeholder": "Describe where the application became slow, froze or used too many resources."
+      },
+      "video-player": {
+        "label": "Video player",
+        "description": "Problems or improvements in the player.",
+        "placeholder": "Explain the player behavior, including loading, audio, captions or controls."
+      },
+      "upload-blossom": {
+        "label": "Upload / Blossom",
+        "description": "Media sending, Blossom and publishing.",
+        "placeholder": "Describe the difficulty with upload, processing or Blossom usage."
+      },
+      "search-discovery": {
+        "label": "Search and discovery",
+        "description": "Search, filters, navigation and content discovery.",
+        "placeholder": "Explain what is missing or what could be improved in search and content discovery."
+      },
+      "feeds-recommendations": {
+        "label": "Feeds and recommendations",
+        "description": "Suggestions, ranking and home feed.",
+        "placeholder": "Describe how feeds or recommendations could become more useful."
+      },
+      "login-nostr": {
+        "label": "Login / Nostr",
+        "description": "Authentication, extensions, keys and session.",
+        "placeholder": "Explain the issue or desired improvement in the Nostr login flow."
+      },
+      "moderation-content": {
+        "label": "Moderation / content",
+        "description": "Rules, reporting or content control.",
+        "placeholder": "Describe the need related to moderation or content display."
+      },
+      "privacy-security": {
+        "label": "Privacy / security",
+        "description": "Data protection, permissions and security.",
+        "placeholder": "Explain the privacy or security concern and the context where it appears."
+      },
+      "i18n": {
+        "label": "Translation / i18n",
+        "description": "Languages, texts and localization.",
+        "placeholder": "Provide the language, the problematic text and the desired improvement."
+      },
+      "documentation": {
+        "label": "Documentation",
+        "description": "Guides, FAQ and product clarity.",
+        "placeholder": "Describe the question, documentation gap or what could be clearer."
+      },
+      "other": {
+        "label": "Other",
+        "description": "Anything outside the categories above.",
+        "placeholder": "Describe your suggestion, issue or appreciation. Include reproduction steps if this is a bug."
+      }
+    }
+  }
+}

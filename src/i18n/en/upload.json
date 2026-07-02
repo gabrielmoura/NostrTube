@@ -1,0 +1,14 @@
+{
+  "add_a_video_title": "Add a video title",
+  "write_a_short_summary_or_description": "Write a short summary or description",
+  "save_as_draft": "Save as Draft",
+  "upload_new_video": "Upload New Video",
+  "upload_desc": "Upload a new video to NostrTube.",
+  "Sending_files": "Sending files",
+  "video_published_successfully": "Video published successfully",
+  "error_publishing_video": "Error publishing video",
+  "autoSave": {
+    "info": "Your draft has been auto-saved.",
+    "clear": "Clear draft"
+  }
+}

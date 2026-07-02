@@ -1,0 +1,49 @@
+{
+  "visibility": {
+    "title": "Privacy & Visibility",
+    "error_nsfw": "Could not update content filter.",
+    "error_age": "Error saving age preference.",
+    "nsfw_label": "Sensitive Content (NSFW)",
+    "nsfw_on": "Showing adult and sensitive content.",
+    "nsfw_off": "Sensitive content hidden by default.",
+    "age_label": "Age Filter",
+    "age_description": "Adjusts content based on age group.",
+    "search_placeholder": "Search age...",
+    "no_results": "No results found.",
+    "ages": {
+      "KID": "Child (General)",
+      "TEEN": "Teen (14+)",
+      "ADULT": "Adult (18+)"
+    }
+  },
+  "image_proxy": {
+    "title": "Image proxy",
+    "description": "Choose how thumbnails and images are loaded on this device.",
+    "mode_label": "Mode",
+    "base_url_label": "Server base URL",
+    "options": {
+      "none": "None",
+      "imgproxy": "imgproxy",
+      "nostube_imgproxy": "nostube-imgproxy",
+      "imageproxy": "imageproxy"
+    },
+    "helper_none": "No proxy is active. Images use the original URLs published on the network.",
+    "helper_imgproxy": "Uses the imgproxy format: /insecure/... with client-generated transformations.",
+    "helper_nostube_imgproxy": "Uses the nostube-imgproxy imgproxy-compatible API: /insecure/.../plain/encoded-URL, including thumbnails derived from videos through FFmpeg.",
+    "helper_imageproxy": "Uses the imageproxy format: /options/remote-url to resize through the server."
+  },
+  "cors_proxy": {
+    "title": "CORS proxy",
+    "description": "Configure an HTTPS proxy for external requests that block CORS.",
+    "mode_label": "Mode",
+    "custom_url_label": "cors-anywhere URL",
+    "options": {
+      "none": "None",
+      "custom": "Custom server",
+      "corsproxy_io": "Use corsproxy.io"
+    },
+    "helper_none": "No CORS proxy is active.",
+    "helper_custom": "Use an HTTPS URL for a compatible cors-anywhere server.",
+    "helper_corsproxy_io": "Uses https://corsproxy.io with the target URL encoded."
+  }
+}

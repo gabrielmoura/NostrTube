@@ -1,0 +1,34 @@
+{
+  "blossom": {
+    "settings": {
+      "add_server": "Добавить сервер",
+      "dialog_title": "Новый сервер Blossom",
+      "dialog_description": "Мы проверяем endpoint перед сохранением. Если проверка проходит, его можно использовать как основной или mirror.",
+      "server_url": "URL сервера",
+      "server_placeholder": "https://blossom.example.com",
+      "set_primary": "Сделать основным",
+      "set_primary_desc": "Новые загрузки медиа сначала пойдут на этот сервер.",
+      "add_mirror": "Добавить как mirror",
+      "add_mirror_desc": "Приложение попробует BUD-04 и при необходимости перейдёт к прямой загрузке.",
+      "testing_server": "Проверка сервера...",
+      "save_server": "Сохранить сервер",
+      "card_title": "Серверы медиа Blossom",
+      "card_description": "Выберите, куда сначала отправляются загрузки и какие серверы служат резервом в создаваемых событиях.",
+      "primary_label": "Основной",
+      "not_configured": "не настроен",
+      "custom": "Пользовательский",
+      "mirror": "Mirror",
+      "primary": "Основной",
+      "set_primary_action": "Сделать основным",
+      "ping_server_aria": "Проверить соединение с {{server}}",
+      "helper": "Приложение сначала отправляет на основной сервер. Mirror-ы пытаются PUT /mirror по BUD-04 и, если это не удаётся, пробуют прямую загрузку. В резерв событий видео попадают только успешные mirror-ы.",
+      "invalid_url": "Используйте корректный http(s) URL для сервера Blossom.",
+      "server_unreachable": "Сервер Blossom не ответил корректно.",
+      "ping_idle": "Ping не запускался",
+      "ping_checking": "Выполняется ping...",
+      "ping_online": "В сети",
+      "ping_online_with_latency": "В сети за {{latency}}мс",
+      "ping_offline": "Не в сети"
+    }
+  }
+}

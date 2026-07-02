@@ -1,0 +1,34 @@
+{
+  "blossom": {
+    "settings": {
+      "add_server": "Add server",
+      "dialog_title": "New Blossom server",
+      "dialog_description": "We validate the endpoint before saving. If the test passes, you can use it as primary or mirror.",
+      "server_url": "Server URL",
+      "server_placeholder": "https://blossom.example.com",
+      "set_primary": "Set as primary",
+      "set_primary_desc": "New media uploads will go to this server first.",
+      "add_mirror": "Add as mirror",
+      "add_mirror_desc": "The app will try BUD-04 and fall back to direct upload if needed.",
+      "testing_server": "Testing server...",
+      "save_server": "Save server",
+      "card_title": "Blossom media servers",
+      "card_description": "Choose where uploads go first and which servers act as fallback in generated events.",
+      "primary_label": "Primary",
+      "not_configured": "not configured",
+      "custom": "Custom",
+      "mirror": "Mirror",
+      "primary": "Primary",
+      "set_primary_action": "Set primary",
+      "ping_server_aria": "Test connection to {{server}}",
+      "helper": "The app uploads to the primary first. Mirrors try PUT /mirror following BUD-04 and, if that fails, try direct upload. Only successful mirrors are added as fallbacks in video events.",
+      "invalid_url": "Use a valid http(s) URL for the Blossom server.",
+      "server_unreachable": "The Blossom server did not respond correctly.",
+      "ping_idle": "Ping not run",
+      "ping_checking": "Pinging...",
+      "ping_online": "Online",
+      "ping_online_with_latency": "Online in {{latency}}ms",
+      "ping_offline": "Offline"
+    }
+  }
+}

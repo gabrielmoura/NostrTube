@@ -1,0 +1,46 @@
+{
+  "zap": {
+    "modal_title": "Send ZAP",
+    "modal_description": "Support a creator or video using Lightning through a Nostr ZAP.",
+    "target": {
+      "user": "Target: user profile",
+      "video": "Target: current video"
+    },
+    "auth_required": {
+      "title": "Login required to send a ZAP",
+      "description": "Log in with your Nostr identity to start the Lightning payment.",
+      "action": "Login with Nostr"
+    },
+    "fields": {
+      "destination": "Target",
+      "amount": "Amount in sats",
+      "custom_amount": "Custom amount",
+      "custom_amount_placeholder": "Ex: 2100",
+      "sats_unit": "sats",
+      "note": "Optional note",
+      "note_placeholder": "Add a short message to your ZAP"
+    },
+    "actions": {
+      "open": "ZAP",
+      "submit": "Send ZAP",
+      "close": "Close"
+    },
+    "success": {
+      "paid": "ZAP sent successfully.",
+      "invoice_ready": "Lightning invoice generated. Open your wallet to complete the ZAP.",
+      "invoice_description": "No WebLN wallet was available. Open your wallet to complete the payment manually.",
+      "open_wallet": "Open Lightning wallet",
+      "webln_preimage_fallback": "paid-via-webln"
+    },
+    "errors": {
+      "unauthenticated": "Log in with your Nostr identity before sending a ZAP.",
+      "invalid_amount": "Enter a valid amount in sats.",
+      "recipient_metadata_failed": "Recipient metadata could not be loaded for the ZAP.",
+      "zap_unavailable": "This target does not have a valid Lightning address to receive ZAP.",
+      "zap_invoice_failed": "The Lightning invoice for the ZAP could not be generated.",
+      "zap_payment_cancelled": "The Lightning payment was cancelled.",
+      "zap_payment_failed": "The Lightning payment failed.",
+      "unknown": "An unexpected error occurred while sending the ZAP."
+    }
+  }
+}

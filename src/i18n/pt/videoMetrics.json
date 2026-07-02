@@ -1,0 +1,26 @@
+{
+  "video_metrics": {
+    "open_button": "Zap / Métricas",
+    "modal_title": "Métricas e apoio do vídeo",
+    "modal_description": "Veja o desempenho do vídeo e envie um ZAP sem sair da página.",
+    "partial_error": "Algumas métricas não estão disponíveis agora. Você ainda pode apoiar o vídeo com ZAP.",
+    "cards": {
+      "views": "Visualizações",
+      "comments": "Comentários",
+      "zap_count": "ZAPs recebidos",
+      "zap_total": "Total recebido"
+    },
+    "support": {
+      "title": "Apoiar este vídeo",
+      "submit": "Enviar ZAP para o vídeo",
+      "retransmit": "Retransmitir",
+      "retransmitting": "Retransmitindo...",
+      "retransmit_success": "Evento retransmitido para {{count}} relay(s).",
+      "retransmit_no_ndk": "A sessão NDK não está disponível para retransmitir.",
+      "retransmit_no_relays": "Não há relays conectados no momento.",
+      "retransmit_failed": "Não foi possível retransmitir o evento.",
+      "refresh": "Atualizar",
+      "refreshing": "Atualizando..."
+    }
+  }
+}

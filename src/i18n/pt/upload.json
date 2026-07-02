@@ -1,0 +1,14 @@
+{
+  "add_a_video_title": "Adicione um título ao vídeo",
+  "write_a_short_summary_or_description": "Escreva um breve resumo ou descrição",
+  "save_as_draft": "Salvar como rascunho",
+  "upload_new_video": "Enviar Novo Vídeo",
+  "upload_desc": "Envie um novo vídeo para o NostrTube.",
+  "Sending_files": "Enviando arquivos",
+  "video_published_successfully": "Vídeo publicado com sucesso",
+  "error_publishing_video": "Erro ao publicar o vídeo",
+  "autoSave": {
+    "info": "Seu rascunho foi salvo automaticamente.",
+    "clear": "Limpar rascunho"
+  }
+}
