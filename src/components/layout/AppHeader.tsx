@@ -27,6 +27,7 @@ import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { FeedbackButton } from '@/features/feedback/components/FeedbackButton'
 import { getNip01PictureFromMetadataEvent } from '@/helper/nostrProfile'
+import { cn } from '@/lib/utils'
 import useUserStore from '@/store/useUserStore'
 
 export interface AppHeaderProps {
@@ -88,39 +89,43 @@ function HeaderUtilityActions({
       <Button variant="glass" size="icon" className="sm:hidden" aria-label="Buscar" onClick={onToggleMobileSearch}>
         <Search className="size-4" />
       </Button>
-      <FeedbackButton className="hidden lg:inline-flex" />
-      <Link
-        to="/faq"
-        className={buttonVariants({ variant: 'glass', size: 'icon-sm', className: 'hidden lg:inline-flex xl:hidden' })}
-      >
-        <CircleHelp className="size-4" />
-        <span className="sr-only">FAQ</span>
-      </Link>
-      <Link to="/faq" className={buttonVariants({ variant: 'glass', size: 'sm', className: 'hidden xl:inline-flex' })}>
-        <CircleHelp className="size-4" />
-        FAQ
-      </Link>
-      <Link
-        to="/terms"
-        className={buttonVariants({ variant: 'glass', size: 'sm', className: 'hidden xl:inline-flex' })}
-      >
-        <ShieldCheck className="size-4" />
-        Termos
-      </Link>
-      <Link
-        to="/new"
-        className={buttonVariants({ variant: 'gradient', size: 'sm', className: 'hidden lg:inline-flex' })}
-      >
-        <Upload className="size-4" />
-        Enviar vídeo
-      </Link>
-      <Link
-        to="/import/youtube"
-        className={buttonVariants({ variant: 'glass', size: 'sm', className: 'hidden xl:inline-flex' })}
-      >
-        <Youtube className="size-4" />
-        Importar YouTube
-      </Link>
+
+      <div className="hidden md:flex items-center gap-2">
+        <FeedbackButton />
+        <Link
+          to="/faq"
+          className={cn(buttonVariants({ variant: 'glass', size: 'icon-sm' }), 'xl:hidden')}
+        >
+          <CircleHelp className="size-4" />
+          <span className="sr-only">FAQ</span>
+        </Link>
+        <Link to="/faq" className={cn(buttonVariants({ variant: 'glass', size: 'sm' }), 'hidden xl:inline-flex')}>
+          <CircleHelp className="size-4" />
+          FAQ
+        </Link>
+        <Link
+          to="/terms"
+          className={cn(buttonVariants({ variant: 'glass', size: 'sm' }), 'hidden xl:inline-flex')}
+        >
+          <ShieldCheck className="size-4" />
+          Termos
+        </Link>
+        <Link
+          to="/new"
+          className={buttonVariants({ variant: 'gradient', size: 'sm' })}
+        >
+          <Upload className="size-4" />
+          Enviar vídeo
+        </Link>
+        <Link
+          to="/import/youtube"
+          className={cn(buttonVariants({ variant: 'glass', size: 'sm' }), 'hidden xl:inline-flex')}
+        >
+          <Youtube className="size-4" />
+          Importar YouTube
+        </Link>
+      </div>
+
       <Button variant="glass" size="icon" aria-label="Notificações">
         <Bell className="size-4" />
       </Button>

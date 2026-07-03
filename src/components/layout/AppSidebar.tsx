@@ -5,6 +5,7 @@ import {
   BellRing,
   Bookmark,
   ChevronDown,
+  CircleHelp,
   Cloud,
   Compass,
   Flame,
@@ -89,6 +90,8 @@ const librarySubItems: SidebarItem[] = [
 
 const secondaryItems: SidebarItem[] = [
   { key: 'settings', label: 'Configurações', icon: Settings2, to: '/configuration', search: { tab: 'platform' } },
+  { key: 'faq', label: 'FAQ', icon: CircleHelp, to: '/faq' },
+  { key: 'terms', label: 'Termos', icon: ShieldCheck, to: '/terms' },
 ]
 
 function shortenIdentifier(identifier?: string) {
@@ -289,7 +292,7 @@ export function AppSidebar({ activeKey, className, showMobileFeedback = false }:
 
       <SidebarNavSection items={secondaryItems} activeKey={activeKey} label="Preferências" />
       {showMobileFeedback ? (
-        <div className="mt-2 px-1 lg:hidden">
+        <div className="mt-2 px-1 md:hidden">
           <FeedbackButton className="w-full justify-start border-sidebar-border bg-sidebar-accent/45 text-sidebar-foreground hover:bg-sidebar-accent" />
         </div>
       ) : null}
