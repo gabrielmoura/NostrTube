@@ -91,6 +91,10 @@ O módulo fica em `src/features/shorts/` e segue a separação entre:
 
 A primeira versão da tela usa scroll vertical com snap, um item por viewport e controle de reprodução pelo item ativo. O player de Shorts reutiliza Vidstack e o parsing de `imeta` existente, mas mantém um wrapper próprio para permitir autoplay/pause sem alterar o player da página de detalhe.
 
+=== Busca de Shorts
+
+A busca da tela de Shorts é isolada da rota `/search` e usa o parâmetro `/shorts?search=...`. O input atualiza o filtro de relays com debounce via `@tanstack/react-pacer`, evitando consultas a cada tecla digitada. O service de Shorts continua montando filtros apenas com `SHORT_VIDEO_EVENT_KINDS`, então a busca não mistura vídeos normais no feed vertical.
+
 == 🛠️ Tecnologias
 
 === Frontend

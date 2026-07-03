@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBatchProfiles } from "@/features/nostr/hooks/useBatchProfiles";
 import { ShortsOverlay } from "@/features/shorts/components/ShortsOverlay";
 import { ShortsPlayer } from "@/features/shorts/components/ShortsPlayer";
@@ -13,6 +13,7 @@ export function ShortsFeed({ shorts }: ShortsFeedProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const profiles = useBatchProfiles(shorts.map((short) => short.event));
+  const shortsKey = useMemo(() => shorts.map((short) => short.id).join(":"), [shorts]);
 
   const handleScroll = useCallback(() => {
     const container = containerRef.current;
@@ -21,6 +22,12 @@ export function ShortsFeed({ shorts }: ShortsFeedProps) {
     const nextIndex = Math.round(container.scrollTop / Math.max(container.clientHeight, 1));
     setActiveIndex(Math.min(Math.max(nextIndex, 0), Math.max(shorts.length - 1, 0)));
   }, [shorts.length]);
+
+  useEffect(() => {
+    if (!shortsKey) return;
+    setActiveIndex(0);
+    containerRef.current?.scrollTo({ top: 0 });
+  }, [shortsKey]);
 
   return (
     <div

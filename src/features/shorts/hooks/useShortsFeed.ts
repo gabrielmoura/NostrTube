@@ -8,9 +8,13 @@ const SEARCH_RELAYS = import.meta.env.VITE_NOSTR_SEARCH_RELAYS?.length > 5
   ? import.meta.env.VITE_NOSTR_SEARCH_RELAYS
   : undefined;
 
-export function useShortsFeed() {
+interface UseShortsFeedParams {
+  search?: string;
+}
+
+export function useShortsFeed({ search }: UseShortsFeedParams = {}) {
   const { filterEvents } = useContentVisibilityFilter();
-  const filter = useMemo(() => buildShortsFeedFilter({ limit: 30 }), []);
+  const filter = useMemo(() => buildShortsFeedFilter({ limit: 30, search }), [search]);
   const { events, eose } = useSubscribe([filter], {
     closeOnEose: false,
     cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
