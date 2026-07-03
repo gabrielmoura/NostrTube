@@ -14,6 +14,7 @@ import { Route as playlistNewRoute } from '@/routes/p/new'
 import { Route as blossomRoute } from '@/routes/blossom/index'
 import { Route as relaysRoute } from '@/routes/relays/index'
 import { Route as searchRoute } from '@/routes/search/index'
+import { Route as shortsRoute } from '@/routes/shorts/index'
 import { Route as trendingRoute } from '@/routes/trending/index'
 import { Route as termsRoute } from '@/routes/terms/index'
 import { Route as userRoute } from '@/routes/u/$userId'
@@ -25,6 +26,7 @@ import { Route as zapsRoute } from '@/routes/zaps/index'
 export const routeTree = rootRoute.addChildren([
   indexRoute,
   searchRoute,
+  shortsRoute,
   youtubeImportRoute,
   newRoute,
   relaysRoute,

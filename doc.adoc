@@ -79,6 +79,18 @@ Use:
 
 O builder NIP-71 em `src/features/upload/services/video-event-builder.service.ts` permanece como ponto único de montagem de tags e resolve o kind antes de publicar, sem duplicar lógica para shorts.
 
+== Tela de Shorts
+
+A rota `/shorts` renderiza um feed vertical dedicado a eventos de short video (`34236` e `22`). A rota é registrada manualmente em `src/router.ts`, mas a exposição em menus continua sendo uma decisão separada.
+
+O módulo fica em `src/features/shorts/` e segue a separação entre:
+
+* `services/`: filtros NDK e adaptação de eventos para view model.
+* `hooks/`: conexão com NDK/NDK Hooks e filtros de visibilidade.
+* `components/`: layout vertical, overlay e player dedicado.
+
+A primeira versão da tela usa scroll vertical com snap, um item por viewport e controle de reprodução pelo item ativo. O player de Shorts reutiliza Vidstack e o parsing de `imeta` existente, mas mantém um wrapper próprio para permitir autoplay/pause sem alterar o player da página de detalhe.
+
 == 🛠️ Tecnologias
 
 === Frontend
