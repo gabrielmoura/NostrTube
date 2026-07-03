@@ -1,11 +1,12 @@
 // hooks/useNostrInfiniteFeed.ts
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { NDKEvent, type NDKFilter, NDKKind } from "@nostr-dev-kit/ndk";
+import { NDKEvent, type NDKFilter } from "@nostr-dev-kit/ndk";
 import { NDKSubscriptionCacheUsage, useSubscribe } from "@nostr-dev-kit/ndk-hooks";
+import { NORMAL_VIDEO_EVENT_KINDS } from "@/features/video/services/video-kinds";
 import { deduplicateEvents } from "@/helper/deduplicateEvents.ts";
 import { useContentVisibilityFilter } from "@/features/nostr/hooks/useContentVisibilityFilter";
 
-const VIDEO_KINDS = [NDKKind.Video, NDKKind.HorizontalVideo];
+const VIDEO_KINDS = NORMAL_VIDEO_EVENT_KINDS;
 const SEARCH_RELAYS = import.meta.env.VITE_NOSTR_SEARCH_RELAYS?.length > 5
   ? import.meta.env.VITE_NOSTR_SEARCH_RELAYS
   : undefined;

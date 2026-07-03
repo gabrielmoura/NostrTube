@@ -1,4 +1,5 @@
 import type { VideoMetadata } from "@/store/videoUpload/useVideoUploadStore";
+import type { VideoContentType } from "@/features/video/services/video-kinds";
 import { buildYouTubeThumbnailUrl, buildYouTubeWatchUrl } from "./youtube-url.service";
 
 export interface BuildYouTubeVideoDraftParams {
@@ -11,6 +12,7 @@ export interface BuildYouTubeVideoDraftParams {
   contentWarning?: string;
   language?: string;
   geohash?: string;
+  contentType?: VideoContentType;
 }
 
 export function buildYouTubeImetaTag(videoId: string, duration?: number): string[] {
@@ -45,6 +47,7 @@ export function buildYouTubeVideoDraft({
   contentWarning,
   language,
   geohash,
+  contentType,
 }: BuildYouTubeVideoDraftParams): Partial<VideoMetadata> {
   const canonicalUrl = buildYouTubeWatchUrl(videoId);
   const thumbnailUrl = buildYouTubeThumbnailUrl(videoId);
@@ -61,6 +64,7 @@ export function buildYouTubeVideoDraft({
     contentWarning,
     language,
     geohash,
+    contentType,
     rawImetaTags: [buildYouTubeImetaTag(videoId, duration)],
     // origin: {
     //   platform: "youtube",

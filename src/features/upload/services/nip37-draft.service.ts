@@ -1,10 +1,11 @@
 import NDK, { NDKEvent, type NDKUser } from '@nostr-dev-kit/ndk'
+import { NORMAL_VIDEO_KIND, resolvePublishVideoKind } from '@/features/video/services/video-kinds'
 import { nostrNow } from '@/helper/date'
 import type { VideoMetadata } from '@/store/videoUpload/useVideoUploadStore'
 
 export const UPLOAD_DRAFT_IDENTIFIER = 'nostrtube:new-video'
 const DRAFT_WRAP_KIND = 31234
-const VIDEO_KIND = 34235
+const VIDEO_KIND = NORMAL_VIDEO_KIND
 
 export interface UploadDraftSnapshot {
   videoData: Partial<VideoMetadata>
@@ -24,7 +25,7 @@ function buildPartialVideoEvent(draft: UploadDraftSnapshot) {
   draft.videoData.hashtags?.filter(Boolean).forEach((tag) => tags.push(['t', tag]))
 
   return {
-    kind: VIDEO_KIND,
+    kind: resolvePublishVideoKind(draft.videoData),
     content: draft.videoData.summary ?? '',
     created_at: Math.floor(draft.updatedAt / 1000),
     tags,
@@ -43,6 +44,7 @@ export async function canUseNip44Drafts(ndk?: NDK | null) {
 
 export async function saveVideoUploadDraft({ ndk, currentUser, snapshot }: { ndk: NDK; currentUser: NDKUser; snapshot: UploadDraftSnapshot }) {
   const draftEvent = new NDKEvent(ndk, buildPartialVideoEvent(snapshot))
+  const videoKind = resolvePublishVideoKind(snapshot.videoData)
   const wrapper = new NDKEvent(ndk, {
     kind: DRAFT_WRAP_KIND,
     pubkey: currentUser.pubkey,
@@ -53,7 +55,7 @@ export async function saveVideoUploadDraft({ ndk, currentUser, snapshot }: { ndk
     }),
     tags: [
       ['d', UPLOAD_DRAFT_IDENTIFIER],
-      ['k', String(VIDEO_KIND)],
+      ['k', String(videoKind)],
       ['step', String(snapshot.currentStep)],
       ['expiration', String(nostrNow() + 60 * 60 * 24 * 90)],
     ],
@@ -99,9 +101,9 @@ export async function clearVideoUploadDraft({ ndk, currentUser }: { ndk: NDK; cu
     pubkey: currentUser.pubkey,
     created_at: nostrNow(),
     content: '',
-    tags: [
-      ['d', UPLOAD_DRAFT_IDENTIFIER],
-      ['k', String(VIDEO_KIND)],
+      tags: [
+        ['d', UPLOAD_DRAFT_IDENTIFIER],
+        ['k', String(VIDEO_KIND)],
     ],
   })
   wrapper.dTag = UPLOAD_DRAFT_IDENTIFIER

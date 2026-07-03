@@ -430,6 +430,7 @@ export function UploadPageContainer() {
   const setIndexers = useVideoUploadStore((state) => state.setIndexers)
   const setLanguage = useVideoUploadStore((state) => state.setLanguage)
   const setGeohash = useVideoUploadStore((state) => state.setGeohash)
+  const setContentType = useVideoUploadStore((state) => state.setContentType)
   const clearUploadedMedia = useVideoUploadStore((state) => state.clearUploadedMedia)
   const resetForm = useVideoUploadStore((state) => state.resetForm)
   const isUploading = useVideoUploadStore((state) => state.isUploading)
@@ -565,6 +566,7 @@ export function UploadPageContainer() {
                 indexers={videoData.indexers}
                 language={videoData.language}
                 geohash={videoData.geohash}
+                contentType={videoData.contentType}
                 onTitleChange={setTitle}
                 onSummaryChange={setSummary}
                 onContentWarningChange={setContentWarning}
@@ -572,6 +574,7 @@ export function UploadPageContainer() {
                 onIndexersChange={setIndexers}
                 onLanguageChange={setLanguage}
                 onGeohashChange={setGeohash}
+                onContentTypeChange={setContentType}
               />
             </div>
           ) : null}

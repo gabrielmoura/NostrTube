@@ -26,7 +26,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import { useBatchProfiles } from '@/features/nostr/hooks/useBatchProfiles'
 import { useContentVisibilityFilter } from '@/features/nostr/hooks/useContentVisibilityFilter'
-import { VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
+import { NORMAL_VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
 import { getVideoRouteReference } from '@/features/video/services/video-reference.service'
 import { getTagValues } from '@/helper/nostrTags'
 import { Route as rootRoute } from '@/routes/__root'
@@ -62,7 +62,7 @@ function useExploreData() {
   const { filterEvents } = useContentVisibilityFilter()
   // Vídeos recentes (proxy para "destaque")
   const filterVideos: NDKFilter = {
-    kinds: VIDEO_EVENT_KINDS,
+    kinds: NORMAL_VIDEO_EVENT_KINDS,
     limit: 40,
   }
   const { events: videoEvents, eose } = useSubscribe([filterVideos], {

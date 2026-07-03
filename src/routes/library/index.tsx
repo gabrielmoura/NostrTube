@@ -28,7 +28,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useWatchLater } from '@/features/library/hooks/use-watch-later'
 import { useBatchProfiles } from '@/features/nostr/hooks/useBatchProfiles'
-import { VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
+import { NORMAL_VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
 import { getVideoRouteReference } from '@/features/video/services/video-reference.service'
 import { getWatchHistory } from '@/features/recommendations/services/watch-history.service'
 import {
@@ -121,7 +121,7 @@ function useLibraryData() {
 
   // Vídeos do usuário
   const myVideosFilter: NDKFilter | null = currentPubkey
-    ? { kinds: VIDEO_EVENT_KINDS, authors: [currentPubkey], limit: 50 }
+    ? { kinds: NORMAL_VIDEO_EVENT_KINDS, authors: [currentPubkey], limit: 50 }
     : null
   const { events: myVideos, eose: myVideosEose } = useSubscribe(
     myVideosFilter ? [myVideosFilter] : false,

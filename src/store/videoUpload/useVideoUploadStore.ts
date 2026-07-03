@@ -3,6 +3,7 @@ import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import type { NDKImetaTag } from "@nostr-dev-kit/ndk-hooks";
 import { AgeEnum } from "@/store/store/sessionTypes.ts";
+import type { VideoContentType } from "@/features/video/services/video-kinds";
 
 export interface VideoMetadata {
   url: string;
@@ -30,6 +31,7 @@ export interface VideoMetadata {
   age: AgeEnum;
   language?: string;
   geohash?: string;
+  contentType?: VideoContentType;
   origin?: {
     platform: string;
     externalId: string;
@@ -78,6 +80,7 @@ export interface VideoUploadState {
   setHashtags: (hashtags: string[]) => void;
   setLanguage: (language?: string) => void;
   setGeohash: (geohash?: string) => void;
+  setContentType: (contentType?: VideoContentType) => void;
   setUploadingState: (isUploading: boolean) => void;
   setUploadProgress: (progress: number) => void;
   setUploadStage: (stage: VideoUploadState["uploadStage"]) => void;
@@ -170,6 +173,11 @@ export const useVideoUploadStore = create<VideoUploadState>()(
         set((state) => {
           state.videoData.geohash = geohash;
         }, false, "video/setGeohash"),
+
+      setContentType: (contentType) =>
+        set((state) => {
+          state.videoData.contentType = contentType;
+        }, false, "video/setContentType"),
 
       setShowEventInput: (show) =>
         set((state) => {

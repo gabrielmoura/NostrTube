@@ -4,7 +4,7 @@ import { nip19 } from "nostr-tools";
 import { startOfDay, subMonths, subWeeks, subYears } from "date-fns";
 import { sortEventsByImages } from "@/helper/format.ts";
 import { notFound } from "@tanstack/react-router";
-import { VIDEO_EVENT_KINDS } from "@/features/video/services/video-kinds";
+import { NORMAL_VIDEO_EVENT_KINDS } from "@/features/video/services/video-kinds";
 import { fetchEventsCached, getSearchRelayUrls } from "@/features/nostr/services/ndk-query.service";
 import { filterEventsByAge } from "@/features/video/services/age-filter.service";
 import useUserStore from "@/store/useUserStore";
@@ -83,7 +83,7 @@ export async function getVideosFromSearchData({
 }): Promise<NDKEvent[]> {
 
   const filter: NDKFilter = {
-    kinds: VIDEO_EVENT_KINDS,
+    kinds: NORMAL_VIDEO_EVENT_KINDS,
     limit: 40 // Aumentamos um pouco o limite para compensar as deduplicações
   };
 

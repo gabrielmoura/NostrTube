@@ -1,6 +1,6 @@
 import NDK, { type NDKEvent, type NDKFilter, NDKKind } from '@nostr-dev-kit/ndk'
 import { nip19 } from 'nostr-tools'
-import { VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
+import { ALL_VIDEO_EVENT_KINDS, NORMAL_VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
 import { extractSingleEventId, type NexusFetchOptions, type NexusOperationType, ndkNexusBridge } from '@/lib/nexus-p2p'
 import { resolveVideoRouteParam } from '@/features/video/services/video-route-resolution.service'
 
@@ -139,7 +139,7 @@ export function buildVideoLookupFilters(reference: string): NDKFilter[] {
       return [
         {
           '#d': [resolution.dTag],
-          kinds: VIDEO_EVENT_KINDS,
+          kinds: ALL_VIDEO_EVENT_KINDS,
           limit: 1,
         },
       ]
@@ -199,7 +199,7 @@ export async function fetchVideoEventByReference(ndk: NDK, reference: string, op
 
   if (directEvent || resolution.type !== 'event-id') return directEvent
 
-  const events = await fetchEventsCached(ndk, [{ '#d': [resolution.id], kinds: VIDEO_EVENT_KINDS, limit: 100 }], {
+  const events = await fetchEventsCached(ndk, [{ '#d': [resolution.id], kinds: ALL_VIDEO_EVENT_KINDS, limit: 100 }], {
     ...options,
     mode: options.mode ?? 'parallel',
     relayUrls: dedupedRelays,
@@ -214,7 +214,7 @@ export async function fetchUserContentBundle(ndk: NDK, pubkey: string) {
     [
       {
         authors: [pubkey],
-        kinds: VIDEO_EVENT_KINDS,
+        kinds: NORMAL_VIDEO_EVENT_KINDS,
         limit: 100,
       },
       {

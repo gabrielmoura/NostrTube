@@ -3,10 +3,11 @@ import { NDKKind } from "@nostr-dev-kit/ndk";
 import { useSubscribe } from "@nostr-dev-kit/ndk-hooks";
 import { VideoFeedPresenter } from "@/components/videoFeed/VideoFeedPresenter.tsx";
 import { t } from "i18next";
+import { NORMAL_VIDEO_EVENT_KINDS } from "@/features/video/services/video-kinds";
 import { processPopularVideos } from "@/helper/videoFilters";
 import { useContentVisibilityFilter } from "@/features/nostr/hooks/useContentVisibilityFilter";
 
-const VIDEO_KINDS = [NDKKind.Video, NDKKind.HorizontalVideo];
+const VIDEO_KINDS = NORMAL_VIDEO_EVENT_KINDS;
 
 export function PopularVideos() {
   // 1. Subscreve tanto aos vídeos quanto às métricas (ou faz queries separadas e combina)

@@ -42,6 +42,43 @@ image:https://deepwiki.com/badge.svg[Ask DeepWiki, link=https://deepwiki.com/gab
 * 🎨 Interface moderna com tema claro/escuro
 * 🔐 Autenticação descentralizada via Nostr
 
+== Arquitetura de Eventos de Vídeo
+
+O domínio de vídeos separa explicitamente os tipos de conteúdo publicados em Nostr:
+
+* `34235` e `21`: vídeos normais, horizontais ou longos.
+* `34236` e `22`: vídeos curtos, verticais ou de consumo no formato Shorts.
+
+As listagens principais de vídeo usam apenas os kinds normais. A resolução de detalhe por `/v/$eventId`, importação de eventos e análises de interação reconhecem a união dos kinds normais e shorts para preservar compatibilidade com eventos existentes.
+
+=== Classificação de Publicação
+
+O fluxo de publicação aceita uma seleção manual de tipo de conteúdo:
+
+* `auto`: padrão conservador.
+* `normal`: força publicação como `34235`.
+* `short`: força publicação como `34236`.
+
+No modo `auto`, um vídeo só é publicado como short quando há metadados confiáveis de dimensão e duração:
+
+* altura maior que largura;
+* razão `largura / altura` menor ou igual a `0.75`;
+* duração menor ou igual a 180 segundos.
+
+Casos ambíguos, importações sem dimensão confiável e URLs externas sem metadados completos permanecem como vídeo normal, a menos que o usuário escolha manualmente `short`.
+
+=== Organização Técnica
+
+As constantes e helpers ficam centralizados em `src/features/video/services/video-kinds.ts`.
+
+Use:
+
+* `NORMAL_VIDEO_EVENT_KINDS` para feeds, buscas e listagens de vídeos normais.
+* `SHORT_VIDEO_EVENT_KINDS` para a tela de Shorts.
+* `ALL_VIDEO_EVENT_KINDS` para resolução de detalhe, importação, métricas e compatibilidade.
+
+O builder NIP-71 em `src/features/upload/services/video-event-builder.service.ts` permanece como ponto único de montagem de tags e resolve o kind antes de publicar, sem duplicar lógica para shorts.
+
 == 🛠️ Tecnologias
 
 === Frontend

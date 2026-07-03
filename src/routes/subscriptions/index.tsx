@@ -32,7 +32,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 import { useBatchProfiles } from '@/features/nostr/hooks/useBatchProfiles'
-import { LIVE_EVENT_KIND, VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
+import { LIVE_EVENT_KIND, NORMAL_VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
 import { Route as rootRoute } from '@/routes/__root'
 
 // ─── Rotas ───────────────────────────────────────────────
@@ -62,7 +62,7 @@ function useSubscriptionsData() {
 
   // Vídeos dos autores seguidos
   const videoFilter: NDKFilter = {
-    kinds: VIDEO_EVENT_KINDS,
+    kinds: NORMAL_VIDEO_EVENT_KINDS,
     authors: followedPubkeys,
     limit: 100,
   }

@@ -7,6 +7,7 @@ import { uploadToConfiguredBlossomServers } from '@/features/upload/services/blo
 import { requestDvmThumbnails } from '@/features/upload/services/dvm-thumbnail.service'
 import { generateVideoThumbnailFromUrl } from '@/features/upload/services/local-media-processing.service'
 import { normalizeVideoEventAssets } from '@/features/video/services/video-imeta.service'
+import { isShortVideoKind } from '@/features/video/services/video-kinds'
 import { getTagValue, getTagValues } from '@/helper/nostrTags'
 import { useUploadPreferencesStore } from '@/store/useUploadPreferencesStore'
 import { useVideoUploadStore } from '@/store/videoUpload/useVideoUploadStore.ts'
@@ -73,6 +74,9 @@ export function useVideoImporter() {
         title,
         summary,
         thumbnail: primaryVariant?.posterUrls[0] ?? thumbnail,
+        dim: primaryVariant?.dimension,
+        duration: primaryVariant?.duration ?? (Number(getTagValue('duration', event.tags)) || undefined),
+        contentType: isShortVideoKind(event.kind) ? 'short' : 'normal',
         mime_type: primaryVariant?.mimeType,
         imetaVideo: imeta as any,
         imetaVariants: assetSet.variants.map(
@@ -188,6 +192,7 @@ export function useVideoImporter() {
       url,
       title: url.split('/').pop()?.split('?')[0] || 'Imported video',
       thumbnail: generatedThumbnail,
+      contentType: 'normal',
       mime_type: mimeType,
       imetaVideo: {
         url,

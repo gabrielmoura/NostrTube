@@ -1,5 +1,6 @@
 import type { NDKEvent } from '@nostr-dev-kit/ndk'
 import { mapImetaTag } from '@nostr-dev-kit/ndk'
+import { isShortVideoKind } from '@/features/video/services/video-kinds'
 import { getTags, getTagValue, getTagValues } from '@/helper/nostrTags'
 import type { VideoMetadata } from '@/store/videoUpload/useVideoUploadStore'
 
@@ -21,6 +22,8 @@ export function extractEditableVideoDraft(event: NDKEvent): Partial<VideoMetadat
     contentWarning: getTagValue('content-warning', event.tags) || '',
     language: getTagValue('l', event.tags) || undefined,
     duration: Number(primaryImeta?.duration || getTagValue('duration', event.tags) || 0) || undefined,
+    dim: primaryImeta?.dim || getTagValue('dim', event.tags) || undefined,
+    contentType: isShortVideoKind(event.kind) ? 'short' : 'normal',
     mime_type: primaryImeta?.m,
     fileHash: primaryImeta?.x,
     fallback: primaryImeta?.fallback,

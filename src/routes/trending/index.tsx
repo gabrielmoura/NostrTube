@@ -26,7 +26,7 @@ import { useTopSupporters } from '@/features/zap/hooks/useTopSupporters'
 import { useZapStats } from '@/features/zap/hooks/useZapStats'
 import { useContentVisibilityFilter } from '@/features/nostr/hooks/useContentVisibilityFilter'
 import { filterEventsByAge } from '@/features/video/services/age-filter.service'
-import { VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
+import { NORMAL_VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
 import { getVideoRouteReference } from '@/features/video/services/video-reference.service'
 import { sortEventsByImages } from '@/helper/format.ts'
 import { cn } from '@/lib/utils'
@@ -37,7 +37,7 @@ import useUserStore from '@/store/useUserStore'
 // Constantes
 // ============================================================
 
-const VIDEO_KINDS = VIDEO_EVENT_KINDS
+const VIDEO_KINDS = NORMAL_VIDEO_EVENT_KINDS
 const SEARCH_RELAYS =
   import.meta.env.VITE_NOSTR_SEARCH_RELAYS?.length > 5 ? import.meta.env.VITE_NOSTR_SEARCH_RELAYS : undefined
 

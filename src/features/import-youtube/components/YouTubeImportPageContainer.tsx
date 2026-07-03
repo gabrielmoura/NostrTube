@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VideoPlayer } from "@/components/videoPlayer";
 import { UploadFormView } from "@/features/upload/components/UploadFormView";
+import type { VideoContentType } from "@/features/video/services/video-kinds";
 import { cn } from "@/lib/utils";
 import {
   buildYouTubeThumbnailUrl,
@@ -26,6 +27,7 @@ interface YouTubeImportDraft {
   duration?: number;
   language?: string;
   geohash?: string;
+  contentType?: VideoContentType;
 }
 
 type ImportStatus = "idle" | "valid" | "invalid" | "importing" | "ready";
@@ -64,6 +66,7 @@ function useYouTubeImportDraft() {
   const setIndexers = useCallback((indexers: string[]) => setDraft((current) => ({ ...current, indexers })), []);
   const setLanguage = useCallback((language?: string) => setDraft((current) => ({ ...current, language })), []);
   const setGeohash = useCallback((geohash?: string) => setDraft((current) => ({ ...current, geohash })), []);
+  const setContentType = useCallback((contentType: VideoContentType) => setDraft((current) => ({ ...current, contentType })), []);
 
   return {
     draft,
@@ -75,6 +78,7 @@ function useYouTubeImportDraft() {
     setIndexers,
     setLanguage,
     setGeohash,
+    setContentType,
   };
 }
 
@@ -429,6 +433,7 @@ export function YouTubeImportPageContainer() {
     setIndexers,
     setLanguage,
     setGeohash,
+    setContentType,
   } = useYouTubeImportDraft();
 
   const detectedVideoId = useMemo(() => extractYouTubeVideoId(url), [url]);
@@ -499,6 +504,7 @@ export function YouTubeImportPageContainer() {
       contentWarning: draft.contentWarning,
       language: draft.language,
       geohash: draft.geohash,
+      contentType: draft.contentType,
     }));
 
     if (!result) return;
@@ -564,6 +570,7 @@ export function YouTubeImportPageContainer() {
               indexers={draft.indexers}
               language={draft.language}
               geohash={draft.geohash}
+              contentType={draft.contentType}
               onTitleChange={handleManualTitleChange}
               onSummaryChange={setSummary}
               onContentWarningChange={setContentWarning}
@@ -571,6 +578,7 @@ export function YouTubeImportPageContainer() {
               onIndexersChange={setIndexers}
               onLanguageChange={setLanguage}
               onGeohashChange={setGeohash}
+              onContentTypeChange={setContentType}
             />
           </div>
 

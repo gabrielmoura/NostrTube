@@ -9,6 +9,7 @@ import useUserStore from "@/store/useUserStore";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import type { VideoContentType } from "@/features/video/services/video-kinds";
 
 const Textarea = lazy(() => import("@/components/textarea"));
 
@@ -39,6 +40,7 @@ interface UploadFormViewProps {
   indexers?: string[];
   language?: string;
   geohash?: string;
+  contentType?: VideoContentType;
   onTitleChange: (value: string) => void;
   onSummaryChange: (value: string) => void;
   onContentWarningChange: (value: string) => void;
@@ -46,6 +48,7 @@ interface UploadFormViewProps {
   onIndexersChange: (values: string[]) => void;
   onLanguageChange: (value?: string) => void;
   onGeohashChange: (value?: string) => void;
+  onContentTypeChange: (value: VideoContentType) => void;
 }
 
 export function UploadFormView({
@@ -56,13 +59,15 @@ export function UploadFormView({
   indexers,
   language,
   geohash,
+  contentType = "auto",
   onTitleChange,
   onSummaryChange,
   onContentWarningChange,
   onHashtagsChange,
   onIndexersChange,
   onLanguageChange,
-  onGeohashChange
+  onGeohashChange,
+  onContentTypeChange
 }: UploadFormViewProps) {
   const storedGeoHash = useUserStore((state) => state.session?.geoHash);
   const [includeGeohash, setIncludeGeohash] = useState(Boolean(geohash || storedGeoHash));
@@ -103,6 +108,24 @@ export function UploadFormView({
     return "Descoberta muito local — alta precisão";
   }
 
+  const contentTypeOptions: Array<{ value: VideoContentType; label: string; description: string }> = [
+    {
+      value: "auto",
+      label: t("content_type_auto", "Auto"),
+      description: t("content_type_auto_desc", "Use video dimensions and duration when available."),
+    },
+    {
+      value: "normal",
+      label: t("content_type_normal", "Normal"),
+      description: t("content_type_normal_desc", "Publish as a regular horizontal/long video."),
+    },
+    {
+      value: "short",
+      label: t("content_type_short", "Short"),
+      description: t("content_type_short_desc", "Publish as a vertical short video."),
+    },
+  ];
+
   return (
     <div className="space-y-4">
       <Textarea
@@ -130,6 +153,31 @@ export function UploadFormView({
         label="Indexers"
         placeholder="Ex: imdb:tt12345"
       />
+      <div className="rounded-xl border bg-card p-4 shadow-sm space-y-3">
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium">{t("content_type", "Content type")}</label>
+          <FieldInfo content={t("content_type_tooltip", "Choose how this video should be published on Nostr. Auto only marks Shorts when dimensions and duration are clearly short-form.")} />
+        </div>
+        <div className="grid gap-2 sm:grid-cols-3">
+          {contentTypeOptions.map((option) => {
+            const active = contentType === option.value;
+            return (
+              <Button
+                key={option.value}
+                type="button"
+                variant={active ? "default" : "outline"}
+                className="h-auto min-h-20 flex-col items-start justify-start gap-1 whitespace-normal rounded-xl px-3 py-3 text-left"
+                onClick={() => onContentTypeChange(option.value)}
+              >
+                <span className="text-sm font-semibold">{option.label}</span>
+                <span className={active ? "text-xs text-primary-foreground/80" : "text-xs text-muted-foreground"}>
+                  {option.description}
+                </span>
+              </Button>
+            );
+          })}
+        </div>
+      </div>
       <div className="rounded-xl border bg-card p-4 shadow-sm space-y-2">
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium">{t("Content_warning", "Content warning")}</label>

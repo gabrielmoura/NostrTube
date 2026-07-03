@@ -29,7 +29,7 @@ import { Button, buttonVariants } from '@/components/ui/button'
 import { Card } from '@/components/ui/card.tsx'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { filterEventsByAge } from '@/features/video/services/age-filter.service'
-import { VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
+import { NORMAL_VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
 import { ZapButton } from '@/features/zap/components/ZapButton'
 import { TECHNICAL_REPORT_KIND } from '@/helper/actions/report'
 import { type GetVideosFromUserDataParams, getVideosFromUserData } from '@/helper/loaders/getVideosFromUserData'
@@ -130,7 +130,7 @@ function ProfilePage() {
   const userProfile = metaEvent ? (JSON.parse(metaEvent.content) as NDKUserProfile) : null
 
   // Separação de eventos por tipo
-  const rawVideos = [...events].filter((e) => VIDEO_EVENT_KINDS.includes(e.kind as number))
+  const rawVideos = [...events].filter((e) => NORMAL_VIDEO_EVENT_KINDS.includes(e.kind as number))
   const agePref = useUserStore((state) => state.session?.age)
   const videos = useMemo(() => filterEventsByAge(rawVideos, agePref), [rawVideos, agePref])
   // Mock de playlists (assumindo que o loader traria Kind 30001 também)

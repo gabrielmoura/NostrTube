@@ -49,5 +49,22 @@ describe("youtube-video-event.service", () => {
     ]);
     expect(event.tags).toContainEqual(["summary", "Metadata-only import"]);
     expect(event.content).toBe("Metadata-only import");
+    expect(event.kind).toBe(34235);
+  });
+
+  it("can publish a YouTube import as a manual short", () => {
+    const draft = buildYouTubeVideoDraft({
+      videoId: "GHvYoKHmtGU",
+      title: "Imported YouTube short",
+      contentType: "short",
+    });
+
+    const event = buildAddressableVideoEvent({
+      draft,
+      currentPubkey: "f".repeat(64),
+      identifier: "youtube-short-import-test",
+    });
+
+    expect(event.kind).toBe(34236);
   });
 });

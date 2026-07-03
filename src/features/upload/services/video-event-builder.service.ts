@@ -1,5 +1,6 @@
 import { imetaTagToTag } from "@nostr-dev-kit/ndk";
 import { ulid } from "ulid";
+import { NORMAL_VIDEO_KIND, resolvePublishVideoKind } from "@/features/video/services/video-kinds";
 import { nostrNow } from "@/helper/date";
 import type { VideoMetadata } from "@/store/videoUpload/useVideoUploadStore";
 import useUserStore from "@/store/useUserStore";
@@ -10,7 +11,7 @@ export interface BuildAddressableVideoEventParams {
   identifier?: string;
 }
 
-const ADDRESSABLE_VIDEO_KIND = 34235;
+const ADDRESSABLE_VIDEO_KIND = NORMAL_VIDEO_KIND;
 
 function normalizeTagValues(values?: string[]): string[] {
   if (!values) return [];
@@ -81,6 +82,7 @@ export function buildAddressableVideoEvent({
   const publishedAt = nostrNow();
   const identifier = providedIdentifier || buildIdentifier(appName);
   const imetaTags = buildImetaTags(draft);
+  const kind = resolvePublishVideoKind(draft);
 
   if (imetaTags.length === 0) {
     throw new Error("At least one imeta tag is required to publish a video event");
@@ -109,7 +111,7 @@ export function buildAddressableVideoEvent({
   tags.push(...imetaTags);
 
   const duration = draft.duration ?? draft.imetaVariants?.[0]?.duration ?? draft.imetaVideo?.duration;
-  if (duration) {
+  if (duration && !draft.rawImetaTags?.length) {
     tags.push(["duration", String(duration)]);
   }
 
@@ -145,7 +147,7 @@ export function buildAddressableVideoEvent({
   }
 
   return {
-    kind: ADDRESSABLE_VIDEO_KIND,
+    kind,
     content: draft.summary ?? "",
     created_at: publishedAt,
     pubkey: currentPubkey,

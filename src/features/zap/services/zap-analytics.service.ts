@@ -2,7 +2,7 @@ import type NDK from '@nostr-dev-kit/ndk'
 import { NDKKind, type NDKEvent, type NDKFilter } from '@nostr-dev-kit/ndk'
 import { nip19 } from 'nostr-tools'
 import { fetchEventsCached, getSearchRelayUrls } from '@/features/nostr/services/ndk-query.service'
-import { VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
+import { ALL_VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
 
 const ZAP_RECEIPT_KIND = 9735 as never
 const DAYS = {
@@ -101,7 +101,7 @@ function normalizeTargetReference(reference: string) {
 function classifyATag(aTag: string) {
   const [kindString, pubkey, identifier] = aTag.split(':')
   const kind = Number.parseInt(kindString, 10)
-  if (VIDEO_EVENT_KINDS.includes(kind)) {
+  if (ALL_VIDEO_EVENT_KINDS.includes(kind)) {
     return {
       targetType: 'video' as const,
       targetRef: aTag,
