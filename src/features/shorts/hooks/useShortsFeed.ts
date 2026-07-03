@@ -1,34 +1,70 @@
-import { NDKSubscriptionCacheUsage, useSubscribe } from "@nostr-dev-kit/ndk-hooks";
+import type { NDKEvent } from "@nostr-dev-kit/ndk";
+import { useNDK } from "@nostr-dev-kit/ndk-hooks";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useContentVisibilityFilter } from "@/features/nostr/hooks/useContentVisibilityFilter";
+import { fetchEventsCached, getSearchRelayUrls } from "@/features/nostr/services/ndk-query.service";
 import { buildShortsFeedFilter, sortShortsEvents } from "@/features/shorts/services/shorts-query.service";
 import { toShortVideoViewModel } from "@/features/shorts/services/shorts-media.service";
 
-const SEARCH_RELAYS = import.meta.env.VITE_NOSTR_SEARCH_RELAYS?.length > 5
-  ? import.meta.env.VITE_NOSTR_SEARCH_RELAYS
-  : undefined;
+const SHORTS_PAGE_SIZE = 20;
 
 interface UseShortsFeedParams {
   search?: string;
 }
 
 export function useShortsFeed({ search }: UseShortsFeedParams = {}) {
+  const { ndk } = useNDK();
   const { filterEvents } = useContentVisibilityFilter();
-  const filter = useMemo(() => buildShortsFeedFilter({ limit: 30, search }), [search]);
-  const { events, eose } = useSubscribe([filter], {
-    closeOnEose: false,
-    cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
-    relayUrls: SEARCH_RELAYS,
+
+  const query = useInfiniteQuery({
+    queryKey: ["shortsFeed", { search }],
+    enabled: Boolean(ndk),
+    initialPageParam: undefined as number | undefined,
+    queryFn: async ({ pageParam }) => {
+      if (!ndk) return [];
+      const filter = buildShortsFeedFilter({
+        limit: SHORTS_PAGE_SIZE,
+        search,
+        until: pageParam,
+      });
+
+      const events = await fetchEventsCached(ndk, filter, {
+        mode: pageParam ? "cache-first" : "parallel",
+        relayUrls: getSearchRelayUrls(),
+      });
+
+      return sortShortsEvents(Array.from(events));
+    },
+    getNextPageParam: (lastPage) => {
+      if (!lastPage || lastPage.length < SHORTS_PAGE_SIZE) return undefined;
+      const lastEvent = lastPage[lastPage.length - 1];
+      return lastEvent?.created_at ? lastEvent.created_at - 1 : undefined;
+    },
   });
 
   const shorts = useMemo(() => {
-    const visibleEvents = filterEvents(sortShortsEvents(events));
+    const allEvents = query.data?.pages.flatMap((page) => page) ?? [];
+    const uniqueEvents = deduplicateEventsById(allEvents);
+    const visibleEvents = filterEvents(sortShortsEvents(uniqueEvents));
     return visibleEvents.map(toShortVideoViewModel).filter((short) => Boolean(short.source));
-  }, [events, filterEvents]);
+  }, [query.data?.pages, filterEvents]);
 
   return {
     shorts,
-    isLoading: !eose && shorts.length === 0,
-    isEmpty: Boolean(eose && shorts.length === 0),
+    isLoading: query.isLoading && shorts.length === 0,
+    isEmpty: Boolean(query.isFetched && shorts.length === 0),
+    fetchNextPage: query.fetchNextPage,
+    hasNextPage: query.hasNextPage,
+    isFetchingNextPage: query.isFetchingNextPage,
   };
+}
+
+function deduplicateEventsById(events: NDKEvent[]): NDKEvent[] {
+  const seen = new Set<string>();
+  return events.filter((event) => {
+    if (seen.has(event.id)) return false;
+    seen.add(event.id);
+    return true;
+  });
 }

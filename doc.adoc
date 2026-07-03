@@ -95,6 +95,14 @@ A primeira versão da tela usa scroll vertical com snap, um item por viewport e 
 
 A busca da tela de Shorts é isolada da rota `/search` e usa o parâmetro `/shorts?search=...`. O input atualiza o filtro de relays com debounce via `@tanstack/react-pacer`, evitando consultas a cada tecla digitada. O service de Shorts continua montando filtros apenas com `SHORT_VIDEO_EVENT_KINDS`, então a busca não mistura vídeos normais no feed vertical.
 
+=== Paginação, Virtualização e Preload
+
+O feed de Shorts usa `useInfiniteQuery` com filtros NDK independentes do feed principal. Cada página consulta apenas `SHORT_VIDEO_EVENT_KINDS`, com `limit` próprio e cursor `until` calculado a partir do `created_at` do último evento da página anterior.
+
+A renderização da lista usa `@tanstack/react-virtual` para manter poucos itens montados por vez, preservando scroll vertical com snap e um vídeo por viewport. O carregamento incremental é acionado ao aproximar o índice ativo do fim da lista e é limitado por `@tanstack/react-pacer` para evitar chamadas sucessivas durante scroll rápido.
+
+O item ativo recebe autoplay e os demais pausam automaticamente. O próximo item virtualizado recebe `preload="auto"`, enquanto os demais permanecem em `metadata`, reduzindo buffering na transição sem pré-carregar todo o feed.
+
 == 🛠️ Tecnologias
 
 === Frontend

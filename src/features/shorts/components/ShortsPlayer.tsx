@@ -17,13 +17,14 @@ import useUserStore from "@/store/useUserStore";
 
 interface ShortsPlayerProps {
   active: boolean;
+  preload?: boolean;
   src: string;
   mimeType?: string;
   poster?: string;
   title: string;
 }
 
-export function ShortsPlayer({ active, src, mimeType, poster, title }: ShortsPlayerProps) {
+export function ShortsPlayer({ active, preload, src, mimeType, poster, title }: ShortsPlayerProps) {
   const playerRef = useRef<MediaPlayerInstance | null>(null);
   const persistedMuted = useUserStore((state) => state.session?.videoMuted ?? true);
   const setVideoMuted = useUserStore((state) => state.setVideoMuted);
@@ -82,7 +83,7 @@ export function ShortsPlayer({ active, src, mimeType, poster, title }: ShortsPla
       src={src}
       viewType="video"
       streamType="on-demand"
-      preload={active ? "auto" : "metadata"}
+      preload={active || preload ? "auto" : "metadata"}
       playsInline
       crossOrigin="anonymous"
       autoplay={active}

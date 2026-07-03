@@ -22,7 +22,14 @@ export function ShortsPageContainer({ search, onSearchChange }: ShortsPageContai
     (state) => ({ isPending: state.isPending }),
   );
   const normalizedSearch = debouncedSearch.trim();
-  const { shorts, isLoading, isEmpty } = useShortsFeed({ search: normalizedSearch || undefined });
+  const {
+    shorts,
+    isLoading,
+    isEmpty,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useShortsFeed({ search: normalizedSearch || undefined });
 
   useEffect(() => {
     setSearchInput(search ?? "");
@@ -73,8 +80,16 @@ export function ShortsPageContainer({ search, onSearchChange }: ShortsPageContai
       ) : null}
 
       {shorts.length > 0 ? (
-        <div className="mx-auto w-full max-w-[520px]">
-          <ShortsFeed shorts={shorts} />
+        <div className="mx-auto w-full max-w-[520px] space-y-3">
+          <ShortsFeed
+            shorts={shorts}
+            fetchNextPage={() => void fetchNextPage()}
+            hasNextPage={Boolean(hasNextPage)}
+            isFetchingNextPage={isFetchingNextPage}
+          />
+          {isFetchingNextPage ? (
+            <p className="text-center text-xs text-muted-foreground">{t("loading_more_shorts", "Carregando mais shorts...")}</p>
+          ) : null}
         </div>
       ) : null}
     </AppShell>
