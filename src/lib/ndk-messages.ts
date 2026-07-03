@@ -1,5 +1,6 @@
-import NDK, { giftWrap, NDKKind, NDKRelaySet, NDKUser, type NDKEvent } from "@nostr-dev-kit/ndk";
-import { CacheModuleStorage, NDKMessenger, type NDKMessage } from "@nostr-dev-kit/messages";
+import NDK, { giftWrap, type NDKEvent, NDKKind, NDKRelaySet, NDKUser } from "@nostr-dev-kit/ndk";
+import { CacheModuleStorage, type NDKMessage, NDKMessenger } from "@nostr-dev-kit/messages";
+import { FEEDBACK_DEV_RELAYS } from "@/config/feedback.const.ts";
 
 const messengers = new Map<string, NDKMessenger>();
 
@@ -102,7 +103,12 @@ export async function sendPrivateMessageEvent(
   recipientLookup: string,
   event: NDKEvent,
   pubkeyFallback?: string
-): Promise<{ wrappedEvent: NDKEvent; rumorEvent: NDKEvent; recipient: NDKUser }> {
+): Promise<{
+  wrappedEvent: NDKEvent;
+  rumorEvent: NDKEvent;
+  recipient: NDKUser;
+  publishedRelays: Set<import("@nostr-dev-kit/ndk").NDKRelay>
+}> {
   if (!ndk.signer) {
     throw new Error("No signer available for private message delivery.");
   }
@@ -113,19 +119,28 @@ export async function sendPrivateMessageEvent(
 
   const recipientRelays = await getPreferredDmRelays(ndk, recipient.pubkey);
   const senderRelays = await getPreferredDmRelays(ndk, sender.pubkey);
-  const allRelays = [...new Set([...recipientRelays, ...senderRelays])];
+  const baseRelays = [...recipientRelays, ...senderRelays];
+
+  if (import.meta.env.DEV) {
+    baseRelays.push(...FEEDBACK_DEV_RELAYS);
+  }
+
+  const allRelays = [...new Set(baseRelays)];
+
+  let publishedRelays: Set<import("@nostr-dev-kit/ndk").NDKRelay>;
 
   if (allRelays.length > 0) {
     const relaySet = NDKRelaySet.fromRelayUrls(allRelays, ndk);
-    await wrappedEvent.publish(relaySet);
+    publishedRelays = await wrappedEvent.publish(relaySet);
   } else {
-    await wrappedEvent.publish();
+    publishedRelays = await wrappedEvent.publish();
   }
 
   return {
     wrappedEvent,
     rumorEvent: event,
-    recipient
+    recipient,
+    publishedRelays
   };
 }
 

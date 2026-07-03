@@ -272,12 +272,18 @@ next-env.d.ts
 .tanstack
 
 /dev-dist/
-/ref/
 keystore.jks
+
+
+# Development-only auxiliary folders
+__ref/
+__design/
+__docs/
+_doc/
+/ref/
 app_spec.md
 stats.html
 .agents
-docs
 opencode.jsonc
 __*
 .codex

@@ -169,14 +169,21 @@ export function useSubmitFeedback() {
 
       const rumorEvent = new NDKEvent(ndk, minedRumor);
 
+      let publishedRelays: string[] = [];
+
       setStage("publishing");
 
       try {
-        const { wrappedEvent } = await sendMessageWithTimeout(
+        const { wrappedEvent, publishedRelays: relays } = await sendMessageWithTimeout(
           sendPrivateMessageEvent(ndk, recipientConfig.lookup, rumorEvent, recipientConfig.pubkey),
           FEEDBACK_PUBLISH_TIMEOUT_MS
         );
         messageId = wrappedEvent.id;
+        publishedRelays = Array.from(relays).map((r: any) => r.url);
+
+        if (import.meta.env.DEV) {
+          console.log("[Feedback] Successfully published to relays:", publishedRelays);
+        }
       } catch (error) {
         if (error instanceof FeedbackFlowError) throw error;
         throw new FeedbackFlowError("publish-failed", "Failed to publish private feedback message.", { cause: error });
@@ -187,7 +194,8 @@ export function useSubmitFeedback() {
           feedbackId,
           messageId: messageId || crypto.randomUUID(),
           protocol: "nip17",
-          zapStatus: "not-requested"
+          zapStatus: "not-requested",
+          publishedRelays
         };
         setSuccessState(success);
         setStage("success");
@@ -213,7 +221,8 @@ export function useSubmitFeedback() {
           zapInvoice: zapOutcome.invoice,
           zapMessage: zapOutcome.status === "paid"
             ? t("feedback.success.sent_with_zap")
-            : t("feedback.success.invoice_ready")
+            : t("feedback.success.invoice_ready"),
+          publishedRelays
         };
 
         setSuccessState(success);
@@ -226,7 +235,8 @@ export function useSubmitFeedback() {
           messageId: messageId || crypto.randomUUID(),
           protocol: "nip17",
           zapStatus: "failed",
-          zapMessage: t("feedback.success.zap_failed_after_feedback")
+          zapMessage: t("feedback.success.zap_failed_after_feedback"),
+          publishedRelays
         };
         setSuccessState(success);
         setStage("success");

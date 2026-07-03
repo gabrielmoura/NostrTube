@@ -99,6 +99,7 @@ export interface FeedbackSuccessState {
   zapStatus: "not-requested" | "paid" | "invoice-ready" | "failed";
   zapMessage?: string;
   zapInvoice?: string;
+  publishedRelays?: string[];
 }
 
 export function resolveFeedbackZapAmount(values: Pick<FeedbackFormValues, "zapPreset" | "customZapAmount">): number | undefined {
