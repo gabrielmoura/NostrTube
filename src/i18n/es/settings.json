@@ -45,5 +45,41 @@
     "helper_none": "No hay proxy CORS activo.",
     "helper_custom": "Usa una URL HTTPS de un servidor cors-anywhere compatible.",
     "helper_corsproxy_io": "Usa https://corsproxy.io con la URL de destino codificada."
+  },
+  "presets": {
+    "title": "Presets",
+    "description": "Elige una configuración curada para relays, filtros y servidores auxiliares.",
+    "activePreset": "Preset activo",
+    "defaultPreset": "Preset predeterminado",
+    "usePreset": "Usar preset",
+    "usingPreset": "En uso",
+    "refresh": "Actualizar",
+    "resetDefault": "Restaurar predeterminado",
+    "noPresets": "No se encontraron presets",
+    "noPresetsDescription": "No encontramos presets en los relays configurados.",
+    "cacheNotice": "Preset cargado desde la caché local. Actualizando en segundo plano.",
+    "errorTitle": "No se pudieron cargar los presets",
+    "errorDescription": "Mantuvimos tu configuración actual para evitar impacto en la navegación.",
+    "personalSettingsSafe": "Tus configuraciones personales no se borrarán.",
+    "stats": {
+      "relays": "Relays",
+      "blockedPubkeys": "Pubkeys bloqueadas",
+      "nsfwPubkeys": "Pubkeys NSFW",
+      "blockedEvents": "Eventos bloqueados"
+    },
+    "thumbServer": "Servidor de miniaturas",
+    "blossomProxy": "Proxy Blossom",
+    "pubkey": "Pubkey",
+    "publishedAt": "Publicado en",
+    "availableTitle": "Presets disponibles",
+    "availableDescription": "Presets publicados como eventos NIP-78 en los relays conectados.",
+    "fallbackDescription": "No se cargó ningún preset activo. La app mantiene tu configuración actual.",
+    "noDescription": "Sin descripción.",
+    "partialWarning": "Parte de este preset fue ignorada porque contiene valores inválidos.",
+    "selectSuccess": "Preset aplicado.",
+    "selectError": "No se pudo cargar este preset. Mantuvimos tu configuración actual.",
+    "refreshSuccess": "Lista de presets actualizada.",
+    "refreshError": "No se pudieron actualizar los presets ahora.",
+    "resetSuccess": "Preset predeterminado restaurado."
   }
 }

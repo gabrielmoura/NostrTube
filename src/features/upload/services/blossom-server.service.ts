@@ -3,6 +3,7 @@ import { NDKBlossom } from "@nostr-dev-kit/ndk-blossom";
 import { MOCK_BLOSSOM_SERVERS } from "@/default";
 import useUserStore from "@/store/useUserStore";
 import { LoggerAgent } from "@/lib/debug";
+import { PresetCacheService } from "@/features/presets/services/PresetCacheService";
 
 const logger = LoggerAgent.create("BlossomServers");
 
@@ -43,13 +44,31 @@ function getDefaultPrimary() {
   );
 }
 
+function getActivePresetBlossomProxy(): string {
+  try {
+    const selectedPubkey = PresetCacheService.getSelectedPresetPubkey();
+    if (!selectedPubkey) return "";
+    const cachedPreset = PresetCacheService.getCachedPreset(selectedPubkey)?.preset;
+    return cachedPreset?.content.defaultBlossomProxy
+      ? normalizeBlossomServerUrl(cachedPreset.content.defaultBlossomProxy)
+      : "";
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.warn("Failed to read preset Blossom proxy", error);
+    }
+    return "";
+  }
+}
+
 export function getConfiguredBlossomServers(): ConfiguredBlossomServers {
   const blossom = useUserStore.getState().blossom;
-  const primary = normalizeBlossomServerUrl(blossom.default || getDefaultPrimary());
+  const presetBlossomProxy = getActivePresetBlossomProxy();
+  const primary = normalizeBlossomServerUrl(blossom.default || presetBlossomProxy || getDefaultPrimary());
   const mirrors = uniqueStrings(blossom.mirrors.map(normalizeBlossomServerUrl)).filter((url) => url !== primary);
   const available = uniqueStrings([
     ...MOCK_BLOSSOM_SERVERS.map((server) => normalizeBlossomServerUrl(server.url)),
     ...blossom.custom.map(normalizeBlossomServerUrl),
+    presetBlossomProxy,
     primary,
     ...mirrors
   ]);

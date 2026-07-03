@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { StatusBadge } from '@/components/ui/status-badge'
 import { Section, SectionContent, SectionHeader, SectionTitle } from '@/components/containers/pageSection'
 import { useBatchProfiles } from '@/features/nostr/hooks/useBatchProfiles'
+import { useContentVisibilityFilter } from '@/features/nostr/hooks/useContentVisibilityFilter'
 import { useZapStats } from '@/features/zap/hooks/useZapStats'
 import { filterEventsByAge } from '@/features/video/services/age-filter.service'
 import { getVideoRouteReference } from '@/features/video/services/video-reference.service'
@@ -42,6 +43,7 @@ function HomePage() {
   const navigate = useNavigate()
   const agePref = useUserStore((state) => state.session?.age)
   const relayCount = useUserStore((state) => state.session?.relays?.length ?? 0)
+  const { filterEvents } = useContentVisibilityFilter()
 
   // --- Dados reais de vídeos (mesma fonte do layout antigo) ---
   const { events } = useSubscribe(
@@ -60,7 +62,7 @@ function HomePage() {
     [],
   )
 
-  const filtered = useMemo(() => filterEventsByAge(events, agePref), [events, agePref])
+  const filtered = useMemo(() => filterEvents(filterEventsByAge(events, agePref)), [events, agePref, filterEvents])
   const processedEvents = useMemo(() => {
     if (!filtered.length) return []
     return uniqBy((e) => {

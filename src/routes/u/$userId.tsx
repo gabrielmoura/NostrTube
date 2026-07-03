@@ -206,7 +206,11 @@ function ProfilePage() {
                   <span className="sr-only">Zap</span>
                 </ZapButton>
               ) : null}
-              <DropdownMenuProfile currentUser={currentUser ?? undefined} events={Array.from(events)} />
+              <DropdownMenuProfile
+                currentUser={currentUser ?? undefined}
+                targetPubkey={metaEvent?.pubkey ?? identifiers.pubkey}
+                events={Array.from(events)}
+              />
             </div>
           </div>
 

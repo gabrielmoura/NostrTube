@@ -1,6 +1,6 @@
-import { NDKKind, type NDKEvent } from '@nostr-dev-kit/ndk'
+import { NDKKind, type NDKEvent, type NDKUserProfile } from '@nostr-dev-kit/ndk'
 import { NDKSubscriptionCacheUsage, useNDK, useNDKCurrentUser, useSubscribe, type NDKFilter } from '@nostr-dev-kit/ndk-hooks'
-import { createRoute, Link } from '@tanstack/react-router'
+import { createRoute, Link, useNavigate } from '@tanstack/react-router'
 import {
   Bookmark,
   ChevronRight,
@@ -29,6 +29,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useWatchLater } from '@/features/library/hooks/use-watch-later'
 import { useBatchProfiles } from '@/features/nostr/hooks/useBatchProfiles'
 import { VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
+import { getVideoRouteReference } from '@/features/video/services/video-reference.service'
 import { getWatchHistory } from '@/features/recommendations/services/watch-history.service'
 import {
   canUseNip44Drafts,
@@ -220,6 +221,7 @@ function LibraryPage() {
   const activeTab = tab || 'all'
   const activeSidebarKey: SidebarKey = activeTab === 'all' || activeTab === 'downloads' || activeTab === 'drafts' ? 'library' : activeTab
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refresh local draft visibility when the active library tab changes.
   useEffect(() => {
     setUploadDraft(readLocalUploadDraft())
   }, [activeTab])
@@ -425,7 +427,7 @@ function LibraryPage() {
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {myVideos.slice(0, 4).map((ev) => (
-                  <VideoCard key={ev.id} event={ev} profile={profiles[ev.pubkey]} />
+                  <LibraryVideoCard key={ev.id} event={ev} profile={profiles[ev.pubkey]} />
                 ))}
               </div>
               {myVideos.length > 4 && (
@@ -559,7 +561,7 @@ function LibraryPage() {
           {likedVideos.length > 0 ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {likedVideos.map((ev) => (
-                <VideoCard key={ev.id} event={ev} profile={profiles[ev.pubkey]} />
+                <LibraryVideoCard key={ev.id} event={ev} profile={profiles[ev.pubkey]} />
               ))}
             </div>
           ) : (
@@ -652,7 +654,7 @@ function LibraryPage() {
           {myVideos.length > 0 ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {myVideos.map((ev) => (
-                <VideoCard key={ev.id} event={ev} profile={profiles[ev.pubkey]} />
+                <LibraryVideoCard key={ev.id} event={ev} profile={profiles[ev.pubkey]} />
               ))}
             </div>
           ) : (
@@ -691,6 +693,34 @@ function LibraryPage() {
         </TabsContent>
       </Tabs>
     </AppShell>
+  )
+}
+
+function LibraryVideoCard({ event, profile }: { event: NDKEvent; profile?: NDKUserProfile }) {
+  const navigate = useNavigate()
+  const eventId = getVideoRouteReference(event)
+
+  const openVideo = () => {
+    navigate({ to: '/v/$eventId', params: { eventId } })
+  }
+
+  return (
+    <div
+      role="link"
+      tabIndex={0}
+      className="block cursor-pointer rounded-lg transition-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-primary"
+      onClick={(event) => {
+        if ((event.target as HTMLElement).closest('a')) return
+        openVideo()
+      }}
+      onKeyDown={(event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return
+        event.preventDefault()
+        openVideo()
+      }}
+    >
+      <VideoCard event={event} profile={profile} />
+    </div>
   )
 }
 

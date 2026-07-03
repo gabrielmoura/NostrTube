@@ -45,5 +45,41 @@
     "helper_none": "CORS-прокси не активен.",
     "helper_custom": "Используйте HTTPS URL совместимого сервера cors-anywhere.",
     "helper_corsproxy_io": "Использует https://corsproxy.io с закодированным целевым URL."
+  },
+  "presets": {
+    "title": "Пресеты",
+    "description": "Выберите curated-настройку для релеев, фильтров и вспомогательных серверов.",
+    "activePreset": "Активный пресет",
+    "defaultPreset": "Пресет по умолчанию",
+    "usePreset": "Использовать пресет",
+    "usingPreset": "Используется",
+    "refresh": "Обновить",
+    "resetDefault": "Вернуть по умолчанию",
+    "noPresets": "Пресеты не найдены",
+    "noPresetsDescription": "Мы не нашли пресеты в настроенных релеях.",
+    "cacheNotice": "Пресет загружен из локального кэша. Обновляем в фоне.",
+    "errorTitle": "Не удалось загрузить пресеты",
+    "errorDescription": "Мы сохранили текущую конфигурацию, чтобы не повлиять на навигацию.",
+    "personalSettingsSafe": "Ваши личные настройки не будут удалены.",
+    "stats": {
+      "relays": "Релеи",
+      "blockedPubkeys": "Заблокированные pubkey",
+      "nsfwPubkeys": "NSFW pubkey",
+      "blockedEvents": "Заблокированные события"
+    },
+    "thumbServer": "Сервер миниатюр",
+    "blossomProxy": "Прокси Blossom",
+    "pubkey": "Pubkey",
+    "publishedAt": "Опубликовано",
+    "availableTitle": "Доступные пресеты",
+    "availableDescription": "Пресеты, опубликованные как события NIP-78 в подключенных релеях.",
+    "fallbackDescription": "Активный пресет не загружен. Приложение сохраняет текущие настройки.",
+    "noDescription": "Без описания.",
+    "partialWarning": "Часть этого пресета была проигнорирована из-за недопустимых значений.",
+    "selectSuccess": "Пресет применен.",
+    "selectError": "Не удалось загрузить этот пресет. Мы сохранили текущую конфигурацию.",
+    "refreshSuccess": "Список пресетов обновлен.",
+    "refreshError": "Не удалось обновить пресеты сейчас.",
+    "resetSuccess": "Пресет по умолчанию восстановлен."
   }
 }

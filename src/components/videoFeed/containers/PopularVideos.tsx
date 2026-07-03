@@ -4,6 +4,7 @@ import { useSubscribe } from "@nostr-dev-kit/ndk-hooks";
 import { VideoFeedPresenter } from "@/components/videoFeed/VideoFeedPresenter.tsx";
 import { t } from "i18next";
 import { processPopularVideos } from "@/helper/videoFilters";
+import { useContentVisibilityFilter } from "@/features/nostr/hooks/useContentVisibilityFilter";
 
 const VIDEO_KINDS = [NDKKind.Video, NDKKind.HorizontalVideo];
 
@@ -13,11 +14,12 @@ export function PopularVideos() {
     { kinds: [34237 as NDKKind], limit: 50 },
     { kinds: VIDEO_KINDS, limit: 50 }
   ]);
+  const { filterEvents } = useContentVisibilityFilter();
 
   // 2. A lógica agora é uma simples transformação de dados
   const sortedPopularVideos = useMemo(() => {
-    return processPopularVideos(allEvents);
-  }, [allEvents]);
+    return filterEvents(processPopularVideos(allEvents));
+  }, [allEvents, filterEvents]);
 
   return (
     <VideoFeedPresenter

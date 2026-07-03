@@ -40,6 +40,7 @@ import { StatusBadge } from '@/components/ui/status-badge'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useZapStats } from '@/features/zap/hooks/useZapStats'
+import { PresetSettingsTab } from '@/features/presets/components/PresetSettingsTab'
 import { publishDmRelayList } from '@/lib/ndk-messages'
 import { cn } from '@/lib/utils'
 import { BlossomSettings } from '@/routes/configuration/@components/BlossomSettings.tsx'
@@ -51,7 +52,7 @@ import { VisibilitySettings } from '@/routes/configuration/@components/Visibilit
 import { type ThumbnailGenerationMode, useUploadPreferencesStore } from '@/store/useUploadPreferencesStore'
 import useUserStore from '@/store/useUserStore.ts'
 
-type SettingsTab = 'appearance' | 'player' | 'privacy' | 'relays-blossom' | 'profile' | 'account' | 'notifications'
+type SettingsTab = 'appearance' | 'player' | 'privacy' | 'relays-blossom' | 'presets' | 'profile' | 'account' | 'notifications'
 type SettingsGroup = 'platform' | 'user'
 type SettingsSub =
   | 'appearance'
@@ -64,11 +65,12 @@ type SettingsSub =
   | 'imgproxy'
   | 'corsproxy'
   | 'dm-relays'
+  | 'presets'
   | 'profile'
   | 'account'
   | 'notifications'
 const userSettingsTabs: SettingsTab[] = ['profile', 'account', 'notifications']
-const platformSettingsTabs: SettingsTab[] = ['appearance', 'player', 'privacy', 'relays-blossom']
+const platformSettingsTabs: SettingsTab[] = ['appearance', 'player', 'privacy', 'relays-blossom', 'presets']
 const platformSubTabMap: Record<SettingsSub, SettingsTab> = {
   appearance: 'appearance',
   player: 'player',
@@ -80,6 +82,7 @@ const platformSubTabMap: Record<SettingsSub, SettingsTab> = {
   imgproxy: 'player',
   corsproxy: 'player',
   'dm-relays': 'privacy',
+  presets: 'presets',
   profile: 'profile',
   account: 'account',
   notifications: 'notifications',
@@ -105,6 +108,7 @@ function getNextSubTab(nextTab: SettingsTab): SettingsSub | undefined {
   if (nextTab === 'player') return 'player'
   if (nextTab === 'privacy') return 'privacy-notifications'
   if (nextTab === 'relays-blossom') return 'blossom'
+  if (nextTab === 'presets') return 'presets'
   if (nextTab === 'profile') return 'profile'
   if (nextTab === 'account') return 'account'
   if (nextTab === 'notifications') return 'notifications'
@@ -655,6 +659,7 @@ export default function ConfigurationPageContent() {
       imgproxy: 'imgproxy-settings',
       corsproxy: 'corsproxy-settings',
       'dm-relays': 'dm-relays-settings',
+      presets: 'presets-settings',
       profile: 'profile-settings',
       account: 'account-settings',
       notifications: 'notifications-settings',
@@ -849,6 +854,12 @@ export default function ConfigurationPageContent() {
           >
             Relays &amp; Blossom
           </TabsTrigger>
+          <TabsTrigger
+            value="presets"
+            className="rounded-xl data-[state=active]:border-b-2 data-[state=active]:border-primary"
+          >
+            Presets
+          </TabsTrigger>
           <span className="flex items-center px-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
             Usuário
           </span>
@@ -945,6 +956,12 @@ export default function ConfigurationPageContent() {
         <TabsContent value="relays-blossom" className="space-y-6">
           <BlossomSettings />
           <RelaySettings />
+        </TabsContent>
+
+        <TabsContent value="presets" className="space-y-6">
+          <div id="presets-settings" className="scroll-mt-24">
+            <PresetSettingsTab />
+          </div>
         </TabsContent>
       </Tabs>
     </AppShell>

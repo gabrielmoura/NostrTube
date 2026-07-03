@@ -1,4 +1,4 @@
-import { type BlossomServer, MOCK_BLOSSOM_SERVERS } from '@/default'
+import { type BlossomServer, MOCK_BLOSSOM_SERVERS } from '@/config/blossom.const'
 
 export const BLOSSOM_DEFAULT_SERVERS: BlossomServer[] = MOCK_BLOSSOM_SERVERS.map((server) => ({
   url: server.url,

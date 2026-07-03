@@ -4,6 +4,8 @@ import { extractTag } from '@/helper/extractTag.ts'
 import { getOptimizedImageSrc, type ImageProxyConfig } from '@/helper/http.ts'
 import { getTags, type NostrTag } from '@/helper/nostrTags'
 import useImageProxySettingsStore from '@/store/useImageProxySettingsStore.ts'
+import { usePreset } from '@/features/presets/hooks/usePreset'
+import { isPubkeyMarkedNsfwByPreset } from '@/features/presets/utils/presetContentFilters'
 
 export interface UseNostrImageOptions {
   width?: number | string
@@ -85,6 +87,7 @@ export function useNostrImage(event: NDKEvent, options?: UseNostrImageOptions) {
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(true)
   const imageProxy = useImageProxySettingsStore((state) => state.imageProxy)
+  const { activePreset } = usePreset()
   const width = options?.width ?? 480
   const height = options?.height ?? width
 
@@ -105,6 +108,15 @@ export function useNostrImage(event: NDKEvent, options?: UseNostrImageOptions) {
     const source = candidates[0]
 
     // Otimização
+    const effectiveImageProxy: ImageProxyConfig =
+      imageProxy.mode === 'none' && activePreset?.content.defaultThumbResizeServer
+        ? {
+            ...imageProxy,
+            mode: 'nostube-imgproxy',
+            nostubeImgproxyBaseUrl: activePreset.content.defaultThumbResizeServer,
+          }
+        : imageProxy
+
     const optimized = source
       ? getOptimizedImageSrc(source, width, {
           resize: {
@@ -113,13 +125,15 @@ export function useNostrImage(event: NDKEvent, options?: UseNostrImageOptions) {
             height: Number(height),
           },
           format: 'webp',
-        }, imageProxy)
+        }, effectiveImageProxy)
       : null
 
-    const isNSFW = event.tags.some((t) => t[0] === 'content-warning' || t[0] === 'nsfw')
+    const isNSFW =
+      event.tags.some((t) => t[0] === 'content-warning' || t[0] === 'nsfw') ||
+      isPubkeyMarkedNsfwByPreset(event.pubkey, activePreset)
 
     return { optimized, title, isNSFW }
-  }, [event.tags, imageProxy, width, height])
+  }, [activePreset, event.pubkey, event.tags, imageProxy, width, height])
 
   useEffect(() => {
     setLoading(Boolean(imageSpecs.optimized))

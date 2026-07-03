@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useEffect, useState } from 'react'
+import { FeedbackButton } from '@/features/feedback/components/FeedbackButton'
 import { NostrTubeLogoWhitText } from '@/components/logo/NostrTube.tsx'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
@@ -248,9 +249,10 @@ function SidebarUserCard({
 export interface AppSidebarProps {
   activeKey?: SidebarKey
   className?: string
+  showMobileFeedback?: boolean
 }
 
-export function AppSidebar({ activeKey, className }: AppSidebarProps) {
+export function AppSidebar({ activeKey, className, showMobileFeedback = false }: AppSidebarProps) {
   const currentUser = useNDKCurrentUser()
   const currentProfile = useCurrentUserProfile()
   const metadataEvent = useNDKSessionEvent(NDKKind.Metadata)
@@ -286,6 +288,11 @@ export function AppSidebar({ activeKey, className }: AppSidebarProps) {
       <div className="my-4 border-t border-sidebar-border" />
 
       <SidebarNavSection items={secondaryItems} activeKey={activeKey} label="Preferências" />
+      {showMobileFeedback ? (
+        <div className="mt-2 px-1 lg:hidden">
+          <FeedbackButton className="w-full justify-start border-sidebar-border bg-sidebar-accent/45 text-sidebar-foreground hover:bg-sidebar-accent" />
+        </div>
+      ) : null}
       <SidebarUserCard
         currentUser={currentUser}
         relayCount={relayCount}

@@ -45,5 +45,41 @@
     "helper_none": "No CORS proxy is active.",
     "helper_custom": "Use an HTTPS URL for a compatible cors-anywhere server.",
     "helper_corsproxy_io": "Uses https://corsproxy.io with the target URL encoded."
+  },
+  "presets": {
+    "title": "Presets",
+    "description": "Choose a curated configuration for relays, filters, and auxiliary servers.",
+    "activePreset": "Active preset",
+    "defaultPreset": "Default preset",
+    "usePreset": "Use preset",
+    "usingPreset": "In use",
+    "refresh": "Refresh",
+    "resetDefault": "Restore default",
+    "noPresets": "No presets found",
+    "noPresetsDescription": "We did not find presets on the configured relays.",
+    "cacheNotice": "Preset loaded from local cache. Refreshing in the background.",
+    "errorTitle": "Could not load presets",
+    "errorDescription": "We kept your current configuration to avoid affecting navigation.",
+    "personalSettingsSafe": "Your personal settings will not be erased.",
+    "stats": {
+      "relays": "Relays",
+      "blockedPubkeys": "Blocked pubkeys",
+      "nsfwPubkeys": "NSFW pubkeys",
+      "blockedEvents": "Blocked events"
+    },
+    "thumbServer": "Thumbnail server",
+    "blossomProxy": "Blossom proxy",
+    "pubkey": "Pubkey",
+    "publishedAt": "Published at",
+    "availableTitle": "Available presets",
+    "availableDescription": "Presets published as NIP-78 events on connected relays.",
+    "fallbackDescription": "No active preset was loaded. The app keeps your current settings.",
+    "noDescription": "No description.",
+    "partialWarning": "Part of this preset was ignored because it contains invalid values.",
+    "selectSuccess": "Preset applied.",
+    "selectError": "Could not load this preset. We kept your current configuration.",
+    "refreshSuccess": "Preset list refreshed.",
+    "refreshError": "Could not refresh presets right now.",
+    "resetSuccess": "Default preset restored."
   }
 }

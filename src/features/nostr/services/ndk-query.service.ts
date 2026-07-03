@@ -156,6 +156,7 @@ export function buildVideoLookupFilters(reference: string): NDKFilter[] {
  * faster single-event lookup path.
  */
 export async function fetchVideoEventByReference(ndk: NDK, reference: string, options: QueryOptions = {}) {
+  const resolution = resolveVideoRouteParam(reference)
   const filters = buildVideoLookupFilters(reference)
   let relayHints: string[] = []
 
@@ -189,12 +190,22 @@ export async function fetchVideoEventByReference(ndk: NDK, reference: string, op
     if (newest) return newest
   }
 
-  return fetchEventCached(ndk, filters, {
+  const directEvent = await fetchEventCached(ndk, filters, {
     ...options,
     operation: extractSingleEventId(filters) ? 'event-by-id' : options.operation,
     mode: options.mode ?? 'parallel',
     relayUrls: dedupedRelays,
   })
+
+  if (directEvent || resolution.type !== 'event-id') return directEvent
+
+  const events = await fetchEventsCached(ndk, [{ '#d': [resolution.id], kinds: VIDEO_EVENT_KINDS, limit: 100 }], {
+    ...options,
+    mode: options.mode ?? 'parallel',
+    relayUrls: dedupedRelays,
+  })
+
+  return newestEvent(events)
 }
 
 export async function fetchUserContentBundle(ndk: NDK, pubkey: string) {

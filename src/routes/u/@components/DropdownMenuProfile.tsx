@@ -1,15 +1,18 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
-import { Download, MoreVertical, Share2 } from "lucide-react";
+import { Download, MoreVertical, Share2, UserX } from "lucide-react";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { type NDKEvent, NDKUser } from "@nostr-dev-kit/ndk";
 import { downloadJsonl } from "@/helper/download.ts";
 import { toast } from "sonner";
 import { Share } from "@capacitor/share";
 import { copyText } from "@/helper/format.ts";
+import { useNDK, useNDKCurrentPubkey } from "@nostr-dev-kit/ndk-hooks";
+import { addMuteListItem } from "@/features/nostr/services/mute-list.service";
 
 interface DropdownMenuProfileProps {
   currentUser?: NDKUser; // O usuário logado
+  targetPubkey?: string;
   events?: NDKEvent[];
 }
 
@@ -19,9 +22,11 @@ interface Option {
   action: () => Promise<void> | void;
 }
 
-export function DropdownMenuProfile({ currentUser, events }: DropdownMenuProfileProps) {
+export function DropdownMenuProfile({ currentUser, targetPubkey, events }: DropdownMenuProfileProps) {
   const navigate = useNavigate();
   const { userId } = useParams({ strict: false });
+  const { ndk } = useNDK();
+  const currentPubkey = useNDKCurrentPubkey();
   const npub = currentUser?.npub;
   const pubkey = currentUser?.pubkey;
 
@@ -64,6 +69,26 @@ export function DropdownMenuProfile({ currentUser, events }: DropdownMenuProfile
 
     }
   ];
+
+  if (targetPubkey && targetPubkey !== currentPubkey) {
+    options.push({
+      label: "Mute Profile",
+      icon: <UserX className="size-4 text-amber-500" />,
+      action: async () => {
+        if (!ndk || !currentPubkey) {
+          toast.error("Faça login para atualizar sua mute list.");
+          return;
+        }
+
+        const result = await addMuteListItem({
+          ndk,
+          pubkey: currentPubkey,
+          item: { tagName: "p", value: targetPubkey }
+        });
+        toast.success(result.alreadyMuted ? "Perfil já estava na mute list." : "Perfil adicionado à mute list.");
+      }
+    });
+  }
 
   if (currentUser && npub && (npub === userId || pubkey === userId)) {
     options.push({

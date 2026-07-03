@@ -62,7 +62,7 @@ function MobileNavigation({ activeKey }: { activeKey?: SidebarKey }) {
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-[min(286px,calc(100vw-32px))] border-border bg-sidebar p-0">
-        <AppSidebar activeKey={activeKey} className="max-w-none border-r-0" />
+        <AppSidebar activeKey={activeKey} className="max-w-none border-r-0" showMobileFeedback />
       </SheetContent>
     </Sheet>
   )
@@ -88,15 +88,15 @@ function HeaderUtilityActions({
       <Button variant="glass" size="icon" className="sm:hidden" aria-label="Buscar" onClick={onToggleMobileSearch}>
         <Search className="size-4" />
       </Button>
-      <FeedbackButton />
+      <FeedbackButton className="hidden lg:inline-flex" />
       <Link
         to="/faq"
-        className={buttonVariants({ variant: 'glass', size: 'icon-sm', className: 'hidden sm:inline-flex md:hidden' })}
+        className={buttonVariants({ variant: 'glass', size: 'icon-sm', className: 'hidden lg:inline-flex xl:hidden' })}
       >
         <CircleHelp className="size-4" />
         <span className="sr-only">FAQ</span>
       </Link>
-      <Link to="/faq" className={buttonVariants({ variant: 'glass', size: 'sm', className: 'hidden md:inline-flex' })}>
+      <Link to="/faq" className={buttonVariants({ variant: 'glass', size: 'sm', className: 'hidden xl:inline-flex' })}>
         <CircleHelp className="size-4" />
         FAQ
       </Link>
@@ -109,7 +109,7 @@ function HeaderUtilityActions({
       </Link>
       <Link
         to="/new"
-        className={buttonVariants({ variant: 'gradient', size: 'sm', className: 'hidden sm:inline-flex' })}
+        className={buttonVariants({ variant: 'gradient', size: 'sm', className: 'hidden lg:inline-flex' })}
       >
         <Upload className="size-4" />
         Enviar vídeo
@@ -120,10 +120,6 @@ function HeaderUtilityActions({
       >
         <Youtube className="size-4" />
         Importar YouTube
-      </Link>
-      <Link to="/new" className={buttonVariants({ variant: 'gradient', size: 'icon', className: 'sm:hidden' })}>
-        <Upload className="size-4" />
-        <span className="sr-only">Enviar vídeo</span>
       </Link>
       <Button variant="glass" size="icon" aria-label="Notificações">
         <Bell className="size-4" />

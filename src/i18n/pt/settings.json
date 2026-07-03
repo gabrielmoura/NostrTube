@@ -45,5 +45,41 @@
     "helper_none": "Nenhum proxy CORS ativo.",
     "helper_custom": "Use uma URL HTTPS de um servidor cors-anywhere compatível.",
     "helper_corsproxy_io": "Usa https://corsproxy.io com a URL de destino codificada."
+  },
+  "presets": {
+    "title": "Presets",
+    "description": "Escolha uma configuração curada para relays, filtros e servidores auxiliares.",
+    "activePreset": "Preset ativo",
+    "defaultPreset": "Preset padrão",
+    "usePreset": "Usar preset",
+    "usingPreset": "Em uso",
+    "refresh": "Atualizar",
+    "resetDefault": "Restaurar padrão",
+    "noPresets": "Nenhum preset encontrado",
+    "noPresetsDescription": "Não encontramos presets nos relays configurados.",
+    "cacheNotice": "Preset carregado do cache local. Atualizando em segundo plano.",
+    "errorTitle": "Não foi possível carregar os presets",
+    "errorDescription": "Mantivemos sua configuração atual para evitar impacto na navegação.",
+    "personalSettingsSafe": "Suas configurações pessoais não serão apagadas.",
+    "stats": {
+      "relays": "Relays",
+      "blockedPubkeys": "Pubkeys bloqueadas",
+      "nsfwPubkeys": "Pubkeys NSFW",
+      "blockedEvents": "Eventos bloqueados"
+    },
+    "thumbServer": "Servidor de thumbnails",
+    "blossomProxy": "Proxy Blossom",
+    "pubkey": "Pubkey",
+    "publishedAt": "Publicado em",
+    "availableTitle": "Presets disponíveis",
+    "availableDescription": "Presets publicados como eventos NIP-78 nos relays conectados.",
+    "fallbackDescription": "Nenhum preset ativo foi carregado. O app mantém suas configurações atuais.",
+    "noDescription": "Sem descrição.",
+    "partialWarning": "Parte deste preset foi ignorada por conter valores inválidos.",
+    "selectSuccess": "Preset aplicado.",
+    "selectError": "Não foi possível carregar este preset. Mantivemos sua configuração atual.",
+    "refreshSuccess": "Lista de presets atualizada.",
+    "refreshError": "Não foi possível atualizar os presets agora.",
+    "resetSuccess": "Preset padrão restaurado."
   }
 }

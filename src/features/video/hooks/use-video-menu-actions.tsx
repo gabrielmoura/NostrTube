@@ -1,19 +1,22 @@
 import * as React from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useNDKCurrentPubkey } from "@nostr-dev-kit/ndk-hooks";
-import { Bookmark, Download, ExternalLink, FileJson, Flag, ListPlus, Pencil, Send, ShieldAlert, Share2, Wrench } from "lucide-react";
+import { Bookmark, Download, ExternalLink, FileJson, ListPlus, Pencil, Send, ShieldAlert, Share2, UserX, VideoOff, Wrench } from "lucide-react";
 import { toast } from "sonner";
 import { Share } from "@capacitor/share";
 import type { NDKEvent } from "@nostr-dev-kit/ndk";
+import { useNDK } from "@nostr-dev-kit/ndk-hooks";
 import { isInWatchLater, toggleWatchLater } from "@/features/library/services/watch-later.service";
 import { copyText, getVideoDetails } from "@/helper/format";
 import AddToPlaylistModal from "@/routes/v/@components/AddToPlaylistModal";
 import { modal } from "@/components/modal_v2/modal-manager";
 import { ReportContentModal, ReportTechnicalModal } from "@/routes/v/@components/ReportVideoModal";
 import { useDownload } from "@/hooks/useDownload";
+import { addMuteListItem } from "@/features/nostr/services/mute-list.service";
 
 export function useVideoMenuActions(event: NDKEvent) {
   const navigate = useNavigate();
+  const { ndk } = useNDK();
   const currentPubkey = useNDKCurrentPubkey();
   const naddr = event.encode();
   const dTag = event.dTag;
@@ -46,6 +49,39 @@ export function useVideoMenuActions(event: NDKEvent) {
       copyText(shareUrl).then(() => toast.success("Link copied!"));
     };
 
+    const handleMuteVideo = async () => {
+      if (!ndk || !currentPubkey) {
+        toast.error("Faça login para atualizar sua mute list.");
+        return;
+      }
+
+      const result = await addMuteListItem({
+        ndk,
+        pubkey: currentPubkey,
+        item: { tagName: "e", value: event.id }
+      });
+      toast.success(result.alreadyMuted ? "Vídeo já estava na mute list." : "Vídeo adicionado à mute list.");
+    };
+
+    const handleMuteAuthor = async () => {
+      if (!ndk || !currentPubkey) {
+        toast.error("Faça login para atualizar sua mute list.");
+        return;
+      }
+
+      if (event.pubkey === currentPubkey) {
+        toast.error("Você não pode mutar seu próprio perfil.");
+        return;
+      }
+
+      const result = await addMuteListItem({
+        ndk,
+        pubkey: currentPubkey,
+        item: { tagName: "p", value: event.pubkey }
+      });
+      toast.success(result.alreadyMuted ? "Autor já estava na mute list." : "Autor adicionado à mute list.");
+    };
+
     return ([
       {
         label: "Share video",
@@ -76,6 +112,26 @@ export function useVideoMenuActions(event: NDKEvent) {
         label: "Download video",
         icon: <Download className="size-4" />,
         action: handleDownload
+      },
+      {
+        label: "Mute video",
+        icon: <VideoOff className="size-4 text-amber-500" />,
+        action: () => {
+          toast.promise(handleMuteVideo(), {
+            loading: "Atualizando mute list...",
+            error: "Não foi possível atualizar a mute list."
+          });
+        }
+      },
+      {
+        label: "Mute author",
+        icon: <UserX className="size-4 text-amber-500" />,
+        action: () => {
+          toast.promise(handleMuteAuthor(), {
+            loading: "Atualizando mute list...",
+            error: "Não foi possível atualizar a mute list."
+          });
+        }
       },
       {
         label: "Copy raw event",
@@ -123,5 +179,5 @@ export function useVideoMenuActions(event: NDKEvent) {
         action: () => window.open(`nostr://${naddr}`)
       }
     ]);
-  }, [currentPubkey, dTag, event, naddr, navigate, downloadFile]);
+  }, [currentPubkey, dTag, event, naddr, navigate, downloadFile, ndk]);
 }

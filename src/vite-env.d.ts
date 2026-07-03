@@ -22,6 +22,7 @@ declare global {
     readonly VITE_MIN_PLAYLIST_POW?: number
     readonly VITE_NOSTR_FEEDBACK_RECIPIENT_NPUB?: string
     readonly VITE_NOSTR_DEVELOPER_PUBKEY?: string
+    readonly VITE_DEFAULT_PRESET_PUBKEY?: string
     readonly VITE_APP_VERSION?: string
     readonly VITE_NEXUS_P2P_RELAY_URL?: string
     readonly VITE_NEXUS_P2P_ENABLED?: string

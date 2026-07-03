@@ -13,7 +13,9 @@ import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { MetricCard } from '@/components/ui/metric-card'
+import { useContentVisibilityFilter } from '@/features/nostr/hooks/useContentVisibilityFilter'
 import { useBatchProfiles } from '@/features/nostr/hooks/useBatchProfiles'
+import { getVideoRouteReference } from '@/features/video/services/video-reference.service'
 import { eventSearchSchema, getVideosFromSearchData } from '@/helper/loaders/getVideosFromSearchData.ts'
 import { Route as rootRoute } from '@/routes/__root'
 import { AdvancedSearch } from './@AdvancedSearch'
@@ -107,6 +109,7 @@ function SearchResults() {
   const initialData = Route.useLoaderData() // Dados do preload
   const parentRef = useRef<HTMLDivElement>(null)
   const columns = useGridColumns()
+  const { filterEvents } = useContentVisibilityFilter()
 
   // 1. Query Infinita com dados iniciais do Loader
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
@@ -129,7 +132,7 @@ function SearchResults() {
   })
 
   // 2. Batch profile fetch para todas as profiles da página
-  const allVideos = useMemo(() => data?.pages.flatMap((page) => page) ?? [], [data?.pages])
+  const allVideos = useMemo(() => filterEvents(data?.pages.flatMap((page) => page) ?? []), [data?.pages, filterEvents])
   const profiles = useBatchProfiles(allVideos)
   const activeFilters = useMemo(() => {
     const tagCount = Array.isArray(searchParams.tag) ? searchParams.tag.length : searchParams.tag ? 1 : 0
@@ -255,8 +258,8 @@ function SearchResults() {
                           role="link"
                           tabIndex={0}
                           className="block w-full focus:outline-none focus:ring-2 focus:ring-primary rounded-lg transition-transform hover:scale-[1.02] cursor-pointer"
-                          onClick={handleCardClick(e.encode())}
-                          onKeyDown={handleCardKeyDown(e.encode())}
+                          onClick={handleCardClick(getVideoRouteReference(e))}
+                          onKeyDown={handleCardKeyDown(getVideoRouteReference(e))}
                         >
                           <VideoCard event={e} profile={profiles[e.author?.pubkey]} />
                         </div>

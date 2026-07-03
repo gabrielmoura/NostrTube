@@ -1,7 +1,7 @@
 export interface BlossomServer {
-  url: string
-  name: string
-  region: string
+  url: string;
+  name: string;
+  region: string;
 }
 
 // Mock Blossom servers data
@@ -12,6 +12,8 @@ export const MOCK_BLOSSOM_SERVERS: BlossomServer[] = [
   { url: "https://internationalright-wing.org", name: "Organização da Direita Internacional", region: "BR" },
   { url: "https://cdn.satellite.earth", name: "Satellite CDN", region: "US" },
   { url: "https://media.nostr.band", name: "Nostr Band", region: "US" },
+  { url: "https://nostrmedia.com", name: "Nostr Media", region: "US" },
   { url: "https://blossom.primal.net", name: "Primal Storage", region: "EU" },
-  { url: "https://files.nostr.ch", name: "Nostr CH", region: "EU" }
+  { url: "https://files.nostr.ch", name: "Nostr CH", region: "EU" },
+  { url: "https://almond.slidestr.net", name: "Almond Slidestr", region: "EU" }
 ];

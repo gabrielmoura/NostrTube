@@ -1,6 +1,6 @@
 import type { NDKEvent } from '@nostr-dev-kit/ndk'
 import { NDKSubscriptionCacheUsage, useSubscribe } from '@nostr-dev-kit/ndk-hooks'
-import { createRoute, Link } from '@tanstack/react-router'
+import { createRoute, Link, useNavigate } from '@tanstack/react-router'
 import { uniqBy } from 'ramda'
 import { useMemo, useState } from 'react'
 import {
@@ -24,8 +24,10 @@ import { Section, SectionContent, SectionHeader, SectionTitle } from '@/componen
 import { useBatchProfiles } from '@/features/nostr/hooks/useBatchProfiles'
 import { useTopSupporters } from '@/features/zap/hooks/useTopSupporters'
 import { useZapStats } from '@/features/zap/hooks/useZapStats'
+import { useContentVisibilityFilter } from '@/features/nostr/hooks/useContentVisibilityFilter'
 import { filterEventsByAge } from '@/features/video/services/age-filter.service'
 import { VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
+import { getVideoRouteReference } from '@/features/video/services/video-reference.service'
 import { sortEventsByImages } from '@/helper/format.ts'
 import { cn } from '@/lib/utils'
 import { Route as rootRoute } from '@/routes/__root'
@@ -70,7 +72,9 @@ export const Route = createRoute({
 // ============================================================
 
 function TrendingPage() {
+  const navigate = useNavigate()
   const agePref = useUserStore((state) => state.session?.age)
+  const { filterEvents } = useContentVisibilityFilter()
 
   // --- Aba de tempo ---
   const [timeTab, setTimeTab] = useState<TimeTab>('week')
@@ -102,7 +106,7 @@ function TrendingPage() {
     [since],
   )
 
-  const filtered = useMemo(() => filterEventsByAge(events, agePref), [events, agePref])
+  const filtered = useMemo(() => filterEvents(filterEventsByAge(events, agePref)), [events, agePref, filterEvents])
   const processedEvents = useMemo(() => {
     if (!filtered.length) return []
     let result = uniqBy((e: NDKEvent) => {
@@ -394,11 +398,11 @@ function TrendingPage() {
                   )}
                   role="link"
                   tabIndex={0}
-                  onClick={() => window.open(`/v/${event.encode()}`, '_self')}
+                  onClick={() => navigate({ to: '/v/$eventId', params: { eventId: getVideoRouteReference(event) } })}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault()
-                      window.open(`/v/${event.encode()}`, '_self')
+                      navigate({ to: '/v/$eventId', params: { eventId: getVideoRouteReference(event) } })
                     }
                   }}
                 >

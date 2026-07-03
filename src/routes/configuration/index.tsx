@@ -21,6 +21,7 @@ export const ConfigurationSearchSchema = z.object({
       'imgproxy',
       'corsproxy',
       'dm-relays',
+      'presets',
       'profile',
       'account',
       'notifications',

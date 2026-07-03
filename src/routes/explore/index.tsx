@@ -25,6 +25,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import { useBatchProfiles } from '@/features/nostr/hooks/useBatchProfiles'
+import { useContentVisibilityFilter } from '@/features/nostr/hooks/useContentVisibilityFilter'
 import { VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
 import { getVideoRouteReference } from '@/features/video/services/video-reference.service'
 import { getTagValues } from '@/helper/nostrTags'
@@ -58,6 +59,7 @@ const CATEGORIES: { key: ExploreCategory; label: string; icon: typeof Compass }[
 
 // ─── Hook de dados ───────────────────────────────────────
 function useExploreData() {
+  const { filterEvents } = useContentVisibilityFilter()
   // Vídeos recentes (proxy para "destaque")
   const filterVideos: NDKFilter = {
     kinds: VIDEO_EVENT_KINDS,
@@ -70,11 +72,12 @@ function useExploreData() {
 
   // Perfis dos autores
   const profiles = useBatchProfiles(videoEvents)
+  const visibleVideoEvents = useMemo(() => filterEvents(videoEvents), [filterEvents, videoEvents])
 
   // Extrair hashtags únicas dos vídeos
   const trendingHashtags = useMemo(() => {
     const tagCount = new Map<string, number>()
-    videoEvents.forEach((ev: NDKEvent) => {
+    visibleVideoEvents.forEach((ev: NDKEvent) => {
       const tags = getTagValues('t', ev.tags)
       tags.forEach((tag: string) => {
         const normalized = tag.toLowerCase().trim()
@@ -82,12 +85,12 @@ function useExploreData() {
       })
     })
     return [...tagCount.entries()].sort((a, b) => b[1] - a[1]).slice(0, 20)
-  }, [videoEvents])
+  }, [visibleVideoEvents])
 
   // Autores únicos (canais)
   const uniqueAuthors = useMemo(() => {
     const seen = new Set<string>()
-    return videoEvents
+    return visibleVideoEvents
       .filter((ev: NDKEvent) => {
         if (ev.pubkey && !seen.has(ev.pubkey)) {
           seen.add(ev.pubkey)
@@ -96,15 +99,15 @@ function useExploreData() {
         return false
       })
       .slice(0, 12)
-  }, [videoEvents])
+  }, [visibleVideoEvents])
 
   // Vídeos em destaque (top 12 mais recentes)
   const featuredVideos = useMemo(() => {
-    return [...videoEvents].sort((a: NDKEvent, b: NDKEvent) => (b.created_at ?? 0) - (a.created_at ?? 0)).slice(0, 12)
-  }, [videoEvents])
+    return [...visibleVideoEvents].sort((a: NDKEvent, b: NDKEvent) => (b.created_at ?? 0) - (a.created_at ?? 0)).slice(0, 12)
+  }, [visibleVideoEvents])
 
   return {
-    videoEvents,
+    videoEvents: visibleVideoEvents,
     profiles,
     trendingHashtags,
     uniqueAuthors,

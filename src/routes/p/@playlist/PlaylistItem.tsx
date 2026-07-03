@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
+import { getVideoRouteReferenceFromParts } from "@/features/video/services/video-reference.service";
 
 interface PlaylistItemProps {
   item: VideoItem;
@@ -44,7 +45,7 @@ export const PlaylistItem = ({ item, onRemove, onPlay, canEdit = false }: Playli
   const formattedDate = new Date(item.publishedAt).toLocaleDateString(undefined, {
     day: "numeric", month: "short", year: "numeric"
   });
-  const routeReference = item.dTag || item.id;
+  const routeReference = getVideoRouteReferenceFromParts({ eventId: item.id, dTag: item.dTag });
 
   return (
     <div ref={setNodeRef} style={style} className="mb-2 sm:mb-3 touch-none outline-none">

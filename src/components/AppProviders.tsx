@@ -10,6 +10,7 @@ import { useNDK, useNDKCurrentUser, useNDKInit, useNDKSessionMonitor } from "@no
 import { ndkInstance, sessionStorage } from "@/lib/ndk"; // Importe do arquivo criado acima
 import { startNdkMessenger } from "@/lib/ndk-messages";
 import { initErrorLogging } from "@/features/debug/services/error-log.service.ts";
+import { PresetProvider } from "@/features/presets/context/PresetContext";
 
 // Configuração do QueryClient
 export const queryClient = new QueryClient({
@@ -70,15 +71,17 @@ export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <NDKInitializer>
         <QueryClientProvider client={queryClient}>
-          <Theme>
-            <NDKMessagingInitializer />
-            {children}
-            <Toaster />
-          <Modstr />
-          <OfflineDetector />
-          <Analytics />
-          <SpeedInsights />
-        </Theme>
+          <PresetProvider>
+            <Theme>
+              <NDKMessagingInitializer />
+              {children}
+              <Toaster />
+            <Modstr />
+            <OfflineDetector />
+            <Analytics />
+            <SpeedInsights />
+          </Theme>
+        </PresetProvider>
       </QueryClientProvider>
     </NDKInitializer>
   );

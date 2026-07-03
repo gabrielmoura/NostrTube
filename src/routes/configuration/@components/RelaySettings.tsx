@@ -2,9 +2,10 @@ import { useCallback, useEffect, useMemo, useState, type MouseEvent } from "reac
 import { useQuery } from "@tanstack/react-query";
 import { Activity, AlertCircle, Plus, RefreshCw, Wifi } from "lucide-react";
 import { checkLatency } from "@/helper/checkLatency.ts";
-import { Button, Card, CardContent, CardHeader } from "./CommonComponents.tsx";
+import { Badge, Button, Card, CardContent, CardHeader } from "./CommonComponents.tsx";
 import useUserStore from "@/store/useUserStore.ts";
 import { syncNdkRelayPool } from "@/lib/ndk";
+import { usePreset } from "@/features/presets/hooks/usePreset";
 import {
   Dialog,
   DialogContent,
@@ -81,7 +82,9 @@ function AddRelayDialog({ onAdd }: { onAdd: (relayUrl: string) => void }) {
 export const RelaySettings = () => {
   const storedRelays = useUserStore((state) => state.session?.relays);
   const setRelays = useUserStore((state) => state.setRelays);
+  const { activePreset } = usePreset();
   const defaultRelays = import.meta.env.VITE_NOSTR_RELAYS || [];
+  const presetRelays = activePreset?.content.defaultRelays ?? [];
   const [selectedRelays, setSelectedRelays] = useState<string[]>(() => storedRelays?.length ? storedRelays : defaultRelays);
   const [latencies, setLatencies] = useState<Record<string, number | null>>({});
   const [isPinging, setIsPinging] = useState(false);
@@ -110,15 +113,19 @@ export const RelaySettings = () => {
     const remoteRelays = data?.relays ?? [];
     return Array.from(new Set([
       ...selectedRelays,
+      ...presetRelays,
       ...remoteRelays.filter((relay) => relay.startsWith("ws://") || relay.startsWith("wss://")),
       ...defaultRelays
     ])).sort((left, right) => {
       const leftSelected = selectedRelays.includes(left) ? 0 : 1;
       const rightSelected = selectedRelays.includes(right) ? 0 : 1;
       if (leftSelected !== rightSelected) return leftSelected - rightSelected;
+      const leftPreset = presetRelays.includes(left) ? 0 : 1;
+      const rightPreset = presetRelays.includes(right) ? 0 : 1;
+      if (leftPreset !== rightPreset) return leftPreset - rightPreset;
       return left.localeCompare(right);
     });
-  }, [data?.relays, selectedRelays]);
+  }, [data?.relays, presetRelays, selectedRelays]);
 
   const pingAllRelays = useCallback(async () => {
     if (!validRelays.length) return;
@@ -223,6 +230,7 @@ export const RelaySettings = () => {
         <div className="h-64 space-y-1 overflow-y-auto pr-1">
           {validRelays.map((relayUrl) => {
             const isSelected = selectedRelays.includes(relayUrl);
+            const isPresetRelay = presetRelays.includes(relayUrl);
             const latency = latencies[relayUrl];
 
             return (
@@ -241,7 +249,10 @@ export const RelaySettings = () => {
                     <span className="w-full truncate text-sm font-medium text-zinc-700 dark:text-zinc-200">
                       {relayUrl.replace("wss://", "").replace("ws://", "")}
                     </span>
-                    <span className="truncate text-xs text-zinc-400">{relayUrl}</span>
+                    <span className="flex items-center gap-2 truncate text-xs text-zinc-400">
+                      {relayUrl}
+                      {isPresetRelay ? <Badge variant="outline">Preset</Badge> : null}
+                    </span>
                   </div>
                 </div>
 

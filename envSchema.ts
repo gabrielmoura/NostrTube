@@ -48,6 +48,7 @@ export default function envSchemaValidate() {
       VITE_MIN_PLAYLIST_POW: z.coerce.number().optional().default(10),
       VITE_NOSTR_FEEDBACK_RECIPIENT_NPUB: z.string().optional().default(DEFAULT_FEEDBACK_RECIPIENT_NPUB),
       VITE_NOSTR_DEVELOPER_PUBKEY: z.string().optional(),
+      VITE_DEFAULT_PRESET_PUBKEY: z.string().optional(),
     },
   })
 }

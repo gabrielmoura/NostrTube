@@ -3,6 +3,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { NDKEvent, type NDKFilter, NDKKind } from "@nostr-dev-kit/ndk";
 import { NDKSubscriptionCacheUsage, useSubscribe } from "@nostr-dev-kit/ndk-hooks";
 import { deduplicateEvents } from "@/helper/deduplicateEvents.ts";
+import { useContentVisibilityFilter } from "@/features/nostr/hooks/useContentVisibilityFilter";
 
 const VIDEO_KINDS = [NDKKind.Video, NDKKind.HorizontalVideo];
 const SEARCH_RELAYS = import.meta.env.VITE_NOSTR_SEARCH_RELAYS?.length > 5
@@ -14,14 +15,15 @@ export function useNostrInfiniteFeed(baseFilter: Partial<NDKFilter>, enabled = t
   const [allEvents, setAllEvents] = useState<NDKEvent[]>([]);
   const [until, setUntil] = useState<number | undefined>(undefined);
   const [isFetching, setIsFetching] = useState(false);
+  const { filterEvents } = useContentVisibilityFilter();
 
   // 1. Estabilização do Filtro:
   // O JSON.stringify garante que o filtro só mude se o CONTEÚDO mudar,
   // ignorando se a referência do objeto baseFilter é nova.
   const filterKey = JSON.stringify(baseFilter);
 
-  const filters: NDKFilter[] = useMemo(() => {
-    if (!enabled) return [];
+  const filters: NDKFilter[] | false = useMemo(() => {
+    if (!enabled) return false;
     return [{
       ...JSON.parse(filterKey),
       kinds: VIDEO_KINDS,
@@ -67,7 +69,7 @@ export function useNostrInfiniteFeed(baseFilter: Partial<NDKFilter>, enabled = t
   }, [allEvents, isFetching]);
 
   return {
-    events: allEvents,
+    events: filterEvents(allEvents),
     isLoading: allEvents.length === 0 && isFetching,
     isFetchingNextPage: isFetching,
     fetchNextPage

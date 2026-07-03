@@ -6,6 +6,7 @@ import type React from "react";
 import VideoCard, { VideoCardLoading } from "@/components/cards/videoCard";
 import { getVideosFromSearchData } from "@/helper/loaders/getVideosFromSearchData";
 import { filterEventsByAge } from "@/features/video/services/age-filter.service";
+import { getVideoRouteReference } from "@/features/video/services/video-reference.service";
 import useUserStore from "@/store/useUserStore";
 
 interface RecommendationRailProps {
@@ -67,8 +68,8 @@ export function RecommendationRail({ title, subtitle, tags, excludeEventId }: Re
               role="link"
               tabIndex={0}
               className="block w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
-              onClick={handleCardClick(event.encode())}
-              onKeyDown={handleCardKeyDown(event.encode())}
+              onClick={handleCardClick(getVideoRouteReference(event))}
+              onKeyDown={handleCardKeyDown(getVideoRouteReference(event))}
             >
               <VideoCard event={event} />
             </div>
