@@ -2,6 +2,7 @@ import { createRootRouteWithContext, HeadContent, Outlet } from "@tanstack/react
 import NDK__default from "@nostr-dev-kit/ndk";
 import type { QueryClient } from "@tanstack/react-query";
 import { Devtools } from "@/Devtools.tsx";
+import { GlobalNotFound } from "@/components/layout/GlobalNotFound";
 
 interface NdkContext {
   ndk: NDK__default;
@@ -10,6 +11,7 @@ interface NdkContext {
 
 export const Route = createRootRouteWithContext<NdkContext>()({
   component: RootComponent,
+  notFoundComponent: GlobalNotFound,
   head: () => ({
     meta: [
       {

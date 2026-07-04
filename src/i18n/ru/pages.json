@@ -7,5 +7,20 @@
   "search_page_title": "Поиск видео",
   "Trending": "В тренде",
   "Popular": "Популярное",
-  "By Language": "По языку"
+  "By Language": "По языку",
+  "notFound_badge": "Страница не найдена",
+  "notFound_headline": "Похоже, вы потерялись во вселенной Nostr",
+  "notFound_description": "Маршрут, который вы пытались открыть, не существует или был удалён. Используйте ярлыки ниже.",
+  "notFound_goHome": "На главную",
+  "notFound_goBack": "Назад",
+  "notFound_quicklinks_title": "Быстрые ссылки",
+  "notFound_tip": "Совет: используйте {{link}} для поиска любого контента в сети Nostr.",
+  "notFound_search_label": "Поиск",
+  "notFound_search_description": "Найдите видео и авторов",
+  "notFound_trending_label": "Тренды",
+  "notFound_trending_description": "Что сейчас популярно",
+  "notFound_explore_label": "Исследовать",
+  "notFound_explore_description": "Открывайте новый контент",
+  "notFound_live_label": "Эфир",
+  "notFound_live_description": "Прямые трансляции"
 }

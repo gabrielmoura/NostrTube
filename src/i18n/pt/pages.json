@@ -7,5 +7,20 @@
   "search_page_title": "Pesquisar vídeos",
   "Trending": "Tendências",
   "Popular": "Populares",
-  "By Language": "Por Idioma"
+  "By Language": "Por Idioma",
+  "notFound_badge": "Página não encontrada",
+  "notFound_headline": "Parece que você se perdeu no universo Nostr",
+  "notFound_description": "A rota que você tentou acessar não existe ou foi removida. Use os atalhos abaixo para encontrar o que procura.",
+  "notFound_goHome": "Início",
+  "notFound_goBack": "Voltar",
+  "notFound_quicklinks_title": "Atalhos rápidos",
+  "notFound_tip": "Dica: use {{link}} para pesquisar qualquer conteúdo na rede Nostr.",
+  "notFound_search_label": "Pesquisar",
+  "notFound_search_description": "Encontre vídeos e criadores",
+  "notFound_trending_label": "Trending",
+  "notFound_trending_description": "O que está em alta agora",
+  "notFound_explore_label": "Explorar",
+  "notFound_explore_description": "Descubra novos conteúdos",
+  "notFound_live_label": "Ao vivo",
+  "notFound_live_description": "Transmissões em tempo real"
 }

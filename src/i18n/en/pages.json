@@ -7,5 +7,20 @@
   "search_page_title": "Search Videos",
   "Trending": "Trending",
   "Popular": "Popular",
-  "By Language": "By Language"
+  "By Language": "By Language",
+  "notFound_badge": "Page not found",
+  "notFound_headline": "Looks like you got lost in the Nostr universe",
+  "notFound_description": "The route you tried to access doesn't exist or was removed. Use the shortcuts below to find what you're looking for.",
+  "notFound_goHome": "Home",
+  "notFound_goBack": "Go back",
+  "notFound_quicklinks_title": "Quick shortcuts",
+  "notFound_tip": "Tip: use {{link}} to search any content on the Nostr network.",
+  "notFound_search_label": "Search",
+  "notFound_search_description": "Find videos and creators",
+  "notFound_trending_label": "Trending",
+  "notFound_trending_description": "What's hot right now",
+  "notFound_explore_label": "Explore",
+  "notFound_explore_description": "Discover new content",
+  "notFound_live_label": "Live",
+  "notFound_live_description": "Real-time streams"
 }
