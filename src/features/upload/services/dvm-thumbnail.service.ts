@@ -1,6 +1,7 @@
 import NDK, { NDKEvent, type NDKFilter } from '@nostr-dev-kit/ndk'
 import { NDKSubscriptionCacheUsage } from '@nostr-dev-kit/ndk-hooks'
 import { nip19 } from 'nostr-tools'
+import { DvmConfigurationError, DvmEncryptionUnavailableError } from '@/errors'
 import { nostrNow } from '@/helper/date'
 
 const DVM_NPUB = 'npub1q8cv87l47fql2xer2uyw509y5n5s9f53h76hvf9377efdptmsvusxf3n8s'
@@ -14,7 +15,7 @@ export interface DvmThumbnailResult {
 function getDvmPubkey() {
   const decoded = nip19.decode(DVM_NPUB)
   if (decoded.type !== 'npub') {
-    throw new Error('Invalid DVM public key')
+    throw new DvmConfigurationError('Invalid DVM public key')
   }
   return decoded.data as string
 }
@@ -26,7 +27,7 @@ async function encryptPayload(pubkey: string, payload: object): Promise<string> 
     return window.nostr.nip04.encrypt(pubkey, plaintext)
   }
 
-  throw new Error('NIP-04 encryption is not available in this session')
+  throw new DvmEncryptionUnavailableError('NIP-04 encryption is not available in this session')
 }
 
 export async function requestDvmThumbnails({

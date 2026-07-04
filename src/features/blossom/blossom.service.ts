@@ -2,6 +2,7 @@ import NDK, { NDKEvent, type NDKRawEvent, type NDKSigner } from '@nostr-dev-kit/
 import type { BlobDescriptor, EventTemplate, SignedEvent } from 'blossom-client-sdk'
 import { BlossomClient } from 'blossom-client-sdk'
 import { MOCK_BLOSSOM_SERVERS } from '@/default'
+import { BlossomDeleteError } from '@/errors'
 import { fetchEventCached } from '@/features/nostr/services/ndk-query.service'
 import { normalizeBlossomServerUrl } from '@/features/upload/services/blossom-server.service'
 import type {
@@ -153,7 +154,7 @@ export async function deleteBlossomFile({
   file: BlossomFileRecord
   servers: string[]
 }): Promise<Array<{ serverUrl: string; ok: boolean; message?: string }>> {
-  if (!file.hash) throw new Error('Arquivo sem hash SHA-256 para deleção Blossom.')
+  if (!file.hash) throw new BlossomDeleteError('Arquivo sem hash SHA-256 para deleção Blossom.', { fileId: file.id })
   const signerAdapter = createBlossomSigner(ndk, signer)
   const targets = Array.from(new Set([file.blossomServerUrl, ...servers].filter(isValidBlossomUrl)))
 

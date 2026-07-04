@@ -1,6 +1,7 @@
 import NDK, { NDKEvent } from '@nostr-dev-kit/ndk'
 import { NDKBlossom } from '@nostr-dev-kit/ndk-blossom'
 import { MOCK_BLOSSOM_SERVERS } from '@/default'
+import { BlossomConfigurationError, BlossomMirrorError, BlossomUploadError } from '@/errors'
 import { PresetCacheService } from '@/features/presets/services/PresetCacheService'
 import { LoggerAgent } from '@/lib/debug'
 import useUserStore from '@/store/useUserStore'
@@ -165,7 +166,12 @@ async function uploadToSpecificServerDirect(
 
   if (!response.ok) {
     const body = await response.text().catch(() => '')
-    throw new Error(body || `Upload request failed with status ${response.status}`)
+    throw new BlossomUploadError(body || `Upload request failed with status ${response.status}`, {
+      server,
+      status: response.status,
+      fileName: file.name,
+      fileSize: file.size,
+    })
   }
 
   const text = await response.text()
@@ -221,7 +227,13 @@ async function mirrorToServer(
 
   if (!response.ok) {
     const body = await response.text()
-    throw new Error(body || `Mirror request failed with status ${response.status}`)
+    throw new BlossomMirrorError(body || `Mirror request failed with status ${response.status}`, {
+      server,
+      status: response.status,
+      sourceUrl,
+      sha256,
+      fileName,
+    })
   }
 
   return response.json() as Promise<BlossomMediaUploadResult>
@@ -243,7 +255,7 @@ export async function uploadToConfiguredBlossomServers({
   const { primary, mirrors, available } = getConfiguredBlossomServers()
   const uploadCandidates = uniqueStrings([primary, ...available])
   if (uploadCandidates.length === 0) {
-    throw new Error('No Blossom server configured')
+    throw new BlossomConfigurationError()
   }
 
   let primaryUpload: BlossomMediaUploadResult | undefined
@@ -268,7 +280,12 @@ export async function uploadToConfiguredBlossomServers({
   }
 
   if (!primaryUpload || !selectedServer) {
-    throw new Error(`Upload failed on all configured Blossom servers: ${uploadErrors.join('; ')}`)
+    throw new BlossomUploadError(
+      `Upload failed on all configured Blossom servers: ${uploadErrors.join('; ')}`,
+      { label, fileName: file.name, fileSize: file.size, uploadErrors },
+      undefined,
+      'medium',
+    )
   }
 
   const sha256 = primaryUpload.x || primaryUpload.sha256

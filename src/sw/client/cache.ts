@@ -1,6 +1,7 @@
 // Utility functions to interact with service worker cache using RPC
 
 import { firstValueFrom } from 'rxjs'
+import { ServiceWorkerUnavailableError } from '@/errors'
 import type { CachedFile, CacheInfo } from '../worker/cache'
 import { serviceWorkerRPC } from './rpc'
 
@@ -8,37 +9,37 @@ const client = serviceWorkerRPC
 
 // Get all cached files from all caches
 export const getAllCachedFiles = async (): Promise<CacheInfo[]> => {
-  if (!client) throw new Error('Service worker not available')
+  if (!client) throw new ServiceWorkerUnavailableError()
   return await firstValueFrom(client.call('cache.getAll', void 0))
 }
 
 // Get cached files for a specific cache
 export const getCachedFilesByName = async (cacheName: string): Promise<CachedFile[]> => {
-  if (!client) throw new Error('Service worker not available')
+  if (!client) throw new ServiceWorkerUnavailableError(undefined, { cacheName })
   return await firstValueFrom(client.call('cache.getByName', { cacheName }))
 }
 
 // Clear a specific cache
 export const clearCache = async (cacheName: string): Promise<void> => {
-  if (!client) throw new Error('Service worker not available')
+  if (!client) throw new ServiceWorkerUnavailableError(undefined, { cacheName })
   return await firstValueFrom(client.call('cache.clear', { cacheName }))
 }
 
 // Clear all caches
 export const clearAllCaches = async (): Promise<string[]> => {
-  if (!client) throw new Error('Service worker not available')
+  if (!client) throw new ServiceWorkerUnavailableError()
   return await firstValueFrom(client.call('cache.clearAll', void 0))
 }
 
 // Get cache statistics
 export const getCacheStats = async (): Promise<{ totalCaches: number; totalFiles: number; totalSize: number }> => {
-  if (!client) throw new Error('Service worker not available')
+  if (!client) throw new ServiceWorkerUnavailableError()
   return await firstValueFrom(client.call('cache.getStats', void 0))
 }
 
 // Refresh offline cache
 export const refreshOfflineCache = async (): Promise<number> => {
-  if (!client) throw new Error('Service worker not available')
+  if (!client) throw new ServiceWorkerUnavailableError()
   return await firstValueFrom(client.call('cache.refresh', void 0))
 }
 

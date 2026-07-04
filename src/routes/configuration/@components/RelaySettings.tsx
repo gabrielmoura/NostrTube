@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { RelayDirectoryError } from '@/errors'
 import { usePreset } from '@/features/presets/hooks/usePreset'
 import { checkLatency } from '@/helper/checkLatency.ts'
 import { syncNdkRelayPool } from '@/lib/ndk'
@@ -105,7 +106,10 @@ export const RelaySettings = () => {
     queryFn: async (): Promise<DufflePudRelaysResponse> => {
       const response = await fetch(import.meta.env.VITE_DUFFLEPUD_URL as string)
       if (!response.ok) {
-        throw new Error('Relay directory request failed')
+        throw new RelayDirectoryError(undefined, {
+          relayDirectoryUrl: import.meta.env.VITE_DUFFLEPUD_URL,
+          status: response.status,
+        })
       }
       return response.json()
     },

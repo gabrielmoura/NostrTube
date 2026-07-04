@@ -1,4 +1,5 @@
 import { encode } from 'blurhash'
+import { MediaProcessingError, ThumbnailCanvasError, ThumbnailGenerationError } from '@/errors'
 import { processVideoWithFFmpeg } from '@/features/upload/services/ffmpeg-media-processing.service'
 import type { ThumbnailGenerationMode } from '@/store/useUploadPreferencesStore'
 
@@ -25,7 +26,7 @@ function readFileAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = () => resolve(String(reader.result))
-    reader.onerror = () => reject(new Error('Unable to read file as data URL'))
+    reader.onerror = () => reject(new MediaProcessingError('Unable to read file as data URL', { fileName: file.name }))
     reader.readAsDataURL(file)
   })
 }
@@ -34,7 +35,7 @@ function loadImageElement(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const image = new Image()
     image.onload = () => resolve(image)
-    image.onerror = () => reject(new Error('Unable to load image for processing'))
+    image.onerror = () => reject(new MediaProcessingError('Unable to load image for processing', { src }))
     image.src = src
   })
 }
@@ -78,7 +79,7 @@ export async function extractVideoMetadataLocally(
 
     video.onerror = () => {
       cleanup()
-      reject(new Error('Unable to load video metadata'))
+      reject(new MediaProcessingError('Unable to load video metadata', { fileName: file.name, fileSize: file.size }))
     }
 
     video.onloadedmetadata = () => {
@@ -112,7 +113,7 @@ export async function generateVideoThumbnailLocally(file: File, seekToSeconds = 
 
     video.onerror = () => {
       cleanup()
-      reject(new Error('Unable to load video for thumbnail generation'))
+      reject(new ThumbnailGenerationError('Unable to load video for thumbnail generation', { fileName: file.name }))
     }
 
     video.onloadedmetadata = () => {
@@ -130,7 +131,7 @@ export async function generateVideoThumbnailLocally(file: File, seekToSeconds = 
         canvas.height = video.videoHeight
         const context = canvas.getContext('2d')
         if (!context) {
-          throw new Error('Unable to create thumbnail canvas context')
+          throw new ThumbnailCanvasError(undefined, { fileName: file.name, source: 'local-file' })
         }
 
         context.drawImage(video, 0, 0, canvas.width, canvas.height)
@@ -138,7 +139,7 @@ export async function generateVideoThumbnailLocally(file: File, seekToSeconds = 
           canvas.toBlob(
             (nextBlob) => {
               if (!nextBlob) {
-                rejectBlob(new Error('Unable to export thumbnail blob'))
+                rejectBlob(new ThumbnailGenerationError('Unable to export thumbnail blob', { fileName: file.name }))
                 return
               }
               resolveBlob(nextBlob)
@@ -162,7 +163,11 @@ export async function generateVideoThumbnailLocally(file: File, seekToSeconds = 
         })
       } catch (error) {
         cleanup()
-        reject(error instanceof Error ? error : new Error('Unknown thumbnail generation error'))
+        reject(
+          error instanceof Error
+            ? error
+            : new ThumbnailGenerationError('Unknown thumbnail generation error', { fileName: file.name }),
+        )
       }
     }
   })
@@ -269,7 +274,7 @@ export async function generateVideoThumbnailFromUrl(
 
     video.onerror = () => {
       cleanup()
-      reject(new Error('Unable to load external video for thumbnail generation'))
+      reject(new ThumbnailGenerationError('Unable to load external video for thumbnail generation', { url, filename }))
     }
 
     video.onloadedmetadata = () => {
@@ -287,7 +292,7 @@ export async function generateVideoThumbnailFromUrl(
         canvas.height = video.videoHeight
         const context = canvas.getContext('2d')
         if (!context) {
-          throw new Error('Unable to create thumbnail canvas context')
+          throw new ThumbnailCanvasError(undefined, { url, filename, source: 'external-url' })
         }
 
         context.drawImage(video, 0, 0, canvas.width, canvas.height)
@@ -295,7 +300,7 @@ export async function generateVideoThumbnailFromUrl(
           canvas.toBlob(
             (nextBlob) => {
               if (!nextBlob) {
-                rejectBlob(new Error('Unable to export thumbnail blob'))
+                rejectBlob(new ThumbnailGenerationError('Unable to export thumbnail blob', { url, filename }))
                 return
               }
               resolveBlob(nextBlob)
@@ -319,7 +324,11 @@ export async function generateVideoThumbnailFromUrl(
         })
       } catch (error) {
         cleanup()
-        reject(error instanceof Error ? error : new Error('Unknown external thumbnail generation error'))
+        reject(
+          error instanceof Error
+            ? error
+            : new ThumbnailGenerationError('Unknown external thumbnail generation error', { url, filename }),
+        )
       }
     }
   })

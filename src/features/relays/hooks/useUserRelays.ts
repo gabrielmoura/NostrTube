@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
+import { RelayDirectoryError } from '@/errors'
 import { normalizeRelayUrls, syncNdkRelayPool } from '@/lib/ndk'
 import useUserStore from '@/store/useUserStore'
 
@@ -21,7 +22,10 @@ export function useUserRelays() {
     queryFn: async (): Promise<DufflePudRelaysResponse> => {
       const response = await fetch(import.meta.env.VITE_DUFFLEPUD_URL as string)
       if (!response.ok) {
-        throw new Error('Relay directory request failed')
+        throw new RelayDirectoryError(undefined, {
+          relayDirectoryUrl: import.meta.env.VITE_DUFFLEPUD_URL,
+          status: response.status,
+        })
       }
       return response.json()
     },

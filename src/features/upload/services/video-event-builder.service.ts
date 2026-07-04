@@ -1,5 +1,6 @@
 import { imetaTagToTag } from '@nostr-dev-kit/ndk'
 import { ulid } from 'ulid'
+import { VideoEventBuildError } from '@/errors'
 import { NORMAL_VIDEO_KIND, resolvePublishVideoKind } from '@/features/video/services/video-kinds'
 import { nostrNow } from '@/helper/date'
 import useUserStore from '@/store/useUserStore'
@@ -71,7 +72,7 @@ export function buildAddressableVideoEvent({
   identifier: providedIdentifier,
 }: BuildAddressableVideoEventParams) {
   if (!draft.title) {
-    throw new Error('Title is required to publish a video event')
+    throw new VideoEventBuildError('Title is required to publish a video event', { field: 'title' })
   }
 
   const appName = import.meta.env.VITE_APP_NAME || 'NostrTube'
@@ -81,7 +82,7 @@ export function buildAddressableVideoEvent({
   const kind = resolvePublishVideoKind(draft)
 
   if (imetaTags.length === 0) {
-    throw new Error('At least one imeta tag is required to publish a video event')
+    throw new VideoEventBuildError('At least one imeta tag is required to publish a video event', { field: 'imeta' })
   }
 
   const tags: string[][] = [

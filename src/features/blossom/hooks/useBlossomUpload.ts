@@ -2,6 +2,12 @@ import { useNDK } from '@nostr-dev-kit/ndk-hooks'
 import { useAsyncQueuer } from '@tanstack/react-pacer'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import {
+  BlossomAuthError,
+  BlossomConfigurationError,
+  BlossomFileTooLargeError,
+  BlossomUploadRequirementError,
+} from '@/errors'
 import { uploadToConfiguredBlossomServers } from '@/features/upload/services/blossom-server.service'
 import { useThrottledProgress } from '@/hooks/useThrottledProgress'
 import { validateBud06UploadRequirements } from '../blossom.service'
@@ -42,14 +48,17 @@ export function useBlossomUpload({
   const blossomUploadQueue = useAsyncQueuer<UploadJob>(
     async ({ file }) => {
       if (!ndk) {
-        throw new Error('Faça login para assinar o upload Blossom.')
+        throw new BlossomAuthError('Faça login para assinar o upload Blossom.')
       }
       if (!hasUserConfiguration && !defaultServer) {
-        throw new Error('Configure um servidor Blossom antes de enviar.')
+        throw new BlossomConfigurationError('Configure um servidor Blossom antes de enviar.')
       }
 
       if (file.size > BLOSSOM_MAX_FILE_SIZE_BYTES) {
-        throw new Error(`${file.name} excede o limite de 4GB.`)
+        throw new BlossomFileTooLargeError(`${file.name} excede o limite de 4GB.`, {
+          fileName: file.name,
+          fileSize: file.size,
+        })
       }
 
       setState({ status: 'uploading', progress: 4, error: null })
@@ -62,7 +71,11 @@ export function useBlossomUpload({
           size: file.size,
         })
         if (!requirements.ok) {
-          throw new Error(requirements.message)
+          throw new BlossomUploadRequirementError(requirements.message, {
+            fileName: file.name,
+            mimeType: file.type || 'application/octet-stream',
+            serverUrl: defaultServer,
+          })
         }
       }
 

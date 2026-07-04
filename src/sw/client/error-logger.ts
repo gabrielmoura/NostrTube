@@ -1,24 +1,25 @@
 // Utility functions to interact with service worker error logs using RPC
 
 import { firstValueFrom } from 'rxjs'
+import { ServiceWorkerUnavailableError } from '@/errors'
 import type { ServiceWorkerErrorLog } from '../worker/error-handler'
 import { serviceWorkerRPC as client } from './rpc'
 
 // Get all error logs from the service worker
 export const getServiceWorkerErrorLogs = async (): Promise<ServiceWorkerErrorLog[]> => {
-  if (!client) throw new Error('Service worker not available')
+  if (!client) throw new ServiceWorkerUnavailableError()
   return await firstValueFrom(client.call('errors.getAll', void 0))
 }
 
 // Clear error logs from the service worker
 export const clearServiceWorkerErrorLogs = async (): Promise<void> => {
-  if (!client) throw new Error('Service worker not available')
+  if (!client) throw new ServiceWorkerUnavailableError()
   return await firstValueFrom(client.call('errors.clear', void 0))
 }
 
 // Get error logs by context from the service worker
 export const getServiceWorkerErrorLogsByContext = async (context: string): Promise<ServiceWorkerErrorLog[]> => {
-  if (!client) throw new Error('Service worker not available')
+  if (!client) throw new ServiceWorkerUnavailableError(undefined, { context })
   return await firstValueFrom(client.call('errors.getByContext', { context }))
 }
 

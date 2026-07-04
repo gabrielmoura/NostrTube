@@ -1,6 +1,7 @@
 import { CacheModuleStorage, type NDKMessage, NDKMessenger } from '@nostr-dev-kit/messages'
 import NDK, { giftWrap, type NDKEvent, NDKKind, NDKRelaySet, NDKUser } from '@nostr-dev-kit/ndk'
 import { FEEDBACK_DEV_RELAYS } from '@/config/feedback.const.ts'
+import { MessengerNotReadyError, RecipientResolutionError, SignerUnavailableError } from '@/errors'
 
 const messengers = new Map<string, NDKMessenger>()
 
@@ -38,7 +39,7 @@ export async function startNdkMessenger(ndk: NDK): Promise<void> {
 export async function publishDmRelayList(ndk: NDK, relays: string[]): Promise<void> {
   const messenger = await getNdkMessenger(ndk)
   if (!messenger) {
-    throw new Error('Messenger is not ready for the current user session')
+    throw new MessengerNotReadyError()
   }
 
   await messenger.publishDMRelays(relays)
@@ -52,7 +53,7 @@ export async function resolveMessageRecipient(ndk: NDK, lookup: string, pubkeyFa
     return ndk.getUser({ pubkey: pubkeyFallback }) || new NDKUser({ pubkey: pubkeyFallback })
   }
 
-  throw new Error('Could not resolve Nostr recipient for private message.')
+  throw new RecipientResolutionError(undefined, { lookup, hasPubkeyFallback: Boolean(pubkeyFallback) })
 }
 
 export async function sendPrivateMessage(
@@ -63,7 +64,7 @@ export async function sendPrivateMessage(
 ): Promise<NDKMessage> {
   const messenger = await getNdkMessenger(ndk)
   if (!messenger) {
-    throw new Error('Messenger is not ready for the current user session')
+    throw new MessengerNotReadyError()
   }
 
   const recipient = await resolveMessageRecipient(ndk, recipientLookup, pubkeyFallback)
@@ -116,7 +117,7 @@ export async function sendPrivateMessageEvent(
   publishedRelays: Set<import('@nostr-dev-kit/ndk').NDKRelay>
 }> {
   if (!ndk.signer) {
-    throw new Error('No signer available for private message delivery.')
+    throw new SignerUnavailableError('No signer available for private message delivery.')
   }
 
   const recipient = await resolveMessageRecipient(ndk, recipientLookup, pubkeyFallback)

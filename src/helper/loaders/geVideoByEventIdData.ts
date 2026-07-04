@@ -1,6 +1,7 @@
 import NDK__default from '@nostr-dev-kit/ndk'
 import { notFound } from '@tanstack/react-router'
 import { nip19 } from 'nostr-tools'
+import { InvalidIdError, MissingFieldError } from '@/errors'
 import { fetchVideoEventByReference } from '@/features/nostr/services/ndk-query.service'
 
 const VIDEO_LOOKUP_TIMEOUT_MS = 12_000
@@ -20,8 +21,8 @@ async function withVideoLookupTimeout<T>(promise: Promise<T>): Promise<T | null>
 }
 
 export async function geVideoByEventIdData({ ndk, eventId }: GeVideoByEventIdDataParams) {
-  if (!eventId) throw new Error('No ID provided')
-  if (eventId.length <= 5) throw new Error('ID invalid')
+  if (!eventId) throw new MissingFieldError('No ID provided', 'eventId')
+  if (eventId.length <= 5) throw new InvalidIdError('ID invalid', { eventId })
 
   let event = await withVideoLookupTimeout(fetchVideoEventByReference(ndk, eventId, { mode: 'cache-first' }))
 
