@@ -24,5 +24,17 @@
   "Disclaimer": "Aviso Legal",
   "disclaimer_text": "Ao usar este serviço, você confirma que este vídeo pertence a você ou que você tem o direito de publicá-lo.",
   "go_to_video": "Ir para o vídeo",
-  "video_metadata": "Metadados do vídeo"
+  "video_metadata": "Metadados do vídeo",
+  "profile": "Perfil",
+  "notifications": "Notificações",
+  "logged_in": "Logado",
+  "anonymous": "Anônimo",
+  "go_to_homepage": "Ir para a página inicial do NostrTube",
+  "open_navigation": "Abrir navegação",
+  "user_menu": "Menu do usuário",
+  "search_placeholder": "Buscar vídeos, criadores ou tags",
+  "relays_count": "{{count}} relays",
+  "login": "Entrar",
+  "logout": "Sair",
+  "user": "Usuário"
 }

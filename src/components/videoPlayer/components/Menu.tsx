@@ -1,6 +1,6 @@
-import { AirPlayButton, Menu } from "@vidstack/react";
-import { AirPlayIcon, SettingsIcon } from "@vidstack/react/icons";
-import { SpeedSubmenu } from "@/components/videoPlayer/components/SpeedSubmenu.tsx";
+import { AirPlayButton, Menu } from '@vidstack/react'
+import { AirPlayIcon, SettingsIcon } from '@vidstack/react/icons'
+import { SpeedSubmenu } from '@/components/videoPlayer/components/SpeedSubmenu.tsx'
 
 export function Menus() {
   return (
@@ -30,13 +30,11 @@ export function Menus() {
         <div className="my-2 h-px bg-white/10" />
 
         {/* AirPlay */}
-        <AirPlayButton
-          className="group inline-flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-white/90 outline-none transition-colors duration-150 hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-primary"
-        >
+        <AirPlayButton className="group inline-flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-white/90 outline-none transition-colors duration-150 hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-primary">
           <AirPlayIcon className="w-6 h-6 shrink-0" />
           <span className="text-sm">Transmitir via AirPlay</span>
         </AirPlayButton>
       </Menu.Items>
     </Menu.Root>
-  );
+  )
 }

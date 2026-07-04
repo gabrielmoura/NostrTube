@@ -17,7 +17,10 @@ export function isEventHiddenByPreset(event: Pick<NDKEvent, 'id' | 'pubkey'>, pr
   return isEventBlockedByPreset(event.id, preset) || isPubkeyBlockedByPreset(event.pubkey, preset)
 }
 
-export function filterEventsByPreset<T extends Pick<NDKEvent, 'id' | 'pubkey'>>(events: T[], preset: NostubePreset | null): T[] {
+export function filterEventsByPreset<T extends Pick<NDKEvent, 'id' | 'pubkey'>>(
+  events: T[],
+  preset: NostubePreset | null,
+): T[] {
   if (!preset) return events
   return events.filter((event) => !isEventHiddenByPreset(event, preset))
 }

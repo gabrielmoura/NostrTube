@@ -1,26 +1,26 @@
 /// <reference lib="webworker" />
-import debug from "debug";
-import { initializeCache, registerCacheHandlers } from "./cache";
-import { setupErrorHandling } from "./error-handler";
+import debug from 'debug'
+import { initializeCache, registerCacheHandlers } from './cache'
+import { setupErrorHandling } from './error-handler'
 
 // Enable all debug logs for worker
-debug.enable(`${import.meta.env.VITE_APP_NAME}:*`);
+debug.enable(`${import.meta.env.VITE_APP_NAME}:*`)
 
-declare let self: ServiceWorkerGlobalScope;
+declare let self: ServiceWorkerGlobalScope
 
 // Initialize error handling
-setupErrorHandling();
+setupErrorHandling()
 
-console.log("Service worker initializing...");
+console.log('Service worker initializing...')
 
 // Only initialize cache management if running on web
 // if (CAP_IS_WEB) {
-console.log("Running on web platform - initializing offline cache");
+console.log('Running on web platform - initializing offline cache')
 // Initialize cache management
-initializeCache();
+initializeCache()
 
 // Register cache RPC handlers
-registerCacheHandlers();
+registerCacheHandlers()
 
 // Register navigation route for SPA fallback
 // Only allow the root path in development to avoid intercepting all routes
@@ -36,17 +36,17 @@ registerCacheHandlers();
 // }
 
 // Handle messages from the main thread
-self.addEventListener("message", (event) => {
-  if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
-});
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting()
+})
 
 // Service worker lifecycle events
-self.addEventListener("install", (event) => {
-  console.log("Service worker installed");
-});
+self.addEventListener('install', (event) => {
+  console.log('Service worker installed')
+})
 
-self.addEventListener("activate", (event) => {
-  console.log("Service worker activated");
-});
+self.addEventListener('activate', (event) => {
+  console.log('Service worker activated')
+})
 
-console.log("Service worker initialization completed");
+console.log('Service worker initialization completed')

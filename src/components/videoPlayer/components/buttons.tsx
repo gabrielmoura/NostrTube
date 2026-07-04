@@ -8,45 +8,43 @@ import {
   PlayButton,
   Tooltip,
   type TooltipPlacement,
-  useMediaState
-} from "@vidstack/react";
+  useMediaState,
+} from '@vidstack/react'
+
+import { ChromecastIcon } from '@vidstack/react/icons'
 
 import {
-  ChromecastIcon,
-} from "@vidstack/react/icons";
-
-import {
-  RiClosedCaptioningFill as SubtitlesIcon,
   RiFullscreenExitFill as FullscreenExitIcon,
   RiFullscreenFill as FullscreenIcon,
-  RiPauseFill as PauseIcon,
-  RiPictureInPicture2Fill as PictureInPictureIcon,
-  RiPictureInPictureExitFill as PictureInPictureExitIcon,
-  RiPlayFill as PlayIcon,
-  RiVolumeDownFill as VolumeLowIcon,
   RiVolumeMuteFill as MuteIcon,
-  RiVolumeUpFill as VolumeHighIcon
-} from "react-icons/ri";
+  RiPauseFill as PauseIcon,
+  RiPictureInPictureExitFill as PictureInPictureExitIcon,
+  RiPictureInPicture2Fill as PictureInPictureIcon,
+  RiPlayFill as PlayIcon,
+  RiClosedCaptioningFill as SubtitlesIcon,
+  RiVolumeUpFill as VolumeHighIcon,
+  RiVolumeDownFill as VolumeLowIcon,
+} from 'react-icons/ri'
 
 export interface MediaButtonProps {
-  tooltipOffset?: number;
-  tooltipPlacement?: TooltipPlacement;
+  tooltipOffset?: number
+  tooltipPlacement?: TooltipPlacement
 }
 
 // 🎨 Base de estilo para botões do player
 export const buttonClass =
-  "group relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md bg-black/35 text-white shadow-sm outline-none ring-1 ring-white/10 transition-all duration-200 hover:bg-white/15 hover:text-white focus-visible:ring-2 focus-visible:ring-primary active:scale-95 disabled:cursor-not-allowed disabled:opacity-40";
+  'group relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md bg-black/35 text-white shadow-sm outline-none ring-1 ring-white/10 transition-all duration-200 hover:bg-white/15 hover:text-white focus-visible:ring-2 focus-visible:ring-primary active:scale-95 disabled:cursor-not-allowed disabled:opacity-40'
 
 // 🎨 Base de estilo para tooltips
 export const tooltipClass =
-  "animate-out fade-out slide-out-to-bottom-2 data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in data-[state=delayed-open]:slide-in-from-bottom-4 z-10 rounded-md bg-black/90 px-2 py-1 text-sm font-medium text-white/90 shadow backdrop-blur-sm";
+  'animate-out fade-out slide-out-to-bottom-2 data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in data-[state=delayed-open]:slide-in-from-bottom-4 z-10 rounded-md bg-black/90 px-2 py-1 text-sm font-medium text-white/90 shadow backdrop-blur-sm'
 
 // ----------------------------- //
 //           BOTÕES              //
 // ----------------------------- //
 
 export function Play({ tooltipOffset: _tooltipOffset = 0, tooltipPlacement }: MediaButtonProps) {
-  const isPaused = useMediaState("paused");
+  const isPaused = useMediaState('paused')
 
   return (
     <Tooltip.Root>
@@ -59,26 +57,18 @@ export function Play({ tooltipOffset: _tooltipOffset = 0, tooltipPlacement }: Me
           )}
         </PlayButton>
       </Tooltip.Trigger>
-      <Tooltip.Content
-        className={tooltipClass}
-        placement={tooltipPlacement}
-      >
-        {isPaused ? "Play" : "Pause"}
+      <Tooltip.Content className={tooltipClass} placement={tooltipPlacement}>
+        {isPaused ? 'Play' : 'Pause'}
       </Tooltip.Content>
     </Tooltip.Root>
-  );
+  )
 }
 
 export function Mute({ tooltipOffset: _tooltipOffset = 0, tooltipPlacement }: MediaButtonProps) {
-  const volume = useMediaState("volume");
-  const isMuted = useMediaState("muted");
+  const volume = useMediaState('volume')
+  const isMuted = useMediaState('muted')
 
-  const Icon =
-    isMuted || volume === 0
-      ? MuteIcon
-      : volume < 0.5
-        ? VolumeLowIcon
-        : VolumeHighIcon;
+  const Icon = isMuted || volume === 0 ? MuteIcon : volume < 0.5 ? VolumeLowIcon : VolumeHighIcon
 
   return (
     <Tooltip.Root>
@@ -87,22 +77,16 @@ export function Mute({ tooltipOffset: _tooltipOffset = 0, tooltipPlacement }: Me
           <Icon className="h-6 w-6 transition-transform duration-200" />
         </MuteButton>
       </Tooltip.Trigger>
-      <Tooltip.Content
-        className={tooltipClass}
-        placement={tooltipPlacement}
-      >
-        {isMuted ? "Unmute" : "Mute"}
+      <Tooltip.Content className={tooltipClass} placement={tooltipPlacement}>
+        {isMuted ? 'Unmute' : 'Mute'}
       </Tooltip.Content>
     </Tooltip.Root>
-  );
+  )
 }
 
-export function Caption({
-                          tooltipOffset: _tooltipOffset = 0,
-                          tooltipPlacement
-                        }: MediaButtonProps) {
-  const track = useMediaState("textTrack");
-  const isOn = track && isTrackCaptionKind(track);
+export function Caption({ tooltipOffset: _tooltipOffset = 0, tooltipPlacement }: MediaButtonProps) {
+  const track = useMediaState('textTrack')
+  const isOn = track && isTrackCaptionKind(track)
 
   return (
     <Tooltip.Root>
@@ -110,24 +94,21 @@ export function Caption({
         <CaptionButton className={buttonClass}>
           <SubtitlesIcon
             className={`h-6 w-6 transition-colors duration-200 ${
-              isOn ? "text-sky-400" : "text-white/60 group-hover:text-white"
+              isOn ? 'text-sky-400' : 'text-white/60 group-hover:text-white'
             }`}
           />
         </CaptionButton>
       </Tooltip.Trigger>
-      <Tooltip.Content
-        className={tooltipClass}
-        placement={tooltipPlacement}
-      >
-        {isOn ? "Subtitles Off" : "Subtitles On"}
+      <Tooltip.Content className={tooltipClass} placement={tooltipPlacement}>
+        {isOn ? 'Subtitles Off' : 'Subtitles On'}
       </Tooltip.Content>
     </Tooltip.Root>
-  );
+  )
 }
 
 export function PIP({ tooltipOffset: _tooltipOffset = 0, tooltipPlacement }: MediaButtonProps) {
-  const isActive = useMediaState("pictureInPicture");
-  const Icon = isActive ? PictureInPictureExitIcon : PictureInPictureIcon;
+  const isActive = useMediaState('pictureInPicture')
+  const Icon = isActive ? PictureInPictureExitIcon : PictureInPictureIcon
 
   return (
     <Tooltip.Root>
@@ -136,22 +117,16 @@ export function PIP({ tooltipOffset: _tooltipOffset = 0, tooltipPlacement }: Med
           <Icon className="h-6 w-6 transition-transform duration-200" />
         </PIPButton>
       </Tooltip.Trigger>
-      <Tooltip.Content
-        className={tooltipClass}
-        placement={tooltipPlacement}
-      >
-        {isActive ? "Exit PIP" : "Enter PIP"}
+      <Tooltip.Content className={tooltipClass} placement={tooltipPlacement}>
+        {isActive ? 'Exit PIP' : 'Enter PIP'}
       </Tooltip.Content>
     </Tooltip.Root>
-  );
+  )
 }
 
-export function Fullscreen({
-                             tooltipOffset: _tooltipOffset = 0,
-                             tooltipPlacement
-                           }: MediaButtonProps) {
-  const isActive = useMediaState("fullscreen");
-  const Icon = isActive ? FullscreenExitIcon : FullscreenIcon;
+export function Fullscreen({ tooltipOffset: _tooltipOffset = 0, tooltipPlacement }: MediaButtonProps) {
+  const isActive = useMediaState('fullscreen')
+  const Icon = isActive ? FullscreenExitIcon : FullscreenIcon
 
   return (
     <Tooltip.Root>
@@ -160,20 +135,14 @@ export function Fullscreen({
           <Icon className="h-6 w-6 transition-transform duration-200" />
         </FullscreenButton>
       </Tooltip.Trigger>
-      <Tooltip.Content
-        className={tooltipClass}
-        placement={tooltipPlacement}
-      >
-        {isActive ? "Exit Fullscreen" : "Enter Fullscreen"}
+      <Tooltip.Content className={tooltipClass} placement={tooltipPlacement}>
+        {isActive ? 'Exit Fullscreen' : 'Enter Fullscreen'}
       </Tooltip.Content>
     </Tooltip.Root>
-  );
+  )
 }
 
-export function GoogleCast({
-                             tooltipOffset: _tooltipOffset = 0,
-                             tooltipPlacement
-                           }: MediaButtonProps) {
+export function GoogleCast({ tooltipOffset: _tooltipOffset = 0, tooltipPlacement }: MediaButtonProps) {
   return (
     <Tooltip.Root>
       <Tooltip.Trigger asChild>
@@ -181,12 +150,9 @@ export function GoogleCast({
           <ChromecastIcon className="h-6 w-6" />
         </GoogleCastButtonPrimitive>
       </Tooltip.Trigger>
-      <Tooltip.Content
-        className={tooltipClass}
-        placement={tooltipPlacement}
-      >
+      <Tooltip.Content className={tooltipClass} placement={tooltipPlacement}>
         Transmitir
       </Tooltip.Content>
     </Tooltip.Root>
-  );
+  )
 }

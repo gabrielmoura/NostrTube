@@ -1,5 +1,6 @@
 import { createRoute } from '@tanstack/react-router'
 import { lazy, Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { PageSpinner } from '@/components/PageSpinner'
@@ -37,11 +38,15 @@ export const Route = createRoute({
 })
 
 function RouteComponent() {
+  const { t } = useTranslation()
   return (
-    <ErrorBoundary title="Não foi possível carregar as configurações">
+    <ErrorBoundary title={t('page.error_title')}>
       <Suspense
         fallback={
-          <PageSpinner label="Carregando configurações" description="Sincronizando preferências locais e opções da plataforma." />
+          <PageSpinner
+            label={t('page.loading_label')}
+            description={t('page.loading_description')}
+          />
         }
       >
         <ConfigurationPageContent />

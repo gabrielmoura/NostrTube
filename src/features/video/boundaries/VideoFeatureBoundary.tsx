@@ -1,10 +1,10 @@
-import type { ReactNode } from "react";
-import { ErrorBoundaryVideo } from "@/routes/v/@components/error";
+import type { ReactNode } from 'react'
+import { ErrorBoundaryVideo } from '@/routes/v/@components/error'
 
 interface VideoFeatureBoundaryProps {
-  children: ReactNode;
+  children: ReactNode
 }
 
 export function VideoFeatureBoundary({ children }: VideoFeatureBoundaryProps) {
-  return <ErrorBoundaryVideo>{children}</ErrorBoundaryVideo>;
+  return <ErrorBoundaryVideo>{children}</ErrorBoundaryVideo>
 }

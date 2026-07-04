@@ -46,9 +46,7 @@ function readItems(): WatchLaterItem[] {
       return cachedItems
     }
 
-    cachedItems = parsed
-      .filter((item) => item?.eventId && item?.eventRef)
-      .sort((a, b) => b.savedAt - a.savedAt)
+    cachedItems = parsed.filter((item) => item?.eventId && item?.eventRef).sort((a, b) => b.savedAt - a.savedAt)
     return cachedItems
   } catch {
     cachedItems = EMPTY_WATCH_LATER_ITEMS

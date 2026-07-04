@@ -1,70 +1,69 @@
-import { useState, useTransition } from "react";
-import type { PlaylistFormData } from "./types";
-import { makeEvent } from "@/helper/pow/pow.ts";
-import { nostrNow } from "@/helper/date.ts";
-import NDK__default, { NDKKind } from "@nostr-dev-kit/ndk";
-import { ulid } from "ulid";
+import NDK__default, { NDKKind } from '@nostr-dev-kit/ndk'
+import { useState, useTransition } from 'react'
+import { ulid } from 'ulid'
+import { nostrNow } from '@/helper/date.ts'
+import { makeEvent } from '@/helper/pow/pow.ts'
+import type { PlaylistFormData } from './types'
 
 interface PlaylistConfigProps {
-  ndk: NDK__default;
-  pubkey: string;
+  ndk: NDK__default
+  pubkey: string
 }
 
 // STUB: Função de criação do evento Nostr
 // Esta função deve criar um evento kind:30001 (NIP-51) ou similar
-const createNostrPlaylistEvent = async ({
-                                           name,
-                                           description,
-                                           coverImage
-                                         }: PlaylistFormData, { ndk, pubkey }: PlaylistConfigProps): Promise<string> => {
-  const newDTag = `${import.meta.env.VITE_APP_NAME}-playlist-${ulid()}`;
+const createNostrPlaylistEvent = async (
+  { name, description, coverImage }: PlaylistFormData,
+  { ndk, pubkey }: PlaylistConfigProps,
+): Promise<string> => {
+  const newDTag = `${import.meta.env.VITE_APP_NAME}-playlist-${ulid()}`
 
   const event = await makeEvent({
     difficulty: Number(import.meta.env.VITE_MIN_PLAYLIST_POW ?? 10),
     event: {
       created_at: nostrNow(),
       kind: NDKKind.VideoCurationSet,
-      content: description || "",
+      content: description || '',
       tags: [
-        ["title", name],
-        ["d", newDTag],
-        ["description", description || ""],
-        ...(coverImage ? [["image", coverImage]] : [])
+        ['title', name],
+        ['d', newDTag],
+        ['description', description || ''],
+        ...(coverImage ? [['image', coverImage]] : []),
       ],
-      pubkey
+      pubkey,
     },
-    ndk: ndk
-  });
+    ndk: ndk,
+  })
 
-  await event.publish();
+  await event.publish()
 
-  return newDTag;
-};
+  return newDTag
+}
 
 interface useCreatePlaylistProps extends PlaylistConfigProps {
-  onSuccess?: (id: string) => void;
+  onSuccess?: (id: string) => void
 }
 
 export function useCreatePlaylist({ onSuccess, pubkey, ndk }: useCreatePlaylistProps) {
-  const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = (data: PlaylistFormData) => {
-    setError(null);
+    setError(null)
     startTransition(async () => {
       try {
-        const playlistId = await createNostrPlaylistEvent(data, { pubkey, ndk });
-        if (onSuccess) onSuccess(playlistId);
+        const playlistId = await createNostrPlaylistEvent(data, { pubkey, ndk })
+        if (onSuccess) onSuccess(playlistId)
       } catch (err) {
-        console.error(err);
-        setError("Falha ao publicar a playlist. Tente novamente.");
+        console.error(err)
+        setError('Falha ao publicar a playlist. Tente novamente.')
       }
-    });
-  };
+    })
+  }
 
   return {
     submit: handleSubmit,
     isPending,
-    error
-  };
+    error,
+  }
 }

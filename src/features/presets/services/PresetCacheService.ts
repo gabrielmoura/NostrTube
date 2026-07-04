@@ -1,4 +1,4 @@
-import { PresetError, type CachedPreset, type NostubePreset } from '@/features/presets/types/preset'
+import { type CachedPreset, type NostubePreset, PresetError } from '@/features/presets/types/preset'
 import { isHex64 } from '@/features/presets/utils/presetValidation'
 
 export const SELECTED_PRESET_KEY = 'nostube:selected-preset-pubkey:v1'

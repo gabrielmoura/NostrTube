@@ -1,5 +1,5 @@
 import type NDK from '@nostr-dev-kit/ndk'
-import { NDKKind, type NDKEvent, type NDKFilter } from '@nostr-dev-kit/ndk'
+import { type NDKEvent, type NDKFilter, NDKKind } from '@nostr-dev-kit/ndk'
 import { nip19 } from 'nostr-tools'
 import { fetchEventsCached, getSearchRelayUrls } from '@/features/nostr/services/ndk-query.service'
 import { ALL_VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
@@ -298,15 +298,23 @@ export async function loadZapDashboard(ndk: NDK, currentPubkey: string): Promise
     supporterMap.set(item.senderPubkey, current)
   })
 
-  const supportedCreators = new Set(sentActivity.map((item) => item.recipientPubkey).filter((value): value is string => Boolean(value)))
+  const supportedCreators = new Set(
+    sentActivity.map((item) => item.recipientPubkey).filter((value): value is string => Boolean(value)),
+  )
 
   return {
-    received30d: received30dItems.length > 0 ? received30dItems.reduce((sum, item) => sum + (item.amountSats ?? 0), 0) : null,
+    received30d:
+      received30dItems.length > 0 ? received30dItems.reduce((sum, item) => sum + (item.amountSats ?? 0), 0) : null,
     sent30d: sent30dItems.length > 0 ? sent30dItems.reduce((sum, item) => sum + (item.amountSats ?? 0), 0) : null,
     supportedCreatorsCount: supportedCreators.size > 0 ? supportedCreators.size : null,
-    averageZapSats: combined30d.length > 0 ? Math.round(combined30d.reduce((sum, item) => sum + (item.amountSats ?? 0), 0) / combined30d.length) : null,
+    averageZapSats:
+      combined30d.length > 0
+        ? Math.round(combined30d.reduce((sum, item) => sum + (item.amountSats ?? 0), 0) / combined30d.length)
+        : null,
     bestVideo: bestVideoEntry ? { targetRef: bestVideoEntry[0], amountSats: bestVideoEntry[1] } : null,
-    topSupporters: Array.from(supporterMap.values()).sort((left, right) => right.amountSats - left.amountSats).slice(0, 5),
+    topSupporters: Array.from(supporterMap.values())
+      .sort((left, right) => right.amountSats - left.amountSats)
+      .slice(0, 5),
     timeSeries: {
       seven: buildSeries(activity, 'seven'),
       thirty: buildSeries(activity, 'thirty'),

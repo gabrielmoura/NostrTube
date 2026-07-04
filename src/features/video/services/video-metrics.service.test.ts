@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { NDKEvent } from '@nostr-dev-kit/ndk'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   getVideoCommentMetrics,
   getVideoMetrics,
@@ -13,7 +13,9 @@ vi.mock('@/features/nostr/services/ndk-query.service', () => ({
   fetchEventsCached: (...args: unknown[]) => fetchEventsCached(...args),
 }))
 
-function makeEvent(partial: Partial<NDKEvent> & { id: string; pubkey?: string; tags?: string[][]; kind?: number }): NDKEvent {
+function makeEvent(
+  partial: Partial<NDKEvent> & { id: string; pubkey?: string; tags?: string[][]; kind?: number },
+): NDKEvent {
   return {
     id: partial.id,
     pubkey: partial.pubkey ?? 'author',
@@ -33,7 +35,11 @@ describe('video-metrics.service', () => {
   it('aggregates zap count and total sats', async () => {
     const video = makeEvent({ id: 'video-1', pubkey: 'author', kind: 34235, tags: [['d', 'video-d']], dTag: 'video-d' })
     const zapA = makeEvent({ id: 'zap-1', kind: 9735, tags: [['amount', '21000']] })
-    const zapB = makeEvent({ id: 'zap-2', kind: 9735, tags: [['description', JSON.stringify({ tags: [['amount', '100000']] })]] })
+    const zapB = makeEvent({
+      id: 'zap-2',
+      kind: 9735,
+      tags: [['description', JSON.stringify({ tags: [['amount', '100000']] })]],
+    })
     fetchEventsCached.mockResolvedValueOnce(new Set([zapA, zapA, zapB]))
 
     await expect(getVideoZapMetrics({} as never, video)).resolves.toEqual({

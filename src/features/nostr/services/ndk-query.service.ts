@@ -1,8 +1,8 @@
 import NDK, { type NDKEvent, type NDKFilter, NDKKind } from '@nostr-dev-kit/ndk'
 import { nip19 } from 'nostr-tools'
 import { ALL_VIDEO_EVENT_KINDS, NORMAL_VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
-import { extractSingleEventId, type NexusFetchOptions, type NexusOperationType, ndkNexusBridge } from '@/lib/nexus-p2p'
 import { resolveVideoRouteParam } from '@/features/video/services/video-route-resolution.service'
+import { extractSingleEventId, type NexusFetchOptions, type NexusOperationType, ndkNexusBridge } from '@/lib/nexus-p2p'
 
 type FetchMode = 'cache-first' | 'parallel'
 
@@ -85,7 +85,9 @@ export function getSearchRelayUrls(): string[] | undefined {
 export function getDefaultVideoLookupRelayUrls(): string[] | undefined {
   const relays = [
     ...(normalizeRelayUrls(import.meta.env.VITE_NOSTR_SEARCH_RELAYS) ?? []),
-    ...(normalizeRelayUrls(import.meta.env.PROD ? import.meta.env.VITE_NOSTR_RELAYS : import.meta.env.VITE_NOSTR_DEV_RELAYS) ?? []),
+    ...(normalizeRelayUrls(
+      import.meta.env.PROD ? import.meta.env.VITE_NOSTR_RELAYS : import.meta.env.VITE_NOSTR_DEV_RELAYS,
+    ) ?? []),
     ...(normalizeRelayUrls(import.meta.env.VITE_NOSTR_RELAYS) ?? []),
   ]
   return normalizeRelayUrls(relays)
@@ -181,11 +183,15 @@ export async function fetchVideoEventByReference(ndk: NDK, reference: string, op
     allRelays.length > 0 ? Array.from(new Set(allRelays.map((r) => r.replace(/\/$/, '')))) : undefined
 
   if (isAddressableVideoReference(reference)) {
-    const events = await fetchEventsCached(ndk, filters.map((filter) => ({ ...filter, limit: 100 })), {
-      ...options,
-      mode: options.mode ?? 'parallel',
-      relayUrls: dedupedRelays,
-    })
+    const events = await fetchEventsCached(
+      ndk,
+      filters.map((filter) => ({ ...filter, limit: 100 })),
+      {
+        ...options,
+        mode: options.mode ?? 'parallel',
+        relayUrls: dedupedRelays,
+      },
+    )
     const newest = newestEvent(events)
     if (newest) return newest
   }

@@ -42,7 +42,15 @@ export async function canUseNip44Drafts(ndk?: NDK | null) {
   }
 }
 
-export async function saveVideoUploadDraft({ ndk, currentUser, snapshot }: { ndk: NDK; currentUser: NDKUser; snapshot: UploadDraftSnapshot }) {
+export async function saveVideoUploadDraft({
+  ndk,
+  currentUser,
+  snapshot,
+}: {
+  ndk: NDK
+  currentUser: NDKUser
+  snapshot: UploadDraftSnapshot
+}) {
   const draftEvent = new NDKEvent(ndk, buildPartialVideoEvent(snapshot))
   const videoKind = resolvePublishVideoKind(snapshot.videoData)
   const wrapper = new NDKEvent(ndk, {
@@ -101,9 +109,9 @@ export async function clearVideoUploadDraft({ ndk, currentUser }: { ndk: NDK; cu
     pubkey: currentUser.pubkey,
     created_at: nostrNow(),
     content: '',
-      tags: [
-        ['d', UPLOAD_DRAFT_IDENTIFIER],
-        ['k', String(VIDEO_KIND)],
+    tags: [
+      ['d', UPLOAD_DRAFT_IDENTIFIER],
+      ['k', String(VIDEO_KIND)],
     ],
   })
   wrapper.dTag = UPLOAD_DRAFT_IDENTIFIER

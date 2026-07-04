@@ -1,8 +1,12 @@
 import type NDK from '@nostr-dev-kit/ndk'
 import type { NDKEvent, NDKFilter } from '@nostr-dev-kit/ndk'
-import { PRESET_D_TAG, PRESET_EVENT_KIND, PresetError, type NostubePreset } from '@/features/presets/types/preset'
 import { fetchEventsCached, getDefaultVideoLookupRelayUrls } from '@/features/nostr/services/ndk-query.service'
-import { dedupePresetsByPubkey, parsePresetEvent, selectNewestPresetEvent } from '@/features/presets/services/PresetParser'
+import {
+  dedupePresetsByPubkey,
+  parsePresetEvent,
+  selectNewestPresetEvent,
+} from '@/features/presets/services/PresetParser'
+import { type NostubePreset, PRESET_D_TAG, PRESET_EVENT_KIND, PresetError } from '@/features/presets/types/preset'
 
 function getPresetRelayUrls(ndk: NDK): string[] | undefined {
   const poolRelays = Array.from(ndk.pool?.relays?.keys?.() ?? [])

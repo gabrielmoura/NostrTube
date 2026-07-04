@@ -3,7 +3,7 @@ import { createContext, type ReactNode, useCallback, useEffect, useMemo, useRef,
 import { getDefaultPresetPubkey, normalizePresetPubkey } from '@/features/presets/preset.config'
 import { PresetCacheService } from '@/features/presets/services/PresetCacheService'
 import { PresetService } from '@/features/presets/services/PresetService'
-import { PresetError, type NostubePreset, type PresetState } from '@/features/presets/types/preset'
+import { type NostubePreset, PresetError, type PresetState } from '@/features/presets/types/preset'
 
 interface PresetContextValue extends PresetState {
   defaultPresetPubkey: string

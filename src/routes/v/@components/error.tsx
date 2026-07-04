@@ -1,46 +1,46 @@
-import React, { Component, type ReactNode } from "react";
-import { ErrorFallback } from "@/components/ErrorFallback";
-import { logErrorBoundaryError } from "@/features/debug/services/error-log.service.ts";
+import React, { Component, type ReactNode } from 'react'
+import { ErrorFallback } from '@/components/ErrorFallback'
+import { logErrorBoundaryError } from '@/features/debug/services/error-log.service.ts'
 
 type Props = {
-  children: ReactNode;
-  fallback?: ReactNode;
-  onGoHome?: () => void;
-};
+  children: ReactNode
+  fallback?: ReactNode
+  onGoHome?: () => void
+}
 
 type State = {
-  hasError: boolean;
-  error: Error | null;
-};
+  hasError: boolean
+  error: Error | null
+}
 
 export class ErrorBoundaryVideo extends Component<Props, State> {
   public state: State = {
     hasError: false,
-    error: null
-  };
+    error: null,
+  }
 
   public static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+    return { hasError: true, error }
   }
 
   public componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("Uncaught error in <ErrorBoundaryVideo />:", error, errorInfo);
-    logErrorBoundaryError("ErrorBoundaryVideo", error, errorInfo, {
+    console.error('Uncaught error in <ErrorBoundaryVideo />:', error, errorInfo)
+    logErrorBoundaryError('ErrorBoundaryVideo', error, errorInfo, {
       onGoHome: !!this.props.onGoHome,
-    });
+    })
     if (import.meta.env.VITE_BEACON_URL) {
-      navigator.sendBeacon(import.meta.env.VITE_BEACON_URL, JSON.stringify(error));
+      navigator.sendBeacon(import.meta.env.VITE_BEACON_URL, JSON.stringify(error))
     }
   }
 
   private handleRetry = () => {
-    this.setState({ hasError: false, error: null });
-  };
+    this.setState({ hasError: false, error: null })
+  }
 
   public render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
-        return this.props.fallback;
+        return this.props.fallback
       }
 
       return (
@@ -52,9 +52,9 @@ export class ErrorBoundaryVideo extends Component<Props, State> {
           onGoHome={this.props.onGoHome}
           retryLabel="Recarregar seção"
         />
-      );
+      )
     }
 
-    return this.props.children;
+    return this.props.children
   }
 }

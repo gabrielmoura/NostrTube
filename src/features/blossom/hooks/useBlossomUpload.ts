@@ -2,6 +2,7 @@ import { useNDK } from '@nostr-dev-kit/ndk-hooks'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { uploadToConfiguredBlossomServers } from '@/features/upload/services/blossom-server.service'
+import { useThrottledProgress } from '@/hooks/useThrottledProgress'
 import { validateBud06UploadRequirements } from '../blossom.service'
 import type { BlossomFileRecord, BlossomUploadResult, BlossomUploadStatus } from '../blossom.types'
 import { BLOSSOM_MAX_FILE_SIZE_BYTES, calculateSha256, getFileKind } from '../blossom.utils'
@@ -15,6 +16,10 @@ interface UseBlossomUploadOptions {
 export function useBlossomUpload({ defaultServer, hasUserConfiguration, onUploaded }: UseBlossomUploadOptions) {
   const { ndk } = useNDK()
   const [state, setState] = useStateCompat()
+  const throttleProgress = useThrottledProgress(
+    (progress) => setState({ status: 'uploading', progress, error: null }),
+    100,
+  )
 
   const uploadFiles = async (files: File[]) => {
     if (files.length === 0) return
@@ -55,7 +60,7 @@ export function useBlossomUpload({ defaultServer, hasUserConfiguration, onUpload
           file,
           label: 'blossom-explorer',
           onProgress: ({ loaded, total }) => {
-            setState({ status: 'uploading', progress: Math.round((loaded / total) * 100), error: null })
+            throttleProgress(loaded, total)
           },
         })
         const hash = result.x || result.sha256 || localHash

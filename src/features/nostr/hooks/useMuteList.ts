@@ -1,7 +1,7 @@
 import type { NDKEvent } from '@nostr-dev-kit/ndk'
 import { NDKSubscriptionCacheUsage, useNDKCurrentPubkey, useSubscribe } from '@nostr-dev-kit/ndk-hooks'
 import { useMemo } from 'react'
-import { MUTE_LIST_KIND, parseMuteListTags, type ParsedMuteList } from '@/features/nostr/services/mute-list.service'
+import { MUTE_LIST_KIND, type ParsedMuteList, parseMuteListTags } from '@/features/nostr/services/mute-list.service'
 
 const EMPTY_MUTE_LIST: ParsedMuteList = {
   pubkeys: new Set<string>(),

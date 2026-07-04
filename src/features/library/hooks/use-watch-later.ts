@@ -1,13 +1,13 @@
 import type { NDKEvent } from '@nostr-dev-kit/ndk'
 import { useCallback, useSyncExternalStore } from 'react'
 import {
-  type WatchLaterItem,
   getWatchLaterItems,
   isInWatchLater,
   removeFromWatchLater,
   saveToWatchLater,
   subscribeWatchLater,
   toggleWatchLater,
+  type WatchLaterItem,
 } from '@/features/library/services/watch-later.service'
 
 const EMPTY_WATCH_LATER_ITEMS: WatchLaterItem[] = []

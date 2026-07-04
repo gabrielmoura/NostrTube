@@ -1,65 +1,63 @@
-import * as React from "react";
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button.tsx";
-import { Check, ChevronsUpDown, X } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label.tsx";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover.tsx";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command.tsx";
-import { detectLanguageMain } from "@/helper/userLang.ts";
-import { COMBOBOX_LANGUAGES } from "@/default.ts";
-import { t } from "i18next";
+import { t } from 'i18next'
+import { Check, ChevronsUpDown, X } from 'lucide-react'
+import * as React from 'react'
+import { useEffect, useState } from 'react'
+import { Button } from '@/components/ui/button.tsx'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command.tsx'
+import { Label } from '@/components/ui/label.tsx'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.tsx'
+import { COMBOBOX_LANGUAGES } from '@/default.ts'
+import { detectLanguageMain } from '@/helper/userLang.ts'
 
-export type Language = { id: string; name: string; native?: string; };
-
+export type Language = { id: string; name: string; native?: string }
 
 export type LanguagesComboProps = {
-  value?: Language | null;
-  onChange?: (lang: Language | null) => void;
-  placeholder?: string;
-  label?: string;
-};
+  value?: Language | null
+  onChange?: (lang: Language | null) => void
+  placeholder?: string
+  label?: string
+}
 
 export default function LanguagesCombo({
-                                         value: controlledValue = null,
-                                         onChange,
-                                         placeholder = "Selecione um idioma...",
-                                         label = "Idioma"
-                                       }: LanguagesComboProps) {
-  const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const [value, setValue] = useState<Language | null>(controlledValue || null);
+  value: controlledValue = null,
+  onChange,
+  placeholder = 'Selecione um idioma...',
+  label = 'Idioma',
+}: LanguagesComboProps) {
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const [value, setValue] = useState<Language | null>(controlledValue || null)
 
-// Derive filtered list const filtered = useMemo(() => { const q = query.trim().toLowerCase(); if (!q) return TOP_10_LANGUAGES; return TOP_10_LANGUAGES.filter( (l) => l.name.toLowerCase().includes(q) || (l.native || "").toLowerCase().includes(q) || l.id === q ); }, [query]);
-
+  // Derive filtered list const filtered = useMemo(() => { const q = query.trim().toLowerCase(); if (!q) return TOP_10_LANGUAGES; return TOP_10_LANGUAGES.filter( (l) => l.name.toLowerCase().includes(q) || (l.native || "").toLowerCase().includes(q) || l.id === q ); }, [query]);
 
   function handleSelect(lang: Language) {
-    setValue(lang);
-    onChange?.(lang);
-    setOpen(false);
-    setQuery("");
+    setValue(lang)
+    onChange?.(lang)
+    setOpen(false)
+    setQuery('')
   }
 
   function clear() {
-    setValue(null);
-    onChange?.(null);
+    setValue(null)
+    onChange?.(null)
   }
 
   useEffect(() => {
-    setValue(controlledValue || null);
-  }, [controlledValue]);
+    setValue(controlledValue || null)
+  }, [controlledValue])
 
   useEffect(() => {
-    if (controlledValue) return;
-    const newDef = detectLanguageMain()!;
+    if (controlledValue) return
+    const newDef = detectLanguageMain()!
     if (newDef) {
-      const lang = COMBOBOX_LANGUAGES.find(l => l.id === newDef?.split("-")[0]);
+      const lang = COMBOBOX_LANGUAGES.find((l) => l.id === newDef?.split('-')[0])
       if (lang) {
-        setValue(lang);
-        onChange?.(lang);
+        setValue(lang)
+        onChange?.(lang)
       }
     }
-  }, [controlledValue, onChange]);
+  }, [controlledValue, onChange])
 
   return (
     <Card className="w-full max-w-sm">
@@ -68,22 +66,19 @@ export default function LanguagesCombo({
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-2">
-          <Label
-            className="text-xs">{t("components.comboLanguage.selectYourLanguage", "Select your content language.")}</Label>
+          <Label className="text-xs">
+            {t('components.comboLanguage.selectYourLanguage', 'Select your content language.')}
+          </Label>
 
           <Popover open={open} onOpenChange={setOpen}>
             <div className="flex items-center gap-2">
               <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full justify-between"
-                  onClick={() => setOpen((s) => !s)}
-                >
+                <Button variant="outline" className="w-full justify-between" onClick={() => setOpen((s) => !s)}>
                   <div className="flex items-center gap-3 truncate">
                     <div className="flex flex-col text-left truncate">
-                  <span className="truncate">
-                    {value ? `${value.name} ${value.native ? `· ${value.native}` : ""}` : placeholder}
-                  </span>
+                      <span className="truncate">
+                        {value ? `${value.name} ${value.native ? `· ${value.native}` : ''}` : placeholder}
+                      </span>
                     </div>
                   </div>
                   <ChevronsUpDown className="ml-2 h-4 w-4" />
@@ -91,8 +86,12 @@ export default function LanguagesCombo({
               </PopoverTrigger>
 
               {value && (
-                <Button variant="ghost" size="icon" onClick={clear}
-                        aria-label={t("components.comboLanguage.clearSelection", "Clear selection")}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={clear}
+                  aria-label={t('components.comboLanguage.clearSelection', 'Clear selection')}
+                >
                   <X />
                 </Button>
               )}
@@ -106,9 +105,7 @@ export default function LanguagesCombo({
                   onValueChange={(v: string) => setQuery(v)}
                   className="h-10"
                 />
-                <CommandEmpty>
-                  {t("components.comboLanguage.noLanguageFound", "No language found")}
-                </CommandEmpty>
+                <CommandEmpty>{t('components.comboLanguage.noLanguageFound', 'No language found')}</CommandEmpty>
 
                 <CommandGroup>
                   {COMBOBOX_LANGUAGES.map((lang) => (
@@ -132,6 +129,5 @@ export default function LanguagesCombo({
         </div>
       </CardContent>
     </Card>
-
-  );
+  )
 }

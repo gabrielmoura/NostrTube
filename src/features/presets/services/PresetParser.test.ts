@@ -1,7 +1,7 @@
 import type { NDKEvent } from '@nostr-dev-kit/ndk'
 import { describe, expect, it } from 'vitest'
-import { PRESET_D_TAG, PRESET_EVENT_KIND, PresetError } from '@/features/presets/types/preset'
 import { dedupePresetsByPubkey, parsePresetEvent } from '@/features/presets/services/PresetParser'
+import { PRESET_D_TAG, PRESET_EVENT_KIND, PresetError } from '@/features/presets/types/preset'
 
 const PUBKEY = 'a'.repeat(64)
 const EVENT_ID = 'b'.repeat(64)
@@ -56,18 +56,28 @@ describe('PresetParser', () => {
   })
 
   it('deduplicates presets by pubkey using the newest created_at', () => {
-    const older = parsePresetEvent(makePresetEvent({ created_at: 1, content: JSON.stringify({
-      defaultRelays: [],
-      blockedPubkeys: [],
-      nsfwPubkeys: [],
-      blockedEvents: [],
-    }) }))
-    const newer = parsePresetEvent(makePresetEvent({ created_at: 2, content: JSON.stringify({
-      defaultRelays: ['wss://new.example.com'],
-      blockedPubkeys: [],
-      nsfwPubkeys: [],
-      blockedEvents: [],
-    }) }))
+    const older = parsePresetEvent(
+      makePresetEvent({
+        created_at: 1,
+        content: JSON.stringify({
+          defaultRelays: [],
+          blockedPubkeys: [],
+          nsfwPubkeys: [],
+          blockedEvents: [],
+        }),
+      }),
+    )
+    const newer = parsePresetEvent(
+      makePresetEvent({
+        created_at: 2,
+        content: JSON.stringify({
+          defaultRelays: ['wss://new.example.com'],
+          blockedPubkeys: [],
+          nsfwPubkeys: [],
+          blockedEvents: [],
+        }),
+      }),
+    )
 
     expect(dedupePresetsByPubkey([older, newer])).toEqual([newer])
   })

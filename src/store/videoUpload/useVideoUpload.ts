@@ -1,5 +1,5 @@
-import { useShallow } from "zustand/react/shallow";
-import { useVideoUploadStore } from "./useVideoUploadStore.ts";
+import { useShallow } from 'zustand/react/shallow'
+import { useVideoUploadStore } from './useVideoUploadStore.ts'
 
 /**
  * Hook para acessar o estado de upload de vídeo.
@@ -15,7 +15,7 @@ export const useVideoUpload = () => {
       uploadProgress: state.uploadProgress,
       uploadStage: state.uploadStage,
       error: state.error,
-      showEventInput: state.showEventInput
-    }))
-  );
-};
+      showEventInput: state.showEventInput,
+    })),
+  )
+}

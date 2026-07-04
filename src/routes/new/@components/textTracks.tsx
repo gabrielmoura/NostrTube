@@ -1,11 +1,11 @@
 // import {Button} from "@radix-ui/themes";
-import { Button } from "@/components/button.tsx";
+import { Button } from '@/components/button.tsx'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
-  TooltipTrigger
-} from "@/components/videoPlayer/components/Tooltip.tsx";
+  TooltipTrigger,
+} from '@/components/videoPlayer/components/Tooltip.tsx'
 export default function TextTracks() {
   return (
     <TooltipProvider>
@@ -18,5 +18,5 @@ export default function TextTracks() {
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  );
+  )
 }

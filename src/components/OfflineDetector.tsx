@@ -1,32 +1,32 @@
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { Status, StatusIndicator, StatusLabel } from "@/components/ui/shadcn-io/status";
-import { t } from "i18next";
+import { t } from 'i18next'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
+import { Status, StatusIndicator, StatusLabel } from '@/components/ui/shadcn-io/status'
 
 export default function OfflineDetector() {
-  const [isOffline, setIsOffline] = useState(!navigator.onLine);
-  const msg = t("You_are_offline", "Você está offline");
+  const [isOffline, setIsOffline] = useState(!navigator.onLine)
+  const msg = t('You_are_offline', 'Você está offline')
 
   useEffect(() => {
     const handleOffline = () => {
-      setIsOffline(true);
-      toast.error(msg);
-    };
+      setIsOffline(true)
+      toast.error(msg)
+    }
 
     const handleOnline = () => {
-      setIsOffline(false);
-    };
+      setIsOffline(false)
+    }
 
-    window.addEventListener("offline", handleOffline);
-    window.addEventListener("online", handleOnline);
+    window.addEventListener('offline', handleOffline)
+    window.addEventListener('online', handleOnline)
 
     return () => {
-      window.removeEventListener("offline", handleOffline);
-      window.removeEventListener("online", handleOnline);
-    };
-  }, [msg]);
+      window.removeEventListener('offline', handleOffline)
+      window.removeEventListener('online', handleOnline)
+    }
+  }, [msg])
 
-  if (!isOffline) return null;
+  if (!isOffline) return null
 
   return (
     <div className="fixed bottom-0 left-0 w-full flex justify-center py-3 z-50">
@@ -52,5 +52,5 @@ export default function OfflineDetector() {
         <StatusLabel className="font-mono text-sm">{msg}</StatusLabel>
       </Status>
     </div>
-  );
+  )
 }

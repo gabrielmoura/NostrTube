@@ -1,22 +1,22 @@
-import type { NDKEvent } from "@nostr-dev-kit/ndk-hooks";
+import type { NDKEvent } from '@nostr-dev-kit/ndk-hooks'
 import { Link } from '@tanstack/react-router'
 import { Compass, MessageCircle, ShieldCheck, Sparkles } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import type { VideoAssetSet } from "@/features/video/services/video-imeta.service";
-import { ErrorBoundaryVideo } from "@/routes/v/@components/error";
-import { VideoPlayerContainer } from "@/routes/v/@components/VideoPlayerContainer";
-import { VideoActionsContainer } from "@/features/video/components/VideoActionsContainer";
-import { VideoCommentsContainer } from "@/features/video/components/VideoCommentsContainer";
+import { VideoActionsContainer } from '@/features/video/components/VideoActionsContainer'
+import { VideoCommentsContainer } from '@/features/video/components/VideoCommentsContainer'
+import type { VideoAssetSet } from '@/features/video/services/video-imeta.service'
+import { ErrorBoundaryVideo } from '@/routes/v/@components/error'
+import { VideoPlayerContainer } from '@/routes/v/@components/VideoPlayerContainer'
 
 interface VideoPageViewProps {
-  event: NDKEvent;
-  title: string;
-  image?: string;
-  fallbackUrl?: string;
-  eventIdentifier: string;
-  assetSet: VideoAssetSet;
-  onCanPlay: () => Promise<void> | void;
+  event: NDKEvent
+  title: string
+  image?: string
+  fallbackUrl?: string
+  eventIdentifier: string
+  assetSet: VideoAssetSet
+  onCanPlay: () => Promise<void> | void
 }
 
 export function VideoPageView({
@@ -26,7 +26,7 @@ export function VideoPageView({
   fallbackUrl,
   eventIdentifier,
   assetSet,
-  onCanPlay
+  onCanPlay,
 }: VideoPageViewProps) {
   return (
     <div className="mx-auto max-w-7xl space-y-6 pb-4 sm:py-4">
@@ -73,11 +73,7 @@ export function VideoPageView({
               </ErrorBoundaryVideo>
             </div>
             <ErrorBoundaryVideo>
-              <VideoCommentsContainer
-                eventReference={eventIdentifier}
-                eventId={event.id}
-                pubkey={event.pubkey}
-              />
+              <VideoCommentsContainer eventReference={eventIdentifier} eventId={event.id} pubkey={event.pubkey} />
             </ErrorBoundaryVideo>
           </div>
         </div>
@@ -89,7 +85,8 @@ export function VideoPageView({
                 <p className="font-medium">Participe da conversa</p>
               </div>
               <p>
-                Use os comentários para reagir ao vídeo, deixar contexto para outros espectadores e continuar a thread no ecossistema Nostr.
+                Use os comentários para reagir ao vídeo, deixar contexto para outros espectadores e continuar a thread
+                no ecossistema Nostr.
               </p>
               <div className="rounded-2xl border border-border/60 bg-muted/20 px-3 py-2 text-xs">
                 Dica: highlights e status ao vivo podem enriquecer essa experiência em uma próxima iteração.
@@ -99,5 +96,5 @@ export function VideoPageView({
         </aside>
       </div>
     </div>
-  );
+  )
 }

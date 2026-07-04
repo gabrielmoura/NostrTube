@@ -1,29 +1,26 @@
-import { AspectRatio } from "@radix-ui/themes";
-import { cn } from "@/helper/format.ts";
-import NostrNotFound from "@/components/logo/NostrNotFound.tsx";
-import useUserStore from "@/store/useUserStore.ts";
-import { useNostrImage } from "@/hooks/useNostrImage.ts";
-import type { NDKEvent } from "@nostr-dev-kit/ndk";
-import { NSFWOverlay } from "@/components/NSFWOverlay.tsx";
-import { getFormattedVideoDuration } from "@/features/video/services/video-duration.service";
+import type { NDKEvent } from '@nostr-dev-kit/ndk'
+import { AspectRatio } from '@radix-ui/themes'
+import NostrNotFound from '@/components/logo/NostrNotFound.tsx'
+import { NSFWOverlay } from '@/components/NSFWOverlay.tsx'
+import { getFormattedVideoDuration } from '@/features/video/services/video-duration.service'
+import { cn } from '@/helper/format.ts'
+import { useNostrImage } from '@/hooks/useNostrImage.ts'
+import useUserStore from '@/store/useUserStore.ts'
 
 interface ImageCardProps {
-  event: NDKEvent;
-  className?: string;
+  event: NDKEvent
+  className?: string
 }
 
 export function ImageCard({ event, className }: ImageCardProps) {
-  const { optimized, title, isNSFW, loading, error, handlers } = useNostrImage(event);
-  const nsfwEnabled = useUserStore((state) => state.session?.nsfw) ?? false;
-  const duration = getFormattedVideoDuration(event);
+  const { optimized, title, isNSFW, loading, error, handlers } = useNostrImage(event)
+  const nsfwEnabled = useUserStore((state) => state.session?.nsfw) ?? false
+  const duration = getFormattedVideoDuration(event)
 
-  const shouldBlockNSFW = isNSFW && !nsfwEnabled;
+  const shouldBlockNSFW = isNSFW && !nsfwEnabled
 
   return (
-    <AspectRatio
-      ratio={16 / 9}
-      className={cn("bg-muted relative overflow-hidden group rounded-md", className)}
-    >
+    <AspectRatio ratio={16 / 9} className={cn('bg-muted relative overflow-hidden group rounded-md', className)}>
       {/* Camada de Imagem/Placeholder */}
       {shouldBlockNSFW ? (
         <NSFWOverlay />
@@ -35,13 +32,13 @@ export function ImageCard({ event, className }: ImageCardProps) {
           <img
             loading="lazy"
             src={optimized}
-            alt={title || "Nostr media"}
+            alt={title || 'Nostr media'}
             onLoad={handlers.onLoad}
             onError={handlers.onError}
             className={cn(
-              "h-full w-full object-cover transition-all duration-500",
-              "group-hover:scale-105",
-              loading ? "opacity-0" : "opacity-100"
+              'h-full w-full object-cover transition-all duration-500',
+              'group-hover:scale-105',
+              loading ? 'opacity-0' : 'opacity-100',
             )}
           />
         </>
@@ -52,18 +49,15 @@ export function ImageCard({ event, className }: ImageCardProps) {
         </span>
       )}
     </AspectRatio>
-  );
+  )
 }
 
 // --- Sub-componentes para melhor legibilidade (S de SOLID) ---
 
-const SkeletonOverlay = () => (
-  <div className="absolute inset-0 z-10 animate-pulse bg-neutral-800/60 backdrop-blur-sm" />
-);
-
+const SkeletonOverlay = () => <div className="absolute inset-0 z-10 animate-pulse bg-neutral-800/60 backdrop-blur-sm" />
 
 const NotFoundFallback = () => (
   <div className="absolute inset-0 flex items-center justify-center bg-[#1a1514]">
     <NostrNotFound className="h-12 w-12 opacity-40 transition-opacity group-hover:opacity-60" />
   </div>
-);
+)

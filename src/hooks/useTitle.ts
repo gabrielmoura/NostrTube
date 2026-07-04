@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect } from 'react'
 
 /**
  * Hook to set the title of the page
@@ -6,6 +6,6 @@ import { useEffect } from "react";
  */
 export function useTitle(title: string) {
   useEffect(() => {
-    document.title = title;
-  }, [title]);
+    document.title = title
+  }, [title])
 }

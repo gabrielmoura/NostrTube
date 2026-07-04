@@ -1,11 +1,11 @@
 import { mapImetaTag, type NDKEvent } from '@nostr-dev-kit/ndk'
 import { useEffect, useMemo, useState } from 'react'
+import { usePreset } from '@/features/presets/hooks/usePreset'
+import { isPubkeyMarkedNsfwByPreset } from '@/features/presets/utils/presetContentFilters'
 import { extractTag } from '@/helper/extractTag.ts'
 import { getOptimizedImageSrc, type ImageProxyConfig } from '@/helper/http.ts'
 import { getTags, type NostrTag } from '@/helper/nostrTags'
 import useImageProxySettingsStore from '@/store/useImageProxySettingsStore.ts'
-import { usePreset } from '@/features/presets/hooks/usePreset'
-import { isPubkeyMarkedNsfwByPreset } from '@/features/presets/utils/presetContentFilters'
 
 export interface UseNostrImageOptions {
   width?: number | string
@@ -118,14 +118,19 @@ export function useNostrImage(event: NDKEvent, options?: UseNostrImageOptions) {
         : imageProxy
 
     const optimized = source
-      ? getOptimizedImageSrc(source, width, {
-          resize: {
-            resizing_type: 'fit',
-            width: Number(width),
-            height: Number(height),
+      ? getOptimizedImageSrc(
+          source,
+          width,
+          {
+            resize: {
+              resizing_type: 'fit',
+              width: Number(width),
+              height: Number(height),
+            },
+            format: 'webp',
           },
-          format: 'webp',
-        }, effectiveImageProxy)
+          effectiveImageProxy,
+        )
       : null
 
     const isNSFW =

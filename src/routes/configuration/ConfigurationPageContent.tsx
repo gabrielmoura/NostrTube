@@ -24,6 +24,7 @@ import {
   Zap,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { AuthModal } from '@/components/AuthModal.tsx'
 import { AppShell } from '@/components/layout/AppShell'
@@ -39,8 +40,8 @@ import { Separator } from '@/components/ui/separator'
 import { StatusBadge } from '@/components/ui/status-badge'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useZapStats } from '@/features/zap/hooks/useZapStats'
 import { PresetSettingsTab } from '@/features/presets/components/PresetSettingsTab'
+import { useZapStats } from '@/features/zap/hooks/useZapStats'
 import { publishDmRelayList } from '@/lib/ndk-messages'
 import { cn } from '@/lib/utils'
 import { BlossomSettings } from '@/routes/configuration/@components/BlossomSettings.tsx'
@@ -52,7 +53,15 @@ import { VisibilitySettings } from '@/routes/configuration/@components/Visibilit
 import { type ThumbnailGenerationMode, useUploadPreferencesStore } from '@/store/useUploadPreferencesStore'
 import useUserStore from '@/store/useUserStore.ts'
 
-type SettingsTab = 'appearance' | 'player' | 'privacy' | 'relays-blossom' | 'presets' | 'profile' | 'account' | 'notifications'
+type SettingsTab =
+  | 'appearance'
+  | 'player'
+  | 'privacy'
+  | 'relays-blossom'
+  | 'presets'
+  | 'profile'
+  | 'account'
+  | 'notifications'
 type SettingsGroup = 'platform' | 'user'
 type SettingsSub =
   | 'appearance'
@@ -120,6 +129,7 @@ function getNextSubTab(nextTab: SettingsTab): SettingsSub | undefined {
 // ====================================================================
 
 function ProfileSection() {
+  const { t } = useTranslation()
   const currentUser = useNDKCurrentUser()
   const profile = currentUser?.profile
 
@@ -134,9 +144,9 @@ function ProfileSection() {
       <CardHeader>
         <div className="flex items-center gap-2">
           <User className="size-5 text-primary" />
-          <CardTitle className="text-base">Perfil do criador</CardTitle>
+          <CardTitle className="text-base">{t('profile.title')}</CardTitle>
         </div>
-        <CardDescription>Suas informações públicas na rede Nostr.</CardDescription>
+        <CardDescription>{t('profile.description')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
         {/* Avatar + Banner preview */}
@@ -146,18 +156,18 @@ function ProfileSection() {
             <AvatarFallback>{(profile?.name || 'U').slice(0, 1).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div className="space-y-1">
-            <p className="font-medium text-foreground">{profile?.displayName || profile?.name || 'Sessão anônima'}</p>
+            <p className="font-medium text-foreground">{profile?.displayName || profile?.name || t('profile.anonymous_session')}</p>
             <p className="font-mono text-xs text-muted-foreground">{pubkeyDisplay}</p>
           </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="settings-name">Nome de exibição</Label>
+            <Label htmlFor="settings-name">{t('profile.display_name_label')}</Label>
             <Input
               id="settings-name"
               defaultValue={profile?.displayName || profile?.name || ''}
-              placeholder="Seu nome"
+              placeholder={t('profile.display_name_placeholder')}
             />
           </div>
           <div className="space-y-2">

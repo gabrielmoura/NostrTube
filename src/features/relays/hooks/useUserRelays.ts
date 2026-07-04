@@ -1,5 +1,5 @@
-import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useMemo } from 'react'
 import { normalizeRelayUrls, syncNdkRelayPool } from '@/lib/ndk'
 import useUserStore from '@/store/useUserStore'
 

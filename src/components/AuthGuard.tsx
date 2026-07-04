@@ -1,8 +1,8 @@
-import { Outlet, useNavigate } from "@tanstack/react-router";
-import { useNDKCurrentUser } from "@nostr-dev-kit/ndk-hooks";
-import { type ComponentType, useEffect } from "react";
-import { toast } from "sonner";
-import { t } from "i18next";
+import { useNDKCurrentUser } from '@nostr-dev-kit/ndk-hooks'
+import { Outlet, useNavigate } from '@tanstack/react-router'
+import { t } from 'i18next'
+import { type ComponentType, useEffect } from 'react'
+import { toast } from 'sonner'
 
 /**
  * Componente de guarda de rota baseado em Layout.
@@ -22,17 +22,15 @@ import { t } from "i18next";
  * @throws {Redirect} Realiza um redirecionamento imperativo via `Maps` se `currentUser` for nulo.
  */
 export function AuthGuard() {
-  const navigate = useNavigate();
-  const currentUser = useNDKCurrentUser();
+  const navigate = useNavigate()
+  const currentUser = useNDKCurrentUser()
 
   useEffect(() => {
     if (!currentUser) {
-      navigate({ to: "/" }).then(() =>
-        toast.warning(t("auth_required", "You must be logged in to upload videos"))
-      );
+      navigate({ to: '/' }).then(() => toast.warning(t('auth_required', 'You must be logged in to upload videos')))
     }
-  }, [currentUser, navigate]);
-  return <Outlet />;
+  }, [currentUser, navigate])
+  return <Outlet />
 }
 
 /**
@@ -54,28 +52,26 @@ export function AuthGuard() {
  */
 export function withAuth<P extends object>(WrappedComponent: ComponentType<P>) {
   const ComponentWithAuth = (props: P) => {
-    const navigate = useNavigate();
-    const currentUser = useNDKCurrentUser();
+    const navigate = useNavigate()
+    const currentUser = useNDKCurrentUser()
 
     useEffect(() => {
       if (!currentUser) {
-        navigate({ to: "/" }).then(() =>
-          toast.warning(t("auth_required", "You must be logged in to access this page"))
-        );
+        navigate({ to: '/' }).then(() => toast.warning(t('auth_required', 'You must be logged in to access this page')))
       }
-    }, [currentUser, navigate]);
+    }, [currentUser, navigate])
 
     // Enquanto redireciona, não renderizamos nada (ou poderíamos retornar um loader)
     if (!currentUser) {
-      return null;
+      return null
     }
 
-    return <WrappedComponent {...props} />;
-  };
+    return <WrappedComponent {...props} />
+  }
 
   // Define um nome amigável para debug no DevTools
-  const displayName = WrappedComponent.displayName || WrappedComponent.name || "Component";
-  ComponentWithAuth.displayName = `withAuth(${displayName})`;
+  const displayName = WrappedComponent.displayName || WrappedComponent.name || 'Component'
+  ComponentWithAuth.displayName = `withAuth(${displayName})`
 
-  return ComponentWithAuth;
+  return ComponentWithAuth
 }

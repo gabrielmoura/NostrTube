@@ -1,20 +1,20 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useRef, useState } from "react";
-import { useNavigate, useParams } from "@tanstack/react-router";
-import { Search, Home, RefreshCw, FileQuestion, ArrowLeft } from "lucide-react";
+import { useNavigate, useParams } from '@tanstack/react-router'
+import { ArrowLeft, FileQuestion, Home, RefreshCw, Search } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 export function NotFoundVideo() {
-  const navigate = useNavigate();
-  const { eventId } = useParams({ from: "/v/$eventId" });
-  const [searchQuery, setSearchQuery] = useState("");
-  const searchRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate()
+  const { eventId } = useParams({ from: '/v/$eventId' })
+  const [searchQuery, setSearchQuery] = useState('')
+  const searchRef = useRef<HTMLInputElement>(null)
 
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-    navigate({ to: "/search", search: { search: searchQuery } as never });
-  };
+    e.preventDefault()
+    if (!searchQuery.trim()) return
+    navigate({ to: '/search', search: { search: searchQuery } as never })
+  }
 
   return (
     <div className="flex min-h-[70vh] items-center justify-center px-4 py-16">
@@ -27,7 +27,8 @@ export function NotFoundVideo() {
             <div className="space-y-1">
               <h1 className="text-2xl font-semibold tracking-tight">Vídeo não encontrado</h1>
               <p className="text-sm text-muted-foreground">
-                O link pode estar incorreto, o vídeo pode ter sido removido ou ainda não ter chegado aos relays conectados.
+                O link pode estar incorreto, o vídeo pode ter sido removido ou ainda não ter chegado aos relays
+                conectados.
               </p>
             </div>
           </div>
@@ -55,17 +56,21 @@ export function NotFoundVideo() {
               placeholder="Buscar por título, tag ou autor..."
               className="flex-1"
             />
-              <Button type="submit" size="icon">
-                <Search className="h-4 w-4" />
-              </Button>
+            <Button type="submit" size="icon">
+              <Search className="h-4 w-4" />
+            </Button>
           </form>
 
           <div className="grid gap-3 sm:grid-cols-3">
-            <Button variant="outline" className="w-full" onClick={() => window.history.length > 1 ? window.history.back() : navigate({ to: "/" })}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => (window.history.length > 1 ? window.history.back() : navigate({ to: '/' }))}
+            >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Voltar
             </Button>
-            <Button variant="outline" className="flex-1" onClick={() => navigate({ to: "/" })}>
+            <Button variant="outline" className="flex-1" onClick={() => navigate({ to: '/' })}>
               <Home className="mr-2 h-4 w-4" />
               Início
             </Button>
@@ -77,5 +82,5 @@ export function NotFoundVideo() {
         </div>
       </div>
     </div>
-  );
+  )
 }

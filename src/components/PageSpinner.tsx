@@ -1,5 +1,5 @@
-import { Loader2, Radio } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { Loader2, Radio } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface PageSpinnerProps {

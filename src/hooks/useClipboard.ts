@@ -1,21 +1,21 @@
-import { useState } from "react";
+import { useState } from 'react'
 
 // A custom hook to copy text to clipboard
 export function useClipboard() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
 
   const copyToClipboard = async (text: string) => {
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(true)
+    setError(null)
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(text)
     } catch (err) {
-      setError(err as Error);
+      setError(err as Error)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
-  return { copyToClipboard, isLoading, error };
+  return { copyToClipboard, isLoading, error }
 }

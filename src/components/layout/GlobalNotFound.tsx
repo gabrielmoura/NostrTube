@@ -1,10 +1,10 @@
 import { Link, useRouter } from '@tanstack/react-router'
-import { Home, ArrowLeft, Compass, TrendingUp, Radio, Zap, Search, Sparkles } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
+import { ArrowLeft, Compass, Home, Radio, Search, Sparkles, TrendingUp, Zap } from 'lucide-react'
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { buttonVariants } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 import { addLog } from '@/features/debug/services/error-log.service'
+import { cn } from '@/lib/utils'
 
 export function GlobalNotFound() {
   const { t } = useTranslation('pages')
@@ -70,16 +70,11 @@ export function GlobalNotFound() {
       </div>
 
       <div className="flex w-full max-w-2xl flex-col items-center gap-14 text-center">
-
         {/* ─── Hero block ─── */}
         <div className="flex flex-col items-center">
-
           {/* Giant 404 */}
           <div className="relative select-none">
-            <div
-              aria-hidden
-              className="absolute inset-0 -z-10 scale-110 rounded-full bg-primary/12 blur-[72px]"
-            />
+            <div aria-hidden className="absolute inset-0 -z-10 scale-110 rounded-full bg-primary/12 blur-[72px]" />
             <span
               aria-hidden
               className="font-display block bg-gradient-to-b from-foreground/90 via-foreground/25 to-foreground/0 bg-clip-text text-[clamp(7rem,22vw,15rem)] font-black leading-none tracking-tighter text-transparent"
@@ -112,10 +107,7 @@ export function GlobalNotFound() {
 
           {/* CTAs */}
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              to="/"
-              className={cn(buttonVariants({ variant: 'gradient', size: 'lg' }))}
-            >
+            <Link to="/" className={cn(buttonVariants({ variant: 'gradient', size: 'lg' }))}>
               <Home className="size-4" />
               {t('notFound_goHome')}
             </Link>
@@ -147,9 +139,7 @@ export function GlobalNotFound() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-foreground">{label}</p>
-                  <p className="mt-0.5 text-[11px] leading-tight text-muted-foreground">
-                    {description}
-                  </p>
+                  <p className="mt-0.5 text-[11px] leading-tight text-muted-foreground">{description}</p>
                 </div>
               </Link>
             ))}
@@ -161,10 +151,7 @@ export function GlobalNotFound() {
           <Zap className="size-3.5 shrink-0 text-[oklch(var(--lightning))]/60" />
           {t('notFound_tip', {
             link: (
-              <Link
-                to="/search"
-                className="underline underline-offset-2 transition-colors hover:text-foreground"
-              >
+              <Link to="/search" className="underline underline-offset-2 transition-colors hover:text-foreground">
                 /search
               </Link>
             ),

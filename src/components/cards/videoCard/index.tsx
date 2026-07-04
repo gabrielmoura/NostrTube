@@ -1,31 +1,30 @@
-import type { NDKEvent, NDKUserProfile } from "@nostr-dev-kit/ndk-hooks";
-import { useProfileValue } from "@nostr-dev-kit/ndk-hooks";
-import { cn, getNameToShow, getTwoLetters } from "@/helper/format.ts";
-import { AspectRatio, Avatar, Skeleton } from "@radix-ui/themes";
-import { HiCheckBadge } from "react-icons/hi2";
-import { relativeTime } from "@/helper/date.ts";
-import { Link } from "@tanstack/react-router";
-import { extractTag } from "@/helper/extractTag.ts";
-import { ImageCard } from "@/components/cards/videoCard/ImageCard.tsx";
+import type { NDKEvent, NDKUserProfile } from '@nostr-dev-kit/ndk-hooks'
+import { useProfileValue } from '@nostr-dev-kit/ndk-hooks'
+import { AspectRatio, Avatar, Skeleton } from '@radix-ui/themes'
+import { Link } from '@tanstack/react-router'
+import { HiCheckBadge } from 'react-icons/hi2'
+import { ImageCard } from '@/components/cards/videoCard/ImageCard.tsx'
+import { relativeTime } from '@/helper/date.ts'
+import { extractTag } from '@/helper/extractTag.ts'
+import { cn, getNameToShow, getTwoLetters } from '@/helper/format.ts'
 
 type VideoCardProps = {
-  className?: string;
-  event: NDKEvent;
-  profile?: NDKUserProfile;
-};
-
+  className?: string
+  event: NDKEvent
+  profile?: NDKUserProfile
+}
 
 export default function VideoCard({ className, event, profile: propProfile }: VideoCardProps) {
-  const npub = event.author.npub;
-  const fetchedProfile = useProfileValue(event.author.pubkey);
-  const profile = propProfile ?? fetchedProfile;
+  const npub = event.author.npub
+  const fetchedProfile = useProfileValue(event.author.pubkey)
+  const profile = propProfile ?? fetchedProfile
 
-  const { title, published_at: publishedAt } = extractTag(event.tags);
+  const { title, published_at: publishedAt } = extractTag(event.tags)
   return (
     <div
       className={cn(
-        "group flex w-full flex-col space-y-3 rounded-2xl p-3 transition hover:bg-muted/70 hover:shadow-md",
-        className
+        'group flex w-full flex-col space-y-3 rounded-2xl p-3 transition hover:bg-muted/70 hover:shadow-md',
+        className,
       )}
     >
       {/* Thumbnail */}
@@ -49,12 +48,12 @@ export default function VideoCard({ className, event, profile: propProfile }: Vi
         >
           <Avatar
             src={profile?.image}
-            alt={profile?.displayName ?? "Avatar"}
+            alt={profile?.displayName ?? 'Avatar'}
             fallback={getTwoLetters({ npub })}
             className="h-7 w-7 rounded-md transition-transform duration-200 group-hover:scale-105"
           />
           <span className="flex items-center gap-1 text-sm font-semibold">
-                        {getNameToShow({ npub, profile })}
+            {getNameToShow({ npub, profile })}
             {profile?.nip05 && <HiCheckBadge className="h-4 w-4 text-primary" />}
           </span>
         </Link>
@@ -72,17 +71,12 @@ export default function VideoCard({ className, event, profile: propProfile }: Vi
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export function VideoCardLoading({ className }: Omit<VideoCardProps, "event">) {
+export function VideoCardLoading({ className }: Omit<VideoCardProps, 'event'>) {
   return (
-    <div
-      className={cn(
-        "flex flex-col space-y-3 rounded-2xl p-3 animate-pulse",
-        className
-      )}
-    >
+    <div className={cn('flex flex-col space-y-3 rounded-2xl p-3 animate-pulse', className)}>
       {/* Thumbnail skeleton */}
       <div className="overflow-hidden rounded-lg">
         <AspectRatio ratio={16 / 9} className="bg-muted" />
@@ -97,5 +91,5 @@ export function VideoCardLoading({ className }: Omit<VideoCardProps, "event">) {
         <Skeleton className="h-4 w-24 rounded bg-muted" />
       </div>
     </div>
-  );
+  )
 }

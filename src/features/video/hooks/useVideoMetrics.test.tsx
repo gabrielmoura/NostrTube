@@ -32,7 +32,11 @@ describe('useVideoMetrics', () => {
 
   it('does not fetch when disabled', () => {
     const wrapper = createWrapper()
-    renderHook(() => useVideoMetrics({ ndk: {} as never, event: { id: 'video-1', tagValue: () => 'd1' } as never, enabled: false }), { wrapper })
+    renderHook(
+      () =>
+        useVideoMetrics({ ndk: {} as never, event: { id: 'video-1', tagValue: () => 'd1' } as never, enabled: false }),
+      { wrapper },
+    )
     expect(getVideoMetricsMock).not.toHaveBeenCalled()
   })
 
@@ -47,7 +51,8 @@ describe('useVideoMetrics', () => {
 
     const wrapper = createWrapper()
     const { result } = renderHook(
-      () => useVideoMetrics({ ndk: {} as never, event: { id: 'video-1', tagValue: () => 'd1' } as never, enabled: true }),
+      () =>
+        useVideoMetrics({ ndk: {} as never, event: { id: 'video-1', tagValue: () => 'd1' } as never, enabled: true }),
       { wrapper },
     )
 

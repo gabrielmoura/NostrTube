@@ -1,6 +1,7 @@
 import type { NDKEvent } from '@nostr-dev-kit/ndk'
-import { NDKSubscriptionCacheUsage, useSubscribe, type NDKFilter } from '@nostr-dev-kit/ndk-hooks'
+import { type NDKFilter, NDKSubscriptionCacheUsage, useSubscribe } from '@nostr-dev-kit/ndk-hooks'
 import { createRoute, Link } from '@tanstack/react-router'
+import { t } from 'i18next'
 import {
   Bell,
   Calendar,
@@ -22,6 +23,7 @@ import {
 } from 'lucide-react'
 import { nip19 } from 'nostr-tools'
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { AppShell } from '@/components/layout/AppShell'
 import { Badge } from '@/components/ui/badge'
@@ -29,8 +31,8 @@ import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatusBadge } from '@/components/ui/status-badge'
 import { VideoPlayer } from '@/components/videoPlayer'
-import { VideoCommentsContainer } from '@/features/video/components/VideoCommentsContainer'
 import { useBatchProfiles } from '@/features/nostr/hooks/useBatchProfiles'
+import { VideoCommentsContainer } from '@/features/video/components/VideoCommentsContainer'
 import { LIVE_EVENT_KIND } from '@/features/video/services/video-kinds'
 import { cn } from '@/lib/utils'
 import { Route as rootRoute } from '@/routes/__root'
@@ -55,16 +57,16 @@ interface LiveEvent {
 }
 
 const CATEGORIES = [
-  { key: 'all', label: 'Todas' },
-  { key: 'technology', label: 'Tecnologia' },
-  { key: 'bitcoin', label: 'Bitcoin' },
-  { key: 'education', label: 'Educação' },
-  { key: 'entertainment', label: 'Entretenimento' },
-  { key: 'music', label: 'Música' },
-  { key: 'gaming', label: 'Gaming' },
-  { key: 'news', label: 'Notícias' },
-  { key: 'talks', label: 'Palestras' },
-]
+  { key: 'all' },
+  { key: 'technology' },
+  { key: 'bitcoin' },
+  { key: 'education' },
+  { key: 'entertainment' },
+  { key: 'music' },
+  { key: 'gaming' },
+  { key: 'news' },
+  { key: 'talks' },
+] as const
 
 const CATEGORY_TAG_MAP: Record<string, string[]> = {
   technology: ['technology', 'tech', 'programming', 'dev', 'software'],
@@ -89,19 +91,19 @@ export const Route = createRoute({
   validateSearch: LiveSearchSchema,
   head: () => ({
     meta: [
-      { title: `Ao vivo - ${import.meta.env.VITE_APP_NAME}` },
-      { name: 'description', content: 'Transmissões ao vivo da comunidade Nostr.' },
-      { property: 'og:title', content: `Ao vivo - ${import.meta.env.VITE_APP_NAME}` },
+      { title: `${t('live_page_title')} - ${import.meta.env.VITE_APP_NAME}` },
+      { name: 'description', content: t('live_page_description') },
+      { property: 'og:title', content: `${t('live_page_title')} - ${import.meta.env.VITE_APP_NAME}` },
     ],
   }),
 })
 
 // ─── Hook de dados ───────────────────────────────────────
-function parseLiveEvent(event: NDKEvent): LiveEvent {
+function parseLiveEvent(event: NDKEvent, tFn: (key: string) => string): LiveEvent {
   return {
     id: event.id,
     dTag: event.tagValue('d') || event.id,
-    title: event.tagValue('title') || 'Live sem título',
+    title: event.tagValue('title') || tFn('live_untitled'),
     summary: event.tagValue('summary') || '',
     image: event.tagValue('image') || null,
     streaming: event.tagValue('streaming') || null,
@@ -118,47 +120,30 @@ function parseLiveEvent(event: NDKEvent): LiveEvent {
 }
 
 function useLiveData() {
+  const { t: tLive } = useTranslation('pages')
   // Buscar todos os eventos 30311 (live)
   const filter: NDKFilter = { kinds: [LIVE_EVENT_KIND as number], limit: 100 }
-  const { events, eose } = useSubscribe(  [filter], {
+  const { events, eose } = useSubscribe([filter], {
     closeOnEose: false,
     cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
   })
 
   // Parse events
-  const liveEvents = useMemo(() => events.map(parseLiveEvent), [events])
+  const liveEvents = useMemo(() => events.map((e) => parseLiveEvent(e, tLive)), [events, tLive])
 
   // Agrupar por status
-  const liveNow = useMemo(
-    () => liveEvents.filter((e) => e.status === 'live'),
-    [liveEvents],
-  )
-  const planned = useMemo(
-    () => liveEvents.filter((e) => e.status === 'planned'),
-    [liveEvents],
-  )
+  const liveNow = useMemo(() => liveEvents.filter((e) => e.status === 'live'), [liveEvents])
+  const planned = useMemo(() => liveEvents.filter((e) => e.status === 'planned'), [liveEvents])
   // Featured = first live with streaming URL
-  const featured = useMemo(
-    () => liveNow.find((e) => e.streaming) || liveNow[0] || null,
-    [liveNow],
-  )
+  const featured = useMemo(() => liveNow.find((e) => e.streaming) || liveNow[0] || null, [liveNow])
 
   // Other lives (exclude featured)
-  const otherLives = useMemo(
-    () => liveNow.filter((e) => e.id !== featured?.id),
-    [liveNow, featured],
-  )
+  const otherLives = useMemo(() => liveNow.filter((e) => e.id !== featured?.id), [liveNow, featured])
 
   // Perfis
-  const allPubkeys = useMemo(
-    () => [...new Set(liveEvents.map((e) => e.pubkey))],
-    [liveEvents],
-  )
+  const allPubkeys = useMemo(() => [...new Set(liveEvents.map((e) => e.pubkey))], [liveEvents])
   const profiles = useBatchProfiles(
-    useMemo(
-      () => events.filter((e) => allPubkeys.includes(e.pubkey)),
-      [events, allPubkeys],
-    ),
+    useMemo(() => events.filter((e) => allPubkeys.includes(e.pubkey)), [events, allPubkeys]),
   )
 
   return {
@@ -174,16 +159,10 @@ function useLiveData() {
 
 // ─── Página Principal ────────────────────────────────────
 function LivePage() {
+  const { t, i18n: i18nLocale } = useTranslation('pages')
   const { liveId } = Route.useSearch()
   const navigate = Route.useNavigate()
-  const {
-    liveNow,
-    planned,
-    featured,
-    otherLives,
-    profiles,
-    isLoading,
-  } = useLiveData()
+  const { liveNow, planned, featured, otherLives, profiles, isLoading } = useLiveData()
 
   const [activeCategory, setActiveCategory] = useState('all')
 
@@ -205,9 +184,7 @@ function LivePage() {
   const filteredOther = useMemo(() => {
     if (activeCategory === 'all') return otherLives
     const relatedTags = CATEGORY_TAG_MAP[activeCategory] || [activeCategory]
-    return otherLives.filter((live) =>
-      live.tags.some((t) => relatedTags.includes(t)),
-    )
+    return otherLives.filter((live) => live.tags.some((t) => relatedTags.includes(t)))
   }, [otherLives, activeCategory])
 
   // Coluna direita
@@ -218,7 +195,7 @@ function LivePage() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Radio className="size-4 text-[oklch(var(--flame))]" />
-            <CardTitle className="text-base">Canais ao vivo</CardTitle>
+            <CardTitle className="text-base">{t('live_sidebar_live_channels')}</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
@@ -249,7 +226,7 @@ function LivePage() {
               )
             })
           ) : (
-            <p className="text-muted-foreground">Nenhum canal ao vivo.</p>
+            <p className="text-muted-foreground">{t('live_sidebar_no_channels')}</p>
           )}
         </CardContent>
       </Card>
@@ -257,19 +234,19 @@ function LivePage() {
       {/* Estatísticas ao vivo */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Estatísticas ao vivo</CardTitle>
+          <CardTitle className="text-base">{t('live_sidebar_stats_title')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Ao vivo agora</span>
+            <span className="text-muted-foreground">{t('live_sidebar_live_now_label')}</span>
             <span className="font-medium">{liveNow.length}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Agendados</span>
+            <span className="text-muted-foreground">{t('live_sidebar_scheduled_label')}</span>
             <span className="font-medium">{planned.length}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground">Total de viewers</span>
+            <span className="text-muted-foreground">{t('live_sidebar_total_viewers')}</span>
             <span className="font-medium">
               {liveNow.reduce((sum, l) => sum + (l.currentParticipants ?? 0), 0) || '—'}
             </span>
@@ -283,19 +260,16 @@ function LivePage() {
           <div className="mb-3 inline-flex size-12 items-center justify-center rounded-full bg-primary/20">
             <Radio className="size-6 text-primary" />
           </div>
-          <h3 className="mb-1 font-semibold">Transmita ao vivo</h3>
-          <p className="mb-4 text-xs text-muted-foreground">
-            Compartilhe sua transmissão com a comunidade Nostr. Use OBS, Streamlabs ou qualquer software compatível com
-            RTMP/HLS — publique o link no Nostr com kind 30311.
-          </p>
+          <h3 className="mb-1 font-semibold">{t('live_cta_title')}</h3>
+          <p className="mb-4 text-xs text-muted-foreground">{t('live_cta_description')}</p>
           <a
             href="https://github.com/nostr-protocol/nips/blob/master/53.md"
             target="_blank"
             rel="noopener noreferrer"
-            className={buttonVariants({ variant: "gradient", size: "sm" })}
+            className={buttonVariants({ variant: 'gradient', size: 'sm' })}
           >
             <ExternalLink className="mr-2 size-4" />
-            Saiba mais (NIP-53)
+            {t('live_cta_learn_more')}
           </a>
         </CardContent>
       </Card>
@@ -303,20 +277,20 @@ function LivePage() {
       {/* Dicas */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Dicas</CardTitle>
+          <CardTitle className="text-base">{t('live_tips_title')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-xs text-muted-foreground">
           <p className="flex items-center gap-2">
             <MessageCircle className="size-3 shrink-0" />
-            Interaja com o chat ao vivo
+            {t('live_tips_chat')}
           </p>
           <p className="flex items-center gap-2">
             <Zap className="size-3 shrink-0" />
-            Use Zaps para apoiar criadores
+            {t('live_tips_zaps')}
           </p>
           <p className="flex items-center gap-2">
             <Bell className="size-3 shrink-0" />
-            Divulgue sua live com antecedência
+            {t('live_tips_promote')}
           </p>
         </CardContent>
       </Card>
@@ -326,7 +300,13 @@ function LivePage() {
   // Loading
   if (isLoading && liveNow.length === 0 && planned.length === 0) {
     return (
-      <AppShell activeKey="live" title="Ao vivo" description="Transmissões ao vivo da comunidade Nostr." icon={Radio} aside={aside}>
+      <AppShell
+        activeKey="live"
+        title={t('live_page_title')}
+        description={t('live_page_description')}
+        icon={Radio}
+        aside={aside}
+      >
         <div className="space-y-6">
           {/* Skeleton player */}
           <div className="aspect-video w-full animate-pulse rounded-xl bg-muted" />
@@ -344,7 +324,13 @@ function LivePage() {
   const isEmpty = liveNow.length === 0 && planned.length === 0
 
   return (
-    <AppShell activeKey="live" title="Ao vivo" description="Transmissões ao vivo da comunidade Nostr." icon={Radio} aside={aside}>
+    <AppShell
+      activeKey="live"
+      title={t('live_page_title')}
+      description={t('live_page_description')}
+      icon={Radio}
+      aside={aside}
+    >
       {/* Featured Live */}
       {activeLive ? (
         <section>
@@ -361,14 +347,14 @@ function LivePage() {
               ) : (
                 <div className="flex h-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-muted to-card p-8 text-center">
                   <Radio className="size-12 text-muted-foreground/40" />
-                  <p className="text-sm text-muted-foreground">URL de transmissão não disponível</p>
+                  <p className="text-sm text-muted-foreground">{t('live_stream_unavailable')}</p>
                 </div>
               )}
               {/* Overlay badge */}
               <div className="absolute left-4 top-4 flex items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-3 py-1 text-xs font-bold text-white shadow-lg">
                   <span className="flex size-2 rounded-full bg-white" />
-                  AO VIVO
+                  {t('live_badge_live')}
                 </span>
                 {activeLive.currentParticipants !== null && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-xs text-white backdrop-blur-sm">
@@ -408,7 +394,7 @@ function LivePage() {
                     href={activeLive.streaming || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={buttonVariants({ variant: "glass", size: "sm" })}
+                    className={buttonVariants({ variant: 'glass', size: 'sm' })}
                   >
                     <ExternalLink className="size-4" />
                   </a>
@@ -442,7 +428,7 @@ function LivePage() {
                     : 'border border-border/50 bg-card/50 text-muted-foreground hover:border-primary/30 hover:text-foreground',
                 )}
               >
-                {cat.label}
+                {t(`live_category_${cat.key}`)}
               </button>
             ))}
           </div>
@@ -454,7 +440,7 @@ function LivePage() {
         <section>
           <div className="mb-4 flex items-center gap-2">
             <Radio className="size-5 text-[oklch(var(--flame))]" />
-            <h2 className="text-lg font-semibold tracking-tight">Ao vivo agora</h2>
+            <h2 className="text-lg font-semibold tracking-tight">{t('live_now_section')}</h2>
             <StatusBadge tone="live">{liveNow.length}</StatusBadge>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -484,7 +470,7 @@ function LivePage() {
                   <div className="absolute left-2 top-2">
                     <span className="inline-flex items-center gap-1 rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white">
                       <span className="flex size-1.5 rounded-full bg-white" />
-                      LIVE
+                      {t('live_badge_live')}
                     </span>
                   </div>
                   {live.currentParticipants !== null && (
@@ -518,14 +504,11 @@ function LivePage() {
         <section>
           <div className="mb-4 flex items-center gap-2">
             <Calendar className="size-5 text-[oklch(var(--water))]" />
-            <h2 className="text-lg font-semibold tracking-tight">Programação em destaque</h2>
+            <h2 className="text-lg font-semibold tracking-tight">{t('live_scheduled_section')}</h2>
           </div>
           <div className="space-y-3">
             {planned.slice(0, 6).map((live) => (
-              <div
-                key={live.id}
-                className="flex items-center gap-4 rounded-xl border border-border/50 bg-card/50 p-4"
-              >
+              <div key={live.id} className="flex items-center gap-4 rounded-xl border border-border/50 bg-card/50 p-4">
                 <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-muted">
                   {live.image ? (
                     <img src={live.image} alt="" className="h-full w-full rounded-lg object-cover" />
@@ -536,12 +519,14 @@ function LivePage() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">{live.title}</p>
                   <p className="text-xs text-muted-foreground">
-                    {live.starts ? new Date(live.starts).toLocaleDateString('pt-BR', {
-                      day: 'numeric',
-                      month: 'long',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    }) : 'Data a definir'}
+                    {live.starts
+                      ? new Date(live.starts).toLocaleDateString(i18nLocale.language, {
+                          day: 'numeric',
+                          month: 'long',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
+                      : t('live_date_undefined')}
                   </p>
                   {live.tags.length > 0 && (
                     <div className="mt-1 flex gap-1">
@@ -554,7 +539,7 @@ function LivePage() {
                   )}
                 </div>
                 <Badge variant="outline" className="shrink-0 text-[10px]">
-                  Agendado
+                  {t('live_badge_scheduled')}
                 </Badge>
               </div>
             ))}
@@ -568,24 +553,21 @@ function LivePage() {
           <div className="mb-4 inline-flex size-16 items-center justify-center rounded-full bg-muted">
             <Radio className="size-8 text-muted-foreground" />
           </div>
-          <h3 className="mb-2 text-lg font-semibold">Nenhuma transmissão ao vivo no momento</h3>
-          <p className="mb-6 max-w-md text-sm text-muted-foreground">
-            Não encontramos lives ativas nos relays consultados. As transmissões ao vivo da comunidade Nostr aparecerão
-            aqui quando disponíveis.
-          </p>
+          <h3 className="mb-2 text-lg font-semibold">{t('live_empty_title')}</h3>
+          <p className="mb-6 max-w-md text-sm text-muted-foreground">{t('live_empty_description')}</p>
           <div className="flex gap-3">
-            <Link to="/explore" className={buttonVariants({ variant: "gradient" })}>
+            <Link to="/explore" className={buttonVariants({ variant: 'gradient' })}>
               <Video className="mr-2 size-4" />
-              Explorar vídeos
+              {t('live_empty_explore')}
             </Link>
             <a
               href="https://github.com/nostr-protocol/nips/blob/master/53.md"
               target="_blank"
               rel="noopener noreferrer"
-              className={buttonVariants({ variant: "glass" })}
+              className={buttonVariants({ variant: 'glass' })}
             >
               <ExternalLink className="mr-2 size-4" />
-              NIP-53
+              {t('live_empty_nip53')}
             </a>
           </div>
         </div>

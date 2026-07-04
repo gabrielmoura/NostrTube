@@ -1,78 +1,82 @@
 // hooks/useNostrInfiniteFeed.ts
-import { useState, useMemo, useEffect, useCallback } from "react";
-import { NDKEvent, type NDKFilter } from "@nostr-dev-kit/ndk";
-import { NDKSubscriptionCacheUsage, useSubscribe } from "@nostr-dev-kit/ndk-hooks";
-import { NORMAL_VIDEO_EVENT_KINDS } from "@/features/video/services/video-kinds";
-import { deduplicateEvents } from "@/helper/deduplicateEvents.ts";
-import { useContentVisibilityFilter } from "@/features/nostr/hooks/useContentVisibilityFilter";
 
-const VIDEO_KINDS = NORMAL_VIDEO_EVENT_KINDS;
-const SEARCH_RELAYS = import.meta.env.VITE_NOSTR_SEARCH_RELAYS?.length > 5
-  ? import.meta.env.VITE_NOSTR_SEARCH_RELAYS
-  : undefined;
+import { NDKEvent, type NDKFilter } from '@nostr-dev-kit/ndk'
+import { NDKSubscriptionCacheUsage, useSubscribe } from '@nostr-dev-kit/ndk-hooks'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useContentVisibilityFilter } from '@/features/nostr/hooks/useContentVisibilityFilter'
+import { NORMAL_VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
+import { deduplicateEvents } from '@/helper/deduplicateEvents.ts'
+
+const VIDEO_KINDS = NORMAL_VIDEO_EVENT_KINDS
+const SEARCH_RELAYS =
+  import.meta.env.VITE_NOSTR_SEARCH_RELAYS?.length > 5 ? import.meta.env.VITE_NOSTR_SEARCH_RELAYS : undefined
 
 // hooks/useNostrInfiniteFeed.ts
 export function useNostrInfiniteFeed(baseFilter: Partial<NDKFilter>, enabled = true) {
-  const [allEvents, setAllEvents] = useState<NDKEvent[]>([]);
-  const [until, setUntil] = useState<number | undefined>(undefined);
-  const [isFetching, setIsFetching] = useState(false);
-  const { filterEvents } = useContentVisibilityFilter();
+  const [allEvents, setAllEvents] = useState<NDKEvent[]>([])
+  const [until, setUntil] = useState<number | undefined>(undefined)
+  const [isFetching, setIsFetching] = useState(false)
+  const { filterEvents } = useContentVisibilityFilter()
 
   // 1. Estabilização do Filtro:
   // O JSON.stringify garante que o filtro só mude se o CONTEÚDO mudar,
   // ignorando se a referência do objeto baseFilter é nova.
-  const filterKey = JSON.stringify(baseFilter);
+  const filterKey = JSON.stringify(baseFilter)
 
   const filters: NDKFilter[] | false = useMemo(() => {
-    if (!enabled) return false;
-    return [{
-      ...JSON.parse(filterKey),
-      kinds: VIDEO_KINDS,
-      limit: 40,
-      until: until || Math.floor(Date.now() / 1000)
-    }];
-  }, [filterKey, until, enabled]);
+    if (!enabled) return false
+    return [
+      {
+        ...JSON.parse(filterKey),
+        kinds: VIDEO_KINDS,
+        limit: 40,
+        until: until || Math.floor(Date.now() / 1000),
+      },
+    ]
+  }, [filterKey, until, enabled])
 
-  const { events } = useSubscribe(filters, {
-    closeOnEose: false,
-    cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
-    relayUrls: SEARCH_RELAYS
-  }, [filters]);
+  const { events } = useSubscribe(
+    filters,
+    {
+      closeOnEose: false,
+      cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
+      relayUrls: SEARCH_RELAYS,
+    },
+    [filters],
+  )
 
   // 2. Guarda de Atualização:
   // Só atualizamos o estado se houver eventos REALMENTE novos.
   useEffect(() => {
-    if (!events || events.length === 0) return;
+    if (!events || events.length === 0) return
 
     setAllEvents((prev) => {
       // Filtra apenas eventos que ainda não existem no estado atual
-      const hasNewEvents = events.some(
-        (newEvent) => !prev.some((existing) => existing.id === newEvent.id)
-      );
+      const hasNewEvents = events.some((newEvent) => !prev.some((existing) => existing.id === newEvent.id))
 
       // SE NÃO HÁ NOVIDADE, retorna a mesma referência de estado (Bate o loop)
-      if (!hasNewEvents) return prev;
+      if (!hasNewEvents) return prev
 
-      const combined = deduplicateEvents([...prev, ...events]);
-      return combined.sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
-    });
+      const combined = deduplicateEvents([...prev, ...events])
+      return combined.sort((a, b) => (b.created_at || 0) - (a.created_at || 0))
+    })
 
-    setIsFetching(false);
-  }, [events]); // 'events' vem do useSubscribe
+    setIsFetching(false)
+  }, [events]) // 'events' vem do useSubscribe
 
   const fetchNextPage = useCallback(() => {
-    if (allEvents.length === 0 || isFetching) return;
-    const lastTimestamp = allEvents[allEvents.length - 1].created_at;
+    if (allEvents.length === 0 || isFetching) return
+    const lastTimestamp = allEvents[allEvents.length - 1].created_at
     if (lastTimestamp) {
-      setIsFetching(true);
-      setUntil(lastTimestamp - 1);
+      setIsFetching(true)
+      setUntil(lastTimestamp - 1)
     }
-  }, [allEvents, isFetching]);
+  }, [allEvents, isFetching])
 
   return {
     events: filterEvents(allEvents),
     isLoading: allEvents.length === 0 && isFetching,
     isFetchingNextPage: isFetching,
-    fetchNextPage
-  };
+    fetchNextPage,
+  }
 }

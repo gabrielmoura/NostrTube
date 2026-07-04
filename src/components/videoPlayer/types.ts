@@ -1,26 +1,26 @@
 export type ChaptersTrack = {
-  src: string;
-  kind: "chapters";
-  language: string;
-  default?: boolean;
-};
+  src: string
+  kind: 'chapters'
+  language: string
+  default?: boolean
+}
 export type SubtitlesTrack = {
-  src: string;
-  kind: "subtitles";
-  language: string;
-  label: string;
-  default?: boolean;
-};
+  src: string
+  kind: 'subtitles'
+  language: string
+  label: string
+  default?: boolean
+}
 
-type TrackType = ChaptersTrack | SubtitlesTrack;
+type TrackType = ChaptersTrack | SubtitlesTrack
 
-export type { TrackType };
+export type { TrackType }
 
 export type DataVideo = {
-  src: string;
-  sourceMimeType?: string;
-  fallback?: string[];
-  image: string;
-  thumbnail?: string;
-  title?: string;
+  src: string
+  sourceMimeType?: string
+  fallback?: string[]
+  image: string
+  thumbnail?: string
+  title?: string
 }

@@ -1,9 +1,9 @@
-import React, { type ReactNode } from "react";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import React, { type ReactNode } from 'react'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 type UploadErrorBoundaryProps = {
-  children: ReactNode;
-};
+  children: ReactNode
+}
 
 export function UploadErrorBoundary({ children }: UploadErrorBoundaryProps) {
   return (
@@ -13,5 +13,5 @@ export function UploadErrorBoundary({ children }: UploadErrorBoundaryProps) {
     >
       {children}
     </ErrorBoundary>
-  );
+  )
 }

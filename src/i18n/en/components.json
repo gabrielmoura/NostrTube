@@ -39,5 +39,13 @@
         "duplicate": "This tag already exists."
       }
     }
+  },
+  "sidebar": {
+    "library_items_label": "Library items",
+    "nostr_session_active": "Active Nostr session",
+    "browsing_without_login": "Browsing without login",
+    "anonymous_session": "Anonymous session",
+    "main_navigation": "Main navigation",
+    "preferences": "Preferences"
   }
 }

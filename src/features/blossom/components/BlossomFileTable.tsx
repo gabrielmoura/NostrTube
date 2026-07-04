@@ -2,7 +2,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import type { BlossomFileRecord, BlossomViewMode } from '../blossom.types'
 import { formatBytes, formatRelativeDate } from '../blossom.utils'
 import { BlossomFileActions, BlossomFileTypeBadge, getBlossomFileIcon } from './BlossomFileActions'
-import { BlossomFileGrid, BlossomInfiniteFooter, type BlossomFileListProps } from './BlossomFileGrid'
+import { BlossomFileGrid, type BlossomFileListProps, BlossomInfiniteFooter } from './BlossomFileGrid'
 import { useBlossomVirtualWindow } from './useBlossomVirtualWindow'
 
 const TABLE_ROW_HEIGHT = 78
@@ -46,7 +46,11 @@ export function BlossomFileTable(props: BlossomFileTableProps) {
 
               if (!file) {
                 return (
-                  <div key="footer" className="absolute left-0 top-0 w-full" style={{ transform: `translateY(${top}px)` }}>
+                  <div
+                    key="footer"
+                    className="absolute left-0 top-0 w-full"
+                    style={{ transform: `translateY(${top}px)` }}
+                  >
                     <BlossomInfiniteFooter
                       shownCount={props.files.length}
                       totalCount={props.totalCount ?? props.files.length}

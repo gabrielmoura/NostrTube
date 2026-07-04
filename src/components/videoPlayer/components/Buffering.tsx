@@ -1,4 +1,4 @@
-import { Spinner } from "@vidstack/react";
+import { Spinner } from '@vidstack/react'
 
 export function BufferingIndicator() {
   return (
@@ -11,5 +11,5 @@ export function BufferingIndicator() {
         <Spinner.TrackFill className="opacity-75" width={8} />
       </Spinner.Root>
     </div>
-  );
+  )
 }

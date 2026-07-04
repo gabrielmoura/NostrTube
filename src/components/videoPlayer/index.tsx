@@ -1,5 +1,5 @@
 // @vidstack/react
-import "@vidstack/react/player/styles/base.css";
+import '@vidstack/react/player/styles/base.css'
 
 import {
   isDASHProvider,
@@ -8,93 +8,93 @@ import {
   type MediaPlayerInstance,
   MediaProvider,
   type MediaProviderAdapter,
-  Poster
-} from "@vidstack/react";
+  Poster,
+} from '@vidstack/react'
 
-import { useEffect, useRef } from "react";
-import type { DataVideo } from "./types.ts";
-import { VideoLayout } from "./layout.tsx";
-import { getOptimizedImageSrc } from "@/helper/http.ts";
-import { cn } from "@/helper/format.ts";
-import useImageProxySettingsStore from "@/store/useImageProxySettingsStore.ts";
-import useUserStore from "@/store/useUserStore.ts";
+import { useEffect, useRef } from 'react'
+import { cn } from '@/helper/format.ts'
+import { getOptimizedImageSrc } from '@/helper/http.ts'
+import useImageProxySettingsStore from '@/store/useImageProxySettingsStore.ts'
+import useUserStore from '@/store/useUserStore.ts'
+import { VideoLayout } from './layout.tsx'
+import type { DataVideo } from './types.ts'
 
 interface VideoPlayerParams extends DataVideo {
-  onCanPlay?: () => void;
-  onPlaybackError?: () => void;
-  onDurationChange?: (duration: number) => void;
-  onTitleChange?: (title: string) => void;
-  onTimeChange?: (currentTime: number) => void;
-  className?: string;
+  onCanPlay?: () => void
+  onPlaybackError?: () => void
+  onDurationChange?: (duration: number) => void
+  onTitleChange?: (title: string) => void
+  onTimeChange?: (currentTime: number) => void
+  className?: string
 }
 
 export function VideoPlayer({
-                              image,
-                              src,
-                              sourceMimeType,
-                              title,
-                              onCanPlay,
-                              onPlaybackError,
-                              onDurationChange,
-                              onTitleChange,
-                              onTimeChange,
-                              className
-                             }: VideoPlayerParams) {
-  const playerRef = useRef<MediaPlayerInstance | null>(null);
-  const handledErrorForSourceRef = useRef<string | null>(null);
-  const persistedMuted = useUserStore((state) => state.session?.videoMuted ?? true);
-  const setVideoMuted = useUserStore((state) => state.setVideoMuted);
-  const imageProxy = useImageProxySettingsStore((state) => state.imageProxy);
+  image,
+  src,
+  sourceMimeType,
+  title,
+  onCanPlay,
+  onPlaybackError,
+  onDurationChange,
+  onTitleChange,
+  onTimeChange,
+  className,
+}: VideoPlayerParams) {
+  const playerRef = useRef<MediaPlayerInstance | null>(null)
+  const handledErrorForSourceRef = useRef<string | null>(null)
+  const persistedMuted = useUserStore((state) => state.session?.videoMuted ?? true)
+  const setVideoMuted = useUserStore((state) => state.setVideoMuted)
+  const imageProxy = useImageProxySettingsStore((state) => state.imageProxy)
 
   useEffect(() => {
-    handledErrorForSourceRef.current = null;
-  }, []);
+    handledErrorForSourceRef.current = null
+  }, [])
 
   useEffect(() => {
-    const player = playerRef.current;
-    if (!player) return;
+    const player = playerRef.current
+    if (!player) return
 
-    let errorLogged = false;
+    let errorLogged = false
 
     return player.subscribe(({ error }) => {
       if (error && !errorLogged) {
-        errorLogged = true;
+        errorLogged = true
         if (handledErrorForSourceRef.current !== src) {
-          handledErrorForSourceRef.current = src;
-          onPlaybackError?.();
+          handledErrorForSourceRef.current = src
+          onPlaybackError?.()
         }
       }
-    });
-  }, [onPlaybackError, src]);
+    })
+  }, [onPlaybackError, src])
 
   useEffect(() => {
-    const player = playerRef.current;
-    if (!player) return;
+    const player = playerRef.current
+    if (!player) return
 
-    player.muted = persistedMuted;
-  }, [persistedMuted]);
+    player.muted = persistedMuted
+  }, [persistedMuted])
 
   useEffect(() => {
-    const player = playerRef.current;
-    if (!player) return;
+    const player = playerRef.current
+    if (!player) return
 
     return player.subscribe(({ muted }) => {
-      if (typeof muted === "boolean" && muted !== persistedMuted) {
-        setVideoMuted(muted);
+      if (typeof muted === 'boolean' && muted !== persistedMuted) {
+        setVideoMuted(muted)
       }
-    });
-  }, [persistedMuted, setVideoMuted]);
+    })
+  }, [persistedMuted, setVideoMuted])
 
   function onProviderChange(provider: MediaProviderAdapter | null) {
-    if (!provider) return;
+    if (!provider) return
     if (isHLSProvider(provider)) {
       provider.config = {
         backBufferLength: 0,
         lowLatencyMode: false,
-      };
+      }
     }
     if (isDASHProvider(provider)) {
-      provider.config = {};
+      provider.config = {}
     }
   }
 
@@ -102,8 +102,8 @@ export function VideoPlayer({
     <MediaPlayer
       ref={playerRef}
       className={cn(
-        "bg-muted-background group relative aspect-video w-full overflow-hidden font-sans text-foreground ring-media-focus @container data-[focus]:ring-4 data-[hocus]:ring-4",
-        className
+        'bg-muted-background group relative aspect-video w-full overflow-hidden font-sans text-foreground ring-media-focus @container data-[focus]:ring-4 data-[hocus]:ring-4',
+        className,
       )}
       title={title}
       src={src}
@@ -111,7 +111,6 @@ export function VideoPlayer({
       streamType="on-demand"
       preload="metadata"
       playsInline
-      crossOrigin="anonymous"
       autoplay
       muted={persistedMuted}
       logLevel="warn"
@@ -121,20 +120,20 @@ export function VideoPlayer({
       onTitleChange={(nextTitle) => onTitleChange?.(nextTitle)}
       onTimeChange={(currentTime) => onTimeChange?.(currentTime)}
       onPlaying={() => {
-        handledErrorForSourceRef.current = null;
+        handledErrorForSourceRef.current = null
       }}
     >
       <MediaProvider>
-        <source src={src} type={sourceMimeType ?? "video/mp4"} />
+        <source src={src} type={sourceMimeType ?? 'video/mp4'} />
 
         <Poster
           className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity data-[visible]:opacity-100"
-          src={getOptimizedImageSrc(image, "500", undefined, imageProxy)}
+          src={getOptimizedImageSrc(image, '500', undefined, imageProxy)}
           alt={title}
         />
       </MediaProvider>
 
       <VideoLayout persistentProgress />
     </MediaPlayer>
-  );
+  )
 }

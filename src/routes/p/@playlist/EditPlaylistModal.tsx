@@ -1,24 +1,24 @@
-import { useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { type Playlist } from "./types";
+import { useEffect, useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { type Playlist } from './types'
 
 interface EditPlaylistModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  playlist: Playlist;
-  onSave: (updatedMeta: Partial<Playlist>) => void;
+  isOpen: boolean
+  onClose: () => void
+  playlist: Playlist
+  onSave: (updatedMeta: Partial<Playlist>) => void
 }
 
 export const EditPlaylistModal = ({ isOpen, onClose, playlist, onSave }: EditPlaylistModalProps) => {
   const [formData, setFormData] = useState({
     name: playlist.name,
     description: playlist.description,
-    coverImage: playlist.coverImage || ""
-  });
+    coverImage: playlist.coverImage || '',
+  })
 
   // Reset form when playlist changes or modal opens
   useEffect(() => {
@@ -26,15 +26,15 @@ export const EditPlaylistModal = ({ isOpen, onClose, playlist, onSave }: EditPla
       setFormData({
         name: playlist.name,
         description: playlist.description,
-        coverImage: playlist.coverImage || ""
-      });
+        coverImage: playlist.coverImage || '',
+      })
     }
-  }, [isOpen, playlist]);
+  }, [isOpen, playlist])
 
   const handleSubmit = () => {
-    onSave(formData);
-    onClose();
-  };
+    onSave(formData)
+    onClose()
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -59,9 +59,9 @@ export const EditPlaylistModal = ({ isOpen, onClose, playlist, onSave }: EditPla
               maxLength={500}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
-            {formData?.description && <p className="text-xs text-right text-muted-foreground">
-              {formData?.description.length}/500
-            </p>}
+            {formData?.description && (
+              <p className="text-xs text-right text-muted-foreground">{formData?.description.length}/500</p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="image">URL da Imagem de Capa</Label>
@@ -73,10 +73,12 @@ export const EditPlaylistModal = ({ isOpen, onClose, playlist, onSave }: EditPla
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button variant="outline" onClick={onClose}>
+            Cancelar
+          </Button>
           <Button onClick={handleSubmit}>Salvar Alterações</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}

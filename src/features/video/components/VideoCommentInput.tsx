@@ -1,27 +1,27 @@
-import { lazy } from "react";
-import type { NDKEvent } from "@nostr-dev-kit/ndk-hooks";
-import { HiOutlinePaperClip, HiX } from "react-icons/hi";
-import { Avatar } from "@radix-ui/themes";
-import { t } from "i18next";
-import { Button } from "@/components/button";
-import { cn, getTwoLetters } from "@/helper/format";
-import { useVideoCommentController } from "@/features/video/hooks/use-video-comment-controller";
+import type { NDKEvent } from '@nostr-dev-kit/ndk-hooks'
+import { Avatar } from '@radix-ui/themes'
+import { t } from 'i18next'
+import { lazy } from 'react'
+import { HiOutlinePaperClip, HiX } from 'react-icons/hi'
+import { Button } from '@/components/button'
+import { useVideoCommentController } from '@/features/video/hooks/use-video-comment-controller'
+import { cn, getTwoLetters } from '@/helper/format'
 
-const Textarea = lazy(() => import("@/components/textarea"));
+const Textarea = lazy(() => import('@/components/textarea'))
 
 export function VideoCommentInput({
   autoFocus,
   initialTags,
-  onSubmitted
+  onSubmitted,
 }: {
-  autoFocus?: boolean;
-  initialTags?: string[][];
-  onSubmitted?: (event: NDKEvent) => void;
+  autoFocus?: boolean
+  initialTags?: string[][]
+  onSubmitted?: (event: NDKEvent) => void
 }) {
-  const controller = useVideoCommentController({ initialTags, onSubmitted });
+  const controller = useVideoCommentController({ initialTags, onSubmitted })
 
   if (!controller.currentUser) {
-    return <div>É necessário estar logado para comentar...</div>;
+    return <div>É necessário estar logado para comentar...</div>
   }
 
   return (
@@ -33,7 +33,7 @@ export function VideoCommentInput({
           alt={controller.currentProfile?.displayName || controller.currentUser.pubkey}
           fallback={getTwoLetters({
             npub: controller.currentUser.npub as string,
-            profile: controller.currentProfile
+            profile: controller.currentProfile,
           })}
         />
       </div>
@@ -45,29 +45,37 @@ export function VideoCommentInput({
                 ref={controller.contentRef}
                 value={controller.content}
                 onChange={(event) => controller.setContent(event.target.value)}
-                placeholder={`${t("leave_a_comment")}...`}
+                placeholder={`${t('leave_a_comment')}...`}
                 autoFocus={autoFocus}
-                className={cn("invisible-textarea min-h-[50px] text-base font-medium text-foreground placeholder:text-muted-foreground/70")}
+                className={cn(
+                  'invisible-textarea min-h-[50px] text-base font-medium text-foreground placeholder:text-muted-foreground/70',
+                )}
               />
               <div className="mt-1 w-full">
                 <div className="flex w-full items-center justify-between text-muted-foreground">
                   {controller.attachmentPreview ? (
                     <div className="relative overflow-hidden rounded-xl border border-border/60 bg-muted/30 p-2">
-                      <img src={controller.attachmentPreview} alt="Attachment preview" className="max-h-[140px] rounded-xl object-cover" />
+                      <img
+                        src={controller.attachmentPreview}
+                        alt="Attachment preview"
+                        className="max-h-[140px] rounded-xl object-cover"
+                      />
                       <button
                         type="button"
                         onClick={controller.clearAttachment}
                         className="center absolute left-1 top-1 rounded-full bg-foreground bg-opacity-70 p-1 hover:bg-opacity-100"
                       >
-                          <HiX className="block h-4 w-4 text-background" aria-hidden="true" />
+                        <HiX className="block h-4 w-4 text-background" aria-hidden="true" />
                       </button>
                       <div className="mt-2 flex items-center justify-between gap-3 text-xs text-muted-foreground">
                         <span>
                           {controller.isUploadingImage
-                            ? `${t("uploading", "Uploading")}... ${controller.upload.progress}%`
-                            : t("attachment_ready", "Attachment ready")}
+                            ? `${t('uploading', 'Uploading')}... ${controller.upload.progress}%`
+                            : t('attachment_ready', 'Attachment ready')}
                         </span>
-                        {!controller.isUploadingImage ? <span>{t("attachment_will_be_sent", "Will be sent with the comment")}</span> : null}
+                        {!controller.isUploadingImage ? (
+                          <span>{t('attachment_will_be_sent', 'Will be sent with the comment')}</span>
+                        ) : null}
                       </div>
                     </div>
                   ) : (
@@ -78,9 +86,9 @@ export function VideoCommentInput({
                         hidden
                         accept="image/*"
                         onChange={(event) => {
-                          const file = event.target.files?.[0];
+                          const file = event.target.files?.[0]
                           if (file) {
-                            void controller.selectAttachment(file);
+                            void controller.selectAttachment(file)
                           }
                         }}
                       />
@@ -88,8 +96,8 @@ export function VideoCommentInput({
                         type="button"
                         size="icon"
                         variant="outline"
-                       className="rounded-full"
-                       onClick={() => controller.fileInputRef.current?.click()}
+                        className="rounded-full"
+                        onClick={() => controller.fileInputRef.current?.click()}
                       >
                         <HiOutlinePaperClip className="h-4 w-4" />
                       </Button>
@@ -99,15 +107,19 @@ export function VideoCommentInput({
                     </>
                   )}
                   <div className="center mt-auto">
-                     <Button
-                       variant="default"
-                       size="default"
-                       disabled={controller.isUploadingImage || controller.isPending || (!controller.content.trim() && !controller.attachmentPreview)}
-                       loading={controller.isPending}
-                       onClick={controller.submit}
-                       className="rounded-full"
+                    <Button
+                      variant="default"
+                      size="default"
+                      disabled={
+                        controller.isUploadingImage ||
+                        controller.isPending ||
+                        (!controller.content.trim() && !controller.attachmentPreview)
+                      }
+                      loading={controller.isPending}
+                      onClick={controller.submit}
+                      className="rounded-full"
                     >
-                      {t("comment")}
+                      {t('comment')}
                     </Button>
                   </div>
                 </div>
@@ -117,5 +129,5 @@ export function VideoCommentInput({
         </div>
       </div>
     </div>
-  );
+  )
 }

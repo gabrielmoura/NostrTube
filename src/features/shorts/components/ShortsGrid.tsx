@@ -1,14 +1,14 @@
-import type { NDKUserProfile } from "@nostr-dev-kit/ndk";
-import { Link } from "@tanstack/react-router";
-import { Clock, Play, UserRound } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getFormattedVideoDuration } from "@/features/video/services/video-duration.service";
-import type { ShortVideoViewModel } from "@/features/shorts/services/shorts-media.service";
-import { getLettersPlain, getNameToShow } from "@/helper/format";
+import type { NDKUserProfile } from '@nostr-dev-kit/ndk'
+import { Link } from '@tanstack/react-router'
+import { Clock, Play, UserRound } from 'lucide-react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import type { ShortVideoViewModel } from '@/features/shorts/services/shorts-media.service'
+import { getFormattedVideoDuration } from '@/features/video/services/video-duration.service'
+import { getLettersPlain, getNameToShow } from '@/helper/format'
 
 interface ShortsGridProps {
-  profiles: Record<string, NDKUserProfile | undefined>;
-  shorts: ShortVideoViewModel[];
+  profiles: Record<string, NDKUserProfile | undefined>
+  shorts: ShortVideoViewModel[]
 }
 
 export function ShortsGrid({ profiles, shorts }: ShortsGridProps) {
@@ -18,22 +18,24 @@ export function ShortsGrid({ profiles, shorts }: ShortsGridProps) {
         <ShortsGridCard key={short.id} profile={profiles[short.event.pubkey]} short={short} />
       ))}
     </div>
-  );
+  )
 }
 
 function ShortsGridCard({ profile, short }: { profile?: NDKUserProfile; short: ShortVideoViewModel }) {
-  const npub = short.event.author.npub;
-  const authorName = getNameToShow({ npub, profile });
-  const duration = getFormattedVideoDuration(short.event);
+  const npub = short.event.author.npub
+  const authorName = getNameToShow({ npub, profile })
+  const duration = getFormattedVideoDuration(short.event)
 
   return (
     <Link
       to="/short/$eventId"
       params={{ eventId: short.routeReference }}
-      search={{
-        author: short.event.pubkey,
-        video: short.id,
-      } as never}
+      search={
+        {
+          author: short.event.pubkey,
+          video: short.id,
+        } as never
+      }
       className="group min-w-0 focus-visible:outline-none"
     >
       <article className="overflow-hidden rounded-xl border border-border/70 bg-card/80 shadow-sm transition-colors hover:border-primary/40 hover:bg-card">
@@ -70,7 +72,9 @@ function ShortsGridCard({ profile, short }: { profile?: NDKUserProfile; short: S
             <div className="flex min-w-0 items-center gap-2 text-white/82">
               <Avatar className="size-6 border border-white/25">
                 <AvatarImage src={profile?.picture || profile?.image} alt={authorName} />
-                <AvatarFallback>{getLettersPlain(profile?.name || authorName) || <UserRound className="size-3" />}</AvatarFallback>
+                <AvatarFallback>
+                  {getLettersPlain(profile?.name || authorName) || <UserRound className="size-3" />}
+                </AvatarFallback>
               </Avatar>
               <span className="truncate text-xs font-medium">{authorName}</span>
             </div>
@@ -78,5 +82,5 @@ function ShortsGridCard({ profile, short }: { profile?: NDKUserProfile; short: S
         </div>
       </article>
     </Link>
-  );
+  )
 }

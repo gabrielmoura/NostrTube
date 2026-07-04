@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { PresetPubkeyBadge } from '@/features/presets/components/PresetPubkeyBadge'
 import type { NostubePreset } from '@/features/presets/types/preset'
 import { formatPresetDate } from '@/features/presets/utils/presetFormatters'
-import { PresetPubkeyBadge } from '@/features/presets/components/PresetPubkeyBadge'
 
 interface PresetListItemProps {
   preset: NostubePreset
@@ -24,7 +24,9 @@ export function PresetListItem({ preset, isSelected, isDefault, onSelect }: Pres
             {isSelected ? <Badge variant="success">{t('presets.usingPreset')}</Badge> : null}
             {isDefault ? <Badge variant="outline">{t('presets.defaultPreset')}</Badge> : null}
           </div>
-          <p className="line-clamp-2 text-sm text-muted-foreground">{preset.description || t('presets.noDescription')}</p>
+          <p className="line-clamp-2 text-sm text-muted-foreground">
+            {preset.description || t('presets.noDescription')}
+          </p>
           <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
             <PresetPubkeyBadge pubkey={preset.pubkey} />
             <span>{formatPresetDate(preset.createdAt)}</span>

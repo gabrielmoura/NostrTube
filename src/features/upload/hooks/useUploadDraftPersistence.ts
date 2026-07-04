@@ -1,5 +1,5 @@
-import { useCallback } from 'react'
 import { useNDK, useNDKCurrentUser } from '@nostr-dev-kit/ndk-hooks'
+import { useCallback } from 'react'
 import { toast } from 'sonner'
 import {
   canUseNip44Drafts,

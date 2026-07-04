@@ -39,5 +39,13 @@
         "duplicate": "Esta etiqueta ya existe."
       }
     }
+  },
+  "sidebar": {
+    "library_items_label": "Elementos de la biblioteca",
+    "nostr_session_active": "Sesión Nostr activa",
+    "browsing_without_login": "Navegando sin iniciar sesión",
+    "anonymous_session": "Sesión anónima",
+    "main_navigation": "Navegación principal",
+    "preferences": "Preferencias"
   }
 }

@@ -94,7 +94,9 @@ export function parsePresetContent(content: string): {
     'Some relay URLs were ignored.',
   )
 
-  const blockedPubkeys = Array.from(new Set(normalizeStringArray(raw.blockedPubkeys, PRESET_LIMITS.pubkeys).filter(isHex64)))
+  const blockedPubkeys = Array.from(
+    new Set(normalizeStringArray(raw.blockedPubkeys, PRESET_LIMITS.pubkeys).filter(isHex64)),
+  )
   addIgnoredWarning(
     warnings,
     'blockedPubkeys',
@@ -112,7 +114,9 @@ export function parsePresetContent(content: string): {
     'Some NSFW pubkeys were ignored.',
   )
 
-  const blockedEvents = Array.from(new Set(normalizeStringArray(raw.blockedEvents, PRESET_LIMITS.events).filter(isHex64)))
+  const blockedEvents = Array.from(
+    new Set(normalizeStringArray(raw.blockedEvents, PRESET_LIMITS.events).filter(isHex64)),
+  )
   addIgnoredWarning(
     warnings,
     'blockedEvents',
@@ -122,7 +126,9 @@ export function parsePresetContent(content: string): {
   )
 
   const defaultTranscodeDvmPubkeys = raw.defaultTranscodeDvmPubkeys
-    ? Array.from(new Set(normalizeStringArray(raw.defaultTranscodeDvmPubkeys, PRESET_LIMITS.dvmPubkeys).filter(isHex64)))
+    ? Array.from(
+        new Set(normalizeStringArray(raw.defaultTranscodeDvmPubkeys, PRESET_LIMITS.dvmPubkeys).filter(isHex64)),
+      )
     : undefined
   if (raw.defaultTranscodeDvmPubkeys) {
     addIgnoredWarning(

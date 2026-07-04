@@ -3,8 +3,8 @@ import { t } from 'i18next'
 import { MonitorUp } from 'lucide-react'
 import { lazy, Suspense } from 'react'
 import { withAuth } from '@/components/AuthGuard.tsx'
-import { PageSpinner } from '@/components/PageSpinner'
 import { AppShell } from '@/components/layout/AppShell'
+import { PageSpinner } from '@/components/PageSpinner'
 import { UploadErrorBoundary } from '@/features/upload/components/UploadErrorBoundary'
 import { Route as rootRoute } from '@/routes/__root'
 
@@ -42,7 +42,10 @@ function NewVideoPage() {
       <UploadErrorBoundary>
         <Suspense
           fallback={
-            <PageSpinner label="Preparando estúdio" description="Carregando ferramentas de upload e rascunhos locais." />
+            <PageSpinner
+              label="Preparando estúdio"
+              description="Carregando ferramentas de upload e rascunhos locais."
+            />
           }
         >
           <UploadPageContainer />

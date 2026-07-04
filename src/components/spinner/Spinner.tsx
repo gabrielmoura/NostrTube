@@ -1,4 +1,4 @@
-import "./spinner01.css";
+import './spinner01.css'
 
 export function Spinner() {
   return (
@@ -7,5 +7,5 @@ export function Spinner() {
         <span className="loader"></span>
       </div>
     </div>
-  );
+  )
 }

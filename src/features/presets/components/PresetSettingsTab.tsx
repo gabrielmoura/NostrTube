@@ -74,7 +74,11 @@ export function PresetSettingsTab() {
               <p className="text-sm text-muted-foreground">{t('presets.personalSettingsSafe')}</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button variant="outline" onClick={handleReset} disabled={isBusy || selectedPresetPubkey === defaultPresetPubkey}>
+              <Button
+                variant="outline"
+                onClick={handleReset}
+                disabled={isBusy || selectedPresetPubkey === defaultPresetPubkey}
+              >
                 <RotateCcw className="size-4" />
                 {t('presets.resetDefault')}
               </Button>

@@ -1,10 +1,5 @@
 import type { NDKEvent } from '@nostr-dev-kit/ndk'
-import {
-  PRESET_D_TAG,
-  PRESET_EVENT_KIND,
-  PresetError,
-  type NostubePreset,
-} from '@/features/presets/types/preset'
+import { type NostubePreset, PRESET_D_TAG, PRESET_EVENT_KIND, PresetError } from '@/features/presets/types/preset'
 import { isHex64, parsePresetContent } from '@/features/presets/utils/presetValidation'
 
 function getTagValue(tags: string[][], name: string): string | undefined {

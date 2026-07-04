@@ -1,17 +1,17 @@
-import { useMediaQuery } from "./use-media-query";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./Dialog"; // Seus componentes existentes
-import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "./Drawer"; // Seus componentes existentes
-import { type ModalType } from "./modal-state";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './Dialog' // Seus componentes existentes
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from './Drawer' // Seus componentes existentes
+import { type ModalType } from './modal-state'
+import { useMediaQuery } from './use-media-query'
 
 interface ResponsiveModalProps {
-  modal: ModalType;
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
+  modal: ModalType
+  isOpen: boolean
+  onOpenChange: (open: boolean) => void
 }
 
 export function ResponsiveModal({ modal, isOpen, onOpenChange }: ResponsiveModalProps) {
   // Tailwind 4 / Mobile-first approach
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isDesktop = useMediaQuery('(min-width: 768px)')
 
   if (isDesktop) {
     return (
@@ -26,7 +26,7 @@ export function ResponsiveModal({ modal, isOpen, onOpenChange }: ResponsiveModal
           {modal.content}
         </DialogContent>
       </Dialog>
-    );
+    )
   }
 
   return (
@@ -38,10 +38,8 @@ export function ResponsiveModal({ modal, isOpen, onOpenChange }: ResponsiveModal
             {modal.description && <DrawerDescription>{modal.description}</DrawerDescription>}
           </DrawerHeader>
         )}
-        <div className="px-4 pb-4">
-          {modal.content}
-        </div>
+        <div className="px-4 pb-4">{modal.content}</div>
       </DrawerContent>
     </Drawer>
-  );
+  )
 }

@@ -1,77 +1,78 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { AlertTriangle, Bug, Clipboard, Copy, Download, FileJson, FileText, Info, Trash2, XCircle } from "lucide-react";
-import { toast } from "sonner";
-import { Badge, Button, Card, CardContent, CardHeader } from "@/routes/configuration/@components/CommonComponents.tsx";
+import { AlertTriangle, Bug, Clipboard, Copy, Download, FileJson, FileText, Info, Trash2, XCircle } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { toast } from 'sonner'
 import {
   clearLogs,
+  type ErrorLogEntry,
   exportJSON,
   exportTXT,
   getAllLogs,
   getSessionErrorCount,
-  type ErrorLogEntry,
-} from "@/features/debug/services/error-log.service.ts";
+} from '@/features/debug/services/error-log.service.ts'
+import { Badge, Button, Card, CardContent, CardHeader } from '@/routes/configuration/@components/CommonComponents.tsx'
 
 export function ErrorLogTab() {
-  const [logs, setLogs] = useState<ErrorLogEntry[]>([]);
-  const [levelFilter, setLevelFilter] = useState<string>("all");
-  const [textFilter, setTextFilter] = useState("");
-  const [showConfirmClear, setShowConfirmClear] = useState(false);
+  const [logs, setLogs] = useState<ErrorLogEntry[]>([])
+  const [levelFilter, setLevelFilter] = useState<string>('all')
+  const [textFilter, setTextFilter] = useState('')
+  const [showConfirmClear, setShowConfirmClear] = useState(false)
 
   useEffect(() => {
-    getAllLogs().then(setLogs).catch(undefined);
-  }, []);
+    getAllLogs().then(setLogs).catch(undefined)
+  }, [])
 
   const refresh = useCallback(async () => {
-    const allLogs = await getAllLogs().catch(() => []);
-    setLogs(allLogs);
-  }, []);
+    const allLogs = await getAllLogs().catch(() => [])
+    setLogs(allLogs)
+  }, [])
 
-  const filtered = useMemo(() =>
-    logs
-      .filter((l) => levelFilter === "all" || l.level === levelFilter)
-      .filter((l) => !textFilter || l.message.toLowerCase().includes(textFilter.toLowerCase()))
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()),
-    [logs, levelFilter, textFilter]
-  );
+  const filtered = useMemo(
+    () =>
+      logs
+        .filter((l) => levelFilter === 'all' || l.level === levelFilter)
+        .filter((l) => !textFilter || l.message.toLowerCase().includes(textFilter.toLowerCase()))
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()),
+    [logs, levelFilter, textFilter],
+  )
 
-  const lastError = useMemo(() => logs.find((l) => l.level === "error"), [logs]);
+  const lastError = useMemo(() => logs.find((l) => l.level === 'error'), [logs])
 
   const handleExportJSON = async () => {
-    const content = exportJSON(filtered);
-    const blob = new Blob([content], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "nostr-error-logs.json";
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Logs exportados como JSON");
-  };
+    const content = exportJSON(filtered)
+    const blob = new Blob([content], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'nostr-error-logs.json'
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Logs exportados como JSON')
+  }
 
   const handleExportTXT = async () => {
-    const content = exportTXT(filtered);
-    const blob = new Blob([content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "nostr-error-logs.txt";
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Logs exportados como TXT");
-  };
+    const content = exportTXT(filtered)
+    const blob = new Blob([content], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'nostr-error-logs.txt'
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Logs exportados como TXT')
+  }
 
   const handleCopyReport = () => {
-    if (!lastError) return;
-    let contextStr = "";
+    if (!lastError) return
+    let contextStr = ''
     try {
       if (lastError.context) {
-        const parsed = JSON.parse(lastError.context);
+        const parsed = JSON.parse(lastError.context)
         contextStr = Object.entries(parsed)
-          .map(([k, v]) => `${k}: ${typeof v === "string" ? v : JSON.stringify(v)}`)
-          .join("\n");
+          .map(([k, v]) => `${k}: ${typeof v === 'string' ? v : JSON.stringify(v)}`)
+          .join('\n')
       }
     } catch {
-      contextStr = lastError.context ?? "";
+      contextStr = lastError.context ?? ''
     }
     const text = [
       `Error ID: ${lastError.errorId}`,
@@ -79,26 +80,32 @@ export function ErrorLogTab() {
       `Message: ${lastError.message}`,
       `Version: ${lastError.appVersion}`,
       `User Agent: ${lastError.userAgent}`,
-      contextStr ? `\nContext:\n${contextStr}` : "",
-      lastError.stack ? `\nStack:\n${lastError.stack}` : "",
-    ].join("\n");
-    navigator.clipboard.writeText(text).then(() => {
-      toast.success("Relatório de erro copiado");
-    }).catch(() => toast.error("Falha ao copiar"));
-  };
+      contextStr ? `\nContext:\n${contextStr}` : '',
+      lastError.stack ? `\nStack:\n${lastError.stack}` : '',
+    ].join('\n')
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        toast.success('Relatório de erro copiado')
+      })
+      .catch(() => toast.error('Falha ao copiar'))
+  }
 
   const handleClear = async () => {
-    await clearLogs();
-    setLogs([]);
-    setShowConfirmClear(false);
-    toast.success("Logs limpos");
-  };
+    await clearLogs()
+    setLogs([])
+    setShowConfirmClear(false)
+    toast.success('Logs limpos')
+  }
 
-  const levelCounts = useMemo(() => ({
-    error: logs.filter((l) => l.level === "error").length,
-    warn: logs.filter((l) => l.level === "warn").length,
-    info: logs.filter((l) => l.level === "info").length,
-  }), [logs]);
+  const levelCounts = useMemo(
+    () => ({
+      error: logs.filter((l) => l.level === 'error').length,
+      warn: logs.filter((l) => l.level === 'warn').length,
+      info: logs.filter((l) => l.level === 'info').length,
+    }),
+    [logs],
+  )
 
   return (
     <div className="space-y-4">
@@ -137,17 +144,17 @@ export function ErrorLogTab() {
         <CardContent>
           <div className="flex flex-wrap gap-3">
             <div className="flex gap-1">
-              {(["all", "error", "warn", "info"] as const).map((l) => (
+              {(['all', 'error', 'warn', 'info'] as const).map((l) => (
                 <button
                   key={l}
                   onClick={() => setLevelFilter(l)}
                   className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                     levelFilter === l
-                      ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400"
-                      : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                      ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
+                      : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
                   }`}
                 >
-                  {l === "all" ? "Todos" : l}
+                  {l === 'all' ? 'Todos' : l}
                 </button>
               ))}
             </div>
@@ -169,22 +176,22 @@ export function ErrorLogTab() {
           ) : (
             <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {filtered.map((log) => {
-                let parsedContext: Record<string, unknown> | null = null;
+                let parsedContext: Record<string, unknown> | null = null
                 try {
-                  if (log.context?.startsWith("{")) {
-                    parsedContext = JSON.parse(log.context);
+                  if (log.context?.startsWith('{')) {
+                    parsedContext = JSON.parse(log.context)
                   }
                 } catch {
-                  void 0;
+                  void 0
                 }
 
                 return (
                   <div key={log.timestamp} className="p-3 hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
                     <div className="flex items-start gap-2">
                       <div className="mt-0.5">
-                        {log.level === "error" ? (
+                        {log.level === 'error' ? (
                           <XCircle className="w-4 h-4 text-red-500" />
-                        ) : log.level === "warn" ? (
+                        ) : log.level === 'warn' ? (
                           <AlertTriangle className="w-4 h-4 text-amber-500" />
                         ) : (
                           <Info className="w-4 h-4 text-blue-500" />
@@ -194,19 +201,17 @@ export function ErrorLogTab() {
                         <div className="flex items-center gap-2 text-xs text-zinc-400 mb-1">
                           <span className="font-mono text-zinc-500">{log.errorId}</span>
                           <span>•</span>
-                          <span>{new Date(log.timestamp).toLocaleString("pt-BR")}</span>
+                          <span>{new Date(log.timestamp).toLocaleString('pt-BR')}</span>
                           <Badge
                             variant={
-                              log.level === "error" ? "destructive" : log.level === "warn" ? "warning" : "default"
+                              log.level === 'error' ? 'destructive' : log.level === 'warn' ? 'warning' : 'default'
                             }
                             className="uppercase"
                           >
                             {log.level}
                           </Badge>
                         </div>
-                        <p className="text-sm font-mono text-zinc-800 dark:text-zinc-200 break-words">
-                          {log.message}
-                        </p>
+                        <p className="text-sm font-mono text-zinc-800 dark:text-zinc-200 break-words">{log.message}</p>
                         {log.stack && (
                           <pre className="mt-1 text-xs text-zinc-500 dark:text-zinc-400 whitespace-pre-wrap overflow-x-auto max-h-24">
                             {log.stack}
@@ -234,7 +239,7 @@ export function ErrorLogTab() {
                       </div>
                     </div>
                   </div>
-                );
+                )
               })}
             </div>
           )}
@@ -272,10 +277,12 @@ export function ErrorLogTab() {
               <Trash2 className="w-4 h-4 mr-1" />
               Limpar
             </Button>
-            <Button variant="ghost" onClick={() => setShowConfirmClear(false)}>Cancelar</Button>
+            <Button variant="ghost" onClick={() => setShowConfirmClear(false)}>
+              Cancelar
+            </Button>
           </CardContent>
         </Card>
       )}
     </div>
-  );
+  )
 }

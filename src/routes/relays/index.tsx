@@ -1,5 +1,5 @@
-import { createRoute, Link } from '@tanstack/react-router'
 import { useDebouncedValue } from '@tanstack/react-pacer'
+import { createRoute, Link } from '@tanstack/react-router'
 import {
   Activity,
   ArrowDown,
@@ -18,6 +18,7 @@ import {
   WifiHigh,
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AppShell } from '@/components/layout/AppShell'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -44,12 +45,12 @@ import { Route as rootRoute } from '@/routes/__root'
 type RelayTab = 'mine' | 'public' | 'add'
 type StatusFilter = 'all' | RelayHealthState
 
-function classifyLatency(latency: number | null) {
-  if (latency === null) return 'Indisponível'
-  if (latency < 200) return 'Excelente'
-  if (latency < 500) return 'Boa'
-  if (latency < 1000) return 'Instável'
-  return 'Crítica'
+function classifyLatency(latency: number | null, t: (key: string) => string) {
+  if (latency === null) return t('relays_latency_unavailable')
+  if (latency < 200) return t('relays_latency_excellent')
+  if (latency < 500) return t('relays_latency_good')
+  if (latency < 1000) return t('relays_latency_unstable')
+  return t('relays_latency_critical')
 }
 
 function formatLatency(latency: number | null | undefined) {
@@ -70,8 +71,8 @@ function formatSuccessRate(rows: RelayHealthRow[]) {
   return Math.round((successes / attempts) * 100)
 }
 
-function formatRelayCapability(isEnabled: boolean | undefined) {
-  return isEnabled ? 'Ativa' : 'Inativa'
+function formatRelayCapability(isEnabled: boolean | undefined, t: (key: string) => string) {
+  return isEnabled ? t('relays_capability_active') : t('relays_capability_inactive')
 }
 
 function getRelayCapabilityTone(isEnabled: boolean | undefined) {
@@ -85,6 +86,7 @@ interface RelayRowViewModel {
 }
 
 function EmptyRelaysState({ onAdd }: { onAdd: () => void }) {
+  const { t } = useTranslation('pages')
   return (
     <Card>
       <CardContent className="flex flex-col items-center justify-center gap-4 py-12 text-center">
@@ -92,14 +94,12 @@ function EmptyRelaysState({ onAdd }: { onAdd: () => void }) {
           <Wifi className="size-6" />
         </div>
         <div className="space-y-2">
-          <h3 className="text-lg font-semibold">Nenhum relay configurado ainda.</h3>
-          <p className="max-w-md text-sm text-muted-foreground">
-            Adicione ao menos um relay seguro para publicar e ler eventos na rede Nostr.
-          </p>
+          <h3 className="text-lg font-semibold">{t('relays_empty_title')}</h3>
+          <p className="max-w-md text-sm text-muted-foreground">{t('relays_empty_description')}</p>
         </div>
         <Button variant="gradient" onClick={onAdd}>
           <Plus className="size-4" />
-          Adicionar relay
+          {t('relays_add_button')}
         </Button>
       </CardContent>
     </Card>
@@ -127,6 +127,7 @@ function RelayControls({
   onAdd: () => void
   isFiltering?: boolean
 }) {
+  const { t } = useTranslation('pages')
   return (
     <Card>
       <CardContent className="flex flex-col gap-3 py-4 lg:flex-row lg:items-center lg:justify-between">
@@ -136,36 +137,36 @@ function RelayControls({
             <Input
               value={search}
               onChange={(event) => onSearchChange(event.target.value)}
-              placeholder="Buscar relays..."
+              placeholder={t('relays_search_placeholder')}
               className="pl-9"
             />
             {isFiltering ? (
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                Filtrando...
+                {t('relays_filtering')}
               </span>
             ) : null}
           </div>
           <Select value={statusFilter} onValueChange={(value) => onStatusFilterChange(value as StatusFilter)}>
             <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Todos os status" />
+              <SelectValue placeholder={t('relays_status_all')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos os status</SelectItem>
-              <SelectItem value="connected">Conectado</SelectItem>
-              <SelectItem value="connecting">Conectando</SelectItem>
-              <SelectItem value="unstable">Instável</SelectItem>
-              <SelectItem value="offline">Offline</SelectItem>
+              <SelectItem value="all">{t('relays_status_all')}</SelectItem>
+              <SelectItem value="connected">{t('relays_status_connected')}</SelectItem>
+              <SelectItem value="connecting">{t('relays_status_connecting')}</SelectItem>
+              <SelectItem value="unstable">{t('relays_latency_unstable')}</SelectItem>
+              <SelectItem value="offline">{t('relays_status_offline')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="glass" onClick={onTestAll} disabled={isTestingAll || !canTest}>
             <RefreshCw className={`size-4 ${isTestingAll ? 'animate-spin' : ''}`} />
-            Testar todos
+            {t('relays_test_all')}
           </Button>
           <Button variant="gradient" onClick={onAdd}>
             <Plus className="size-4" />
-            Adicionar relay
+            {t('relays_add_button')}
           </Button>
         </div>
       </CardContent>
@@ -184,21 +185,22 @@ function SelectedRelaysTable({
   onShowMetrics: (relayUrl: string) => void
   onRemove: (relayUrl: string) => void
 }) {
+  const { t } = useTranslation('pages')
   return (
     <Card>
       <CardContent className="overflow-x-auto p-0">
         <table className="min-w-full text-sm">
           <thead>
             <tr className="border-b border-border/70 text-left text-xs uppercase tracking-[0.16em] text-muted-foreground">
-              <th className="px-4 py-3">Mover</th>
-              <th className="px-4 py-3">Relay</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Latência</th>
-              <th className="px-4 py-3">Eventos (5m)</th>
-              <th className="px-4 py-3">Leitura</th>
-              <th className="px-4 py-3">Escrita</th>
-              <th className="px-4 py-3">Conexão</th>
-              <th className="px-4 py-3 text-right">Ações</th>
+              <th className="px-4 py-3">{t('relays_col_move')}</th>
+              <th className="px-4 py-3">{t('relays_col_relay')}</th>
+              <th className="px-4 py-3">{t('relays_col_status')}</th>
+              <th className="px-4 py-3">{t('relays_col_latency')}</th>
+              <th className="px-4 py-3">{t('relays_col_events')}</th>
+              <th className="px-4 py-3">{t('relays_col_read')}</th>
+              <th className="px-4 py-3">{t('relays_col_write')}</th>
+              <th className="px-4 py-3">{t('relays_col_connection')}</th>
+              <th className="px-4 py-3 text-right">{t('relays_col_actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -212,7 +214,7 @@ function SelectedRelaysTable({
                         type="button"
                         className="rounded p-1 hover:bg-secondary"
                         onClick={() => onReorder(row.url, 'up')}
-                        aria-label="Mover para cima"
+                        aria-label={t('relays_move_up_aria')}
                       >
                         <ArrowUp className="size-3.5" />
                       </button>
@@ -220,7 +222,7 @@ function SelectedRelaysTable({
                         type="button"
                         className="rounded p-1 hover:bg-secondary"
                         onClick={() => onReorder(row.url, 'down')}
-                        aria-label="Mover para baixo"
+                        aria-label={t('relays_move_down_aria')}
                       >
                         <ArrowDown className="size-3.5" />
                       </button>
@@ -234,18 +236,20 @@ function SelectedRelaysTable({
                   </div>
                 </td>
                 <td className="px-4 py-4">
-                  <StatusBadge tone={row.health?.tone ?? 'danger'}>{row.health?.label ?? 'Offline'}</StatusBadge>
+                  <StatusBadge tone={row.health?.tone ?? 'danger'}>
+                    {row.health?.label ?? t('relays_status_offline')}
+                  </StatusBadge>
                 </td>
                 <td className="px-4 py-4 font-mono text-sm">{formatLatency(row.health?.latency)}</td>
                 <td className="px-4 py-4 font-mono text-sm">{row.metrics?.events5m ?? '—'}</td>
                 <td className="px-4 py-4">
                   <StatusBadge tone={getRelayCapabilityTone(row.health?.canRead)}>
-                    {formatRelayCapability(row.health?.canRead)}
+                    {formatRelayCapability(row.health?.canRead, t)}
                   </StatusBadge>
                 </td>
                 <td className="px-4 py-4">
                   <StatusBadge tone={getRelayCapabilityTone(row.health?.canWrite)}>
-                    {formatRelayCapability(row.health?.canWrite)}
+                    {formatRelayCapability(row.health?.canWrite, t)}
                   </StatusBadge>
                 </td>
                 <td className="px-4 py-4 font-mono text-sm">
@@ -254,14 +258,14 @@ function SelectedRelaysTable({
                 <td className="px-4 py-4">
                   <div className="flex justify-end gap-2">
                     <Button variant="glass" size="sm" onClick={() => onShowMetrics(row.url)}>
-                      Ver métricas
+                      {t('relays_view_metrics')}
                     </Button>
                     <Link to="/configuration" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
-                      Configurar
+                      {t('relays_configure')}
                     </Link>
                     <Button variant="dangerSoft" size="sm" onClick={() => onRemove(row.url)}>
                       <Trash2 className="size-4" />
-                      Remover
+                      {t('relays_remove')}
                     </Button>
                   </div>
                 </td>
@@ -289,6 +293,7 @@ function PublicRelaysToolbar({
   onTestPublicRelays: () => void
   isFiltering?: boolean
 }) {
+  const { t } = useTranslation('pages')
   return (
     <Card>
       <CardContent className="flex flex-col gap-3 py-4 lg:flex-row lg:items-center lg:justify-between">
@@ -297,18 +302,18 @@ function PublicRelaysToolbar({
           <Input
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Pesquisar relays públicos..."
+            placeholder={t('relays_search_public_placeholder')}
             className="pl-9"
           />
           {isFiltering ? (
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-              Filtrando...
+              {t('relays_filtering')}
             </span>
           ) : null}
         </div>
         <Button variant="glass" onClick={onTestPublicRelays} disabled={isTestingAll || count === 0}>
           <RefreshCw className={`size-4 ${isTestingAll ? 'animate-spin' : ''}`} />
-          Rodar latência nos públicos
+          {t('relays_test_public_latency')}
         </Button>
       </CardContent>
     </Card>
@@ -322,6 +327,7 @@ function PublicRelayCard({
   row: RelayRowViewModel & { selected: boolean }
   onAdd: (relayUrl: string) => void
 }) {
+  const { t } = useTranslation('pages')
   return (
     <Card>
       <CardContent className="space-y-4 py-5">
@@ -329,24 +335,24 @@ function PublicRelayCard({
           <div className="flex items-center justify-between gap-2">
             <p className="truncate font-medium text-foreground">{row.url.replace(/^wss?:\/\//, '')}</p>
             <StatusBadge tone={row.selected ? 'healthy' : (row.health?.tone ?? 'warning')}>
-              {row.selected ? 'Adicionado' : (row.health?.label ?? 'Disponível')}
+              {row.selected ? t('relays_added_label') : (row.health?.label ?? t('relays_available_label'))}
             </StatusBadge>
           </div>
           <p className="break-all font-mono text-xs text-muted-foreground">{row.url}</p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Latência</p>
+            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">{t('relays_label_latency')}</p>
             <p className="mt-1 font-mono text-sm">{formatLatency(row.health?.latency)}</p>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Eventos (5m)</p>
+            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">{t('relays_label_events')}</p>
             <p className="mt-1 font-mono text-sm">{row.metrics?.events5m ?? '—'}</p>
           </div>
         </div>
         <Button variant={row.selected ? 'glass' : 'relay'} onClick={() => onAdd(row.url)} disabled={row.selected}>
           <Plus className="size-4" />
-          {row.selected ? 'Já adicionado' : 'Adicionar relay'}
+          {row.selected ? t('relays_already_added') : t('relays_add_button')}
         </Button>
       </CardContent>
     </Card>
@@ -362,14 +368,13 @@ function RelayMetricsDialog({
   metrics: { events5m: number | null; cachedTotal: number | null } | null
   onOpenChange: (open: boolean) => void
 }) {
+  const { t } = useTranslation('pages')
   return (
     <Dialog open={Boolean(relay)} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>Métricas do relay</DialogTitle>
-          <DialogDescription>
-            Dados reais quando disponíveis. Informações indisponíveis permanecem marcadas como `—`.
-          </DialogDescription>
+          <DialogTitle>{t('relays_metrics_title')}</DialogTitle>
+          <DialogDescription>{t('relays_metrics_description')}</DialogDescription>
         </DialogHeader>
 
         {relay ? (
@@ -384,7 +389,7 @@ function RelayMetricsDialog({
             <MetricCard
               title="Latência"
               value={formatLatency(relay.latency)}
-              description={classifyLatency(relay.latency ?? null)}
+              description={classifyLatency(relay.latency ?? null, t)}
               icon={Activity}
               tone="relay"
             />
@@ -422,13 +427,12 @@ export const Route = createRoute({
 })
 
 function RelaysPage() {
+  const { t } = useTranslation('pages')
   const [activeTab, setActiveTab] = useState<RelayTab>('mine')
   const [search, setSearch] = useState('')
-  const [debouncedSearch, searchDebouncer] = useDebouncedValue(
-    search,
-    { wait: 250 },
-    (state) => ({ isPending: state.isPending }),
-  )
+  const [debouncedSearch, searchDebouncer] = useDebouncedValue(search, { wait: 250 }, (state) => ({
+    isPending: state.isPending,
+  }))
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [manualRelayUrl, setManualRelayUrl] = useState('')
   const [manualRelayError, setManualRelayError] = useState<string | null>(null)
@@ -650,7 +654,7 @@ function RelaysPage() {
         <MetricCard
           title="Latência média"
           value={relayHealth.avgLatency === null ? '—' : `${relayHealth.avgLatency}ms`}
-          description={classifyLatency(relayHealth.avgLatency)}
+          description={classifyLatency(relayHealth.avgLatency, t)}
           icon={Activity}
           tone="relay"
         />

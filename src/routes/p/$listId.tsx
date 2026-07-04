@@ -1,27 +1,27 @@
-import { createRoute, redirect } from "@tanstack/react-router";
-import { nip19 } from "nostr-tools";
-import PlaylistScreen from "./@playlist/PlaylistScreen.tsx";
-import { Route as rootRoute } from "@/routes/__root";
+import { createRoute, redirect } from '@tanstack/react-router'
+import { nip19 } from 'nostr-tools'
+import { Route as rootRoute } from '@/routes/__root'
+import PlaylistScreen from './@playlist/PlaylistScreen.tsx'
 
 export const Route = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/p/$listId",
+  path: '/p/$listId',
   beforeLoad: ({ params: { listId } }) => {
-    if (!listId.startsWith("naddr")) return;
+    if (!listId.startsWith('naddr')) return
 
-    const { type, data } = nip19.decode(listId);
-    if (type !== "naddr") return;
+    const { type, data } = nip19.decode(listId)
+    if (type !== 'naddr') return
 
-    const address = data as nip19.AddressPointer;
+    const address = data as nip19.AddressPointer
     throw redirect({
-      to: "/p/$listId",
+      to: '/p/$listId',
       params: { listId: address.identifier },
-      replace: true
-    });
+      replace: true,
+    })
   },
-  component: RouteComponent
-});
+  component: RouteComponent,
+})
 
 function RouteComponent() {
-  return <PlaylistScreen />;
+  return <PlaylistScreen />
 }

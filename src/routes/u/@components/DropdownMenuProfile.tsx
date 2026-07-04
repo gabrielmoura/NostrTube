@@ -1,108 +1,100 @@
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-
-import { Download, MoreVertical, Share2, UserX } from "lucide-react";
-import { useNavigate, useParams } from "@tanstack/react-router";
-import { type NDKEvent, NDKUser } from "@nostr-dev-kit/ndk";
-import { downloadJsonl } from "@/helper/download.ts";
-import { toast } from "sonner";
-import { Share } from "@capacitor/share";
-import { copyText } from "@/helper/format.ts";
-import { useNDK, useNDKCurrentPubkey } from "@nostr-dev-kit/ndk-hooks";
-import { addMuteListItem } from "@/features/nostr/services/mute-list.service";
+import { Share } from '@capacitor/share'
+import { type NDKEvent, NDKUser } from '@nostr-dev-kit/ndk'
+import { useNDK, useNDKCurrentPubkey } from '@nostr-dev-kit/ndk-hooks'
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import { useNavigate, useParams } from '@tanstack/react-router'
+import { Download, MoreVertical, Share2, UserX } from 'lucide-react'
+import { toast } from 'sonner'
+import { addMuteListItem } from '@/features/nostr/services/mute-list.service'
+import { downloadJsonl } from '@/helper/download.ts'
+import { copyText } from '@/helper/format.ts'
+import { useTranslation } from 'react-i18next'
 
 interface DropdownMenuProfileProps {
-  currentUser?: NDKUser; // O usuário logado
-  targetPubkey?: string;
-  events?: NDKEvent[];
+  currentUser?: NDKUser // O usuário logado
+  targetPubkey?: string
+  events?: NDKEvent[]
 }
 
 interface Option {
-  label: string;
-  icon: React.ReactNode;
-  action: () => Promise<void> | void;
+  label: string
+  icon: React.ReactNode
+  action: () => Promise<void> | void
 }
 
 export function DropdownMenuProfile({ currentUser, targetPubkey, events }: DropdownMenuProfileProps) {
-  const navigate = useNavigate();
-  const { userId } = useParams({ strict: false });
-  const { ndk } = useNDK();
-  const currentPubkey = useNDKCurrentPubkey();
-  const npub = currentUser?.npub;
-  const pubkey = currentUser?.pubkey;
+  const navigate = useNavigate()
+  const { userId } = useParams({ strict: false })
+  const { ndk } = useNDK()
+  const currentPubkey = useNDKCurrentPubkey()
+  const { t } = useTranslation('pages')
+  const npub = currentUser?.npub
+  const pubkey = currentUser?.pubkey
 
   const options: Option[] = [
     {
-      label: "Share Profile",
+      label: 'Share Profile',
       icon: <Share2 className="size-4" />,
       action: () => {
         if ((navigator as Navigator).share) {
           Share.share({
             title: currentUser?.profile?.name,
-            url: `${
-              import.meta.env.VITE_PUBLIC_ROOT_DOMAIN ?? "https://nostrtube.com"
-            }/u/${npub}`
-          }).catch(console.log);
+            url: `${import.meta.env.VITE_PUBLIC_ROOT_DOMAIN ?? 'https://nostrtube.com'}/u/${npub}`,
+          }).catch(console.log)
         } else {
-          copyText(
-            `${
-              import.meta.env.VITE_PUBLIC_ROOT_DOMAIN ?? "https://nostrtube.com"
-            }/u/${npub}`
-          ).then(() => toast.success("Link copied!"));
+          copyText(`${import.meta.env.VITE_PUBLIC_ROOT_DOMAIN ?? 'https://nostrtube.com'}/u/${npub}`).then(() =>
+            toast.success('Link copied!'),
+          )
         }
-      }
+      },
     },
     {
-      label: "Export Profile",
+      label: 'Export Profile',
       icon: <Download className="size-4" />,
       action: async () => {
         if (currentUser && events) {
-          toast.promise(
-            downloadJsonl(events, `user-${userId || npub}.jsonl`),
-            {
-              loading: "Preparing download...",
-              success: "User data has been downloaded",
-              error: "Error downloading user data"
-            }
-          );
+          toast.promise(downloadJsonl(events, `user-${userId || npub}.jsonl`), {
+            loading: 'Preparing download...',
+            success: 'User data has been downloaded',
+            error: 'Error downloading user data',
+          })
         }
-      }
-
-    }
-  ];
+      },
+    },
+  ]
 
   if (targetPubkey && targetPubkey !== currentPubkey) {
     options.push({
-      label: "Mute Profile",
+      label: 'Mute Profile',
       icon: <UserX className="size-4 text-amber-500" />,
       action: async () => {
         if (!ndk || !currentPubkey) {
-          toast.error("Faça login para atualizar sua mute list.");
-          return;
+          toast.error(t('user_dropdown_login_required'))
+          return
         }
 
         const result = await addMuteListItem({
           ndk,
           pubkey: currentPubkey,
-          item: { tagName: "p", value: targetPubkey }
-        });
-        toast.success(result.alreadyMuted ? "Perfil já estava na mute list." : "Perfil adicionado à mute list.");
-      }
-    });
+          item: { tagName: 'p', value: targetPubkey },
+        })
+        toast.success(result.alreadyMuted ? t('user_dropdown_already_muted') : t('user_dropdown_muted_success'))
+      },
+    })
   }
 
   if (currentUser && npub && (npub === userId || pubkey === userId)) {
     options.push({
-      label: "Edit Profile",
+      label: 'Edit Profile',
       icon: <MoreVertical className="size-4" />,
       action: async () => {
         await navigate({
-          to: "/u/$userId/edit",
-          params: { userId: npub }
-        });
-      }
-    });
+          to: '/u/$userId/edit',
+          params: { userId: npub },
+        })
+      },
+    })
   }
-
 
   return (
     <DropdownMenu.Root>
@@ -137,5 +129,5 @@ export function DropdownMenuProfile({ currentUser, targetPubkey, events }: Dropd
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>
-  );
+  )
 }

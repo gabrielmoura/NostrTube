@@ -1,50 +1,50 @@
-import { LoggerAgent } from "@/lib/debug.ts";
+import { LoggerAgent } from '@/lib/debug.ts'
 
 export const checkLatency = async (url: string, timeoutMs: number = 2000): Promise<number | null> => {
-  const log = LoggerAgent.create("checkLatency");
+  const log = LoggerAgent.create('checkLatency')
   return new Promise((resolve) => {
-    const start = performance.now();
-    let socket: WebSocket | null = null;
-    let hasResolved = false;
+    const start = performance.now()
+    let socket: WebSocket | null = null
+    let hasResolved = false
 
     // Timeout de segurança
     const timeoutId = setTimeout(() => {
       if (!hasResolved) {
-        hasResolved = true;
+        hasResolved = true
         if (socket) {
-          socket.close();
+          socket.close()
         }
-        resolve(null); // Timeout
+        resolve(null) // Timeout
       }
-    }, timeoutMs);
+    }, timeoutMs)
 
     try {
-      socket = new WebSocket(url);
+      socket = new WebSocket(url)
 
       socket.onopen = () => {
         if (!hasResolved) {
-          const end = performance.now();
-          hasResolved = true;
-          clearTimeout(timeoutId);
-          socket?.close();
-          resolve(Math.round(end - start));
+          const end = performance.now()
+          hasResolved = true
+          clearTimeout(timeoutId)
+          socket?.close()
+          resolve(Math.round(end - start))
         }
-      };
+      }
 
       socket.onerror = () => {
         if (!hasResolved) {
-          hasResolved = true;
-          clearTimeout(timeoutId);
-          resolve(null); // Erro de conexão
+          hasResolved = true
+          clearTimeout(timeoutId)
+          resolve(null) // Erro de conexão
         }
-      };
+      }
     } catch (e) {
       if (!hasResolved) {
-        hasResolved = true;
-        clearTimeout(timeoutId);
-        resolve(null);
+        hasResolved = true
+        clearTimeout(timeoutId)
+        resolve(null)
       }
-      log.debug(`WebSocket error: ${e}`);
+      log.debug(`WebSocket error: ${e}`)
     }
-  });
-};
+  })
+}

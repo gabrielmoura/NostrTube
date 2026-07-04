@@ -1,57 +1,59 @@
 // components/profile/FollowButton.tsx
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { NDKUser } from "@nostr-dev-kit/ndk";
 
+import { NDKUser } from '@nostr-dev-kit/ndk'
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Button } from '@/components/ui/button'
 
 interface FollowButtonProps {
-  pubkey?: string;
-  currentUser?: NDKUser; // O usuário logado
+  pubkey?: string
+  currentUser?: NDKUser // O usuário logado
 }
 
 export function FollowButton({ pubkey, currentUser }: FollowButtonProps) {
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const { t } = useTranslation('pages')
+  const [isFollowing, setIsFollowing] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (currentUser && pubkey) {
       // Verifica se o usuário logado segue o perfil atual (simplificado)
       // Em produção, verificar o Kind 3 do currentUser
       const checkFollow = async () => {
-        const follows = await currentUser.followSet();
-        setIsFollowing(Array.from(follows).some(userKey => userKey === pubkey));
-      };
-      checkFollow();
+        const follows = await currentUser.followSet()
+        setIsFollowing(Array.from(follows).some((userKey) => userKey === pubkey))
+      }
+      checkFollow()
     }
-  }, [currentUser, pubkey]);
+  }, [currentUser, pubkey])
 
   const toggleFollow = async () => {
-    if (!currentUser) return; // Trigger login modal here ideally
-    setLoading(true);
+    if (!currentUser) return // Trigger login modal here ideally
+    setLoading(true)
     try {
-      const targetUser = new NDKUser({ pubkey });
+      const targetUser = new NDKUser({ pubkey })
       if (isFollowing) {
-        await currentUser.unfollow(targetUser);
-        setIsFollowing(false);
+        await currentUser.unfollow(targetUser)
+        setIsFollowing(false)
       } else {
-        await currentUser.follow(targetUser);
-        setIsFollowing(true);
+        await currentUser.follow(targetUser)
+        setIsFollowing(true)
       }
     } catch (e) {
-      console.error("Erro ao seguir/deixar de seguir", e);
+      console.error('Erro ao seguir/deixar de seguir', e)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <Button
       onClick={toggleFollow}
       disabled={loading || !currentUser}
-      variant={isFollowing ? "outline" : "default"}
+      variant={isFollowing ? 'outline' : 'default'}
       className="rounded-full px-6"
     >
-      {loading ? "Processando..." : isFollowing ? "Seguindo" : "Seguir"}
+      {loading ? t('user_follow_processing') : isFollowing ? t('user_follow_following') : t('user_follow_follow')}
     </Button>
-  );
+  )
 }

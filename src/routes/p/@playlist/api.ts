@@ -122,13 +122,18 @@ export const playlistApi: IPlaylistAPI = {
     }
 
     // 2. Buscar o Evento da Playlist
-    const metaEvents = id.length === 64
-      ? await fetchEventsCached(ndk, filter, {
-          mode: 'parallel',
-        })
-      : await fetchEventsCached(ndk, { ...filter, limit: 100 }, {
-          mode: 'parallel',
-        })
+    const metaEvents =
+      id.length === 64
+        ? await fetchEventsCached(ndk, filter, {
+            mode: 'parallel',
+          })
+        : await fetchEventsCached(
+            ndk,
+            { ...filter, limit: 100 },
+            {
+              mode: 'parallel',
+            },
+          )
     const metaEvent = newestEvent(metaEvents)
 
     let directMetaEvent = metaEvent

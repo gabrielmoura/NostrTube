@@ -1,19 +1,19 @@
-"use client";
+'use client'
 
-import { useModalStore } from "./modal-state";
-import { ResponsiveModal } from "./ResponsiveModal";
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react'
+import { useModalStore } from './modal-state'
+import { ResponsiveModal } from './ResponsiveModal'
 
 export const Modstr = () => {
-  const { modals, removeModal } = useModalStore();
-  const [isMounted, setIsMounted] = useState(false);
+  const { modals, removeModal } = useModalStore()
+  const [isMounted, setIsMounted] = useState(false)
 
   // Evita problemas de hidratação garantindo que só roda no cliente
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
+    setIsMounted(true)
+  }, [])
 
-  if (!isMounted) return null;
+  if (!isMounted) return null
 
   return (
     <>
@@ -24,12 +24,12 @@ export const Modstr = () => {
           isOpen={true} // O modal existe no array, logo está aberto
           onOpenChange={(open) => {
             if (!open) {
-              removeModal(modal.id);
-              if (modal.onClose) modal.onClose();
+              removeModal(modal.id)
+              if (modal.onClose) modal.onClose()
             }
           }}
         />
       ))}
     </>
-  );
-};
+  )
+}

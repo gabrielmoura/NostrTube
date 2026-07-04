@@ -1,40 +1,35 @@
-import type { VideoMetadata } from "@/store/videoUpload/useVideoUploadStore";
-import type { VideoContentType } from "@/features/video/services/video-kinds";
-import { buildYouTubeThumbnailUrl, buildYouTubeWatchUrl } from "./youtube-url.service";
+import type { VideoContentType } from '@/features/video/services/video-kinds'
+import type { VideoMetadata } from '@/store/videoUpload/useVideoUploadStore'
+import { buildYouTubeThumbnailUrl, buildYouTubeWatchUrl } from './youtube-url.service'
 
 export interface BuildYouTubeVideoDraftParams {
-  videoId: string;
-  title: string;
-  summary?: string;
-  duration?: number;
-  hashtags?: string[];
-  indexers?: string[];
-  contentWarning?: string;
-  language?: string;
-  geohash?: string;
-  contentType?: VideoContentType;
+  videoId: string
+  title: string
+  summary?: string
+  duration?: number
+  hashtags?: string[]
+  indexers?: string[]
+  contentWarning?: string
+  language?: string
+  geohash?: string
+  contentType?: VideoContentType
 }
 
 export function buildYouTubeImetaTag(videoId: string, duration?: number): string[] {
-  const canonicalUrl = buildYouTubeWatchUrl(videoId);
-  const thumbnailUrl = buildYouTubeThumbnailUrl(videoId);
+  const canonicalUrl = buildYouTubeWatchUrl(videoId)
+  const thumbnailUrl = buildYouTubeThumbnailUrl(videoId)
 
-  const tag = [
-    "imeta",
-    `url ${canonicalUrl}`,
-    `image ${thumbnailUrl}`,
-    "m image/jpeg",
-  ];
+  const tag = ['imeta', `url ${canonicalUrl}`, `image ${thumbnailUrl}`, 'm image/jpeg']
 
   if (duration && Number.isFinite(duration) && duration > 0) {
-    tag.push(`duration ${duration}`);
+    tag.push(`duration ${duration}`)
   }
 
-  return tag;
+  return tag
 }
 
 export function buildYouTubeAltTagText(videoId: string): string {
-  return `Este formato de vídeo não é suportado por todos os players. Assista diretamente em: ${buildYouTubeWatchUrl(videoId)}`;
+  return `Este formato de vídeo não é suportado por todos os players. Assista diretamente em: ${buildYouTubeWatchUrl(videoId)}`
 }
 
 export function buildYouTubeVideoDraft({
@@ -49,8 +44,8 @@ export function buildYouTubeVideoDraft({
   geohash,
   contentType,
 }: BuildYouTubeVideoDraftParams): Partial<VideoMetadata> {
-  const canonicalUrl = buildYouTubeWatchUrl(videoId);
-  const thumbnailUrl = buildYouTubeThumbnailUrl(videoId);
+  const canonicalUrl = buildYouTubeWatchUrl(videoId)
+  const thumbnailUrl = buildYouTubeThumbnailUrl(videoId)
 
   return {
     url: canonicalUrl,
@@ -58,7 +53,7 @@ export function buildYouTubeVideoDraft({
     summary,
     alt: buildYouTubeAltTagText(videoId),
     thumbnail: thumbnailUrl,
-    mime_type: "image/jpeg",
+    mime_type: 'image/jpeg',
     hashtags,
     indexers,
     contentWarning,
@@ -72,5 +67,5 @@ export function buildYouTubeVideoDraft({
     //   originalUrl: canonicalUrl,
     //   metadata: "metadata-only",
     // },
-  };
+  }
 }

@@ -7,14 +7,14 @@ import { t } from 'i18next'
 import { Compass, Sparkles } from 'lucide-react'
 import { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import VideoCard, { VideoCardLoading } from '@/components/cards/videoCard'
-import { PageSpinner } from '@/components/PageSpinner.tsx'
 import { AppShell } from '@/components/layout/AppShell'
+import { PageSpinner } from '@/components/PageSpinner.tsx'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { MetricCard } from '@/components/ui/metric-card'
-import { useContentVisibilityFilter } from '@/features/nostr/hooks/useContentVisibilityFilter'
 import { useBatchProfiles } from '@/features/nostr/hooks/useBatchProfiles'
+import { useContentVisibilityFilter } from '@/features/nostr/hooks/useContentVisibilityFilter'
 import { getVideoRouteReference } from '@/features/video/services/video-reference.service'
 import { eventSearchSchema, getVideosFromSearchData } from '@/helper/loaders/getVideosFromSearchData.ts'
 import { Route as rootRoute } from '@/routes/__root'
@@ -74,7 +74,14 @@ function HasError({ error }: { error: Error }) {
 
 function RouteComponent() {
   return (
-    <AppShell activeKey="explore" title="Pesquisar" description="Busque vídeos, criadores e conteúdos no ecossistema Nostr." eyebrow="Discovery" badge="Search & Filters" icon={Compass}>
+    <AppShell
+      activeKey="explore"
+      title="Pesquisar"
+      description="Busque vídeos, criadores e conteúdos no ecossistema Nostr."
+      eyebrow="Discovery"
+      badge="Search & Filters"
+      icon={Compass}
+    >
       <AdvancedSearch />
       <SearchResults />
     </AppShell>
@@ -136,8 +143,16 @@ function SearchResults() {
   const profiles = useBatchProfiles(allVideos)
   const activeFilters = useMemo(() => {
     const tagCount = Array.isArray(searchParams.tag) ? searchParams.tag.length : searchParams.tag ? 1 : 0
-    return [searchParams.search, searchParams.author, searchParams.lang, searchParams.geohash, searchParams.nsfw ? 'nsfw' : undefined, searchParams.timeRange && searchParams.timeRange !== 'all' ? searchParams.timeRange : undefined]
-      .filter(Boolean).length + tagCount
+    return (
+      [
+        searchParams.search,
+        searchParams.author,
+        searchParams.lang,
+        searchParams.geohash,
+        searchParams.nsfw ? 'nsfw' : undefined,
+        searchParams.timeRange && searchParams.timeRange !== 'all' ? searchParams.timeRange : undefined,
+      ].filter(Boolean).length + tagCount
+    )
   }, [searchParams])
 
   // 3. Agrupar vídeos em linhas baseadas nas colunas atuais
@@ -194,9 +209,13 @@ function SearchResults() {
           <CardContent className="flex items-center justify-between gap-4 p-5">
             <div>
               <p className="text-xs uppercase tracking-[0.24em] text-primary/80">Resultados ativos</p>
-              <h2 className="mt-2 text-xl font-semibold tracking-tight sm:text-2xl">{allVideos.length} vídeos encontrados</h2>
+              <h2 className="mt-2 text-xl font-semibold tracking-tight sm:text-2xl">
+                {allVideos.length} vídeos encontrados
+              </h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                {activeFilters > 0 ? `Busca refinada com ${activeFilters} filtro${activeFilters > 1 ? 's' : ''}.` : 'Navegue pelos resultados mais recentes da busca.'}
+                {activeFilters > 0
+                  ? `Busca refinada com ${activeFilters} filtro${activeFilters > 1 ? 's' : ''}.`
+                  : 'Navegue pelos resultados mais recentes da busca.'}
               </p>
             </div>
             <div className="hidden rounded-3xl border border-primary/15 bg-primary/10 p-3 text-primary sm:block">
@@ -204,16 +223,29 @@ function SearchResults() {
             </div>
           </CardContent>
         </Card>
-        <MetricCard title="Filtros ativos" value={activeFilters} description="Texto, idioma, tags e recortes avançados." />
-        <MetricCard title="Páginas carregadas" value={data?.pages.length ?? 1} description="Scroll infinito otimizado para discovery." tone="relay" />
+        <MetricCard
+          title="Filtros ativos"
+          value={activeFilters}
+          description="Texto, idioma, tags e recortes avançados."
+        />
+        <MetricCard
+          title="Páginas carregadas"
+          value={data?.pages.length ?? 1}
+          description="Scroll infinito otimizado para discovery."
+          tone="relay"
+        />
       </div>
 
       <div className="flex items-center justify-between gap-3 border-b pb-4">
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="font-main text-lg font-bold tracking-tight sm:text-xl">Grade de resultados</h3>
-          {searchParams.timeRange && searchParams.timeRange !== 'all' ? <Badge variant="secondary">Período: {searchParams.timeRange}</Badge> : null}
+          {searchParams.timeRange && searchParams.timeRange !== 'all' ? (
+            <Badge variant="secondary">Período: {searchParams.timeRange}</Badge>
+          ) : null}
         </div>
-        <a href="/explore" className={buttonVariants({ variant: 'glass' })}>Explorar agora</a>
+        <a href="/explore" className={buttonVariants({ variant: 'glass' })}>
+          Explorar agora
+        </a>
       </div>
 
       {allVideos.length === 0 ? (
@@ -223,7 +255,8 @@ function SearchResults() {
           </div>
           <h3 className="text-lg font-semibold">Nenhum vídeo encontrado</h3>
           <p className="mt-2 max-w-lg text-sm text-muted-foreground">
-            Tente ampliar o período, remover filtros muito específicos ou usar termos mais curtos para aumentar a cobertura da busca.
+            Tente ampliar o período, remover filtros muito específicos ou usar termos mais curtos para aumentar a
+            cobertura da busca.
           </p>
         </div>
       ) : null}

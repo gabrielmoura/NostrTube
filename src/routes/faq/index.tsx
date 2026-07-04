@@ -1,13 +1,12 @@
-import { createRoute } from '@tanstack/react-router'
 import { useDebouncedValue } from '@tanstack/react-pacer'
+import { createRoute, Link } from '@tanstack/react-router'
 import { t } from 'i18next'
 import { HelpCircle, Search, ShieldCheck, Sparkles } from 'lucide-react'
-import { Link } from '@tanstack/react-router'
-import { buttonVariants } from '@/components/ui/button'
 import { useEffect, useMemo, useState } from 'react'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx'
-import { Input } from '@/components/ui/input.tsx'
 import { AppShell } from '@/components/layout/AppShell'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx'
+import { buttonVariants } from '@/components/ui/button'
+import { Input } from '@/components/ui/input.tsx'
 import { faqData } from '@/default.ts'
 import { detectLanguageMain } from '@/helper/userLang.ts'
 import { Route as rootRoute } from '@/routes/__root'
@@ -39,11 +38,9 @@ export interface FaqEntry {
 
 function FaqPage({ faqData }: { faqData: FaqEntry[] }) {
   const [searchTerm, setSearchTerm] = useState('')
-  const [debouncedSearchTerm, searchDebouncer] = useDebouncedValue(
-    searchTerm,
-    { wait: 200 },
-    (state) => ({ isPending: state.isPending }),
-  )
+  const [debouncedSearchTerm, searchDebouncer] = useDebouncedValue(searchTerm, { wait: 200 }, (state) => ({
+    isPending: state.isPending,
+  }))
 
   const filteredFaqs = useMemo(() => {
     if (!debouncedSearchTerm) return faqData
@@ -84,14 +81,16 @@ function FaqPage({ faqData }: { faqData: FaqEntry[] }) {
           className="h-11 rounded-xl border-border/60 bg-background/70 pl-9"
         />
         {searchDebouncer.state.isPending ? (
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-            Filtrando...
-          </span>
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">Filtrando...</span>
         ) : null}
       </div>
 
       {filteredFaqs.length > 0 ? (
-        <Accordion type="single" collapsible className="w-full rounded-3xl border border-border/70 bg-card/80 shadow-sm">
+        <Accordion
+          type="single"
+          collapsible
+          className="w-full rounded-3xl border border-border/70 bg-card/80 shadow-sm"
+        >
           {filteredFaqs.map((faq) => (
             <AccordionItem key={faq.id} value={faq.id} className="border-b border-border last:border-b-0">
               <AccordionTrigger className="flex w-full items-center justify-between px-5 py-4 text-left text-base font-medium text-foreground transition-colors hover:bg-muted/50 hover:no-underline data-[state=open]:bg-muted/30">
@@ -123,7 +122,11 @@ function RouteComponent() {
   const lang = detectLanguageMain() || 'en'
   const faqDataL = faqData[lang?.split('-')[0] as keyof typeof faqData] || faqData['en']
   return (
-    <AppShell title="Perguntas Frequentes" description="Encontre respostas para as dúvidas mais comuns." icon={HelpCircle}>
+    <AppShell
+      title="Perguntas Frequentes"
+      description="Encontre respostas para as dúvidas mais comuns."
+      icon={HelpCircle}
+    >
       <FaqPage faqData={faqDataL} />
     </AppShell>
   )

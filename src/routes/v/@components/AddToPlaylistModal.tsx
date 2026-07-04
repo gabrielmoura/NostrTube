@@ -1,52 +1,49 @@
-import { type NDKEvent, NDKKind, NDKSubscriptionCacheUsage } from "@nostr-dev-kit/ndk";
-import { useNDKCurrentPubkey, useSubscribe } from "@nostr-dev-kit/ndk-hooks";
-import { toast } from "sonner";
-import { addToPlayListEvent } from "@/helper/actions/playlist.ts";
-import { cn } from "@/lib/utils";
-import { getTagValue } from "@/helper/nostrTags";
-import Spinner from "@/components/Spinner.tsx";
-import { modal } from "@/components/modal_v2/modal-manager.ts";
+import { type NDKEvent, NDKKind, NDKSubscriptionCacheUsage } from '@nostr-dev-kit/ndk'
+import { useNDKCurrentPubkey, useSubscribe } from '@nostr-dev-kit/ndk-hooks'
+import { toast } from 'sonner'
 import {
   DrawerBody,
   DrawerDescription,
   DrawerFooter,
   DrawerHeader,
-  DrawerTitle
-} from "@/components/modal_v2/Drawer.tsx";
+  DrawerTitle,
+} from '@/components/modal_v2/Drawer.tsx'
+import { modal } from '@/components/modal_v2/modal-manager.ts'
+import Spinner from '@/components/Spinner.tsx'
+import { addToPlayListEvent } from '@/helper/actions/playlist.ts'
+import { getTagValue } from '@/helper/nostrTags'
+import { cn } from '@/lib/utils'
 
 type AddToPlaylistModal = {
-  eventIdTag: string;
-};
+  eventIdTag: string
+}
 
-export default function AddToPlaylistModal({
-                                             eventIdTag
-                                           }: AddToPlaylistModal) {
-
-  const currentPubkey = useNDKCurrentPubkey();
-  const { events: userPlaylists, eose: loadingPlaylists } = useSubscribe([
+export default function AddToPlaylistModal({ eventIdTag }: AddToPlaylistModal) {
+  const currentPubkey = useNDKCurrentPubkey()
+  const { events: userPlaylists, eose: loadingPlaylists } = useSubscribe(
+    [
       {
         authors: [currentPubkey!],
-        kinds: [NDKKind.VideoCurationSet]
-      }
+        kinds: [NDKKind.VideoCurationSet],
+      },
     ],
-    { cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST }
-  );
-
+    { cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST },
+  )
 
   async function handleUpdateList(playlist: NDKEvent) {
     try {
       toast.promise(addToPlayListEvent({ playLisEvent: playlist, eventIdTag: eventIdTag }), {
-        loading: "Adding to playlist",
+        loading: 'Adding to playlist',
         success: (data) => {
-          console.log("Novo Evento ", data);
-          modal.dismissAll();
-          return `Video has been added to playlist!`;
+          console.log('Novo Evento ', data)
+          modal.dismissAll()
+          return `Video has been added to playlist!`
         },
-        error: "Error"
-      });
+        error: 'Error',
+      })
     } catch (err) {
-      console.log("Error adding event", err);
-      toast.error("Error adding event");
+      console.log('Error adding event', err)
+      toast.error('Error adding event')
     }
   }
 
@@ -56,36 +53,36 @@ export default function AddToPlaylistModal({
       loadingOptions={!loadingPlaylists}
       getKeyAndLabel={(e) => ({
         key: e.tagId(),
-        label: getTagValue("title", e.tags) ?? e.id
+        label: getTagValue('title', e.tags) ?? e.id,
       })}
       onSelect={(p) => handleUpdateList(p)}
       title="Select a playlist"
       description="This video will be added to the chosen playlist"
     />
-  );
+  )
 }
 
 type SelectModalProps<ItemType> = {
-  title?: string;
-  description?: string;
-  listContainerClassName?: string;
-  options: ItemType[];
-  getKeyAndLabel: (i: ItemType) => { key: string; label: string };
-  selected?: ItemType;
-  loadingOptions?: boolean;
-  onSelect: (i: ItemType) => void;
-};
+  title?: string
+  description?: string
+  listContainerClassName?: string
+  options: ItemType[]
+  getKeyAndLabel: (i: ItemType) => { key: string; label: string }
+  selected?: ItemType
+  loadingOptions?: boolean
+  onSelect: (i: ItemType) => void
+}
 
 function SelectModal<ItemType>({
-                                 title = "Select an option",
-                                 description,
-                                 listContainerClassName,
-                                 options,
-                                 getKeyAndLabel,
-                                 selected,
-                                 onSelect,
-                                 loadingOptions
-                               }: SelectModalProps<ItemType>) {
+  title = 'Select an option',
+  description,
+  listContainerClassName,
+  options,
+  getKeyAndLabel,
+  selected,
+  onSelect,
+  loadingOptions,
+}: SelectModalProps<ItemType>) {
   return (
     <>
       <DrawerHeader>
@@ -93,15 +90,12 @@ function SelectModal<ItemType>({
         {!!description && <DrawerDescription>{description}</DrawerDescription>}
       </DrawerHeader>
       <DrawerBody className="">
-        <ul className={cn("space-y-4", listContainerClassName)}>
+        <ul className={cn('space-y-4', listContainerClassName)}>
           {options.map((p) => (
             <li key={getKeyAndLabel(p).key} className="">
               <TileButton
                 onClick={() => onSelect(p)}
-                active={
-                  selected &&
-                  getKeyAndLabel(p).key === getKeyAndLabel(selected).key
-                }
+                active={selected && getKeyAndLabel(p).key === getKeyAndLabel(selected).key}
                 className="w-full font-semibold"
               >
                 {getKeyAndLabel(p).label}
@@ -117,31 +111,26 @@ function SelectModal<ItemType>({
       </DrawerBody>
       <DrawerFooter></DrawerFooter>
     </>
-  );
+  )
 }
 
 type TileButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  active?: boolean;
-};
+  active?: boolean
+}
 
-export function TileButton({
-                             active,
-                             className,
-                             children,
-                             ...props
-                           }: TileButtonProps) {
+export function TileButton({ active, className, children, ...props }: TileButtonProps) {
   return (
     <button
       {...props}
       className={cn(
-        "hover flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 transition-all",
+        'hover flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 transition-all',
         active
-          ? "border-primary hover:opacity-70"
-          : "text-muted-foreground hover:border-muted-foreground hover:bg-muted hover:text-foreground",
-        className
+          ? 'border-primary hover:opacity-70'
+          : 'text-muted-foreground hover:border-muted-foreground hover:bg-muted hover:text-foreground',
+        className,
       )}
     >
       {children}
     </button>
-  );
+  )
 }

@@ -1,13 +1,16 @@
-import { useMemo } from 'react'
 import { useNDK } from '@nostr-dev-kit/ndk-hooks'
 import { useQuery } from '@tanstack/react-query'
+import { useMemo } from 'react'
 import { useZapStats } from '@/features/zap/hooks/useZapStats'
 
 export function useTopSupporters() {
   const { ndk } = useNDK()
   const statsQuery = useZapStats()
 
-  const supporterPubkeys = useMemo(() => statsQuery.data?.topSupporters.map((supporter) => supporter.pubkey) ?? [], [statsQuery.data?.topSupporters])
+  const supporterPubkeys = useMemo(
+    () => statsQuery.data?.topSupporters.map((supporter) => supporter.pubkey) ?? [],
+    [statsQuery.data?.topSupporters],
+  )
 
   const profilesQuery = useQuery({
     queryKey: ['zap-top-supporters-profiles', supporterPubkeys],

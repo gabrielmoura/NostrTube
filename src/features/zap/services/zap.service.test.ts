@@ -9,7 +9,9 @@ vi.mock('i18next', () => ({
 describe('zap.service', () => {
   it('maps typed zap errors to translation keys', () => {
     expect(getZapErrorMessage(new ZapFlowError('zap-unavailable', 'no lnurl'))).toBe('zap.errors.zap_unavailable')
-    expect(getZapErrorMessage(new ZapFlowError('zap-payment-cancelled', 'cancelled'))).toBe('zap.errors.zap_payment_cancelled')
+    expect(getZapErrorMessage(new ZapFlowError('zap-payment-cancelled', 'cancelled'))).toBe(
+      'zap.errors.zap_payment_cancelled',
+    )
   })
 
   it('falls back to generic translation key for unknown errors', () => {

@@ -1,5 +1,5 @@
-import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useDebouncedValue } from '@tanstack/react-pacer'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import { Search as SearchIcon, SlidersHorizontal, Sparkles, X } from 'lucide-react'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -26,11 +26,9 @@ export function AdvancedSearch() {
 
   const [isOpen, setIsOpen] = useState(false)
   const [searchInput, setSearchInput] = useState('')
-  const [debouncedSearchInput, searchDebouncer] = useDebouncedValue(
-    searchInput,
-    { wait: 220 },
-    (state) => ({ isPending: state.isPending }),
-  )
+  const [debouncedSearchInput, searchDebouncer] = useDebouncedValue(searchInput, { wait: 220 }, (state) => ({
+    isPending: state.isPending,
+  }))
   const [chips, setChips] = useState<SearchChipToken[]>([])
   const [geohashEnabled, setGeohashEnabled] = useState(false)
 
@@ -163,7 +161,9 @@ export function AdvancedSearch() {
               </SelectContent>
             </Select>
 
-            <Button type="submit" className="h-11 rounded-2xl px-5">Buscar</Button>
+            <Button type="submit" className="h-11 rounded-2xl px-5">
+              Buscar
+            </Button>
 
             <Button type="button" variant="ghost" className="h-11 rounded-2xl" onClick={clearFilters}>
               Limpar

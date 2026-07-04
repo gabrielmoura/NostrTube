@@ -1,4 +1,4 @@
-import { Time } from "@vidstack/react";
+import { Time } from '@vidstack/react'
 
 export function TimeGroup() {
   return (
@@ -7,5 +7,5 @@ export function TimeGroup() {
       <div className="mx-1 text-white/75">/</div>
       <Time className="time" type="duration" />
     </div>
-  );
+  )
 }

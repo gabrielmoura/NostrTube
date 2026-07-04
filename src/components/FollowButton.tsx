@@ -1,84 +1,76 @@
-import { type ComponentProps, useEffect, useState } from "react";
-import { toast } from "sonner";
-
-
-import { Button } from "@/components/ui/button";
-import { type Hexpubkey, NDKUser, useNDK, useNDKCurrentUser } from "@nostr-dev-kit/ndk-hooks";
-import { UserMinus, UserPlus } from "lucide-react";
-import { modal } from "@/components/modal_v2/modal-manager.ts";
-import { AuthModal } from "@/components/AuthModal.tsx";
+import { type Hexpubkey, NDKUser, useNDK, useNDKCurrentUser } from '@nostr-dev-kit/ndk-hooks'
+import { UserMinus, UserPlus } from 'lucide-react'
+import { type ComponentProps, useEffect, useState } from 'react'
+import { toast } from 'sonner'
+import { AuthModal } from '@/components/AuthModal.tsx'
+import { modal } from '@/components/modal_v2/modal-manager.ts'
+import { Button } from '@/components/ui/button'
 
 type FollowButtonProps = {
-  pubkey: string;
-} & ComponentProps<typeof Button>;
+  pubkey: string
+} & ComponentProps<typeof Button>
 
-export default function FollowButton({
-                                       pubkey,
-                                       ...buttonProps
-                                     }: FollowButtonProps) {
-  const [followLoading, setFollowLoading] = useState<boolean>(false);
-  const [follows, setFollows] = useState<Hexpubkey[]>([]);
-  const currentUser = useNDKCurrentUser();
-  const { ndk } = useNDK();
-
+export default function FollowButton({ pubkey, ...buttonProps }: FollowButtonProps) {
+  const [followLoading, setFollowLoading] = useState<boolean>(false)
+  const [follows, setFollows] = useState<Hexpubkey[]>([])
+  const currentUser = useNDKCurrentUser()
+  const { ndk } = useNDK()
 
   useEffect(() => {
     if (currentUser) {
-      currentUser.followSet().then(r => setFollows(Array.from(r)));
-
+      currentUser.followSet().then((r) => setFollows(Array.from(r)))
     }
-  }, [currentUser]);
-
+  }, [currentUser])
 
   async function handleFollow() {
-    if (!ndk || !currentUser) return;
+    if (!ndk || !currentUser) return
 
-    setFollowLoading(true);
+    setFollowLoading(true)
     try {
-      setFollows((f) => [...f, pubkey]);
-      await currentUser?.follow(new NDKUser({ hexpubkey: pubkey }));
-      toast.success("Following!");
+      setFollows((f) => [...f, pubkey])
+      await currentUser?.follow(new NDKUser({ hexpubkey: pubkey }))
+      toast.success('Following!')
     } catch (err) {
-      console.log("Error", err);
+      console.log('Error', err)
     }
-    setFollowLoading(false);
+    setFollowLoading(false)
   }
 
   async function handleUnfollow() {
-    if (!ndk || !currentUser) return;
-    setFollowLoading(true);
+    if (!ndk || !currentUser) return
+    setFollowLoading(true)
     try {
-      setFollows((f) => f.filter((i) => i !== pubkey));
-      await currentUser?.unfollow(new NDKUser({ hexpubkey: pubkey }));
-      toast.success("Unfollowed!");
+      setFollows((f) => f.filter((i) => i !== pubkey))
+      await currentUser?.unfollow(new NDKUser({ hexpubkey: pubkey }))
+      toast.success('Unfollowed!')
     } catch (err) {
-      console.log("Error", err);
+      console.log('Error', err)
     }
-    setFollowLoading(false);
+    setFollowLoading(false)
   }
 
   if (follows.find((i) => i === pubkey)) {
     return (
       <Button
         onClick={() => {
-          handleUnfollow().catch(console.warn);
+          handleUnfollow().catch(console.warn)
         }}
         isLoading={followLoading}
-        variant={"secondary"}
+        variant={'secondary'}
         {...buttonProps}
       >
         <UserMinus />
         <span>Unfollow</span>
       </Button>
-    );
+    )
   } else {
     return (
       <Button
         onClick={() => {
           if (!currentUser) {
-            modal.show(<AuthModal />, { id: "auth" });
+            modal.show(<AuthModal />, { id: 'auth' })
           } else {
-            handleFollow().catch(console.warn);
+            handleFollow().catch(console.warn)
           }
         }}
         isLoading={followLoading}
@@ -87,6 +79,6 @@ export default function FollowButton({
         <UserPlus />
         <span>Follow</span>
       </Button>
-    );
+    )
   }
 }

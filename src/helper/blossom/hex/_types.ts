@@ -8,4 +8,4 @@
  * @internal @private
  */
 
-export type Uint8Array_ = ReturnType<Uint8Array["slice"]>;
+export type Uint8Array_ = ReturnType<Uint8Array['slice']>

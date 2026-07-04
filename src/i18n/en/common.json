@@ -24,5 +24,17 @@
   "Disclaimer": "Disclaimer",
   "disclaimer_text": "By using this service, you confirm that this video belongs to you or that you have the right to publish it.",
   "go_to_video": "Go to video",
-  "video_metadata": "Video metadata"
+  "video_metadata": "Video metadata",
+  "profile": "Profile",
+  "notifications": "Notifications",
+  "logged_in": "Logged in",
+  "anonymous": "Anonymous",
+  "go_to_homepage": "Go to NostrTube homepage",
+  "open_navigation": "Open navigation",
+  "user_menu": "User menu",
+  "search_placeholder": "Search videos, creators or tags",
+  "relays_count": "{{count}} relays",
+  "login": "Log in",
+  "logout": "Log out",
+  "user": "User"
 }

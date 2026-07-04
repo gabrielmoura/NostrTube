@@ -1,18 +1,18 @@
-import { useEffect } from "react";
-import { useRouter } from "@tanstack/react-router";
-import { ErrorFallback } from "@/components/ErrorFallback";
-import { logErrorBoundaryError } from "@/features/debug/services/error-log.service.ts";
+import { useRouter } from '@tanstack/react-router'
+import { useEffect } from 'react'
+import { ErrorFallback } from '@/components/ErrorFallback'
+import { logErrorBoundaryError } from '@/features/debug/services/error-log.service.ts'
 
 interface VideoRouteErrorProps {
-  error: Error;
+  error: Error
 }
 
 export function VideoRouteError({ error }: VideoRouteErrorProps) {
-  const router = useRouter();
+  const router = useRouter()
 
   useEffect(() => {
-    logErrorBoundaryError("VideoRouteError", error);
-  }, [error]);
+    logErrorBoundaryError('VideoRouteError', error)
+  }, [error])
 
   return (
     <ErrorFallback
@@ -22,5 +22,5 @@ export function VideoRouteError({ error }: VideoRouteErrorProps) {
       error={error}
       onRetry={() => router.invalidate()}
     />
-  );
+  )
 }

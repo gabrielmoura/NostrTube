@@ -148,7 +148,9 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
             <p className="mt-3 text-xs text-muted-foreground">{t('feedback.success.private_delivery_notice')}</p>
           </div>
 
-          {import.meta.env.DEV && submission.successState.publishedRelays && submission.successState.publishedRelays.length > 0 ? (
+          {import.meta.env.DEV &&
+          submission.successState.publishedRelays &&
+          submission.successState.publishedRelays.length > 0 ? (
             <div className="rounded-2xl border border-blue-500/40 bg-blue-500/5 p-4 text-sm">
               <p className="font-medium text-foreground">Relays de Publicação (DEV)</p>
               <ul className="mt-2 list-disc pl-5 text-xs text-muted-foreground">

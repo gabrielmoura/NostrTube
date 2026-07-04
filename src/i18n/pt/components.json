@@ -39,5 +39,13 @@
         "duplicate": "Esta tag já existe."
       }
     }
+  },
+  "sidebar": {
+    "library_items_label": "Itens da biblioteca",
+    "nostr_session_active": "Sessão Nostr ativa",
+    "browsing_without_login": "Navegando sem login",
+    "anonymous_session": "Sessão anônima",
+    "main_navigation": "Navegação principal",
+    "preferences": "Preferências"
   }
 }

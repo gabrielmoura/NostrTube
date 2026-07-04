@@ -39,5 +39,13 @@
         "duplicate": "Этот тег уже существует."
       }
     }
+  },
+  "sidebar": {
+    "library_items_label": "Элементы библиотеки",
+    "nostr_session_active": "Активная сессия Nostr",
+    "browsing_without_login": "Просмотр без входа",
+    "anonymous_session": "Анонимная сессия",
+    "main_navigation": "Основная навигация",
+    "preferences": "Настройки"
   }
 }

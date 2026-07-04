@@ -1,43 +1,38 @@
-import type { NDKEvent } from "@nostr-dev-kit/ndk-hooks";
-import { useProfileValue } from "@nostr-dev-kit/ndk-hooks";
-import { useRouter } from "@tanstack/react-router";
-import useElementOnScreen from "@/hooks/useElements.ts";
-import { cn, formatCount, getNameToShow, getTwoLetters } from "@/helper/format.ts";
-import { relativeTime } from "@/helper/date.ts";
-import { extractTag } from "@/helper/extractTag.ts";
-import { AspectRatio, Avatar, Skeleton } from "@radix-ui/themes";
-import { HiCheckBadge } from "react-icons/hi2";
-import { getFormattedVideoDuration } from "@/features/video/services/video-duration.service";
-
+import type { NDKEvent } from '@nostr-dev-kit/ndk-hooks'
+import { useProfileValue } from '@nostr-dev-kit/ndk-hooks'
+import { AspectRatio, Avatar, Skeleton } from '@radix-ui/themes'
+import { useRouter } from '@tanstack/react-router'
+import { HiCheckBadge } from 'react-icons/hi2'
+import { getFormattedVideoDuration } from '@/features/video/services/video-duration.service'
+import { relativeTime } from '@/helper/date.ts'
+import { extractTag } from '@/helper/extractTag.ts'
+import { cn, formatCount, getNameToShow, getTwoLetters } from '@/helper/format.ts'
+import useElementOnScreen from '@/hooks/useElements.ts'
 
 type VideoCardProps = {
-  className?: string;
-  event: NDKEvent;
-};
+  className?: string
+  event: NDKEvent
+}
 
-export default function HorizontalVideoCard({
-                                               className,
-                                               event
-                                             }: VideoCardProps) {
-  const { navigate } = useRouter();
-  const { containerRef } = useElementOnScreen();
-  const viewCount = 0;
+export default function HorizontalVideoCard({ className, event }: VideoCardProps) {
+  const { navigate } = useRouter()
+  const { containerRef } = useElementOnScreen()
+  const viewCount = 0
   //
   // const { viewCount, video } = useVideo({
   //   eventIdentifier: event.tagId(),
   //   event: event,
   //   getViewCount: isVisible,
   // });
-  
 
-  const npub = event.author.npub;
-  const profile = useProfileValue(event.author.pubkey);
-  const { image, published_at: publishedAt, thumb, title } = extractTag(event.tags);
-  const thumbnail = thumb || image;
-  const duration = getFormattedVideoDuration(event);
+  const npub = event.author.npub
+  const profile = useProfileValue(event.author.pubkey)
+  const { image, published_at: publishedAt, thumb, title } = extractTag(event.tags)
+  const thumbnail = thumb || image
+  const duration = getFormattedVideoDuration(event)
 
   return (
-    <div ref={containerRef} className={cn("group flex space-x-3", className)}>
+    <div ref={containerRef} className={cn('group flex space-x-3', className)}>
       <div className="relative h-full w-[120px]  overflow-hidden rounded-md">
         <AspectRatio ratio={21 / 14} className="bg-muted">
           {!!thumbnail && (
@@ -46,10 +41,7 @@ export default function HorizontalVideoCard({
               alt={title}
               width={150}
               height={70}
-              className={cn(
-                "h-full w-full object-cover transition-all group-hover:scale-105",
-                "aspect-[21/14]"
-              )}
+              className={cn('h-full w-full object-cover transition-all group-hover:scale-105', 'aspect-[21/14]')}
             />
           )}
           {duration && (
@@ -60,51 +52,40 @@ export default function HorizontalVideoCard({
         </AspectRatio>
       </div>
       <div className="flex-1 space-y-1 pt-0.5 text-base">
-        <h3 className="mt-0 line-clamp-2 text-[15px] font-medium leading-4">
-          {title}
-        </h3>
+        <h3 className="mt-0 line-clamp-2 text-[15px] font-medium leading-4">{title}</h3>
         <div className="flex flex-col items-start gap-y-1">
           <div className="flex items-center gap-x-1 text-xs text-muted-foreground">
-            <p className="whitespace-nowrap">{`${formatCount(
-              viewCount
-            )} views`}</p>
+            <p className="whitespace-nowrap">{`${formatCount(viewCount)} views`}</p>
             {!!publishedAt && (
               <>
                 <span>•</span>
-                <p className="whitespace-nowrap">
-                  {relativeTime(new Date(publishedAt * 1000))}
-                </p>
+                <p className="whitespace-nowrap">{relativeTime(new Date(publishedAt * 1000))}</p>
               </>
             )}
           </div>
         </div>
         <div className="flex">
           <div
-            onClick={() => navigate({
-                to: "/u/$userId",
+            onClick={() =>
+              navigate({
+                to: '/u/$userId',
                 params: {
-                  userId: npub
-                }
-              }
-            )}
+                  userId: npub,
+                },
+              })
+            }
             className="center group gap-x-2 rounded-sm rounded-r-full pr-1 text-muted-foreground hover:shadow"
           >
-            <Avatar className={cn("center h-[20px] w-[20px] overflow-hidden rounded-[.35rem] bg-muted",
-              "object-cover"
-            )}
-                    src={profile?.image}
-                    alt={profile?.displayName}
-                    fallback={getTwoLetters({ npub, profile })}
+            <Avatar
+              className={cn('center h-[20px] w-[20px] overflow-hidden rounded-[.35rem] bg-muted', 'object-cover')}
+              src={profile?.image}
+              alt={profile?.displayName}
+              fallback={getTwoLetters({ npub, profile })}
             />
 
-
             <div className="flex items-center gap-1">
-              <span className="truncate text-[12px] font-semibold">
-                {getNameToShow({ npub, profile })}
-              </span>
-              {!!profile?.nip05 && (
-                <HiCheckBadge className="h-[12px] w-[12px] text-primary" />
-              )}
+              <span className="truncate text-[12px] font-semibold">{getNameToShow({ npub, profile })}</span>
+              {!!profile?.nip05 && <HiCheckBadge className="h-[12px] w-[12px] text-primary" />}
             </div>
           </div>
         </div>
@@ -115,14 +96,12 @@ export default function HorizontalVideoCard({
         ))}
       </div> */}
     </div>
-  );
+  )
 }
 
-export function HorizontalVideoCardLoading({
-                                             className
-                                           }: Omit<VideoCardProps, "event">) {
+export function HorizontalVideoCardLoading({ className }: Omit<VideoCardProps, 'event'>) {
   return (
-    <div className={cn("group flex space-x-3", className)}>
+    <div className={cn('group flex space-x-3', className)}>
       <div className="relative h-full w-[120px]  overflow-hidden rounded-md">
         <AspectRatio ratio={21 / 14} className="bg-muted"></AspectRatio>
       </div>
@@ -135,8 +114,7 @@ export function HorizontalVideoCardLoading({
           </div>
         </div>
         <div className="flex">
-          <div
-            className="center group gap-x-2 rounded-sm rounded-r-full pr-1 text-muted-foreground hover:shadow">
+          <div className="center group gap-x-2 rounded-sm rounded-r-full pr-1 text-muted-foreground hover:shadow">
             <Avatar className="center h-[20px] w-[20px] overflow-hidden rounded-[.35rem] bg-muted" fallback="" />
             <div className="flex items-center gap-1">
               <Skeleton className="h-[12px] w-[100px] bg-muted" />
@@ -150,5 +128,5 @@ export function HorizontalVideoCardLoading({
         ))}
       </div> */}
     </div>
-  );
+  )
 }

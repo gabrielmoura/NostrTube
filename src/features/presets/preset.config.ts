@@ -33,7 +33,10 @@ export function getDefaultPresetPubkey(): string {
 
   if (import.meta.env.DEV && envPubkey) {
     console.warn(
-      new PresetError('Invalid VITE_DEFAULT_PRESET_PUBKEY. Falling back to bundled default preset pubkey.', 'INVALID_ENV_PUBKEY'),
+      new PresetError(
+        'Invalid VITE_DEFAULT_PRESET_PUBKEY. Falling back to bundled default preset pubkey.',
+        'INVALID_ENV_PUBKEY',
+      ),
     )
   }
 

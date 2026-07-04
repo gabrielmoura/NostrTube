@@ -17,10 +17,7 @@ let ffmpegPromise: Promise<import('@ffmpeg/ffmpeg').FFmpeg> | null = null
 async function getFFmpeg() {
   if (!ffmpegPromise) {
     ffmpegPromise = (async () => {
-      const [{ FFmpeg }, { fetchFile }] = await Promise.all([
-        import('@ffmpeg/ffmpeg'),
-        import('@ffmpeg/util'),
-      ])
+      const [{ FFmpeg }, { fetchFile }] = await Promise.all([import('@ffmpeg/ffmpeg'), import('@ffmpeg/util')])
 
       const ffmpeg = new FFmpeg()
       await ffmpeg.load()
@@ -54,7 +51,10 @@ function getOutputStem(name: string) {
   return name.replace(/\.[^.]+$/, '')
 }
 
-export async function processVideoWithFFmpeg(file: File, { preferCompression = false }: { preferCompression?: boolean } = {}): Promise<FFmpegPreparedVideo | null> {
+export async function processVideoWithFFmpeg(
+  file: File,
+  { preferCompression = false }: { preferCompression?: boolean } = {},
+): Promise<FFmpegPreparedVideo | null> {
   try {
     const ffmpeg = await getFFmpeg()
     const fetchFile = (ffmpeg as typeof ffmpeg & { __fetchFile: (value: File) => Promise<Uint8Array> }).__fetchFile

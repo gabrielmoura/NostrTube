@@ -1,5 +1,5 @@
-import type { NostubePreset } from '@/features/presets/types/preset'
 import { PresetListItem } from '@/features/presets/components/PresetListItem'
+import type { NostubePreset } from '@/features/presets/types/preset'
 
 interface PresetListProps {
   presets: NostubePreset[]

@@ -1,3 +1,3 @@
 export function PlaylistPage() {
-  return <></>;
+  return <></>
 }

@@ -1,39 +1,40 @@
-import { t } from "i18next";
-import { Loader2, Search } from "lucide-react";
-import { NDKEvent } from "@nostr-dev-kit/ndk";
-import { Section, SectionContent } from "@/components/containers/pageSection";
-import { VideoCardLoading } from "@/components/cards/videoCard";
-import { VirtualizedVideoGrid } from "./VirtualizedVideoGrid";
+import { NDKEvent } from '@nostr-dev-kit/ndk'
+import { t } from 'i18next'
+import { Loader2, Search } from 'lucide-react'
+import { VideoCardLoading } from '@/components/cards/videoCard'
+import { Section, SectionContent } from '@/components/containers/pageSection'
+import { VirtualizedVideoGrid } from './VirtualizedVideoGrid'
 
 interface VideoFeedPresenterProps {
-  title: string;
-  events: NDKEvent[];
-  isLoading: boolean;
-  isFetchingNextPage: boolean;
-  hasNextPage: boolean;
-  fetchNextPage: () => void;
-  emptyMessage?: string;
+  title: string
+  events: NDKEvent[]
+  isLoading: boolean
+  isFetchingNextPage: boolean
+  hasNextPage: boolean
+  fetchNextPage: () => void
+  emptyMessage?: string
 }
 
 export function VideoFeedPresenter({
-                                     title,
-                                     events,
-                                     isLoading,
-                                     isFetchingNextPage,
-                                     hasNextPage,
-                                     fetchNextPage,
-                                     emptyMessage
-                                   }: VideoFeedPresenterProps) {
-
+  title,
+  events,
+  isLoading,
+  isFetchingNextPage,
+  hasNextPage,
+  fetchNextPage,
+  emptyMessage,
+}: VideoFeedPresenterProps) {
   // 1. Estado de Carregamento Inicial (Skeleton)
   if (isLoading && events.length === 0) {
     return (
       <Section className="px-5">
         <SectionContent className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mx-auto">
-          {Array.from({ length: 8 }).map((_, i) => <VideoCardLoading key={i} />)}
+          {Array.from({ length: 8 }).map((_, i) => (
+            <VideoCardLoading key={i} />
+          ))}
         </SectionContent>
       </Section>
-    );
+    )
   }
 
   return (
@@ -44,7 +45,7 @@ export function VideoFeedPresenter({
       {events.length === 0 ? (
         <div className="py-20 text-center text-muted-foreground">
           <Search className="w-10 h-10 mx-auto opacity-20 mb-4" />
-          <p>{emptyMessage || t("No videos found", "Nenhum vídeo encontrado.")}</p>
+          <p>{emptyMessage || t('No videos found', 'Nenhum vídeo encontrado.')}</p>
         </div>
       ) : (
         /* 3. Grid Virtualizado */
@@ -65,5 +66,5 @@ export function VideoFeedPresenter({
         </>
       )}
     </section>
-  );
+  )
 }

@@ -15,17 +15,34 @@ import { NexusMetricsTab } from '@/routes/debug/@components/NexusMetricsTab.tsx'
 export default function DebugPageContent() {
   const aside = (
     <>
-      <MetricCard title="Ambiente" value={import.meta.env.DEV ? 'DEV' : 'PROD'} description={`Modo ${import.meta.env.MODE}`} icon={Server} tone="relay" />
-      <MetricCard title="PWA / cache" value="ativo" description="Ferramentas de export, métricas e limpeza já disponíveis." icon={Database} tone="default" />
+      <MetricCard
+        title="Ambiente"
+        value={import.meta.env.DEV ? 'DEV' : 'PROD'}
+        description={`Modo ${import.meta.env.MODE}`}
+        icon={Server}
+        tone="relay"
+      />
+      <MetricCard
+        title="PWA / cache"
+        value="ativo"
+        description="Ferramentas de export, métricas e limpeza já disponíveis."
+        icon={Database}
+        tone="default"
+      />
       <Card>
-        <CardHeader title="Leitura rápida" icon={Bug} description="Painel técnico aproveitado como validação da nova base visual." />
+        <CardHeader
+          title="Leitura rápida"
+          icon={Bug}
+          description="Painel técnico aproveitado como validação da nova base visual."
+        />
         <CardContent className="space-y-3">
           <div className="flex flex-wrap gap-2">
             <StatusBadge tone="warning">debug interno</StatusBadge>
             <StatusBadge tone="partial">infra observável</StatusBadge>
           </div>
           <p className="text-sm text-muted-foreground">
-            Esta página continua técnica, mas já recebe a mesma casca visual reutilizável que servirá para Relays e demais telas do redesign.
+            Esta página continua técnica, mas já recebe a mesma casca visual reutilizável que servirá para Relays e
+            demais telas do redesign.
           </p>
         </CardContent>
       </Card>

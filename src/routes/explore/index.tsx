@@ -1,6 +1,7 @@
 import type { NDKEvent } from '@nostr-dev-kit/ndk'
 import { type NDKFilter, NDKSubscriptionCacheUsage, useSubscribe } from '@nostr-dev-kit/ndk-hooks'
 import { createRoute, Link, useNavigate } from '@tanstack/react-router'
+import { t } from 'i18next'
 import {
   Activity,
   ChevronRight,
@@ -18,6 +19,7 @@ import {
 } from 'lucide-react'
 import { nip19 } from 'nostr-tools'
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import VideoCard, { VideoCardLoading } from '@/components/cards/videoCard'
 import { AppShell } from '@/components/layout/AppShell'
 import { Badge } from '@/components/ui/badge'
@@ -38,9 +40,9 @@ export const Route = createRoute({
   component: ExplorePage,
   head: () => ({
     meta: [
-      { title: `Explorar - ${import.meta.env.VITE_APP_NAME}` },
-      { name: 'description', content: 'Descubra novos conteúdos, criadores e comunidades do ecossistema Nostr.' },
-      { property: 'og:title', content: `Explorar - ${import.meta.env.VITE_APP_NAME}` },
+      { title: `${t('explore_page_title')} - ${import.meta.env.VITE_APP_NAME}` },
+      { name: 'description', content: t('explore_page_description') },
+      { property: 'og:title', content: `${t('explore_page_title')} - ${import.meta.env.VITE_APP_NAME}` },
     ],
   }),
 })
@@ -48,13 +50,13 @@ export const Route = createRoute({
 // ─── Categorias ──────────────────────────────────────────
 type ExploreCategory = 'all' | 'videos' | 'channels' | 'hashtags' | 'live' | 'apps'
 
-const CATEGORIES: { key: ExploreCategory; label: string; icon: typeof Compass }[] = [
-  { key: 'all', label: 'Todos', icon: Compass },
-  { key: 'videos', label: 'Vídeos', icon: Video },
-  { key: 'channels', label: 'Canais', icon: Users },
-  { key: 'hashtags', label: 'Hashtags', icon: Hash },
-  { key: 'live', label: 'Ao vivo', icon: Radio },
-  { key: 'apps', label: 'Nostr Apps', icon: Globe },
+const CATEGORIES: { key: ExploreCategory; icon: typeof Compass }[] = [
+  { key: 'all', icon: Compass },
+  { key: 'videos', icon: Video },
+  { key: 'channels', icon: Users },
+  { key: 'hashtags', icon: Hash },
+  { key: 'live', icon: Radio },
+  { key: 'apps', icon: Globe },
 ]
 
 // ─── Hook de dados ───────────────────────────────────────
@@ -101,9 +103,11 @@ function useExploreData() {
       .slice(0, 12)
   }, [visibleVideoEvents])
 
-  // Vídeos em destaque (top 12 mais recentes)
+  // {t("explore_featured_videos")} (top 12 mais recentes)
   const featuredVideos = useMemo(() => {
-    return [...visibleVideoEvents].sort((a: NDKEvent, b: NDKEvent) => (b.created_at ?? 0) - (a.created_at ?? 0)).slice(0, 12)
+    return [...visibleVideoEvents]
+      .sort((a: NDKEvent, b: NDKEvent) => (b.created_at ?? 0) - (a.created_at ?? 0))
+      .slice(0, 12)
   }, [visibleVideoEvents])
 
   return {
@@ -119,8 +123,18 @@ function useExploreData() {
 
 // ─── Página Principal ────────────────────────────────────
 function ExplorePage() {
+  const { t } = useTranslation('pages')
   const { videoEvents, profiles, trendingHashtags, uniqueAuthors, featuredVideos, isLoading, eose } = useExploreData()
   const navigate = useNavigate()
+
+  const categoryLabels: Record<ExploreCategory, string> = {
+    all: t('explore_category_all'),
+    videos: t('explore_category_videos'),
+    channels: t('explore_category_channels'),
+    hashtags: t('explore_category_hashtags'),
+    live: t('explore_category_live'),
+    apps: t('explore_category_apps'),
+  }
 
   const isEmpty = eose && videoEvents.length === 0
 
@@ -132,7 +146,7 @@ function ExplorePage() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Activity className="size-4 text-[oklch(var(--grass))]" />
-            <CardTitle className="text-base">Categorias populares</CardTitle>
+            <CardTitle className="text-base">{t('explore_popular_categories')}</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
@@ -144,7 +158,7 @@ function ExplorePage() {
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
             >
               <cat.icon className="size-4" />
-              <span className="flex-1">{cat.label}</span>
+              <span className="flex-1">{categoryLabels[cat.key]}</span>
               <ChevronRight className="size-3" />
             </Link>
           ))}
@@ -154,7 +168,7 @@ function ExplorePage() {
       {/* Explore o ecossistema Nostr */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Explore o ecossistema Nostr</CardTitle>
+          <CardTitle className="text-base">{t('explore_ecosystem_title')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <a
@@ -185,7 +199,7 @@ function ExplorePage() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Sparkles className="size-4 text-[oklch(var(--primary))]" />
-            <CardTitle className="text-base">Criadores em destaque</CardTitle>
+            <CardTitle className="text-base">{t('explore_featured_creators')}</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
@@ -210,7 +224,7 @@ function ExplorePage() {
             )
           })}
           {uniqueAuthors.length === 0 && !isLoading && (
-            <p className="text-muted-foreground">Nenhum criador encontrado.</p>
+            <p className="text-muted-foreground">{t('explore_no_creators')}</p>
           )}
         </CardContent>
       </Card>
@@ -218,13 +232,13 @@ function ExplorePage() {
       {/* Dicas para explorar */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Dicas para explorar</CardTitle>
+          <CardTitle className="text-base">{t('explore_tips_title')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>🔍 Use a busca para encontrar vídeos específicos.</p>
-          <p>🏷️ Clique em hashtags para descobrir conteúdos relacionados.</p>
-          <p>👤 Siga criadores para acompanhar novos vídeos.</p>
-          <p>⚡ Apoie com Zaps os conteúdos que você mais gosta.</p>
+          <p>{t('explore_tips_search')}</p>
+          <p>{t('explore_tips_tags')}</p>
+          <p>{t('explore_tips_follow')}</p>
+          <p>{t('explore_tips_zaps')}</p>
         </CardContent>
       </Card>
     </>
@@ -235,8 +249,8 @@ function ExplorePage() {
     return (
       <AppShell
         activeKey="explore"
-        title="Explorar"
-        description="Descubra novos conteúdos, criadores e comunidades do ecossistema Nostr."
+        title={t('explore_page_title')}
+        description={t('explore_page_description')}
         icon={Compass}
         aside={aside}
       >
@@ -263,8 +277,8 @@ function ExplorePage() {
     return (
       <AppShell
         activeKey="explore"
-        title="Explorar"
-        description="Descubra novos conteúdos, criadores e comunidades do ecossistema Nostr."
+        title={t('explore_page_title')}
+        description={t('explore_page_description')}
         icon={Compass}
         aside={aside}
       >
@@ -272,13 +286,11 @@ function ExplorePage() {
           <div className="mb-4 inline-flex size-16 items-center justify-center rounded-full bg-muted">
             <Compass className="size-8 text-muted-foreground" />
           </div>
-          <h3 className="mb-2 text-lg font-semibold">Nada por aqui ainda</h3>
-          <p className="mb-6 max-w-md text-sm text-muted-foreground">
-            Nenhum conteúdo encontrado nos relays consultados. Tente alterar os filtros ou buscar por palavras-chave.
-          </p>
+          <h3 className="mb-2 text-lg font-semibold">{t('explore_empty_title')}</h3>
+          <p className="mb-6 max-w-md text-sm text-muted-foreground">{t('explore_empty_description')}</p>
           <Link to="/search" className={buttonVariants({ variant: 'gradient' })}>
             <Search className="mr-2 size-4" />
-            Buscar conteúdo
+            {t('explore_empty_action')}
           </Link>
         </div>
       </AppShell>
@@ -288,8 +300,8 @@ function ExplorePage() {
   return (
     <AppShell
       activeKey="explore"
-      title="Explorar"
-      description="Descubra novos conteúdos, criadores e comunidades do ecossistema Nostr."
+      title={t('explore_page_title')}
+      description={t('explore_page_description')}
       icon={Compass}
       aside={aside}
     >
@@ -299,7 +311,7 @@ function ExplorePage() {
         className="flex items-center gap-3 rounded-xl border border-border/50 bg-card/50 px-4 py-3 text-sm text-muted-foreground transition-colors hover:bg-muted/30"
       >
         <Search className="size-4" />
-        <span>Buscar no explorar...</span>
+        <span>{t('explore_search_placeholder')}</span>
         <kbd className="ml-auto hidden rounded-md border border-border bg-muted px-2 py-0.5 text-xs md:inline">⌘K</kbd>
       </Link>
 
@@ -316,7 +328,7 @@ function ExplorePage() {
               <div className="flex size-10 items-center justify-center rounded-full bg-primary/10">
                 <cat.icon className="size-5 text-primary" />
               </div>
-              <span className="whitespace-nowrap text-xs font-medium">{cat.label}</span>
+              <span className="whitespace-nowrap text-xs font-medium">{categoryLabels[cat.key]}</span>
             </Link>
           ))}
         </div>
@@ -327,7 +339,7 @@ function ExplorePage() {
         <section>
           <div className="mb-4 flex items-center gap-2">
             <TrendingUp className="size-5 text-[oklch(var(--flame))]" />
-            <h2 className="text-lg font-semibold tracking-tight">Hashtags em alta</h2>
+            <h2 className="text-lg font-semibold tracking-tight">{t('explore_trending_hashtags')}</h2>
           </div>
           <div className="flex flex-wrap gap-2">
             {trendingHashtags.map(([tag, count]) => (
@@ -354,13 +366,13 @@ function ExplorePage() {
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Sparkles className="size-5 text-[oklch(var(--primary))]" />
-              <h2 className="text-lg font-semibold tracking-tight">Vídeos em destaque</h2>
+              <h2 className="text-lg font-semibold tracking-tight">{t('explore_featured_videos')}</h2>
             </div>
             <Link
               to="/search"
               className="flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
-              Ver todos
+              {t('explore_view_all')}
               <ChevronRight className="size-3" />
             </Link>
           </div>
@@ -394,7 +406,7 @@ function ExplorePage() {
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Users className="size-5 text-[oklch(var(--water))]" />
-              <h2 className="text-lg font-semibold tracking-tight">Canais recomendados</h2>
+              <h2 className="text-lg font-semibold tracking-tight">{t('explore_recommended_channels')}</h2>
             </div>
           </div>
           <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
@@ -415,7 +427,7 @@ function ExplorePage() {
                     {profile?.displayName || profile?.name || 'anon'}
                   </span>
                   <Badge variant="secondary" className="text-[10px]">
-                    Canal
+                    {t('explore_channel_badge')}
                   </Badge>
                 </Link>
               )
@@ -428,7 +440,7 @@ function ExplorePage() {
       <section>
         <div className="mb-4 flex items-center gap-2">
           <Radio className="size-5 text-[oklch(var(--flame))]" />
-          <h2 className="text-lg font-semibold tracking-tight">Ao vivo agora</h2>
+          <h2 className="text-lg font-semibold tracking-tight">{t('explore_live_now')}</h2>
         </div>
         <Card>
           <CardContent className="flex flex-col items-center gap-4 py-8">
@@ -436,14 +448,12 @@ function ExplorePage() {
               <Radio className="size-6 text-muted-foreground" />
             </div>
             <div className="text-center">
-              <p className="font-medium">Nenhuma live no momento</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Lives ao vivo aparecerão aqui quando disponíveis nos relays.
-              </p>
+              <p className="font-medium">{t('explore_no_live')}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{t('explore_no_live_description')}</p>
             </div>
             <Link to="/search" search={{ tag: 'live' }} className={buttonVariants({ variant: 'glass', size: 'sm' })}>
               <Radio className="mr-2 size-4" />
-              Buscar lives
+              {t('explore_search_live')}
             </Link>
           </CardContent>
         </Card>
@@ -451,14 +461,12 @@ function ExplorePage() {
 
       {/* Rodapé CTA */}
       <section className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 p-6 text-center">
-        <h3 className="mb-2 text-lg font-semibold">Quer apoiar criadores?</h3>
-        <p className="mb-4 text-sm text-muted-foreground">
-          Use Zaps para apoiar diretamente os criadores de conteúdo que você mais gosta no ecossistema Nostr.
-        </p>
+        <h3 className="mb-2 text-lg font-semibold">{t('explore_cta_title')}</h3>
+        <p className="mb-4 text-sm text-muted-foreground">{t('explore_cta_description')}</p>
         <div className="flex justify-center gap-3">
           <Link to="/zaps" className={buttonVariants({ variant: 'gradient' })}>
             <Zap className="mr-2 size-4" />
-            Ver Zaps
+            {t('explore_view_zaps')}
           </Link>
           <Link to="/trending" className={buttonVariants({ variant: 'glass' })}>
             <TrendingUp className="mr-2 size-4" />

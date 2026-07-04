@@ -44,7 +44,14 @@ export function AppShell({
             <div className={cn('grid gap-6', aside ? '2xl:grid-cols-[minmax(0,1fr)_336px]' : '')}>
               <div className="space-y-6">
                 {title ? (
-                  <PageHeader title={title} description={description} icon={icon} eyebrow={eyebrow} badge={badge} actions={actions} />
+                  <PageHeader
+                    title={title}
+                    description={description}
+                    icon={icon}
+                    eyebrow={eyebrow}
+                    badge={badge}
+                    actions={actions}
+                  />
                 ) : null}
                 {children}
               </div>

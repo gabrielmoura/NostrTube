@@ -1,14 +1,13 @@
-import { useEffect, useState } from "react";
-
-import * as Slider from "@radix-ui/react-slider";
-import { formatTime, Thumbnail, useMediaRemote, useMediaState, useSliderPreview } from "@vidstack/react";
+import * as Slider from '@radix-ui/react-slider'
+import { formatTime, Thumbnail, useMediaRemote, useMediaState, useSliderPreview } from '@vidstack/react'
+import { useEffect, useState } from 'react'
 
 export function Volume() {
-  const volume = useMediaState("volume"),
-    canSetVolume = useMediaState("canSetVolume"),
-    remote = useMediaRemote();
+  const volume = useMediaState('volume'),
+    canSetVolume = useMediaState('canSetVolume'),
+    remote = useMediaRemote()
 
-  if (!canSetVolume) return null;
+  if (!canSetVolume) return null
 
   return (
     <div>
@@ -16,7 +15,7 @@ export function Volume() {
         className="group/volume-slider relative inline-flex h-10 w-full max-w-0 cursor-pointer touch-none select-none items-center overflow-hidden outline-none transition-all group-hover/volume:max-w-[80px]"
         value={[volume * 100]}
         onValueChange={([value]) => {
-          remote.changeVolume((value ?? 0) / 100);
+          remote.changeVolume((value ?? 0) / 100)
         }}
       >
         <Slider.Track className="relative h-[5px] w-full rounded-sm bg-white/30">
@@ -29,36 +28,36 @@ export function Volume() {
       </Slider.Root>
       <div className="pointer-events-none w-0 transition-[width] group-hover/volume:w-[80px]" />
     </div>
-  );
+  )
 }
 
 export interface TimeSliderProps {
-  thumbnails?: string;
+  thumbnails?: string
 }
 
 export function Time({ thumbnails }: TimeSliderProps) {
-  const time = useMediaState("currentTime");
-  const canSeek = useMediaState("canSeek");
-  const duration = useMediaState("duration");
-  const seeking = useMediaState("seeking");
-  const remote = useMediaRemote();
+  const time = useMediaState('currentTime')
+  const canSeek = useMediaState('canSeek')
+  const duration = useMediaState('duration')
+  const seeking = useMediaState('seeking')
+  const remote = useMediaRemote()
 
-  const step = (1 / duration) * 100;
-  const [value, setValue] = useState(0);
+  const step = (1 / duration) * 100
+  const [value, setValue] = useState(0)
 
   const { previewRootRef, previewRef, previewValue } = useSliderPreview({
     clamp: true,
     offset: 6,
-    orientation: "horizontal"
-  });
+    orientation: 'horizontal',
+  })
 
-  const previewTime = (previewValue / 100) * duration;
+  const previewTime = (previewValue / 100) * duration
 
   // Sincroniza o slider com o tempo atual da mídia
   useEffect(() => {
-    if (seeking) return;
-    setValue((time / duration) * 100);
-  }, [time, duration, seeking]);
+    if (seeking) return
+    setValue((time / duration) * 100)
+  }, [time, duration, seeking])
 
   return (
     <Slider.Root
@@ -68,18 +67,16 @@ export function Time({ thumbnails }: TimeSliderProps) {
       step={Number.isFinite(step) ? step : 1}
       ref={previewRootRef}
       onValueChange={([val]) => {
-        setValue(val ?? 0);
-        remote.seeking(((val ?? 0) / 100) * duration);
+        setValue(val ?? 0)
+        remote.seeking(((val ?? 0) / 100) * duration)
       }}
       onValueCommit={([val]) => {
-        remote.seek(((val ?? 0) / 100) * duration);
+        remote.seek(((val ?? 0) / 100) * duration)
       }}
     >
       {/* Trilha do slider */}
-      <Slider.Track
-        className="relative h-[4px] w-full rounded-full bg-white/20 group-hover/time-slider:bg-white/30 transition-colors">
-        <Slider.Range
-          className="absolute h-full rounded-full bg-sky-500 transition-[width] duration-150 ease-out will-change-[width]" />
+      <Slider.Track className="relative h-[4px] w-full rounded-full bg-white/20 group-hover/time-slider:bg-white/30 transition-colors">
+        <Slider.Range className="absolute h-full rounded-full bg-sky-500 transition-[width] duration-150 ease-out will-change-[width]" />
       </Slider.Track>
 
       {/* Thumb interativo */}
@@ -95,7 +92,7 @@ export function Time({ thumbnails }: TimeSliderProps) {
         ref={previewRef}
         className="absolute flex flex-col items-center -translate-x-1/2 opacity-0 transition-opacity duration-200
                    data-[visible]:opacity-100 pointer-events-none z-10"
-        style={{ bottom: "120%" }}
+        style={{ bottom: '120%' }}
       >
         {thumbnails && (
           <Thumbnail.Root
@@ -108,36 +105,34 @@ export function Time({ thumbnails }: TimeSliderProps) {
             <Thumbnail.Img />
           </Thumbnail.Root>
         )}
-        <span
-          className="rounded bg-black/80 px-2 py-0.5 text-[12px] text-white/90 font-medium backdrop-blur-sm shadow">
+        <span className="rounded bg-black/80 px-2 py-0.5 text-[12px] text-white/90 font-medium backdrop-blur-sm shadow">
           {formatTime(previewTime)}
         </span>
       </div>
     </Slider.Root>
-  );
+  )
 }
 
-
 export function PersistentProgress({ thumbnails }: TimeSliderProps) {
-  const time = useMediaState("currentTime"),
-    canSeek = useMediaState("canSeek"),
-    duration = useMediaState("duration"),
-    seeking = useMediaState("seeking"),
+  const time = useMediaState('currentTime'),
+    canSeek = useMediaState('canSeek'),
+    duration = useMediaState('duration'),
+    seeking = useMediaState('seeking'),
     remote = useMediaRemote(),
     step = (1 / duration) * 100,
     [value, setValue] = useState(0),
     { previewRootRef, previewRef, previewValue } = useSliderPreview({
       clamp: true,
       offset: 6,
-      orientation: "horizontal"
+      orientation: 'horizontal',
     }),
-    previewTime = (previewValue / 100) * duration;
+    previewTime = (previewValue / 100) * duration
 
   // Keep slider value in-sync with playback.
   useEffect(() => {
-    if (seeking) return;
-    setValue((time / duration) * 100);
-  }, [time, duration, seeking]);
+    if (seeking) return
+    setValue((time / duration) * 100)
+  }, [time, duration, seeking])
   return (
     <Slider.Root
       className="group relative inline-flex h-[2px] w-full cursor-pointer touch-none select-none items-center outline-none"
@@ -146,11 +141,11 @@ export function PersistentProgress({ thumbnails }: TimeSliderProps) {
       step={Number.isFinite(step) ? step : 1}
       ref={previewRootRef}
       onValueChange={([value]) => {
-        setValue(value ?? 0);
-        remote.seeking(((value ?? 0) / 100) * duration);
+        setValue(value ?? 0)
+        remote.seeking(((value ?? 0) / 100) * duration)
       }}
       onValueCommit={([value]) => {
-        remote.seek(((value ?? 0) / 100) * duration);
+        remote.seek(((value ?? 0) / 100) * duration)
       }}
     >
       <Slider.Track className="relative h-full w-full rounded-sm bg-muted-foreground/40">
@@ -178,5 +173,5 @@ export function PersistentProgress({ thumbnails }: TimeSliderProps) {
         <span className="text-[13px]">{formatTime(previewTime)}</span>
       </div>
     </Slider.Root>
-  );
+  )
 }

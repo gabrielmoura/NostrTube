@@ -1,58 +1,55 @@
-import { useState } from "react";
-import { RiArrowLeftLine, RiLinkM, RiSearchLine } from "react-icons/ri";
-import { t } from "i18next";
-
-import { Label } from "@/components/label.tsx";
-import { Input } from "@/components/input.tsx";
-import { Button } from "@/components/button.tsx";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx";
-import { Separator } from "@/components/ui/separator.tsx"; // Opcional, ou use <hr />
-import { useVideoImporter } from "@/hooks/useVideoImporter.ts";
-import { useVideoUploadStore } from "@/store/videoUpload/useVideoUploadStore.ts";
+import { t } from 'i18next'
+import { useState } from 'react'
+import { RiArrowLeftLine, RiLinkM, RiSearchLine } from 'react-icons/ri'
+import { Button } from '@/components/button.tsx'
+import { Input } from '@/components/input.tsx'
+import { Label } from '@/components/label.tsx'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx'
+import { Separator } from '@/components/ui/separator.tsx' // Opcional, ou use <hr />
+import { useVideoImporter } from '@/hooks/useVideoImporter.ts'
+import { useVideoUploadStore } from '@/store/videoUpload/useVideoUploadStore.ts'
 
 export default function LoadVideoFromOthers() {
   // Estado local apenas para controle dos inputs antes do submit
-  const [eventString, setEventString] = useState("");
-  const [urlString, setUrlString] = useState("");
-  const setShowEventInput = useVideoUploadStore((s) => s.setShowEventInput);
+  const [eventString, setEventString] = useState('')
+  const [urlString, setUrlString] = useState('')
+  const setShowEventInput = useVideoUploadStore((s) => s.setShowEventInput)
 
-  const { importFromEvent, importFromUrl, isImporting } = useVideoImporter();
+  const { importFromEvent, importFromUrl, isImporting } = useVideoImporter()
 
   const handleEventSearch = () => {
-    importFromEvent(eventString);
-  };
+    importFromEvent(eventString)
+  }
 
   const handleUrlImport = () => {
-    importFromUrl(urlString);
-  };
+    importFromUrl(urlString)
+  }
 
   return (
     <Card className="w-full max-w-lg mx-auto shadow-none border-none h-full flex-col ">
       <CardHeader>
-        <CardTitle className="text-lg">{t("import_video", "Importar vídeo")}</CardTitle>
+        <CardTitle className="text-lg">{t('import_video', 'Importar vídeo')}</CardTitle>
         <CardDescription>
-          {t("import_video_desc", "Use um evento Nostr existente ou um link direto de vídeo.")}
+          {t('import_video_desc', 'Use um evento Nostr existente ou um link direto de vídeo.')}
         </CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-6">
         {/* Opção 1: Evento Nostr */}
         <div className="space-y-2">
-          <Label htmlFor="nostr-event">
-            {t("nostr_event_id", "ID do evento Nostr (nevent/naddr)")}
-          </Label>
+          <Label htmlFor="nostr-event">{t('nostr_event_id', 'ID do evento Nostr (nevent/naddr)')}</Label>
           <div className="flex gap-2">
             <Input
               id="nostr-event"
               value={eventString}
               onChange={(e) => setEventString(e.target.value)}
               placeholder="naddr1... ou nevent1..."
-              onKeyDown={(e) => e.key === "Enter" && handleEventSearch()}
+              onKeyDown={(e) => e.key === 'Enter' && handleEventSearch()}
             />
-              <Button
-                onClick={handleEventSearch}
-                loading={isImporting}
-                disabled={!eventString || isImporting}
+            <Button
+              onClick={handleEventSearch}
+              loading={isImporting}
+              disabled={!eventString || isImporting}
               size="icon"
               variant="secondary"
             >
@@ -63,36 +60,27 @@ export default function LoadVideoFromOthers() {
 
         <div className="flex items-center gap-4">
           <Separator className="flex-1" />
-          <span className="text-xs text-muted-foreground uppercase font-medium">
-            {t("or", "OR")}
-          </span>
+          <span className="text-xs text-muted-foreground uppercase font-medium">{t('or', 'OR')}</span>
           <Separator className="flex-1" />
         </div>
 
         {/* Opção 2: URL Direta */}
         <div className="space-y-2">
-          <Label htmlFor="video-url">
-            {t("video_url", "URL direta do vídeo")}
-          </Label>
+          <Label htmlFor="video-url">{t('video_url', 'URL direta do vídeo')}</Label>
           <div className="flex gap-2">
             <Input
               id="video-url"
               value={urlString}
               onChange={(e) => setUrlString(e.target.value)}
               placeholder="https://example.com/video.mp4"
-              onKeyDown={(e) => e.key === "Enter" && handleUrlImport()}
+              onKeyDown={(e) => e.key === 'Enter' && handleUrlImport()}
             />
-            <Button
-              onClick={handleUrlImport}
-              disabled={!urlString}
-              size="icon"
-              variant="secondary"
-            >
+            <Button onClick={handleUrlImport} disabled={!urlString} size="icon" variant="secondary">
               <RiLinkM className="h-4 w-4" />
             </Button>
           </div>
           <p className="text-[0.8rem] text-muted-foreground">
-            {t("youtube_warning", "Evite links do YouTube quando possível.")}
+            {t('youtube_warning', 'Evite links do YouTube quando possível.')}
           </p>
         </div>
 
@@ -104,10 +92,10 @@ export default function LoadVideoFromOthers() {
             className="w-full gap-2 text-muted-foreground hover:text-foreground"
           >
             <RiArrowLeftLine />
-            {t("back_to_upload", "Voltar para envio de arquivo")}
+            {t('back_to_upload', 'Voltar para envio de arquivo')}
           </Button>
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }

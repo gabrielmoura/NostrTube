@@ -1,17 +1,17 @@
-import { lazy, useEffect, useMemo, useState } from "react";
-import { t } from "i18next";
-import { CircleHelp, MapPin, Minus, Plus } from "lucide-react";
-import { AddTagInput } from "@/routes/new/@components/BoxAddToModal";
-import LanguagesCombo from "@/components/ComboBox/ComboLanguage";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/videoPlayer/components/Tooltip";
-import { COMBOBOX_LANGUAGES } from "@/default";
-import useUserStore from "@/store/useUserStore";
-import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import type { VideoContentType } from "@/features/video/services/video-kinds";
+import { t } from 'i18next'
+import { CircleHelp, MapPin, Minus, Plus } from 'lucide-react'
+import { lazy, useEffect, useMemo, useState } from 'react'
+import LanguagesCombo from '@/components/ComboBox/ComboLanguage'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/videoPlayer/components/Tooltip'
+import { COMBOBOX_LANGUAGES } from '@/default'
+import type { VideoContentType } from '@/features/video/services/video-kinds'
+import { AddTagInput } from '@/routes/new/@components/BoxAddToModal'
+import useUserStore from '@/store/useUserStore'
 
-const Textarea = lazy(() => import("@/components/textarea"));
+const Textarea = lazy(() => import('@/components/textarea'))
 
 function FieldInfo({ content }: { content: string }) {
   return (
@@ -29,26 +29,26 @@ function FieldInfo({ content }: { content: string }) {
         <TooltipContent className="max-w-xs text-balance">{content}</TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  );
+  )
 }
 
 interface UploadFormViewProps {
-  title?: string;
-  summary?: string;
-  contentWarning?: string;
-  hashtags?: string[];
-  indexers?: string[];
-  language?: string;
-  geohash?: string;
-  contentType?: VideoContentType;
-  onTitleChange: (value: string) => void;
-  onSummaryChange: (value: string) => void;
-  onContentWarningChange: (value: string) => void;
-  onHashtagsChange: (values: string[]) => void;
-  onIndexersChange: (values: string[]) => void;
-  onLanguageChange: (value?: string) => void;
-  onGeohashChange: (value?: string) => void;
-  onContentTypeChange: (value: VideoContentType) => void;
+  title?: string
+  summary?: string
+  contentWarning?: string
+  hashtags?: string[]
+  indexers?: string[]
+  language?: string
+  geohash?: string
+  contentType?: VideoContentType
+  onTitleChange: (value: string) => void
+  onSummaryChange: (value: string) => void
+  onContentWarningChange: (value: string) => void
+  onHashtagsChange: (values: string[]) => void
+  onIndexersChange: (values: string[]) => void
+  onLanguageChange: (value?: string) => void
+  onGeohashChange: (value?: string) => void
+  onContentTypeChange: (value: VideoContentType) => void
 }
 
 export function UploadFormView({
@@ -59,7 +59,7 @@ export function UploadFormView({
   indexers,
   language,
   geohash,
-  contentType = "auto",
+  contentType = 'auto',
   onTitleChange,
   onSummaryChange,
   onContentWarningChange,
@@ -67,78 +67,78 @@ export function UploadFormView({
   onIndexersChange,
   onLanguageChange,
   onGeohashChange,
-  onContentTypeChange
+  onContentTypeChange,
 }: UploadFormViewProps) {
-  const storedGeoHash = useUserStore((state) => state.session?.geoHash);
-  const [includeGeohash, setIncludeGeohash] = useState(Boolean(geohash || storedGeoHash));
-  const [rawGeohash, setRawGeohash] = useState(geohash || storedGeoHash || "");
-  const [precision, setPrecision] = useState(Math.max(1, (geohash || storedGeoHash || "").length || 3));
+  const storedGeoHash = useUserStore((state) => state.session?.geoHash)
+  const [includeGeohash, setIncludeGeohash] = useState(Boolean(geohash || storedGeoHash))
+  const [rawGeohash, setRawGeohash] = useState(geohash || storedGeoHash || '')
+  const [precision, setPrecision] = useState(Math.max(1, (geohash || storedGeoHash || '').length || 3))
 
   useEffect(() => {
-    const base = geohash || storedGeoHash || "";
-    setIncludeGeohash(Boolean(base));
-    setRawGeohash(base);
-    setPrecision(Math.max(1, base.length || 3));
-  }, [geohash, storedGeoHash]);
+    const base = geohash || storedGeoHash || ''
+    setIncludeGeohash(Boolean(base))
+    setRawGeohash(base)
+    setPrecision(Math.max(1, base.length || 3))
+  }, [geohash, storedGeoHash])
 
-  const effectiveGeohash = useMemo(() => rawGeohash.trim().toLowerCase().slice(0, precision), [precision, rawGeohash]);
+  const effectiveGeohash = useMemo(() => rawGeohash.trim().toLowerCase().slice(0, precision), [precision, rawGeohash])
 
   useEffect(() => {
-    onGeohashChange(includeGeohash && effectiveGeohash ? effectiveGeohash : undefined);
-  }, [effectiveGeohash, includeGeohash, onGeohashChange]);
+    onGeohashChange(includeGeohash && effectiveGeohash ? effectiveGeohash : undefined)
+  }, [effectiveGeohash, includeGeohash, onGeohashChange])
 
   const PRECISION_PRESETS = [
-    { label: "Estado", value: 3, description: "Ampla — nível estadual" },
-    { label: "Região", value: 4, description: "Intermediária — nível regional" },
-    { label: "Cidade", value: 5, description: "Local — nível municipal" },
-  ] as const;
+    { label: 'Estado', value: 3, description: 'Ampla — nível estadual' },
+    { label: 'Região', value: 4, description: 'Intermediária — nível regional' },
+    { label: 'Cidade', value: 5, description: 'Local — nível municipal' },
+  ] as const
 
   function getScopeLabel(p: number): string {
-    if (p <= 2) return "Muito amplo";
-    if (p === 3) return "Estado";
-    if (p === 4) return "Região";
-    return "Cidade";
+    if (p <= 2) return 'Muito amplo'
+    if (p === 3) return 'Estado'
+    if (p === 4) return 'Região'
+    return 'Cidade'
   }
 
   function getScopeDescription(p: number): string {
-    if (p <= 2) return "Descoberta muito ampla";
-    if (p === 3) return "Descoberta ampla — nível estadual";
-    if (p === 4) return "Descoberta intermediária — nível regional";
-    if (p === 5) return "Descoberta local — nível municipal";
-    return "Descoberta muito local — alta precisão";
+    if (p <= 2) return 'Descoberta muito ampla'
+    if (p === 3) return 'Descoberta ampla — nível estadual'
+    if (p === 4) return 'Descoberta intermediária — nível regional'
+    if (p === 5) return 'Descoberta local — nível municipal'
+    return 'Descoberta muito local — alta precisão'
   }
 
   const contentTypeOptions: Array<{ value: VideoContentType; label: string; description: string }> = [
     {
-      value: "auto",
-      label: t("content_type_auto", "Auto"),
-      description: t("content_type_auto_desc", "Use video dimensions and duration when available."),
+      value: 'auto',
+      label: t('content_type_auto', 'Auto'),
+      description: t('content_type_auto_desc', 'Use video dimensions and duration when available.'),
     },
     {
-      value: "normal",
-      label: t("content_type_normal", "Normal"),
-      description: t("content_type_normal_desc", "Publish as a regular horizontal/long video."),
+      value: 'normal',
+      label: t('content_type_normal', 'Normal'),
+      description: t('content_type_normal_desc', 'Publish as a regular horizontal/long video.'),
     },
     {
-      value: "short",
-      label: t("content_type_short", "Short"),
-      description: t("content_type_short_desc", "Publish as a vertical short video."),
+      value: 'short',
+      label: t('content_type_short', 'Short'),
+      description: t('content_type_short_desc', 'Publish as a vertical short video.'),
     },
-  ];
+  ]
 
   return (
     <div className="space-y-4">
       <Textarea
         value={title}
         onChange={(event) => onTitleChange(event.target.value)}
-        placeholder={`${t("add_a_video_title")}...`}
+        placeholder={`${t('add_a_video_title')}...`}
         autoFocus
         className="invisible-textarea text-3xl font-semibold tracking-tight placeholder:text-muted-foreground/70"
       />
       <Textarea
         value={summary}
         onChange={(event) => onSummaryChange(event.target.value)}
-        placeholder={`${t("write_a_short_summary_or_description")}...`}
+        placeholder={`${t('write_a_short_summary_or_description')}...`}
         className="invisible-textarea min-h-[150px] text-base placeholder:text-muted-foreground/70"
       />
       <AddTagInput
@@ -155,45 +155,55 @@ export function UploadFormView({
       />
       <div className="rounded-xl border bg-card p-4 shadow-sm space-y-3">
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium">{t("content_type", "Content type")}</label>
-          <FieldInfo content={t("content_type_tooltip", "Choose how this video should be published on Nostr. Auto only marks Shorts when dimensions and duration are clearly short-form.")} />
+          <label className="text-sm font-medium">{t('content_type', 'Content type')}</label>
+          <FieldInfo
+            content={t(
+              'content_type_tooltip',
+              'Choose how this video should be published on Nostr. Auto only marks Shorts when dimensions and duration are clearly short-form.',
+            )}
+          />
         </div>
         <div className="grid gap-2 sm:grid-cols-3">
           {contentTypeOptions.map((option) => {
-            const active = contentType === option.value;
+            const active = contentType === option.value
             return (
               <Button
                 key={option.value}
                 type="button"
-                variant={active ? "default" : "outline"}
+                variant={active ? 'default' : 'outline'}
                 className="h-auto min-h-20 flex-col items-start justify-start gap-1 whitespace-normal rounded-xl px-3 py-3 text-left"
                 onClick={() => onContentTypeChange(option.value)}
               >
                 <span className="text-sm font-semibold">{option.label}</span>
-                <span className={active ? "text-xs text-primary-foreground/80" : "text-xs text-muted-foreground"}>
+                <span className={active ? 'text-xs text-primary-foreground/80' : 'text-xs text-muted-foreground'}>
                   {option.description}
                 </span>
               </Button>
-            );
+            )
           })}
         </div>
       </div>
       <div className="rounded-xl border bg-card p-4 shadow-sm space-y-2">
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium">{t("Content_warning", "Content warning")}</label>
-          <FieldInfo content={t("content_warning_tooltip", "Use this field when the video needs an explicit viewer warning before playback.")} />
+          <label className="text-sm font-medium">{t('Content_warning', 'Content warning')}</label>
+          <FieldInfo
+            content={t(
+              'content_warning_tooltip',
+              'Use this field when the video needs an explicit viewer warning before playback.',
+            )}
+          />
         </div>
         <Textarea
           value={contentWarning}
           onChange={(event) => onContentWarningChange(event.target.value)}
-          placeholder={t("content_warning_placeholder")}
+          placeholder={t('content_warning_placeholder')}
           className="text-sm min-h-[60px]"
         />
       </div>
       <LanguagesCombo
-        label={t("Language")}
-        placeholder={t("Select_language")}
-        value={language ? COMBOBOX_LANGUAGES.find((item) => item.id === language) ?? null : null}
+        label={t('Language')}
+        placeholder={t('Select_language')}
+        value={language ? (COMBOBOX_LANGUAGES.find((item) => item.id === language) ?? null) : null}
         onChange={(nextLanguage) => onLanguageChange(nextLanguage?.id)}
       />
       {storedGeoHash ? (
@@ -218,22 +228,30 @@ export function UploadFormView({
                 <label className="text-sm font-medium">Geohash publicado</label>
                 <Input
                   value={rawGeohash}
-                  onChange={(event) => setRawGeohash(event.target.value.replace(/[^0-9a-z]/gi, "").toLowerCase())}
+                  onChange={(event) => setRawGeohash(event.target.value.replace(/[^0-9a-z]/gi, '').toLowerCase())}
                   placeholder={storedGeoHash}
                   className="font-mono"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Valor efetivo: <span className="font-mono text-foreground">{effectiveGeohash || "-"}</span>
+                  Valor efetivo: <span className="font-mono text-foreground">{effectiveGeohash || '-'}</span>
                 </p>
               </div>
 
               <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 p-3">
                 <div>
                   <p className="text-sm font-medium">Precisão</p>
-                  <p className="text-xs text-muted-foreground">Aumente ou reduza quantos caracteres serão publicados.</p>
+                  <p className="text-xs text-muted-foreground">
+                    Aumente ou reduza quantos caracteres serão publicados.
+                  </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button type="button" variant="outline" size="icon" onClick={() => setPrecision((current) => Math.max(1, current - 1))} disabled={precision <= 1}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setPrecision((current) => Math.max(1, current - 1))}
+                    disabled={precision <= 1}
+                  >
                     <Minus className="size-4" />
                   </Button>
                   <span className="min-w-10 text-center font-mono text-sm font-semibold">{precision}</span>
@@ -254,7 +272,7 @@ export function UploadFormView({
                   <Button
                     key={preset.value}
                     type="button"
-                    variant={precision === preset.value ? "default" : "outline"}
+                    variant={precision === preset.value ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setPrecision(preset.value)}
                     className="h-7 px-3 text-xs"
@@ -267,9 +285,8 @@ export function UploadFormView({
               <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/20 px-3 py-2.5">
                 <MapPin className="size-3.5 shrink-0 text-emerald-500" />
                 <span className="text-xs text-muted-foreground">
-                  Escopo atual:{" "}
-                  <span className="font-semibold text-foreground">{getScopeLabel(precision)}</span>
-                  {" — "}
+                  Escopo atual: <span className="font-semibold text-foreground">{getScopeLabel(precision)}</span>
+                  {' — '}
                   {getScopeDescription(precision)}
                 </span>
               </div>
@@ -278,5 +295,5 @@ export function UploadFormView({
         </div>
       ) : null}
     </div>
-  );
+  )
 }

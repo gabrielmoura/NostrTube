@@ -6,9 +6,22 @@ import {
   useNDKSessionLogout,
 } from '@nostr-dev-kit/ndk-hooks'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { Bell, CircleHelp, LogIn, LogOut, Menu, Search, Settings2, ShieldCheck, Upload, UserRound, Youtube } from 'lucide-react'
+import {
+  Bell,
+  CircleHelp,
+  LogIn,
+  LogOut,
+  Menu,
+  Search,
+  Settings2,
+  ShieldCheck,
+  Upload,
+  UserRound,
+  Youtube,
+} from 'lucide-react'
 import type { KeyboardEvent } from 'react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AuthModal } from '@/components/AuthModal'
 import { AppSidebar, type SidebarKey } from '@/components/layout/AppSidebar'
 import { NostrTubeLogo } from '@/components/logo/NostrTube.tsx'
@@ -40,13 +53,14 @@ interface HeaderSearchProps {
 }
 
 function HeaderSearch({ compact = false, onSearch }: HeaderSearchProps) {
+  const { t } = useTranslation('common')
   return (
     <div className={compact ? 'relative mt-3 sm:hidden' : 'relative hidden max-w-2xl flex-1 sm:block'}>
       <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
       <Input
         autoFocus={compact}
         className="h-10 rounded-2xl border-border/70 bg-card/70 pl-9 shadow-none"
-        placeholder="Buscar vídeos, criadores ou tags"
+        placeholder={t('search_placeholder')}
         onKeyDown={onSearch}
       />
     </div>
@@ -54,12 +68,13 @@ function HeaderSearch({ compact = false, onSearch }: HeaderSearchProps) {
 }
 
 function MobileNavigation({ activeKey }: { activeKey?: SidebarKey }) {
+  const { t } = useTranslation('common')
   return (
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="glass" size="icon" className="lg:hidden">
           <Menu className="size-4" />
-          <span className="sr-only">Abrir navegação</span>
+          <span className="sr-only">{t('open_navigation')}</span>
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-[min(286px,calc(100vw-32px))] border-border bg-sidebar p-0">
@@ -70,8 +85,13 @@ function MobileNavigation({ activeKey }: { activeKey?: SidebarKey }) {
 }
 
 function MobileBrand() {
+  const { t } = useTranslation('common')
   return (
-    <Link to="/" className="mr-1 flex size-9 shrink-0 items-center justify-center lg:hidden" aria-label="NostrTube">
+    <Link
+      to="/"
+      className="mr-1 flex size-9 shrink-0 items-center justify-center lg:hidden"
+      aria-label={t('go_to_homepage')}
+    >
       <NostrTubeLogo className="size-9" />
     </Link>
   )
@@ -84,49 +104,48 @@ function HeaderUtilityActions({
   currentUser: NDKUser | null | undefined
   onToggleMobileSearch: () => void
 }) {
+  const { t: tc } = useTranslation('common')
+  const { t: tpages } = useTranslation('pages')
   return (
     <>
-      <Button variant="glass" size="icon" className="sm:hidden" aria-label="Buscar" onClick={onToggleMobileSearch}>
+      <Button
+        variant="glass"
+        size="icon"
+        className="sm:hidden"
+        aria-label={tc('Search')}
+        onClick={onToggleMobileSearch}
+      >
         <Search className="size-4" />
       </Button>
 
       <div className="hidden md:flex items-center gap-2">
         <FeedbackButton />
-        <Link
-          to="/faq"
-          className={cn(buttonVariants({ variant: 'glass', size: 'icon-sm' }), 'xl:hidden')}
-        >
+        <Link to="/faq" className={cn(buttonVariants({ variant: 'glass', size: 'icon-sm' }), 'xl:hidden')}>
           <CircleHelp className="size-4" />
-          <span className="sr-only">FAQ</span>
+          <span className="sr-only">{tpages('sidebar_faq')}</span>
         </Link>
         <Link to="/faq" className={cn(buttonVariants({ variant: 'glass', size: 'sm' }), 'hidden xl:inline-flex')}>
           <CircleHelp className="size-4" />
-          FAQ
+          {tpages('sidebar_faq')}
         </Link>
-        <Link
-          to="/terms"
-          className={cn(buttonVariants({ variant: 'glass', size: 'sm' }), 'hidden xl:inline-flex')}
-        >
+        <Link to="/terms" className={cn(buttonVariants({ variant: 'glass', size: 'sm' }), 'hidden xl:inline-flex')}>
           <ShieldCheck className="size-4" />
-          Termos
+          {tpages('sidebar_terms')}
         </Link>
-        <Link
-          to="/new"
-          className={buttonVariants({ variant: 'gradient', size: 'sm' })}
-        >
+        <Link to="/new" className={buttonVariants({ variant: 'gradient', size: 'sm' })}>
           <Upload className="size-4" />
-          Enviar vídeo
+          {tpages('sidebar_upload')}
         </Link>
         <Link
           to="/import/youtube"
           className={cn(buttonVariants({ variant: 'glass', size: 'sm' }), 'hidden xl:inline-flex')}
         >
           <Youtube className="size-4" />
-          Importar YouTube
+          {tpages('sidebar_import_youtube')}
         </Link>
       </div>
 
-      <Button variant="glass" size="icon" aria-label="Notificações">
+      <Button variant="glass" size="icon" aria-label={tc('notifications')}>
         <Bell className="size-4" />
       </Button>
       {!currentUser ? (
@@ -137,7 +156,7 @@ function HeaderUtilityActions({
           onClick={() => modal.show(<AuthModal />, { id: 'auth' })}
         >
           <LogIn className="size-4" />
-          Entrar
+          {tc('login')}
         </Button>
       ) : null}
       {!currentUser ? (
@@ -145,7 +164,7 @@ function HeaderUtilityActions({
           variant="relay"
           size="icon"
           className="min-[420px]:hidden"
-          aria-label="Entrar"
+          aria-label={tc('login')}
           onClick={() => modal.show(<AuthModal />, { id: 'auth' })}
         >
           <LogIn className="size-4" />
@@ -168,6 +187,8 @@ function HeaderUserMenu({
   profileFallback: string
   onLogout: () => void
 }) {
+  const { t: tc } = useTranslation('common')
+  const { t: tpages } = useTranslation('pages')
   if (!currentUser) {
     return (
       <Link
@@ -176,7 +197,7 @@ function HeaderUserMenu({
         className={buttonVariants({ variant: 'glass', size: 'icon' })}
       >
         <Settings2 className="size-4" />
-        <span className="sr-only">Configurações</span>
+        <span className="sr-only">{tpages('sidebar_settings')}</span>
       </Link>
     )
   }
@@ -184,7 +205,7 @@ function HeaderUserMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="glass" size="icon" className="rounded-full p-1" aria-label="Menu do usuário">
+        <Button variant="glass" size="icon" className="rounded-full p-1" aria-label={tc('user_menu')}>
           <Avatar className="size-8">
             {profileImage ? <AvatarImage src={profileImage} alt={profileName} /> : null}
             {!profileImage ? <AvatarFallback>{profileFallback}</AvatarFallback> : null}
@@ -197,19 +218,19 @@ function HeaderUserMenu({
         <DropdownMenuItem asChild>
           <Link to="/u/$userId" params={{ userId: currentUser.npub ?? currentUser.pubkey }}>
             <UserRound className="size-4" />
-            Perfil
+            {tc('profile')}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link to="/configuration">
             <Settings2 className="size-4" />
-            Configurações
+            {tpages('sidebar_settings')}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={onLogout}>
           <LogOut className="size-4" />
-          Sair
+          {tc('logout')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -224,12 +245,13 @@ export function AppHeader({ activeKey }: AppHeaderProps) {
   const currentProfile = useCurrentUserProfile()
   const metadataEvent = useNDKSessionEvent(NDKKind.Metadata)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const { t } = useTranslation('common')
   const profileName =
     currentProfile?.displayName ||
     currentProfile?.name ||
     currentUser?.profile?.displayName ||
     currentUser?.profile?.name ||
-    'Usuário'
+    t('user')
   const profileImage =
     getNip01PictureFromMetadataEvent(metadataEvent) || currentProfile?.picture || currentUser?.profile?.picture
   const profileFallback = profileName.slice(0, 1).toUpperCase()
