@@ -18,7 +18,7 @@ interface ShortsPageContainerProps {
 export function ShortsPageContainer({ search, onSearchChange }: ShortsPageContainerProps) {
   const [searchInput, setSearchInput] = useState(search ?? '')
   const loadMoreRef = useRef<HTMLDivElement | null>(null)
-  const [debouncedSearch, debouncer] = useDebouncedValue(searchInput, { wait: 450 }, (state) => ({
+  const [debouncedSearch, debouncer] = useDebouncedValue(searchInput, { wait: 450, key: 'shorts-search' }, (state) => ({
     isPending: state.isPending,
   }))
   const normalizedSearch = debouncedSearch.trim()

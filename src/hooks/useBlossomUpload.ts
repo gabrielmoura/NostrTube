@@ -16,7 +16,7 @@ export function useBlossomUpload(options?: UseBlossomUploadOptions) {
   const [isUploading, setIsUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState<string | null>(null)
-  const throttleProgress = useThrottledProgress(setProgress, 100)
+  const throttleProgress = useThrottledProgress(setProgress, 100, 'blossom-upload-progress')
 
   // Referência estável para evitar recriação do NDK durante upload
   const ndkRef = useRef(ndk)

@@ -88,7 +88,7 @@ export function useSubmitFeedback() {
       if (!isPowActiveRef.current) return
       setPowProgress({ attempts, updatedAt: Date.now() })
     },
-    { wait: 100 },
+    { wait: 100, key: 'feedback-pow-progress' },
   )
 
   const resetState = useCallback(() => {

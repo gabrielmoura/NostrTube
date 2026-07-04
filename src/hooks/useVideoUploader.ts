@@ -30,7 +30,7 @@ export function useVideoUploader() {
   const isLoading = useVideoUploadStore((s) => s.isUploading)
   const progress = useVideoUploadStore((s) => s.uploadProgress)
   const uploadStage = useVideoUploadStore((s) => s.uploadStage)
-  const throttleProgress = useThrottledProgress(setUploadProgress, 100)
+  const throttleProgress = useThrottledProgress(setUploadProgress, 100, 'video-upload-progress')
 
   useEffect(() => {
     ndkRef.current = ndk

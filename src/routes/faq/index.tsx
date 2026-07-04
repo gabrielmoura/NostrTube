@@ -38,9 +38,13 @@ export interface FaqEntry {
 
 function FaqPage({ faqData }: { faqData: FaqEntry[] }) {
   const [searchTerm, setSearchTerm] = useState('')
-  const [debouncedSearchTerm, searchDebouncer] = useDebouncedValue(searchTerm, { wait: 200 }, (state) => ({
-    isPending: state.isPending,
-  }))
+  const [debouncedSearchTerm, searchDebouncer] = useDebouncedValue(
+    searchTerm,
+    { wait: 200, key: 'faq-search' },
+    (state) => ({
+      isPending: state.isPending,
+    }),
+  )
 
   const filteredFaqs = useMemo(() => {
     if (!debouncedSearchTerm) return faqData

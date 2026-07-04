@@ -430,9 +430,13 @@ function RelaysPage() {
   const { t } = useTranslation('pages')
   const [activeTab, setActiveTab] = useState<RelayTab>('mine')
   const [search, setSearch] = useState('')
-  const [debouncedSearch, searchDebouncer] = useDebouncedValue(search, { wait: 250 }, (state) => ({
-    isPending: state.isPending,
-  }))
+  const [debouncedSearch, searchDebouncer] = useDebouncedValue(
+    search,
+    { wait: 250, key: 'relays-search' },
+    (state) => ({
+      isPending: state.isPending,
+    }),
+  )
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [manualRelayUrl, setManualRelayUrl] = useState('')
   const [manualRelayError, setManualRelayError] = useState<string | null>(null)

@@ -1,7 +1,7 @@
 import { useDebouncedValue } from '@tanstack/react-pacer'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { Search as SearchIcon, SlidersHorizontal, Sparkles, X } from 'lucide-react'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -26,9 +26,13 @@ export function AdvancedSearch() {
 
   const [isOpen, setIsOpen] = useState(false)
   const [searchInput, setSearchInput] = useState('')
-  const [debouncedSearchInput, searchDebouncer] = useDebouncedValue(searchInput, { wait: 220 }, (state) => ({
-    isPending: state.isPending,
-  }))
+  const [debouncedSearchInput, searchDebouncer] = useDebouncedValue(
+    searchInput,
+    { wait: 220, key: 'search-advanced-input' },
+    (state) => ({
+      isPending: state.isPending,
+    }),
+  )
   const [chips, setChips] = useState<SearchChipToken[]>([])
   const [geohashEnabled, setGeohashEnabled] = useState(false)
 
@@ -59,17 +63,20 @@ export function AdvancedSearch() {
 
   const visibleLanguages = useMemo(() => COMBOBOX_LANGUAGES.slice(0, 10), [])
 
-  const applyInput = (input: string) => {
-    const parsed = buildSearchStateFromInput(input, searchParams)
-    setChips(parsed.chips)
-    setValue('search', parsed.search || undefined)
-    setValue('author', parsed.author || undefined)
-    setValue('lang', parsed.lang || undefined)
-  }
+  const applyInput = useCallback(
+    (input: string) => {
+      const parsed = buildSearchStateFromInput(input, searchParams)
+      setChips(parsed.chips)
+      setValue('search', parsed.search || undefined)
+      setValue('author', parsed.author || undefined)
+      setValue('lang', parsed.lang || undefined)
+    },
+    [searchParams, setValue],
+  )
 
   useEffect(() => {
     applyInput(debouncedSearchInput)
-  }, [debouncedSearchInput])
+  }, [applyInput, debouncedSearchInput])
 
   const removeChip = (chipToRemove: SearchChipToken) => {
     const nextChips = chips.filter((chip) => !(chip.type === chipToRemove.type && chip.value === chipToRemove.value))

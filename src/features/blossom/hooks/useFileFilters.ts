@@ -9,9 +9,13 @@ export function useFileFilters(files: BlossomFileRecord[]) {
   const [sort, setSortState] = useState<BlossomFileSort>('newest')
   const [viewMode, setViewMode] = useState<BlossomViewMode>('table')
   const [isPending, startTransition] = useTransition()
-  const [debouncedSearch, searchDebouncer] = useDebouncedValue(search, { wait: 250 }, (state) => ({
-    isPending: state.isPending,
-  }))
+  const [debouncedSearch, searchDebouncer] = useDebouncedValue(
+    search,
+    { wait: 250, key: 'blossom-files-search' },
+    (state) => ({
+      isPending: state.isPending,
+    }),
+  )
 
   const setSearch = (value: string) => startTransition(() => setSearchState(value))
   const setTypeFilter = (value: BlossomFileTypeFilter) => startTransition(() => setTypeFilterState(value))

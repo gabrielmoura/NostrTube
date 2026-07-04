@@ -35,7 +35,7 @@ export function ShortsFeed({
   const eventsForProfiles = useMemo(() => shorts.map((short) => short.event), [shorts])
   const profiles = useBatchProfiles(eventsForProfiles)
   const resetKey = initialShortId ?? shorts[0]?.id ?? ''
-  const loadMore = useThrottledCallback(fetchNextPage, { wait: 600 })
+  const loadMore = useThrottledCallback(fetchNextPage, { wait: 600, key: 'shorts-feed-load-more' })
 
   const virtualizer = useVirtualizer({
     count: shorts.length,
