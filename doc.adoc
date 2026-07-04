@@ -81,7 +81,9 @@ O builder NIP-71 em `src/features/upload/services/video-event-builder.service.ts
 
 == Tela de Shorts
 
-A rota `/shorts` renderiza um feed vertical dedicado a eventos de short video (`34236` e `22`). A rota é registrada manualmente em `src/router.ts`, mas a exposição em menus continua sendo uma decisão separada.
+A rota `/shorts` renderiza um feed vertical dedicado a eventos de short video (`34236` e `22`). A rota é registrada manualmente em `src/router.ts` e aparece na navegação principal como entrada independente do feed de vídeos normais.
+
+A experiência visual foi ajustada: `/shorts` mantém integração com `AppShell`, sidebar e busca do projeto, mas apresenta uma grade de cards verticais 9:16 para descoberta. A entrada direta `/short/$eventId` abre a experiência fullscreen com navegação vertical um-a-um, preservando `naddr`, `nevent`, `note`, ids hexadecimais e `d` tags sem redirecionar `naddr` para um identificador ambíguo.
 
 O módulo fica em `src/features/shorts/` e segue a separação entre:
 
@@ -89,7 +91,7 @@ O módulo fica em `src/features/shorts/` e segue a separação entre:
 * `hooks/`: conexão com NDK/NDK Hooks e filtros de visibilidade.
 * `components/`: layout vertical, overlay e player dedicado.
 
-A primeira versão da tela usa scroll vertical com snap, um item por viewport e controle de reprodução pelo item ativo. O player de Shorts reutiliza Vidstack e o parsing de `imeta` existente, mas mantém um wrapper próprio para permitir autoplay/pause sem alterar o player da página de detalhe.
+A tela `/shorts` usa uma grade responsiva para descoberta e paginação incremental. O player vertical com snap, um item por viewport e controle de reprodução pelo item ativo fica restrito a `/short/$eventId`, onde o usuário já escolheu um short para assistir.
 
 === Busca de Shorts
 
@@ -99,9 +101,11 @@ A busca da tela de Shorts é isolada da rota `/search` e usa o parâmetro `/shor
 
 O feed de Shorts usa `useInfiniteQuery` com filtros NDK independentes do feed principal. Cada página consulta apenas `SHORT_VIDEO_EVENT_KINDS`, com `limit` próprio e cursor `until` calculado a partir do `created_at` do último evento da página anterior.
 
-A renderização da lista usa `@tanstack/react-virtual` para manter poucos itens montados por vez, preservando scroll vertical com snap e um vídeo por viewport. O carregamento incremental é acionado ao aproximar o índice ativo do fim da lista e é limitado por `@tanstack/react-pacer` para evitar chamadas sucessivas durante scroll rápido.
+A renderização imersiva de `/short/$eventId` usa `@tanstack/react-virtual` para manter poucos itens montados por vez, preservando scroll vertical com snap e um vídeo por viewport. O carregamento incremental é acionado ao aproximar o índice ativo do fim da lista e é limitado por `@tanstack/react-pacer` para evitar chamadas sucessivas durante scroll rápido. Em `/shorts`, a paginação usa um sentinel no fim da grade.
 
 O item ativo recebe autoplay e os demais pausam automaticamente. O próximo item virtualizado recebe `preload="auto"`, enquanto os demais permanecem em `metadata`, reduzindo buffering na transição sem pré-carregar todo o feed.
+
+Na rota direta `/short/$eventId`, o evento inicial é injetado no feed antes da paginação para garantir abertura imediata do short solicitado. O parâmetro opcional `author` restringe as próximas páginas aos shorts do autor quando fornecido. A URL só é substituída quando o usuário navega para outro short no deck, preservando a URL inicial compartilhada.
 
 == 🛠️ Tecnologias
 

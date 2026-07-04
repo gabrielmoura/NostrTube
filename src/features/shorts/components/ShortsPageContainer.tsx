@@ -1,11 +1,12 @@
 import { Film } from "lucide-react";
 import { t } from "i18next";
 import { useDebouncedValue } from "@tanstack/react-pacer";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PageSpinner } from "@/components/PageSpinner";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
-import { ShortsFeed } from "@/features/shorts/components/ShortsFeed";
+import { useBatchProfiles } from "@/features/nostr/hooks/useBatchProfiles";
+import { ShortsGrid } from "@/features/shorts/components/ShortsGrid";
 import { ShortsSearchBar } from "@/features/shorts/components/ShortsSearchBar";
 import { useShortsFeed } from "@/features/shorts/hooks/useShortsFeed";
 
@@ -16,6 +17,7 @@ interface ShortsPageContainerProps {
 
 export function ShortsPageContainer({ search, onSearchChange }: ShortsPageContainerProps) {
   const [searchInput, setSearchInput] = useState(search ?? "");
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const [debouncedSearch, debouncer] = useDebouncedValue(
     searchInput,
     { wait: 450 },
@@ -30,6 +32,8 @@ export function ShortsPageContainer({ search, onSearchChange }: ShortsPageContai
     hasNextPage,
     isFetchingNextPage,
   } = useShortsFeed({ search: normalizedSearch || undefined });
+  const eventsForProfiles = useMemo(() => shorts.map((short) => short.event), [shorts]);
+  const profiles = useBatchProfiles(eventsForProfiles);
 
   useEffect(() => {
     setSearchInput(search ?? "");
@@ -44,8 +48,31 @@ export function ShortsPageContainer({ search, onSearchChange }: ShortsPageContai
     onSearchChange(undefined);
   };
 
+  const requestNextPage = useCallback(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+    void fetchNextPage();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+  useEffect(() => {
+    const node = loadMoreRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          requestNextPage();
+        }
+      },
+      { rootMargin: "720px 0px" },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [requestNextPage]);
+
   return (
     <AppShell
+      activeKey="shorts"
       title={t("shorts_page_title", "Shorts")}
       description={t("shorts_page_description", "Vertical short videos published as Nostr short video events.")}
       eyebrow="Short video"
@@ -80,15 +107,14 @@ export function ShortsPageContainer({ search, onSearchChange }: ShortsPageContai
       ) : null}
 
       {shorts.length > 0 ? (
-        <div className="mx-auto w-full max-w-[520px] space-y-3">
-          <ShortsFeed
-            shorts={shorts}
-            fetchNextPage={() => void fetchNextPage()}
-            hasNextPage={Boolean(hasNextPage)}
-            isFetchingNextPage={isFetchingNextPage}
-          />
+        <div className="space-y-5">
+          <ShortsGrid shorts={shorts} profiles={profiles} />
+          <div ref={loadMoreRef} className="h-8" aria-hidden="true" />
           {isFetchingNextPage ? (
             <p className="text-center text-xs text-muted-foreground">{t("loading_more_shorts", "Carregando mais shorts...")}</p>
+          ) : null}
+          {!hasNextPage && !isFetchingNextPage ? (
+            <p className="text-center text-xs text-muted-foreground">{t("shorts_no_more", "Todos os shorts carregados.")}</p>
           ) : null}
         </div>
       ) : null}

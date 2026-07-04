@@ -14,6 +14,7 @@ import { Route as playlistNewRoute } from '@/routes/p/new'
 import { Route as blossomRoute } from '@/routes/blossom/index'
 import { Route as relaysRoute } from '@/routes/relays/index'
 import { Route as searchRoute } from '@/routes/search/index'
+import { Route as shortRoute } from '@/routes/short/$eventId'
 import { Route as shortsRoute } from '@/routes/shorts/index'
 import { Route as trendingRoute } from '@/routes/trending/index'
 import { Route as termsRoute } from '@/routes/terms/index'
@@ -42,6 +43,7 @@ export const routeTree = rootRoute.addChildren([
   debugRoute,
   configurationRoute,
   videoRoute,
+  shortRoute,
   videoEditRoute,
   userRoute,
   userEditRoute,

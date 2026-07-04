@@ -11,9 +11,15 @@ Uma plataforma de vídeo descentralizada alimentada pelo protocolo Nostr.
 
 NostrTube é uma aplicação de compartilhamento de vídeos descentralizada que utiliza o protocolo Nostr para armazenamento e distribuição de conteúdo. A plataforma permite aos usuários fazer upload, assistir e compartilhar vídeos de forma descentralizada, sem depender de servidores centralizados.
 
+O domínio de vídeo está separado por tipo de conteúdo:
+
+- `34235` e `21` para vídeos normais.
+- `34236` e `22` para vídeos curtos no formato Shorts.
+
 ## ✨ Funcionalidades
 
 - 📹 Upload e compartilhamento de vídeos
+- 🎞️ Shorts em feed próprio e rota direta para reprodução vertical
 - 🔍 Busca de conteúdo
 - 👤 Perfis de usuário
 - 💬 Feedback direto via Nostr com POW e ZAP opcional
@@ -24,6 +30,12 @@ NostrTube é uma aplicação de compartilhamento de vídeos descentralizada que 
 - 🌍 Suporte multilíngue (i18n)
 - 🎨 Interface moderna com tema claro/escuro
 - 🔐 Autenticação descentralizada via Nostr
+
+## 🎞️ Shorts
+
+- `/shorts` mostra uma grade de vídeos curtos em cards verticais 9:16, com busca própria e paginação independente.
+- `/short/$eventId` abre um short específico em uma experiência fullscreen com navegação vertical um-a-um, autoplay e preload do próximo item.
+- A publicação de novos vídeos decide automaticamente entre `34235` e `34236` com base em dimensões, duração e seleção manual no fluxo de upload/import.
 
 ## 🛠️ Tecnologias
 
@@ -46,6 +58,8 @@ NostrTube é uma aplicação de compartilhamento de vídeos descentralizada que 
 - **Vidstack** - Player de vídeo
 - **HLS.js** - Streaming HLS
 - **Dash.js** - Streaming DASH
+- **@tanstack/react-virtual** - Virtualização de listas para o feed imersivo de Shorts
+- **@tanstack/react-pacer** - Debounce/throttle nas interações da tela de Shorts
 
 ### Mobile
 - **Capacitor** - Framework para aplicativos nativos
@@ -143,15 +157,15 @@ pnpm analyze
 ### Android
 ```bash
 pnpm build
-npx cap sync android
-npx cap open android
+pnpm exec cap sync android
+pnpm exec cap open android
 ```
 
 ### iOS
 ```bash
 pnpm build
-npx cap sync ios
-npx cap open ios
+pnpm exec cap sync ios
+pnpm exec cap open ios
 ```
 
 ## 🐳 Docker

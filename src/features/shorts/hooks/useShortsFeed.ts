@@ -10,20 +10,23 @@ import { toShortVideoViewModel } from "@/features/shorts/services/shorts-media.s
 const SHORTS_PAGE_SIZE = 20;
 
 interface UseShortsFeedParams {
+  author?: string;
+  initialEvent?: NDKEvent;
   search?: string;
 }
 
-export function useShortsFeed({ search }: UseShortsFeedParams = {}) {
+export function useShortsFeed({ author, initialEvent, search }: UseShortsFeedParams = {}) {
   const { ndk } = useNDK();
   const { filterEvents } = useContentVisibilityFilter();
 
   const query = useInfiniteQuery({
-    queryKey: ["shortsFeed", { search }],
+    queryKey: ["shortsFeed", { author, search }],
     enabled: Boolean(ndk),
     initialPageParam: undefined as number | undefined,
     queryFn: async ({ pageParam }) => {
       if (!ndk) return [];
       const filter = buildShortsFeedFilter({
+        author,
         limit: SHORTS_PAGE_SIZE,
         search,
         until: pageParam,
@@ -44,15 +47,18 @@ export function useShortsFeed({ search }: UseShortsFeedParams = {}) {
   });
 
   const shorts = useMemo(() => {
-    const allEvents = query.data?.pages.flatMap((page) => page) ?? [];
+    const allEvents = [
+      ...(initialEvent ? [initialEvent] : []),
+      ...(query.data?.pages.flatMap((page) => page) ?? []),
+    ];
     const uniqueEvents = deduplicateEventsById(allEvents);
     const visibleEvents = filterEvents(sortShortsEvents(uniqueEvents));
     return visibleEvents.map(toShortVideoViewModel).filter((short) => Boolean(short.source));
-  }, [query.data?.pages, filterEvents]);
+  }, [initialEvent, query.data?.pages, filterEvents]);
 
   return {
     shorts,
-    isLoading: query.isLoading && shorts.length === 0,
+    isLoading: !initialEvent && query.isLoading && shorts.length === 0,
     isEmpty: Boolean(query.isFetched && shorts.length === 0),
     fetchNextPage: query.fetchNextPage,
     hasNextPage: query.hasNextPage,

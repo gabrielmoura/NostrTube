@@ -20,7 +20,7 @@ export function ShortsOverlay({ short, profile }: ShortsOverlayProps) {
     .slice(0, 4);
 
   const share = async () => {
-    const url = `${location.origin}/v/${short.routeReference}`;
+    const url = `${location.origin}/short/${short.routeReference}`;
     if (navigator.share) {
       await navigator.share({ title: short.title, url }).catch(() => undefined);
       return;
@@ -45,7 +45,7 @@ export function ShortsOverlay({ short, profile }: ShortsOverlayProps) {
 
         <div className="space-y-1.5">
           <Link
-            to="/v/$eventId"
+            to="/short/$eventId"
             params={{ eventId: short.routeReference }}
             className="pointer-events-auto line-clamp-2 text-base font-semibold leading-tight hover:underline"
           >
@@ -74,7 +74,7 @@ export function ShortsOverlay({ short, profile }: ShortsOverlayProps) {
           <Zap className="size-5" />
         </Button>
         <Link
-          to="/v/$eventId"
+          to="/short/$eventId"
           params={{ eventId: short.routeReference }}
           className="inline-flex size-10 items-center justify-center rounded-full bg-black/30 text-white transition-colors hover:bg-white/20"
           aria-label="Abrir comentarios"

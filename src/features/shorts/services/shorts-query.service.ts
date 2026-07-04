@@ -2,16 +2,21 @@ import type { NDKEvent, NDKFilter } from "@nostr-dev-kit/ndk";
 import { SHORT_VIDEO_EVENT_KINDS } from "@/features/video/services/video-kinds";
 
 export interface ShortsFeedFilterParams {
+  author?: string;
   limit?: number;
   until?: number;
   search?: string;
 }
 
-export function buildShortsFeedFilter({ limit = 30, until, search }: ShortsFeedFilterParams = {}): NDKFilter {
+export function buildShortsFeedFilter({ author, limit = 30, until, search }: ShortsFeedFilterParams = {}): NDKFilter {
   const filter: NDKFilter = {
     kinds: SHORT_VIDEO_EVENT_KINDS,
     limit,
   };
+
+  if (author) {
+    filter.authors = [author];
+  }
 
   if (until) {
     filter.until = until;

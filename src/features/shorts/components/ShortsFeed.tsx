@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { useThrottledCallback } from "@tanstack/react-pacer";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useBatchProfiles } from "@/features/nostr/hooks/useBatchProfiles";
@@ -11,15 +11,29 @@ interface ShortsFeedProps {
   shorts: ShortVideoViewModel[];
   fetchNextPage: () => void;
   hasNextPage: boolean;
+  immersive?: boolean;
+  initialShortId?: string;
   isFetchingNextPage: boolean;
+  onActiveShortChange?: (short: ShortVideoViewModel) => void;
+  onExit?: () => void;
 }
 
-export function ShortsFeed({ shorts, fetchNextPage, hasNextPage, isFetchingNextPage }: ShortsFeedProps) {
+export function ShortsFeed({
+  shorts,
+  fetchNextPage,
+  hasNextPage,
+  immersive,
+  initialShortId,
+  isFetchingNextPage,
+  onActiveShortChange,
+  onExit,
+}: ShortsFeedProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const lastResetKeyRef = useRef<string | null>(null);
   const eventsForProfiles = useMemo(() => shorts.map((short) => short.event), [shorts]);
   const profiles = useBatchProfiles(eventsForProfiles);
-  const shortsKey = useMemo(() => shorts.map((short) => short.id).join(":"), [shorts]);
+  const resetKey = initialShortId ?? shorts[0]?.id ?? "";
   const loadMore = useThrottledCallback(fetchNextPage, { wait: 600 });
 
   const virtualizer = useVirtualizer({
@@ -51,18 +65,60 @@ export function ShortsFeed({ shorts, fetchNextPage, hasNextPage, isFetchingNextP
   }, [maybeLoadMore, shorts.length, virtualizer]);
 
   useEffect(() => {
-    if (!shortsKey) return;
-    setActiveIndex(0);
-    containerRef.current?.scrollTo({ top: 0 });
-  }, [shortsKey]);
+    if (!resetKey || lastResetKeyRef.current === resetKey) return;
+    lastResetKeyRef.current = resetKey;
+    const nextIndex = initialShortId ? shorts.findIndex((short) => short.id === initialShortId) : -1;
+    const boundedIndex = Math.max(nextIndex, 0);
+    setActiveIndex(boundedIndex);
+    containerRef.current?.scrollTo({
+      top: boundedIndex * (containerRef.current?.clientHeight || 0),
+    });
+  }, [initialShortId, resetKey, shorts]);
+
+  useEffect(() => {
+    const activeShort = shorts[activeIndex];
+    if (activeShort) {
+      onActiveShortChange?.(activeShort);
+    }
+  }, [activeIndex, onActiveShortChange, shorts]);
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      if (event.key === "Escape") {
+        onExit?.();
+        return;
+      }
+
+      if (event.key === "ArrowDown" || event.key === "PageDown") {
+        event.preventDefault();
+        container.scrollBy({ top: container.clientHeight, behavior: "smooth" });
+      }
+
+      if (event.key === "ArrowUp" || event.key === "PageUp") {
+        event.preventDefault();
+        container.scrollBy({ top: -container.clientHeight, behavior: "smooth" });
+      }
+    },
+    [onExit],
+  );
 
   const virtualItems = virtualizer.getVirtualItems();
 
   return (
     <div
       ref={containerRef}
-      className="h-[calc(100svh-var(--header-height)-2rem)] min-h-[620px] overflow-y-auto overscroll-contain rounded-3xl border border-border/70 bg-black shadow-2xl snap-y snap-mandatory"
+      className={cn(
+        "overflow-y-auto overscroll-contain bg-black snap-y snap-mandatory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70",
+        immersive
+          ? "h-svh min-h-svh rounded-none"
+          : "h-[calc(100svh-var(--header-height)-2rem)] min-h-[620px] rounded-xl border border-border/70 shadow-2xl",
+      )}
+      onKeyDown={handleKeyDown}
       onScroll={handleScroll}
+      tabIndex={0}
     >
       <div className="relative w-full" style={{ height: `${virtualizer.getTotalSize()}px` }}>
         {virtualItems.map((virtualItem) => {
@@ -81,7 +137,7 @@ export function ShortsFeed({ shorts, fetchNextPage, hasNextPage, isFetchingNextP
               )}
               style={{
                 height: `${virtualItem.size}px`,
-                minHeight: "620px",
+                minHeight: immersive ? "100svh" : "620px",
                 transform: `translateY(${virtualItem.start}px)`,
               }}
             >

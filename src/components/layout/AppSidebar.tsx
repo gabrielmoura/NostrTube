@@ -8,6 +8,7 @@ import {
   CircleHelp,
   Cloud,
   Compass,
+  Clapperboard,
   Flame,
   FolderOpen,
   Heart,
@@ -38,6 +39,7 @@ import useUserStore from '@/store/useUserStore'
 type SidebarKey =
   | 'home'
   | 'explore'
+  | 'shorts'
   | 'trending'
   | 'upload'
   | 'youtubeImport'
@@ -53,6 +55,8 @@ type SidebarKey =
   | 'myvideos'
   | 'playlists'
   | 'settings'
+  | 'faq'
+  | 'terms'
   | 'debug'
 
 interface SidebarItem {
@@ -68,6 +72,7 @@ interface SidebarItem {
 const primaryItems: SidebarItem[] = [
   { key: 'home', label: 'Início', icon: LayoutGrid, to: '/' },
   { key: 'trending', label: 'Trending', icon: Flame, to: '/trending' },
+  { key: 'shorts', label: 'Shorts', icon: Clapperboard, to: '/shorts' },
   { key: 'subscriptions', label: 'Inscrições', icon: BellRing, to: '/subscriptions' },
   { key: 'live', label: 'Ao vivo', icon: Radio, to: '/live' },
   { key: 'zaps', label: 'Zaps', icon: WalletCards, to: '/zaps' },

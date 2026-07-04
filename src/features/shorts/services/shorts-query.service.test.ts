@@ -11,7 +11,8 @@ describe("shorts-query.service", () => {
   });
 
   it("adds cursor and trimmed search when provided", () => {
-    expect(buildShortsFeedFilter({ limit: 10, until: 123, search: "  nostr  " })).toEqual({
+    expect(buildShortsFeedFilter({ author: "pubkey", limit: 10, until: 123, search: "  nostr  " })).toEqual({
+      authors: ["pubkey"],
       kinds: SHORT_VIDEO_EVENT_KINDS,
       limit: 10,
       until: 123,
