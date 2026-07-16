@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "pre-build": "tsc  && vite build",
+    "pre-build": "tsc -b && vite build",
     "typecheck": "tsc -b",
     "lint": "biome lint .",
     "lint:fix": "biome check --write .",
