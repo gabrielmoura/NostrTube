@@ -1,33 +1,23 @@
 import type { NDKEvent } from '@nostr-dev-kit/ndk'
 import { NDKSubscriptionCacheUsage, useSubscribe } from '@nostr-dev-kit/ndk-hooks'
 import { createRoute, Link, useNavigate } from '@tanstack/react-router'
+import { ArrowRight, Flame, HandCoins, Lightbulb, RefreshCw, Search, TrendingUp, UserRound, Zap } from 'lucide-react'
 import { uniqBy } from 'ramda'
 import { useMemo, useState } from 'react'
-import {
-  ArrowRight,
-  Flame,
-  HandCoins,
-  Lightbulb,
-  RefreshCw,
-  Search,
-  TrendingUp,
-  UserRound,
-  Zap,
-} from 'lucide-react'
 import VideoCard, { VideoCardLoading } from '@/components/cards/videoCard'
+import { Section, SectionContent, SectionHeader, SectionTitle } from '@/components/containers/pageSection'
 import { AppShell } from '@/components/layout/AppShell'
 import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { MetricCard } from '@/components/ui/metric-card'
 import { StatusBadge } from '@/components/ui/status-badge'
-import { Section, SectionContent, SectionHeader, SectionTitle } from '@/components/containers/pageSection'
 import { useBatchProfiles } from '@/features/nostr/hooks/useBatchProfiles'
-import { useTopSupporters } from '@/features/zap/hooks/useTopSupporters'
-import { useZapStats } from '@/features/zap/hooks/useZapStats'
 import { useContentVisibilityFilter } from '@/features/nostr/hooks/useContentVisibilityFilter'
 import { filterEventsByAge } from '@/features/video/services/age-filter.service'
 import { NORMAL_VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
 import { getVideoRouteReference } from '@/features/video/services/video-reference.service'
+import { useTopSupporters } from '@/features/zap/hooks/useTopSupporters'
+import { useZapStats } from '@/features/zap/hooks/useZapStats'
 import { sortEventsByImages } from '@/helper/format.ts'
 import { cn } from '@/lib/utils'
 import { Route as rootRoute } from '@/routes/__root'
@@ -44,10 +34,10 @@ const SEARCH_RELAYS =
 type TimeTab = 'now' | 'today' | 'week' | 'month'
 
 const TIME_RANGES: Record<TimeTab, number> = {
-  now: 60 * 60,            // 1 hora
-  today: 60 * 60 * 24,     // 24 horas
-  week: 60 * 60 * 24 * 7,  // 7 dias
-  month: 60 * 60 * 24 * 30,// ~30 dias
+  now: 60 * 60, // 1 hora
+  today: 60 * 60 * 24, // 24 horas
+  week: 60 * 60 * 24 * 7, // 7 dias
+  month: 60 * 60 * 24 * 30, // ~30 dias
 }
 
 const TIME_LABELS: Record<TimeTab, string> = {
@@ -186,7 +176,10 @@ function TrendingPage() {
             topSupporters.slice(0, 5).map((s, i) => {
               const profile = supporterProfiles[s.pubkey]
               return (
-                <div key={s.pubkey} className="flex items-center gap-3 rounded-xl border border-border/50 bg-card/50 px-3 py-2">
+                <div
+                  key={s.pubkey}
+                  className="flex items-center gap-3 rounded-xl border border-border/50 bg-card/50 px-3 py-2"
+                >
                   <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/12 text-xs font-bold text-primary">
                     {i + 1}
                   </span>
@@ -235,7 +228,7 @@ function TrendingPage() {
           <CardDescription>Fortaleça o ecossistema Nostr.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Link to="/zaps" className={cn(buttonVariants({ variant: "gradient" }), "w-full")}>
+          <Link to="/zaps" className={cn(buttonVariants({ variant: 'gradient' }), 'w-full')}>
             <Zap className="size-4" />
             Apoie criadores
           </Link>
@@ -374,11 +367,11 @@ function TrendingPage() {
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold">Nenhum vídeo em alta</h3>
                 <p className="max-w-md text-sm text-muted-foreground">
-                  Nenhum vídeo encontrado no período &ldquo;{TIME_LABELS[timeTab]}&rdquo;.
-                  Tente um período maior ou publique seu conteúdo.
+                  Nenhum vídeo encontrado no período &ldquo;{TIME_LABELS[timeTab]}&rdquo;. Tente um período maior ou
+                  publique seu conteúdo.
                 </p>
               </div>
-              <Link to="/new" className={buttonVariants({ variant: "glass" })}>
+              <Link to="/new" className={buttonVariants({ variant: 'glass' })}>
                 Publicar vídeo
               </Link>
             </CardContent>
@@ -421,9 +414,7 @@ function TrendingPage() {
             <h2 className="font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl">
               Criadores em destaque
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Autores com mais conteúdo no período.
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">Autores com mais conteúdo no período.</p>
           </div>
 
           <div className="flex gap-4 overflow-x-auto pb-2">
@@ -456,12 +447,8 @@ function TrendingPage() {
       {uniqueTags.length > 0 && (
         <section className="space-y-4">
           <div>
-            <h2 className="font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-              Tags em alta
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Hashtags mais frequentes nos vídeos do período.
-            </p>
+            <h2 className="font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl">Tags em alta</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Hashtags mais frequentes nos vídeos do período.</p>
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -481,15 +468,11 @@ function TrendingPage() {
 
       {/* === Refresh / Ver todos === */}
       <div className="flex justify-center gap-3">
-        <button
-          type="button"
-          onClick={() => window.location.reload()}
-          className={buttonVariants({ variant: "glass" })}
-        >
+        <button type="button" onClick={() => window.location.reload()} className={buttonVariants({ variant: 'glass' })}>
           <RefreshCw className="mr-1.5 size-4" />
           Atualizar
         </button>
-        <Link to="/search" className={buttonVariants({ variant: "glass" })}>
+        <Link to="/search" className={buttonVariants({ variant: 'glass' })}>
           Ver todos os vídeos
           <ArrowRight className="ml-1.5 size-4" />
         </Link>

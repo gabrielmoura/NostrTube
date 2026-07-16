@@ -69,7 +69,8 @@ export abstract class AppError extends Error {
 
     const cause = (this as Error & { cause?: unknown }).cause
     if (cause !== undefined) {
-      logContext.cause = cause instanceof Error ? { name: cause.name, message: cause.message, stack: cause.stack } : cause
+      logContext.cause =
+        cause instanceof Error ? { name: cause.name, message: cause.message, stack: cause.stack } : cause
     }
 
     return logContext

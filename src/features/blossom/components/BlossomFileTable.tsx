@@ -15,7 +15,10 @@ interface BlossomFileTableProps extends BlossomFileListProps {
 
 export function BlossomFileTable(props: BlossomFileTableProps) {
   if (props.viewMode === 'grid') return <BlossomFileGrid {...props} />
+  return <BlossomVirtualFileTable {...props} />
+}
 
+function BlossomVirtualFileTable(props: BlossomFileTableProps) {
   const virtualCount = props.files.length + (props.hasMore || props.isLoadingMore ? 1 : 0)
   const { parentRef, scrollMargin, totalSize, virtualItems } = useBlossomVirtualWindow({
     count: virtualCount,

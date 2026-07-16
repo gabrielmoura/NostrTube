@@ -1,10 +1,10 @@
 import type { NDKEvent } from '@nostr-dev-kit/ndk'
 import {
+  type NDKFilter,
   NDKSubscriptionCacheUsage,
   useFollows,
   useProfileValue,
   useSubscribe,
-  type NDKFilter,
 } from '@nostr-dev-kit/ndk-hooks'
 import { createRoute, Link } from '@tanstack/react-router'
 import {
@@ -66,10 +66,7 @@ function useSubscriptionsData() {
     authors: followedPubkeys,
     limit: 100,
   }
-  const {
-    events: videoEvents,
-    eose: videoEose,
-  } = useSubscribe(followedPubkeys.length > 0 ? [videoFilter] : false, {
+  const { events: videoEvents, eose: videoEose } = useSubscribe(followedPubkeys.length > 0 ? [videoFilter] : false, {
     closeOnEose: false,
     cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
   })
@@ -91,10 +88,7 @@ function useSubscriptionsData() {
     authors: followedPubkeys,
     limit: 50,
   }
-  const {
-    events: postsEvents,
-    eose: postsEose,
-  } = useSubscribe(followedPubkeys.length > 0 ? [postsFilter] : false, {
+  const { events: postsEvents, eose: postsEose } = useSubscribe(followedPubkeys.length > 0 ? [postsFilter] : false, {
     closeOnEose: false,
     cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
   })
@@ -115,10 +109,11 @@ function useSubscriptionsData() {
 
   // Lives ativas
   const liveNow = useMemo(
-    () => liveEvents.filter((e) => {
-      const status = e.tagValue('status') || ''
-      return status === 'live'
-    }),
+    () =>
+      liveEvents.filter((e) => {
+        const status = e.tagValue('status') || ''
+        return status === 'live'
+      }),
     [liveEvents],
   )
 
@@ -155,16 +150,8 @@ function useSubscriptionsData() {
 
 // ─── Página Principal ────────────────────────────────────
 function SubscriptionsPage() {
-  const {
-    videoEvents,
-    liveNow,
-    postsEose,
-    profiles,
-    followedPubkeys,
-    notFollowing,
-    isEmpty,
-    isLoading,
-  } = useSubscriptionsData()
+  const { videoEvents, liveNow, postsEose, profiles, followedPubkeys, notFollowing, isEmpty, isLoading } =
+    useSubscriptionsData()
 
   const isEmptyPosts = postsEose
 
@@ -228,9 +215,7 @@ function SubscriptionsPage() {
                   <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-bold">
                     {profile?.displayName?.[0] || profile?.name?.[0] || '?'}
                   </div>
-                  <span className="flex-1 truncate text-muted-foreground">
-                    {ev.tagValue('title') || 'Live'}
-                  </span>
+                  <span className="flex-1 truncate text-muted-foreground">{ev.tagValue('title') || 'Live'}</span>
                 </Link>
               )
             })}
@@ -247,9 +232,7 @@ function SubscriptionsPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
-          <p className="text-muted-foreground">
-            Playlists dos canais que você segue aparecerão aqui.
-          </p>
+          <p className="text-muted-foreground">Playlists dos canais que você segue aparecerão aqui.</p>
         </CardContent>
       </Card>
 
@@ -259,13 +242,8 @@ function SubscriptionsPage() {
           <CardTitle className="text-base">Gerencie suas inscrições</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
-          <p className="text-muted-foreground">
-            Descubra novos criadores e gerencie quem você acompanha.
-          </p>
-          <Link
-            to="/search"
-            className={buttonVariants({ variant: "glass", size: "sm", className: "w-full" })}
-          >
+          <p className="text-muted-foreground">Descubra novos criadores e gerencie quem você acompanha.</p>
+          <Link to="/search" className={buttonVariants({ variant: 'glass', size: 'sm', className: 'w-full' })}>
             <Users className="mr-2 size-4" />
             Descobrir criadores
           </Link>
@@ -319,10 +297,9 @@ function SubscriptionsPage() {
           </div>
           <h3 className="mb-2 text-lg font-semibold">Você não segue ninguém</h3>
           <p className="mb-6 max-w-md text-sm text-muted-foreground">
-            Siga criadores para acompanhar novos vídeos, lives e postagens no seu feed
-            personalizado.
+            Siga criadores para acompanhar novos vídeos, lives e postagens no seu feed personalizado.
           </p>
-          <Link to="/explore" className={buttonVariants({ variant: "gradient" })}>
+          <Link to="/explore" className={buttonVariants({ variant: 'gradient' })}>
             <Sparkles className="mr-2 size-4" />
             Explorar criadores
           </Link>
@@ -347,10 +324,10 @@ function SubscriptionsPage() {
           </div>
           <h3 className="mb-2 text-lg font-semibold">Nenhum conteúdo recente</h3>
           <p className="mb-6 max-w-md text-sm text-muted-foreground">
-            Os criadores que você segue ainda não publicaram nada recentemente. Os novos vídeos
-            aparecerão aqui automaticamente.
+            Os criadores que você segue ainda não publicaram nada recentemente. Os novos vídeos aparecerão aqui
+            automaticamente.
           </p>
-          <Link to="/trending" className={buttonVariants({ variant: "glass" })}>
+          <Link to="/trending" className={buttonVariants({ variant: 'glass' })}>
             <Tv className="mr-2 size-4" />
             Ver trending
           </Link>
@@ -374,10 +351,7 @@ function SubscriptionsPage() {
             {followedPubkeys.length} {followedPubkeys.length === 1 ? 'canal' : 'canais'}
           </span>
         </div>
-        <Link
-          to="/search"
-          className={buttonVariants({ variant: "glass", size: "sm" })}
-        >
+        <Link to="/search" className={buttonVariants({ variant: 'glass', size: 'sm' })}>
           <Settings className="mr-2 size-4" />
           Gerenciar inscrições
         </Link>
@@ -399,12 +373,7 @@ function SubscriptionsPage() {
       )}
 
       {/* Tabs do feed */}
-      <Tabs
-        defaultValue="all"
-        value={activeTab}
-        onValueChange={(v) => setActiveTab(v as SubTab)}
-        className="mb-6"
-      >
+      <Tabs defaultValue="all" value={activeTab} onValueChange={(v) => setActiveTab(v as SubTab)} className="mb-6">
         <TabsList className="w-full sm:w-auto">
           <TabsTrigger value="all">
             Todos
@@ -438,9 +407,7 @@ function SubscriptionsPage() {
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="playlists">
-            Playlists
-          </TabsTrigger>
+          <TabsTrigger value="playlists">Playlists</TabsTrigger>
         </TabsList>
 
         {/* Tab: Todos */}
@@ -470,9 +437,7 @@ function SubscriptionsPage() {
           ) : (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <Video className="mb-3 size-10 text-muted-foreground/40" />
-              <p className="text-sm text-muted-foreground">
-                Os criadores que você segue ainda não publicaram vídeos.
-              </p>
+              <p className="text-sm text-muted-foreground">Os criadores que você segue ainda não publicaram vídeos.</p>
             </div>
           )}
         </TabsContent>
@@ -504,9 +469,7 @@ function SubscriptionsPage() {
                       </div>
                     </div>
                     <div className="p-3">
-                      <h4 className="line-clamp-1 text-sm font-medium">
-                        {ev.tagValue('title') || 'Live sem título'}
-                      </h4>
+                      <h4 className="line-clamp-1 text-sm font-medium">{ev.tagValue('title') || 'Live sem título'}</h4>
                       <p className="mt-1 text-xs text-muted-foreground">
                         {profile?.displayName || profile?.name || 'anon'}
                       </p>
@@ -518,9 +481,7 @@ function SubscriptionsPage() {
           ) : (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <Radio className="mb-3 size-10 text-muted-foreground/40" />
-              <p className="text-sm text-muted-foreground">
-                Nenhum dos seus canais está ao vivo no momento.
-              </p>
+              <p className="text-sm text-muted-foreground">Nenhum dos seus canais está ao vivo no momento.</p>
             </div>
           )}
         </TabsContent>
@@ -529,9 +490,7 @@ function SubscriptionsPage() {
         <TabsContent value="posts" className="mt-6">
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <Hash className="mb-3 size-10 text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground">
-              Postagens dos seus canais aparecerão aqui em breve.
-            </p>
+            <p className="text-sm text-muted-foreground">Postagens dos seus canais aparecerão aqui em breve.</p>
           </div>
         </TabsContent>
 
@@ -553,11 +512,11 @@ function SubscriptionsPage() {
           Explore novos canais, hashtags e conteúdos no ecossistema Nostr.
         </p>
         <div className="flex justify-center gap-3">
-          <Link to="/explore" className={buttonVariants({ variant: "gradient" })}>
+          <Link to="/explore" className={buttonVariants({ variant: 'gradient' })}>
             <Sparkles className="mr-2 size-4" />
             Explorar
           </Link>
-          <Link to="/trending" className={buttonVariants({ variant: "glass" })}>
+          <Link to="/trending" className={buttonVariants({ variant: 'glass' })}>
             <Tv className="mr-2 size-4" />
             Trending
           </Link>

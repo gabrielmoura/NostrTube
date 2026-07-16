@@ -41,14 +41,7 @@ function RouteComponent() {
   const { t } = useTranslation()
   return (
     <ErrorBoundary title={t('page.error_title')}>
-      <Suspense
-        fallback={
-          <PageSpinner
-            label={t('page.loading_label')}
-            description={t('page.loading_description')}
-          />
-        }
-      >
+      <Suspense fallback={<PageSpinner label={t('page.loading_label')} description={t('page.loading_description')} />}>
         <ConfigurationPageContent />
       </Suspense>
     </ErrorBoundary>

@@ -185,23 +185,23 @@ function chunkFiles(files: BlossomFileRecord[], columns: number) {
 }
 
 function useBlossomGridColumns() {
-  const [columns, setColumns] = useStateFromWindow()
-  return columns
+  return useStateFromWindow()
+}
+
+function getBlossomColumnCount() {
+  if (window.matchMedia('(min-width: 1280px)').matches) return 3
+  if (window.matchMedia('(min-width: 768px)').matches) return 2
+  return 1
 }
 
 function useStateFromWindow() {
-  const getColumns = () => {
-    if (window.matchMedia('(min-width: 1280px)').matches) return 3
-    if (window.matchMedia('(min-width: 768px)').matches) return 2
-    return 1
-  }
-  const [columns, setColumns] = useState(getColumns)
+  const [columns, setColumns] = useState(getBlossomColumnCount)
 
   useEffect(() => {
-    const updateColumns = () => setColumns(getColumns())
+    const updateColumns = () => setColumns(getBlossomColumnCount())
     window.addEventListener('resize', updateColumns)
     return () => window.removeEventListener('resize', updateColumns)
   }, [])
 
-  return [columns, setColumns] as const
+  return columns
 }

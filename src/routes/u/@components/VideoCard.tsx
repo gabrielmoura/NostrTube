@@ -1,6 +1,7 @@
 import { NDKEvent } from '@nostr-dev-kit/ndk'
 import { Link } from '@tanstack/react-router'
 import { PlayCircle } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { NSFWOverlay } from '@/components/NSFWOverlay.tsx'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { getFormattedVideoDuration } from '@/features/video/services/video-duration.service'
@@ -8,7 +9,6 @@ import { getVideoRouteReference } from '@/features/video/services/video-referenc
 import { extractTag } from '@/helper/extractTag'
 import { cn } from '@/helper/format'
 import { useNostrImage } from '@/hooks/useNostrImage'
-import { useTranslation } from 'react-i18next'
 import useUserStore from '@/store/useUserStore'
 
 interface VideoCardProps {

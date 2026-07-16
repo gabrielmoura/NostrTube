@@ -1,6 +1,6 @@
 import { sentryVitePlugin } from '@sentry/vite-plugin'
-import { devtools } from '@tanstack/devtools-vite'
 import tailwindcss from '@tailwindcss/vite'
+import { devtools } from '@tanstack/devtools-vite'
 import legacy from '@vitejs/plugin-legacy'
 import react from '@vitejs/plugin-react'
 import path from 'path'
@@ -197,6 +197,9 @@ export default defineConfig(({ mode }) => {
           ]
         : []),
     ],
+    optimizeDeps: {
+      entries: ['index.html'],
+    },
     build: {
       sourcemap: sentryEnabled ? 'hidden' : shouldGenerateSourcemap,
       cssMinify: true,

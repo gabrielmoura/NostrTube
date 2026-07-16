@@ -3,8 +3,8 @@
 import { NDKEvent } from '@nostr-dev-kit/ndk'
 import { Link } from '@tanstack/react-router'
 import { ListVideo, Play } from 'lucide-react'
-import { Card } from '@/components/ui/card'
 import { useTranslation } from 'react-i18next'
+import { Card } from '@/components/ui/card'
 import { extractPlaylistData } from './extractPlaylistData'
 
 interface PlaylistCardProps {

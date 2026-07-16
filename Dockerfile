@@ -12,7 +12,7 @@ RUN corepack enable
 # copy the package.json to install dependencies
 COPY . .
 # Install the dependencies and make the folder
-RUN pnpm install && pnpm build
+RUN pnpm install --frozen-lockfile && pnpm build
 
 FROM nginx:alpine
 

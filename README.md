@@ -41,7 +41,7 @@ O domínio de vídeo está separado por tipo de conteúdo:
 
 ### Frontend
 - **React 19** - Biblioteca UI
-- **TypeScript** - Linguagem de programação
+- **TypeScript 7** - Linguagem de programação e compilador local (`tsc`)
 - **Vite** - Build tool e dev server
 - **TanStack Router** - Roteamento
 - **TanStack Query** - Gerenciamento de estado assíncrono
@@ -68,6 +68,8 @@ O domínio de vídeo está separado por tipo de conteúdo:
 
 - Node.js 20 ou superior
 - pnpm 10.24.0 ou superior
+
+O compilador local do projeto é TypeScript 7. Como o pacote `typescript@7` não expõe `tsserver` clássico, IDEs e ferramentas que dependem da Compiler API/Language Service clássica podem usar temporariamente o serviço TypeScript embutido da IDE até o ecossistema declarar suporte completo ao TypeScript 7.
 
 ## 🚀 Instalação
 
@@ -136,6 +138,15 @@ A aplicação estará disponível em `http://localhost:5173`
 ### Outros comandos úteis
 
 ```bash
+# Checagem de tipos
+pnpm typecheck
+
+# Checagem Biome completa
+pnpm check
+
+# Checagem Biome para CI
+pnpm check:ci
+
 # Build para produção
 pnpm build
 
@@ -150,6 +161,9 @@ pnpm format
 
 # Análise do bundle
 pnpm analyze
+
+# Validação completa
+pnpm validate
 ```
 
 ## 📱 Build Mobile

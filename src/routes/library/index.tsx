@@ -1,5 +1,11 @@
-import { NDKKind, type NDKEvent, type NDKUserProfile } from '@nostr-dev-kit/ndk'
-import { NDKSubscriptionCacheUsage, useNDK, useNDKCurrentUser, useSubscribe, type NDKFilter } from '@nostr-dev-kit/ndk-hooks'
+import { type NDKEvent, NDKKind, type NDKUserProfile } from '@nostr-dev-kit/ndk'
+import {
+  type NDKFilter,
+  NDKSubscriptionCacheUsage,
+  useNDK,
+  useNDKCurrentUser,
+  useSubscribe,
+} from '@nostr-dev-kit/ndk-hooks'
 import { createRoute, Link, useNavigate } from '@tanstack/react-router'
 import {
   Bookmark,
@@ -28,8 +34,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useWatchLater } from '@/features/library/hooks/use-watch-later'
 import { useBatchProfiles } from '@/features/nostr/hooks/useBatchProfiles'
-import { NORMAL_VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
-import { getVideoRouteReference } from '@/features/video/services/video-reference.service'
 import { getWatchHistory } from '@/features/recommendations/services/watch-history.service'
 import {
   canUseNip44Drafts,
@@ -37,6 +41,8 @@ import {
   loadVideoUploadDraft,
   type UploadDraftSnapshot,
 } from '@/features/upload/services/nip37-draft.service'
+import { NORMAL_VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
+import { getVideoRouteReference } from '@/features/video/services/video-reference.service'
 import { Route as rootRoute } from '@/routes/__root'
 import { useVideoUploadStore } from '@/store/videoUpload/useVideoUploadStore'
 
@@ -61,7 +67,10 @@ function isResolvablePlaylistVideoTag(tag: string[]) {
 
   if (tag[0] === 'a') {
     const parts = value.split(':')
-    return (parts.length === 3 && Boolean(parts[0] && parts[1] && parts[2])) || (parts.length === 2 && parts[1]?.length === 64)
+    return (
+      (parts.length === 3 && Boolean(parts[0] && parts[1] && parts[2])) ||
+      (parts.length === 2 && parts[1]?.length === 64)
+    )
   }
 
   return false
@@ -123,28 +132,26 @@ function useLibraryData() {
   const myVideosFilter: NDKFilter | null = currentPubkey
     ? { kinds: NORMAL_VIDEO_EVENT_KINDS, authors: [currentPubkey], limit: 50 }
     : null
-  const { events: myVideos, eose: myVideosEose } = useSubscribe(
-    myVideosFilter ? [myVideosFilter] : false,
-    { closeOnEose: false, cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST },
-  )
+  const { events: myVideos, eose: myVideosEose } = useSubscribe(myVideosFilter ? [myVideosFilter] : false, {
+    closeOnEose: false,
+    cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
+  })
 
   // Playlists de vídeo do usuário (kind 30005 / NDKKind.VideoCurationSet)
   const playlistsFilter: NDKFilter | null = currentPubkey
     ? { kinds: [NDKKind.VideoCurationSet], authors: [currentPubkey], limit: 100 }
     : null
-  const { events: playlists, eose: playlistsEose } = useSubscribe(
-    playlistsFilter ? [playlistsFilter] : false,
-    { closeOnEose: false, cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST },
-  )
+  const { events: playlists, eose: playlistsEose } = useSubscribe(playlistsFilter ? [playlistsFilter] : false, {
+    closeOnEose: false,
+    cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
+  })
 
   // Vídeos curtidos (kind 7 do usuário)
-  const likesFilter: NDKFilter | null = currentPubkey
-    ? { kinds: [7], authors: [currentPubkey], limit: 100 }
-    : null
-  const { events: likeEvents } = useSubscribe(
-    likesFilter ? [likesFilter] : false,
-    { closeOnEose: false, cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST },
-  )
+  const likesFilter: NDKFilter | null = currentPubkey ? { kinds: [7], authors: [currentPubkey], limit: 100 } : null
+  const { events: likeEvents } = useSubscribe(likesFilter ? [likesFilter] : false, {
+    closeOnEose: false,
+    cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
+  })
 
   // Resolver IDs dos vídeos curtidos
   const likedVideoIds = useMemo(() => {
@@ -159,13 +166,12 @@ function useLibraryData() {
   }, [likeEvents])
 
   // Buscar eventos dos vídeos curtidos
-  const likedVideoFilter: NDKFilter = likedVideoIds.length > 0
-    ? { ids: likedVideoIds, limit: likedVideoIds.length }
-    : { kinds: [], limit: 0 }
-  const { events: likedVideos } = useSubscribe(
-    likedVideoIds.length > 0 ? [likedVideoFilter] : false,
-    { closeOnEose: false, cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST },
-  )
+  const likedVideoFilter: NDKFilter =
+    likedVideoIds.length > 0 ? { ids: likedVideoIds, limit: likedVideoIds.length } : { kinds: [], limit: 0 }
+  const { events: likedVideos } = useSubscribe(likedVideoIds.length > 0 ? [likedVideoFilter] : false, {
+    closeOnEose: false,
+    cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
+  })
 
   // Perfis
   const allVideoEvents = useMemo(() => [...myVideos, ...likedVideos], [myVideos, likedVideos])
@@ -207,19 +213,12 @@ function LibraryPage() {
   const applyDraftSnapshot = useVideoUploadStore((state) => state.applyDraftSnapshot)
   const clearLocalDraft = useVideoUploadStore((state) => state.clearLocalDraft)
   const [uploadDraft, setUploadDraft] = useState<UploadDraftSnapshot | null>(() => readLocalUploadDraft())
-  const {
-    currentUser,
-    watchHistory,
-    myVideos,
-    playlists,
-    likedVideos,
-    profiles,
-    isLoading,
-  } = useLibraryData()
+  const { currentUser, watchHistory, myVideos, playlists, likedVideos, profiles, isLoading } = useLibraryData()
 
   const isLoggedIn = !!currentUser
   const activeTab = tab || 'all'
-  const activeSidebarKey: SidebarKey = activeTab === 'all' || activeTab === 'downloads' || activeTab === 'drafts' ? 'library' : activeTab
+  const activeSidebarKey: SidebarKey =
+    activeTab === 'all' || activeTab === 'downloads' || activeTab === 'drafts' ? 'library' : activeTab
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: refresh local draft visibility when the active library tab changes.
   useEffect(() => {
@@ -238,9 +237,8 @@ function LibraryPage() {
       if (!cancelled && remoteDraft) {
         const localDraft = readLocalUploadDraft()
         setUploadDraft(
-          [localDraft, remoteDraft]
-            .filter(Boolean)
-            .sort((a, b) => (b?.updatedAt || 0) - (a?.updatedAt || 0))[0] ?? null,
+          [localDraft, remoteDraft].filter(Boolean).sort((a, b) => (b?.updatedAt || 0) - (a?.updatedAt || 0))[0] ??
+            null,
         )
       }
     }
@@ -271,7 +269,7 @@ function LibraryPage() {
 
   const removeUploadDraft = async () => {
     clearLocalDraft()
-    if (ndk && currentUser && await canUseNip44Drafts(ndk)) {
+    if (ndk && currentUser && (await canUseNip44Drafts(ndk))) {
       await clearVideoUploadDraft({ ndk, currentUser })
     }
     setUploadDraft(null)
@@ -325,16 +323,15 @@ function LibraryPage() {
               >
                 <ListVideo className="size-4 shrink-0" />
                 <span className="flex-1 truncate">{pl.title}</span>
-                <Badge variant="secondary" className="text-[10px]">{pl.videoCount}</Badge>
+                <Badge variant="secondary" className="text-[10px]">
+                  {pl.videoCount}
+                </Badge>
               </Link>
             ))
           ) : (
             <p className="text-muted-foreground">Nenhuma playlist ainda.</p>
           )}
-          <Link
-            to="/p/new"
-            className={buttonVariants({ variant: "glass", className: "mt-2 w-full" })}
-          >
+          <Link to="/p/new" className={buttonVariants({ variant: 'glass', className: 'mt-2 w-full' })}>
             <Plus className="mr-2 size-4" />
             Nova playlist
           </Link>
@@ -371,7 +368,13 @@ function LibraryPage() {
   // Loading
   if (isLoading && myVideos.length === 0 && playlists.length === 0) {
     return (
-      <AppShell activeKey={activeSidebarKey} title="Biblioteca" description="Tudo o que você salvou, organizou e acompanhou." icon={FolderOpen} aside={aside}>
+      <AppShell
+        activeKey={activeSidebarKey}
+        title="Biblioteca"
+        description="Tudo o que você salvou, organizou e acompanhou."
+        icon={FolderOpen}
+        aside={aside}
+      >
         <div className="space-y-6">
           <div className="flex gap-2 overflow-x-auto pb-2">
             {TABS.map((t) => (
@@ -389,7 +392,13 @@ function LibraryPage() {
   }
 
   return (
-    <AppShell activeKey={activeSidebarKey} title="Biblioteca" description="Tudo o que você salvou, organizou e acompanhou." icon={FolderOpen} aside={aside}>
+    <AppShell
+      activeKey={activeSidebarKey}
+      title="Biblioteca"
+      description="Tudo o que você salvou, organizou e acompanhou."
+      icon={FolderOpen}
+      aside={aside}
+    >
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-6 flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-none border-b border-border bg-transparent p-0 pb-px scrollbar-thin">
           {TABS.map((tab) => (
@@ -498,20 +507,25 @@ function LibraryPage() {
           )}
 
           {/* Empty state */}
-           {myVideos.length === 0 && playlists.length === 0 && watchHistory.length === 0 && watchLaterItems.length === 0 && !uploadDraft && (
-             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="mb-4 inline-flex size-16 items-center justify-center rounded-full bg-muted">
-                <FolderOpen className="size-8 text-muted-foreground" />
+          {myVideos.length === 0 &&
+            playlists.length === 0 &&
+            watchHistory.length === 0 &&
+            watchLaterItems.length === 0 &&
+            !uploadDraft && (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="mb-4 inline-flex size-16 items-center justify-center rounded-full bg-muted">
+                  <FolderOpen className="size-8 text-muted-foreground" />
+                </div>
+                <h3 className="mb-2 text-lg font-semibold">Sua biblioteca está vazia</h3>
+                <p className="mb-6 max-w-md text-sm text-muted-foreground">
+                  Vídeos que você enviar, curtir, salvar para assistir mais tarde ou adicionar em playlists aparecerão
+                  aqui.
+                </p>
+                <Link to="/explore" className={buttonVariants({ variant: 'gradient' })}>
+                  Explorar conteúdo
+                </Link>
               </div>
-              <h3 className="mb-2 text-lg font-semibold">Sua biblioteca está vazia</h3>
-              <p className="mb-6 max-w-md text-sm text-muted-foreground">
-                Vídeos que você enviar, curtir, salvar para assistir mais tarde ou adicionar em playlists aparecerão aqui.
-              </p>
-              <Link to="/explore" className={buttonVariants({ variant: "gradient" })}>
-                Explorar conteúdo
-              </Link>
-            </div>
-          )}
+            )}
         </TabsContent>
 
         {/* ── Playlists ── */}
@@ -549,7 +563,7 @@ function LibraryPage() {
             />
           )}
           <div className="mt-4">
-            <Link to="/p/new" className={buttonVariants({ variant: "glass" })}>
+            <Link to="/p/new" className={buttonVariants({ variant: 'glass' })}>
               <Plus className="mr-2 size-4" />
               Nova playlist
             </Link>
@@ -575,28 +589,52 @@ function LibraryPage() {
           )}
         </TabsContent>
 
-         {/* ── Assistir mais tarde ── */}
+        {/* ── Assistir mais tarde ── */}
         <TabsContent value="watchlater" className="mt-0">
           {watchLaterItems.length > 0 ? (
             <div className="space-y-3">
               {watchLaterItems.map((item) => (
-                <div key={item.eventId} className="flex items-center gap-4 rounded-xl border border-border/50 bg-card/50 p-4 transition-colors hover:bg-muted/30">
+                <div
+                  key={item.eventId}
+                  className="flex items-center gap-4 rounded-xl border border-border/50 bg-card/50 p-4 transition-colors hover:bg-muted/30"
+                >
                   {item.thumbnail ? (
-                    <img src={item.thumbnail} alt={item.title} className="aspect-video w-36 rounded-lg border object-cover" />
+                    <img
+                      src={item.thumbnail}
+                      alt={item.title}
+                      className="aspect-video w-36 rounded-lg border object-cover"
+                    />
                   ) : (
                     <div className="flex aspect-video w-36 items-center justify-center rounded-lg border border-dashed text-xs text-muted-foreground">
                       Sem thumbnail
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <Link to="/v/$eventId" params={{ eventId: item.eventRef }} className="line-clamp-2 text-sm font-medium hover:text-primary">
+                    <Link
+                      to="/v/$eventId"
+                      params={{ eventId: item.eventRef }}
+                      className="line-clamp-2 text-sm font-medium hover:text-primary"
+                    >
                       {item.title}
                     </Link>
-                    <p className="mt-1 text-xs text-muted-foreground">Salvo em {new Date(item.savedAt).toLocaleString()}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Salvo em {new Date(item.savedAt).toLocaleString()}
+                    </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
-                    <Link to="/v/$eventId" params={{ eventId: item.eventRef }} className={buttonVariants({ variant: 'glass' })}>Assistir</Link>
-                    <Button variant="ghost" size="icon" onClick={() => removeWatchLater(item.eventId)} aria-label="Remover de assistir mais tarde">
+                    <Link
+                      to="/v/$eventId"
+                      params={{ eventId: item.eventRef }}
+                      className={buttonVariants({ variant: 'glass' })}
+                    >
+                      Assistir
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeWatchLater(item.eventId)}
+                      aria-label="Remover de assistir mais tarde"
+                    >
                       <Trash2 className="size-4" />
                     </Button>
                   </div>
@@ -630,9 +668,7 @@ function LibraryPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{entry.title}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(entry.watchedAt).toLocaleString()}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{new Date(entry.watchedAt).toLocaleString()}</p>
                   </div>
                   <ChevronRight className="size-4 text-muted-foreground" />
                 </Link>
@@ -661,7 +697,11 @@ function LibraryPage() {
             <EmptyState
               icon={UserRound}
               title={isLoggedIn ? 'Nenhum vídeo enviado' : 'Faça login para ver seus vídeos'}
-              description={isLoggedIn ? 'Vídeos que você enviar aparecerão aqui.' : 'Conecte sua chave Nostr para gerenciar seus vídeos.'}
+              description={
+                isLoggedIn
+                  ? 'Vídeos que você enviar aparecerão aqui.'
+                  : 'Conecte sua chave Nostr para gerenciar seus vídeos.'
+              }
               cta={isLoggedIn ? 'Enviar vídeo' : undefined}
               ctaTo={isLoggedIn ? '/new' : undefined}
             />
@@ -749,12 +789,12 @@ function DraftCard({
       <div className="min-w-0 flex-1">
         <div className="mb-2 flex flex-wrap items-center gap-2">
           <Badge variant="glass">Rascunho</Badge>
-          <Badge variant="secondary" className="text-[10px]">Etapa: {stepLabel}</Badge>
+          <Badge variant="secondary" className="text-[10px]">
+            Etapa: {stepLabel}
+          </Badge>
         </div>
         <p className="line-clamp-2 text-sm font-medium">{title}</p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Atualizado em {new Date(draft.updatedAt).toLocaleString()}
-        </p>
+        <p className="mt-1 text-xs text-muted-foreground">Atualizado em {new Date(draft.updatedAt).toLocaleString()}</p>
         {draft.videoData.url ? (
           <p className="mt-1 truncate text-xs text-muted-foreground">{draft.videoData.url}</p>
         ) : null}
@@ -795,7 +835,7 @@ function EmptyState({
       <h3 className="mb-2 text-lg font-semibold">{title}</h3>
       <p className="mb-6 max-w-md text-sm text-muted-foreground">{description}</p>
       {cta && ctaTo && (
-        <Link to={ctaTo} className={buttonVariants({ variant: "gradient" })}>
+        <Link to={ctaTo} className={buttonVariants({ variant: 'gradient' })}>
           {cta}
         </Link>
       )}

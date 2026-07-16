@@ -4,11 +4,11 @@ import { useNDK, useNDKCurrentPubkey } from '@nostr-dev-kit/ndk-hooks'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { useNavigate, useParams } from '@tanstack/react-router'
 import { Download, MoreVertical, Share2, UserX } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { addMuteListItem } from '@/features/nostr/services/mute-list.service'
 import { downloadJsonl } from '@/helper/download.ts'
 import { copyText } from '@/helper/format.ts'
-import { useTranslation } from 'react-i18next'
 
 interface DropdownMenuProfileProps {
   currentUser?: NDKUser // O usuário logado

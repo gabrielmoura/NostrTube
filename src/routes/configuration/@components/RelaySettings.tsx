@@ -33,11 +33,7 @@ function AddRelayDialog({ onAdd }: { onAdd: (relayUrl: string) => void }) {
   const handleSave = () => {
     const normalized = relayUrl.trim()
     if (!normalized.startsWith('wss://')) {
-      setError(
-        normalized.startsWith('ws://')
-          ? t('relays.error_insecure')
-          : t('relays.error_invalid'),
-      )
+      setError(normalized.startsWith('ws://') ? t('relays.error_insecure') : t('relays.error_invalid'))
       return
     }
 
@@ -58,9 +54,7 @@ function AddRelayDialog({ onAdd }: { onAdd: (relayUrl: string) => void }) {
       <DialogContent className="sm:max-w-[440px]">
         <DialogHeader>
           <DialogTitle>{t('relays.dialog_title')}</DialogTitle>
-          <DialogDescription>
-            {t('relays.dialog_description')}
-          </DialogDescription>
+          <DialogDescription>{t('relays.dialog_description')}</DialogDescription>
         </DialogHeader>
         <div className="space-y-2 py-2">
           <Label htmlFor="relay-url">{t('relays.url_label')}</Label>
@@ -232,11 +226,7 @@ export const RelaySettings = () => {
 
   return (
     <Card>
-      <CardHeader
-        title={t('relays.title')}
-        description={t('relays.description')}
-        icon={Wifi}
-      />
+      <CardHeader title={t('relays.title')} description={t('relays.description')} icon={Wifi} />
       <div className="flex items-center justify-between border-b border-zinc-100 bg-zinc-50/30 p-2 dark:border-zinc-800">
         <span className="ml-2 text-xs text-zinc-400">{t('relays.selected', { count: selectedRelays.length })}</span>
         <div className="flex items-center gap-2">

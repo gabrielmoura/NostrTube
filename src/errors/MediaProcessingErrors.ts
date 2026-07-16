@@ -32,7 +32,11 @@ export class MediaProcessingError extends SystemError {
 }
 
 export class ThumbnailCanvasError extends MediaProcessingError {
-  constructor(message = 'Unable to create thumbnail canvas context', context?: AppErrorContext, options?: ErrorOptions) {
+  constructor(
+    message = 'Unable to create thumbnail canvas context',
+    context?: AppErrorContext,
+    options?: ErrorOptions,
+  ) {
     super(message, context, options)
     this.name = 'ThumbnailCanvasError'
   }

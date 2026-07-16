@@ -14,7 +14,12 @@ async function getWasmInstance(): Promise<NostrWasmInstance> {
 
   log.debug('Initializing WebAssembly')
   const { initNostrWasm } = await import('nostr-wasm')
-  nostrWasmInstance = await initNostrWasm()
+  const instance = await initNostrWasm()
+  if (!instance) {
+    throw new Error('Failed to initialize nostr-wasm')
+  }
+
+  nostrWasmInstance = instance
   return nostrWasmInstance
 }
 
@@ -69,15 +74,15 @@ Generated on: ${new Date().toLocaleString()} on ${import.meta.env.VITE_PUBLIC_RO
   }
 }
 
-export function toHex(bytes: Uint8Array<ArrayBuffer>): string {
+export function toHex(bytes: Uint8Array<ArrayBufferLike>): string {
   return bytes.reduce((hex, byte) => hex + byte.toString(16).padStart(2, '0'), '')
 }
 
-export function fromHex(hex: string): Uint8Array<ArrayBuffer> {
+export function fromHex(hex: string): Uint8Array<ArrayBufferLike> {
   return new Uint8Array(hex.length / 2).map((_, i) => parseInt(hex.slice(i * 2, i * 2 + 2), 16))
 }
 type NostrWasmInstance = {
   verifyEvent: (event: SignedEvent) => void
-  generateSecretKey: () => Uint8Array<ArrayBuffer>
-  getPublicKey: (sk: Uint8Array<ArrayBuffer>) => Uint8Array<ArrayBuffer>
+  generateSecretKey: () => Uint8Array<ArrayBufferLike>
+  getPublicKey: (sk: Uint8Array<ArrayBufferLike>) => Uint8Array<ArrayBufferLike>
 }

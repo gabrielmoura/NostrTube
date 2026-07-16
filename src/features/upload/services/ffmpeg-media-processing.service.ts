@@ -43,8 +43,8 @@ export async function isFFmpegAvailable() {
   }
 }
 
-function toFile(data: Uint8Array, filename: string, type: string) {
-  return new File([data], filename, { type })
+function toFile(data: Uint8Array<ArrayBufferLike>, filename: string, type: string) {
+  return new File([new Uint8Array(data)], filename, { type })
 }
 
 function getOutputStem(name: string) {

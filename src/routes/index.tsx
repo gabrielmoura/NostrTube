@@ -1,22 +1,35 @@
 import type { NDKEvent } from '@nostr-dev-kit/ndk'
 import { NDKSubscriptionCacheUsage, useSubscribe } from '@nostr-dev-kit/ndk-hooks'
 import { createRoute, Link, useNavigate } from '@tanstack/react-router'
+import { t } from 'i18next'
+import {
+  ArrowRight,
+  CircleHelp,
+  HandCoins,
+  LayoutGrid,
+  MonitorUp,
+  Radio,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  TrendingUp,
+  Wifi,
+  Zap,
+} from 'lucide-react'
 import { uniqBy } from 'ramda'
 import { useMemo, useRef } from 'react'
-import { t } from 'i18next'
-import { ArrowRight, CircleHelp, HandCoins, LayoutGrid, MonitorUp, Radio, Search, ShieldCheck, Sparkles, TrendingUp, Wifi, Zap } from 'lucide-react'
 import VideoCard, { VideoCardLoading } from '@/components/cards/videoCard'
+import { Section, SectionContent, SectionHeader, SectionTitle } from '@/components/containers/pageSection'
 import { AppShell } from '@/components/layout/AppShell'
 import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatusBadge } from '@/components/ui/status-badge'
-import { Section, SectionContent, SectionHeader, SectionTitle } from '@/components/containers/pageSection'
 import { useBatchProfiles } from '@/features/nostr/hooks/useBatchProfiles'
 import { useContentVisibilityFilter } from '@/features/nostr/hooks/useContentVisibilityFilter'
-import { useZapStats } from '@/features/zap/hooks/useZapStats'
 import { filterEventsByAge } from '@/features/video/services/age-filter.service'
-import { getVideoRouteReference } from '@/features/video/services/video-reference.service'
 import { NORMAL_VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
+import { getVideoRouteReference } from '@/features/video/services/video-reference.service'
+import { useZapStats } from '@/features/zap/hooks/useZapStats'
 import { sortEventsByImages } from '@/helper/format.ts'
 import { cn } from '@/lib/utils'
 import { Route as rootRoute } from '@/routes/__root'
@@ -110,7 +123,10 @@ function HomePage() {
         <CardContent className="space-y-2 text-sm">
           {topZaps.length > 0 ? (
             topZaps.map((zap) => (
-              <div key={zap.id} className="flex items-center justify-between rounded-xl border border-border/50 bg-card/50 px-3 py-2">
+              <div
+                key={zap.id}
+                className="flex items-center justify-between rounded-xl border border-border/50 bg-card/50 px-3 py-2"
+              >
                 <span className="truncate text-muted-foreground">{zap.targetLabel || 'vídeo'}</span>
                 <StatusBadge tone="warning">{zap.amountSats} sats</StatusBadge>
               </div>
@@ -146,7 +162,7 @@ function HomePage() {
             </div>
           </div>
           <div className="mt-3">
-            <Link to="/relays" className={cn(buttonVariants({ variant: "glass", size: "sm" }), "w-full")}>
+            <Link to="/relays" className={cn(buttonVariants({ variant: 'glass', size: 'sm' }), 'w-full')}>
               Gerenciar relays
               <ArrowRight className="ml-1 size-3.5" />
             </Link>
@@ -188,7 +204,7 @@ function HomePage() {
           <CardDescription>Publique vídeos diretamente na rede Nostr.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Link to="/new" className={cn(buttonVariants({ variant: "gradient" }), "w-full")}>
+          <Link to="/new" className={cn(buttonVariants({ variant: 'gradient' }), 'w-full')}>
             <MonitorUp className="size-4" />
             Enviar vídeo
           </Link>
@@ -234,7 +250,8 @@ function HomePage() {
 
           {/* Título */}
           <h1 className="font-display max-w-[640px] text-3xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-4xl md:text-5xl">
-            Vídeos livres para<br />
+            Vídeos livres para
+            <br />
             <span className="bg-gradient-to-r from-primary via-accent to-[oklch(var(--lightning))] bg-clip-text text-transparent">
               criadores soberanos.
             </span>
@@ -242,17 +259,16 @@ function HomePage() {
 
           {/* Descrição */}
           <p className="mt-5 max-w-[520px] text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Publique, descubra e apoie criadores usando Nostr, relays e Blossom.
-            Sem censura. Sem algoritmos.
+            Publique, descubra e apoie criadores usando Nostr, relays e Blossom. Sem censura. Sem algoritmos.
           </p>
 
           {/* CTAs */}
           <div className="mt-7 flex flex-wrap items-center gap-3">
-            <Link to="/search" className={buttonVariants({ variant: "gradient", size: "lg" })}>
+            <Link to="/search" className={buttonVariants({ variant: 'gradient', size: 'lg' })}>
               Explorar vídeos
               <ArrowRight className="ml-1.5 size-4" />
             </Link>
-            <Link to="/new" className={buttonVariants({ variant: "glass", size: "lg" })}>
+            <Link to="/new" className={buttonVariants({ variant: 'glass', size: 'lg' })}>
               <MonitorUp className="mr-1.5 size-4" />
               Enviar vídeo
             </Link>
@@ -288,8 +304,12 @@ function HomePage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link to="/faq" className={buttonVariants({ variant: 'glass' })}>FAQ</Link>
-            <Link to="/terms" className={buttonVariants({ variant: 'glass' })}>Termos</Link>
+            <Link to="/faq" className={buttonVariants({ variant: 'glass' })}>
+              FAQ
+            </Link>
+            <Link to="/terms" className={buttonVariants({ variant: 'glass' })}>
+              Termos
+            </Link>
           </div>
         </div>
       </section>
@@ -328,7 +348,7 @@ function HomePage() {
                   Ainda não há vídeos disponíveis nos relays consultados. Tente novamente mais tarde.
                 </p>
               </div>
-              <Link to="/new" className={buttonVariants({ variant: "glass" })}>
+              <Link to="/new" className={buttonVariants({ variant: 'glass' })}>
                 Seja o primeiro a publicar
               </Link>
             </CardContent>
@@ -360,10 +380,10 @@ function HomePage() {
 
         {hasVideos ? (
           <div className="flex justify-center">
-          <Link to="/search" className={buttonVariants({ variant: "glass" })}>
-            Ver todos os vídeos
-            <ArrowRight className="ml-1.5 size-4" />
-          </Link>
+            <Link to="/search" className={buttonVariants({ variant: 'glass' })}>
+              Ver todos os vídeos
+              <ArrowRight className="ml-1.5 size-4" />
+            </Link>
           </div>
         ) : null}
       </section>

@@ -111,7 +111,7 @@ Na rota direta `/short/$eventId`, o evento inicial é injetado no feed antes da 
 
 === Frontend
 * *React 19* - Biblioteca UI
-* *TypeScript* - Linguagem de programação
+* *TypeScript 7* - Linguagem de programação e compilador local (`tsc`)
 * *Vite* - Build tool e dev server
 * *TanStack Router* - Roteamento
 * *TanStack Query* - Gerenciamento de estado assíncrono
@@ -135,6 +135,8 @@ Na rota direta `/short/$eventId`, o evento inicial é injetado no feed antes da 
 
 * Node.js 20 ou superior
 * pnpm 10.24.0 ou superior
+
+O projeto usa `typescript@^7.0.0` para o binário local `tsc`. O pacote TypeScript 7 não expõe o `tsserver` clássico; por isso, a estratégia temporária para IDE/tooling é manter `tsc` local em TypeScript 7 e permitir que IDEs ou ferramentas que dependem da Compiler API/Language Service clássica usem seu serviço TypeScript embutido até declararem suporte ao TypeScript 7.
 
 == 🚀 Instalação e Desenvolvimento
 
@@ -166,6 +168,15 @@ A aplicação estará disponível em `http://localhost:5173`.
 
 [source,bash]
 ----
+# Checagem de tipos
+pnpm typecheck
+
+# Checagem Biome completa
+pnpm check
+
+# Checagem Biome para CI
+pnpm check:ci
+
 # Build para produção
 pnpm build
 
@@ -180,6 +191,9 @@ pnpm format
 
 # Análise do bundle
 pnpm analyze
+
+# Validação completa
+pnpm validate
 ----
 
 == 📱 Build Mobile

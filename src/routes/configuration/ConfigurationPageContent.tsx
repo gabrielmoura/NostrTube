@@ -156,7 +156,9 @@ function ProfileSection() {
             <AvatarFallback>{(profile?.name || 'U').slice(0, 1).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div className="space-y-1">
-            <p className="font-medium text-foreground">{profile?.displayName || profile?.name || t('profile.anonymous_session')}</p>
+            <p className="font-medium text-foreground">
+              {profile?.displayName || profile?.name || t('profile.anonymous_session')}
+            </p>
             <p className="font-mono text-xs text-muted-foreground">{pubkeyDisplay}</p>
           </div>
         </div>

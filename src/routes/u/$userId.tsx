@@ -21,8 +21,8 @@ import {
 import { nip19 } from 'nostr-tools'
 import { useMemo } from 'react'
 import { z } from 'zod' // Extraído para arquivo separado
-import { PageSpinner } from '@/components/PageSpinner'
 import { AppShell } from '@/components/layout/AppShell'
+import { PageSpinner } from '@/components/PageSpinner'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -33,12 +33,12 @@ import { NORMAL_VIDEO_EVENT_KINDS } from '@/features/video/services/video-kinds'
 import { ZapButton } from '@/features/zap/components/ZapButton'
 import { TECHNICAL_REPORT_KIND } from '@/helper/actions/report'
 import { type GetVideosFromUserDataParams, getVideosFromUserData } from '@/helper/loaders/getVideosFromUserData'
+import { Route as rootRoute } from '@/routes/__root'
 import { DropdownMenuProfile } from '@/routes/u/@components/DropdownMenuProfile.tsx'
 import { FollowButton } from '@/routes/u/@components/FollowButton.tsx'
 import { PlaylistCard } from '@/routes/u/@components/PlaylistCard.tsx'
 import { SocialGraphTab } from '@/routes/u/@components/SocialGraphTab.tsx'
 import { VideoCard } from '@/routes/u/@components/VideoCard.tsx'
-import { Route as rootRoute } from '@/routes/__root'
 import useUserStore from '@/store/useUserStore'
 import CreateProfile from './@components/EditProfile.tsx'
 
@@ -311,7 +311,8 @@ function ProfilePage() {
               <div>
                 <h2 className="text-lg font-semibold">Playlists públicas</h2>
                 <p className="text-sm text-muted-foreground">
-                  {playlists.length} {playlists.length === 1 ? 'playlist publicada' : 'playlists publicadas'} por este perfil.
+                  {playlists.length} {playlists.length === 1 ? 'playlist publicada' : 'playlists publicadas'} por este
+                  perfil.
                 </p>
               </div>
             </div>
@@ -472,7 +473,11 @@ function AuthorAlertsPanel({
                       'other'}
                   </p>
                 </div>
-                <Link to="/v/$eventId/edit" params={{ eventId: targetVideo?.encode() || targetId }} className={buttonVariants({})}>
+                <Link
+                  to="/v/$eventId/edit"
+                  params={{ eventId: targetVideo?.encode() || targetId }}
+                  className={buttonVariants({})}
+                >
                   Ajustar metadados
                 </Link>
               </div>
@@ -493,7 +498,11 @@ function AuthorAlertsPanel({
                     Tipo: {alert.tags.find((tag) => tag[0] === 'type')?.[1] || 'other'}
                   </p>
                 </div>
-                <Link to="/v/$eventId/edit" params={{ eventId: targetVideo?.encode() || targetId }} className={buttonVariants({})}>
+                <Link
+                  to="/v/$eventId/edit"
+                  params={{ eventId: targetVideo?.encode() || targetId }}
+                  className={buttonVariants({})}
+                >
                   Corrigir link / URL
                 </Link>
               </div>

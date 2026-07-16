@@ -4,10 +4,10 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Network, UsersRound } from 'lucide-react'
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
-import { useTranslation } from 'react-i18next'
 import { fetchEventsCached } from '@/features/nostr/services/ndk-query.service'
 
 interface SocialGraphTabProps {
@@ -143,9 +143,7 @@ export function SocialGraphTab({ pubkey, profileTitle, profilePicture }: SocialG
                 <UsersRound className="size-4" />
                 <span className="font-medium">{t('user_social_connected_nodes')}</span>
               </div>
-              <p className="mt-2">
-                {t('user_social_nodes_count', { count: nodes.length })}
-              </p>
+              <p className="mt-2">{t('user_social_nodes_count', { count: nodes.length })}</p>
             </div>
           </div>
 
@@ -154,7 +152,11 @@ export function SocialGraphTab({ pubkey, profileTitle, profilePicture }: SocialG
               {nodes.map((node) => {
                 const label = getProfileLabel(node)
                 const isMutual = follows.includes(node.pubkey) && followers.includes(node.pubkey)
-                const relation = isMutual ? t('user_mutual') : follows.includes(node.pubkey) ? t('user_follows') : t('user_follower')
+                const relation = isMutual
+                  ? t('user_mutual')
+                  : follows.includes(node.pubkey)
+                    ? t('user_follows')
+                    : t('user_follower')
 
                 return (
                   <Link

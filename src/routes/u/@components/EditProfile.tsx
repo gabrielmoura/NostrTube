@@ -3,6 +3,7 @@ import { useCurrentUserProfile, useNDK, useNDKCurrentPubkey } from '@nostr-dev-k
 import { useMutation } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ButtonWithLoader } from '@/components/ButtonWithLoader.tsx'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.tsx'
@@ -10,7 +11,6 @@ import { Input } from '@/components/ui/input.tsx'
 import { Label } from '@/components/ui/label.tsx'
 import { Textarea } from '@/components/ui/textarea.tsx'
 import { nostrNow } from '@/helper/date.ts'
-import { useTranslation } from 'react-i18next'
 import { makeEvent } from '@/helper/pow/pow.ts'
 
 interface ProfileForm {
@@ -115,7 +115,11 @@ export default function CreateProfile() {
             {/* Display Name */}
             <div>
               <Label>{t('user_edit_display_name')}</Label>
-              <Input placeholder={t('user_edit_display_name_placeholder')} value={form.displayName} onChange={handleChange('displayName')} />
+              <Input
+                placeholder={t('user_edit_display_name_placeholder')}
+                value={form.displayName}
+                onChange={handleChange('displayName')}
+              />
             </div>
 
             {/* Username */}
